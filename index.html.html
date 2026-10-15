@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrated Corporate Dashboard - Energy Holding Group</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Supabase JS Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        navy: { 800: '#0f172a', 900: '#0b1329', 950: '#040712' },
+                        emerald: { 400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857' },
+                        amber: { 500: '#f59e0b', 600: '#d97706' }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-in { animation: fadeIn 0.4s ease-in-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #0b1329; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+        .industrial-bg {
+            background-color: #040712;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(37, 99, 235, 0.08) 0%, transparent 40%),
+                radial-gradient(circle, rgba(30, 41, 59, 0.4) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 32px 32px;
+        }
+    </style>
+</head>
+<body class="industrial-bg text-slate-100 font-sans min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white">
+
+    <!-- Header / Navbar Utama -->
+    <header class="bg-slate-900/90 border-b border-slate-800/80 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="goHome()">
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-emerald-500 to-blue-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                        <i class="fa-solid font-bold text-white text-xl fa-gas-pump"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                            HOLDING GROUP
+                            <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">Corp v4.8</span>
+                        </h1>
+                        <p class="text-xs text-slate-400">Integrated Corporate Dashboard & Energy Trading</p>
+                    </div>
+                </div>
+                <nav class="hidden lg:flex space-x-1 bg-slate-950/60 p-1.5 rounded-xl border border-slate-800" id="desktopNav"></nav>
+                <div class="flex items-center space-x-3">
+                    <div id="authArea"></div>
+                    <div class="lg:hidden" id="mobileMenuContainer">
+                        <button id="mobileMenuBtn" class="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white focus:outline-none">
+                            <i class="fa-solid fa-bars text-xl" id="menuIcon"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hidden lg:hidden border-t border-slate-800 bg-slate-900/95 backdrop-blur px-4 pt-2 pb-4 space-y-2" id="mobileNav"></div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div id="contentArea"></div>
+    </main>
+
+    <!-- Modal Login Multi-Admin -->
+    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-8 relative shadow-2xl fade-in overflow-hidden">
+            <button onclick="toggleLoginModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-slate-800/60 p-2 rounded-full transition">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+            <div class="text-center mb-6 relative z-10">
+                <div class="w-14 h-14 bg-gradient-to-tr from-emerald-600 to-blue-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-lg shadow-emerald-600/30">
+                    <i class="fa-solid fa-users-gear"></i>
+                </div>
+                <h3 class="text-xl font-extrabold text-white">Login Akses Transaksi Korporat</h3>
+                <p class="text-xs text-slate-400 mt-1">Masukkan kredensial admin untuk membuka menu penjualan, PO, penawaran, dan invoice.</p>
+            </div>
+            <form onsubmit="handleLogin(event)" class="space-y-4 relative z-10">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5"><i class="fa-solid fa-user-shield text-emerald-400 mr-1"></i> Pilih Akun Admin</label>
+                    <select id="adminSelect" onchange="fillAdminCredential(this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 mb-2 transition">
+                        <option value="admin@energyholding.co.id">Admin Utama Sistem (Holding Admin)</option>
+                        <option value="direktur@energyholding.co.id">Direksi Eksekutif (Executive Admin)</option>
+                        <option value="logistik@energyholding.co.id">Kepala Logistik & Armada (Logistics Admin)</option>
+                    </select>
+                    <input type="email" id="loginEmail" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-500 transition" value="admin@energyholding.co.id">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5"><i class="fa-solid fa-lock text-emerald-400 mr-1"></i> Kata Sandi</label>
+                    <input type="password" id="loginPassword" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-500 transition" value="password123">
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-emerald-600/30 flex items-center justify-center space-x-2">
+                    <span>Verifikasi & Buka Menu Transaksi</span>
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <footer class="bg-slate-900 border-t border-slate-800 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center sm:flex sm:justify-between sm:items-center text-xs text-slate-400">
+            <p>&copy; 2026 Energy Holding Group. Integrated Corporate Monitoring System.</p>
+            <p class="mt-2 sm:mt-0 flex items-center justify-center gap-2">
+                <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Sistem Operasional Terproteksi &bull; Diperbarui: <strong class="text-slate-200">Oktober 2026</strong>[cite: 3]</span>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Konfigurasi Supabase untuk Penjualan (data_pengiriman)
+        const SB_PENJUALAN_URL = 'https://ntaECTphgoelmhzrkatp.supabase.co';
+        const SB_PENJUALAN_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YWVjdHBoZ29lbG1oenJrYXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzExNDYsImV4cCI6MjA4ODE0NzE0Nn0.-8E98wpkzHBARRhW6PKhBtf2XKhWFjq7idAzw9jlcKg';
+        const _supabasePenjualan = supabase.createClient(SB_PENJUALAN_URL, SB_PENJUALAN_KEY);
+
+        // Konfigurasi Supabase untuk eforms (PO, SPH/Penawaran, Invoice)
+        const SB_URL = "https://yqdtgcjpfhiskywhowhu.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxZHRnY2pwZmhpc2t5d2hvd2h1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MDY0MTIsImV4cCI6MjA4NzA4MjQxMn0.Mlw3e8C4xKHcJPSMRkcsRXL5udtR9SeWk2GmqM1NyYc";
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+
+        let isLoggedIn = false;
+        let activeTab = 'holding';
+        let currentAdmin = { name: 'Holding Administrator', email: 'admin@energyholding.co.id', role: 'Super Admin' };
+        
+        window.selectedMonthFilter = '-10-';
+
+        const adminProfiles = {
+            'admin@energyholding.co.id': { name: 'Holding Administrator', role: 'Super Admin' },
+            'direktur@energyholding.co.id': { name: 'Dr. Hendra Gunawan', role: 'Executive Director' },
+            'logistik@energyholding.co.id': { name: 'Ferry Kurniawan', role: 'Logistics & Fleet Manager' }
+        };
+
+        function fillAdminCredential(email) { document.getElementById('loginEmail').value = email; }
+
+        const companiesData = {
+            holding: {
+                id: 'holding', name: 'Holding Overview', shortName: 'Holding Group',
+                tagline: 'Sinergi Distributor, Agen, dan Transportir BBM Industri Terpercaya',
+                badge: 'Group Synergy',
+                operatingAreas: [
+                    { id: 'kse', name: 'PT. Khatulistiwa Sinar Energi', focus: 'Trading BBM Solar (Supabase Connected)', desc: 'Berfokus pada penyediaan dan trading komoditas BBM Solar industri berskala besar.' },
+                    { id: 'ikaen', name: 'PT. Investama Kalimantan Energi', focus: 'Agen Resmi BBM Solar Industri (Supabase Connected)', desc: 'Berperan sebagai agen resmi penyaluran BBM solar industri.' },
+                    { id: 'ide', name: 'PT. Indo Dharma Energi', focus: 'Transportir BBM Industri (Supabase Connected)', desc: 'Perusahaan khusus penyedia jasa transportasi/transportir BBM industri.' }
+                ]
+            },
+            kse: { 
+                id: 'kse', name: 'PT. Khatulistiwa Sinar Energi', shortName: 'Khatulistiwa Sinar Energi', 
+                tagline: 'Trading & Penyediaan BBM Solar Industri Berkualitas (Supabase Powered)', 
+                badge: 'Trading Division', sector: 'Trading & Supply Chain BBM Solar', location: 'Head Office: Pangkalan Bun',
+                vision: 'Menjadi perusahaan trading dan penyedia energi BBM industri terpercaya di Kalimantan.', 
+                mission: 'Menjamin ketersediaan pasokan solar industri tepat waktu dan sesuai spesifikasi.' 
+            },
+            ikaen: { 
+                id: 'ikaen', name: 'PT. Investama Kalimantan Energi', shortName: 'Investama Kalimantan Energi', 
+                tagline: 'Agen Resmi BBM Solar (Supabase Powered)', 
+                badge: 'Agency Division', sector: 'Keagenan Resmi BBM Solar', location: 'Head Office: Pangkalan Bun',
+                vision: 'Menjadi agen penyaluran energi terkemuka dengan layanan profesional.', 
+                mission: 'Menyalurkan distribusi BBM ke sektor industri secara legal, transparan, dan efisien.' 
+            },
+            ide: { 
+                id: 'ide', name: 'PT. Indo Dharma Energi', shortName: 'Indo Dharma Energi', 
+                tagline: 'Transportir BBM (Supabase Powered)', 
+                badge: 'Logistics Division', sector: 'Transportir & Armada Logistik BBM', location: 'Head Office: Pangkalan Bun',
+                vision: 'Menjadi penyedia jasa logistik dan transportir energi paling handal dan aman.', 
+                mission: 'Mengutamakan keselamatan (HSE), ketepatan waktu, dan efisiensi armada pengiriman.' 
+            }
+        };
+
+        function goHome() { activeTab = 'holding'; renderNav(); renderAuthUI(); renderContent(); }
+        function renderNav() {
+            const desktopNav = document.getElementById('desktopNav');
+            const mobileNav = document.getElementById('mobileNav');
+            const items = [
+                { id: 'holding', name: 'Overview Holding', icon: 'fa-network-wired' },
+                { id: 'kse', name: 'PT Khatulistiwa Sinar', icon: 'fa-sun' },
+                { id: 'ikaen', name: 'PT Investama Kalimantan', icon: 'fa-handshake' },
+                { id: 'ide', name: 'PT Indo Dharma Energi', icon: 'fa-truck-moving' }
+            ];
+            desktopNav.innerHTML = items.map(i => `<button onclick="switchTab('${i.id}')" class="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition ${activeTab === i.id ? 'bg-slate-800 text-white border border-slate-700' : 'text-slate-400 hover:text-white'}"><i class="fa-solid ${i.icon} ${activeTab === i.id ? 'text-emerald-400' : ''}"></i><span>${i.name}</span></button>`).join('');
+            mobileNav.innerHTML = items.map(i => `<button onclick="switchTab('${i.id}'); toggleMobileMenu();" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium ${activeTab === i.id ? 'bg-slate-800 text-white border-l-4 border-emerald-500' : 'text-slate-400'}"><i class="fa-solid ${i.icon} w-5 text-emerald-400"></i><span>${i.name}</span></button>`).join('');
+        }
+        function renderAuthUI() {
+            const authArea = document.getElementById('authArea');
+            if (isLoggedIn) {
+                authArea.innerHTML = `<div class="flex items-center space-x-3"><div class="hidden sm:block text-right"><div class="text-xs font-bold text-white">${currentAdmin.name}</div><div class="text-[10px] text-emerald-400">${currentAdmin.role}</div></div><button onclick="handleLogout()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition">Logout</button></div>`;
+            } else {
+                authArea.innerHTML = `<button onclick="openGeneralLogin()" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-xl shadow-emerald-600/30 transition">Login Sistem Admin</button>`;
+            }
+        }
+        function openGeneralLogin() { document.getElementById('loginModal').classList.toggle('hidden'); }
+        function toggleLoginModal() { document.getElementById('loginModal').classList.toggle('hidden'); }
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            currentAdmin = adminProfiles[email] || { name: 'Custom Admin', email, role: 'Administrator' };
+            isLoggedIn = true;
+            toggleLoginModal();
+            renderNav(); renderAuthUI(); renderContent();
+        }
+        function handleLogout() { isLoggedIn = false; activeTab = 'holding'; renderNav(); renderAuthUI(); renderContent(); }
+        function toggleMobileMenu() { document.getElementById('mobileNav').classList.toggle('hidden'); }
+        document.getElementById('mobileMenuBtn').addEventListener('click', toggleMobileMenu);
+        function switchTab(tabId) { activeTab = tabId; renderNav(); renderContent(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+        function renderMonthFilterHTML(callbackName) {
+            const months = [
+                { val: '', label: 'Semua Bulan' },
+                { val: '-01-', label: 'Januari' }, { val: '-02-', label: 'Februari' }, { val: '-03-', label: 'Maret' },
+                { val: '-04-', label: 'April' }, { val: '-05-', label: 'Mei' }, { val: '-06-', label: 'Juni' },
+                { val: '-07-', label: 'Juli' }, { val: '-08-', label: 'Agustus' }, { val: '-09-', label: 'September' },
+                { val: '-10-', label: 'Oktober (Berjalan)' }, { val: '-11-', label: 'November' }, { val: '-12-', label: 'Desember' }
+            ];
+            const currentMonthFilter = window.selectedMonthFilter !== undefined ? window.selectedMonthFilter : '-10-';
+            let options = months.map(m => `<option value="${m.val}" ${currentMonthFilter === m.val ? 'selected' : ''}>${m.label}</option>`).join('');
+            return `
+                <div class="flex items-center gap-2 mb-3">
+                    <label class="text-xs text-slate-300 font-semibold"><i class="fa-solid fa-filter text-emerald-400 mr-1"></i> Filter Bulan:</label>
+                    <select id="monthFilterSelect" onchange="window.selectedMonthFilter = this.value; window['${callbackName}']();" class="bg-slate-900 border border-slate-700 text-xs text-white rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500">
+                        ${options}
+                    </select>
+                </div>
+            `;
+        }
+
+        async function loadPenjualanData() {
+            const container = document.getElementById('supabaseLiveContainer');
+            if (!container) return;
+            const compId = activeTab; 
+            container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Mengambil data Penjualan ${compId.toUpperCase()} dari tabel data_pengiriman...</div>`;
+            try {
+                let query = _supabasePenjualan.from('data_pengiriman').select('tanggal, delivery_to, jumlah_masuk, lokasi').ilike('seller', compId).order('tanggal', { ascending: false });
+                const { data, error } = await query;
+                if (error) throw error;
+                
+                let filteredData = data || [];
+                const selectedMonth = window.selectedMonthFilter !== undefined ? window.selectedMonthFilter : '-10-';
+                if (selectedMonth !== '') {
+                    filteredData = filteredData.filter(item => item.tanggal && item.tanggal.includes(selectedMonth));
+                }
+
+                let filterHtml = renderMonthFilterHTML('loadPenjualanData');
+
+                if (filteredData.length > 0) {
+                    let rows = filteredData.map(item => `
+                        <tr class="hover:bg-slate-800/40 transition">
+                            <td class="p-3 text-slate-300">${item.tanggal || '-'}</td>
+                            <td class="p-3 font-semibold text-white">${item.delivery_to || '-'}</td>
+                            <td class="p-3 text-emerald-400 font-mono">${item.jumlah_masuk ? Number(item.jumlah_masuk).toLocaleString('id-ID') + ' KL' : '-'}</td>
+                            <td class="p-3 text-slate-300">${item.lokasi || '-'}</td>
+                        </tr>
+                    `).join('');
+                    container.innerHTML = `
+                        <div class="space-y-3">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                <span class="text-xs font-bold text-emerald-400"><i class="fa-solid fa-cash-register mr-1"></i> Data Penjualan ${compId.toUpperCase()} (Tabel data_pengiriman)</span>
+                                ${filterHtml}
+                            </div>
+                            <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800"><tr><th class="p-2.5">Tanggal</th><th class="p-2.5">Delivery To</th><th class="p-2.5">Jumlah Masuk (KL)</th><th class="p-2.5">Lokasi</th></tr></thead><tbody class="divide-y divide-slate-800/60">${rows}</tbody></table></div>
+                        </div>`;
+                } else {
+                    container.innerHTML = `
+                        <div class="space-y-3">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">${filterHtml}</div>
+                            <div class="p-4 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-slate-300">Tidak ada data penjualan ${compId.toUpperCase()} pada bulan yang dipilih.</div>
+                        </div>`;
+                }
+            } catch (err) {
+                container.innerHTML = `<div class="p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl text-xs text-rose-400">Gagal memuat data Penjualan dari Supabase: ${err.message}</div>`;
+            }
+        }
+
+        async function loadPurchaseOrdersData() {
+            const container = document.getElementById('supabaseLiveContainer');
+            if (!container) return;
+            const compId = activeTab; 
+            container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Mengambil data Purchase Order ${compId.toUpperCase()} dari tabel eforms...</div>`;
+            try {
+                let query = _supabase.from('eforms').select('*').order('created_at', { ascending: false });
+                const { data, error } = await query;
+                if (error) throw error;
+
+                let filteredData = data || [];
+                let filterHtml = renderMonthFilterHTML('loadPurchaseOrdersData');
+
+                if (filteredData.length > 0) {
+                    let rows = filteredData.map(item => {
+                        let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 rounded-lg text-[10px] font-bold border border-amber-500/30 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View PDF</a>` : `<span class="text-slate-500 text-[10px]">No PDF</span>`;
+                        let nomorVal = item.nomor || item.nomor_po || item.no_po || '-';
+                        let nominalVal = item.nominal ? (isNaN(item.nominal) ? item.nominal : 'Rp ' + Number(item.nominal).toLocaleString('id-ID')) : '-';
+                        let tujuanVal = item.tujuan || item.client_name || '-';
+                        return `
+                            <tr class="hover:bg-slate-800/40 transition">
+                                <td class="p-3 text-slate-300">${item.created_at ? item.created_at.substring(0, 10) : '-'}</td>
+                                <td class="p-3 font-mono text-amber-400 font-bold">${nomorVal}</td>
+                                <td class="p-3 text-white">${tujuanVal}</td>
+                                <td class="p-3 text-emerald-400 font-mono">${nominalVal}</td>
+                                <td class="p-3">${viewPdfBtn}</td>
+                            </tr>
+                        `;
+                    }).join('');
+
+                    container.innerHTML = `
+                        <div class="space-y-3">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                <span class="text-xs font-bold text-amber-400"><i class="fa-solid fa-cart-shopping mr-1"></i> Data Purchase Order &bull; eforms (${compId.toUpperCase()})</span>
+                                ${filterHtml}
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800">
+                                        <tr>
+                                            <th class="p-2.5">Tanggal</th>
+                                            <th class="p-2.5">Nomor PO</th>
+                                            <th class="p-2.5">Klien / Tujuan</th>
+                                            <th class="p-2.5">Nominal</th>
+                                            <th class="p-2.5">Aksi PDF</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-800/60">${rows}</tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div class="space-y-3">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">${filterHtml}</div>
+                            <div class="p-4 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-slate-300">Tidak ada data Purchase Order pada tabel eforms.</div>
+                        </div>`;
+                }
+            } catch (err) {
+                container.innerHTML = `<div class="p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl text-xs text-rose-400">Gagal memuat data dari Supabase: ${err.message}</div>`;
+            }
+        }
+
+        async function loadPenawaranData(subType = 'Penawaran Biasa') {
+            const container = document.getElementById('supabaseLiveContainer');
+            if (!container) return;
+            const compId = activeTab;
+            container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Mengambil data SPH (${subType}) dari tabel eforms...</div>`;
+            try {
+                let query = _supabase.from('eforms').select('*').ilike('jenis', '%SPH%').order('created_at', { ascending: false });
+                const { data, error } = await query;
+                if (error) throw error;
+
+                let filteredData = data || [];
+                if (filteredData.length === 0) {
+                    const resAll = await _supabase.from('eforms').select('*').limit(15);
+                    filteredData = resAll.data || [];
+                }
+
+                let rows = filteredData.map((item, idx) => {
+                    let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-400 rounded-lg text-[10px] font-bold border border-indigo-500/30 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View SPH</a>` : `<span class="text-slate-500 text-[10px]">No PDF</span>`;
+                    let nomorVal = item.nomor || item.nomor_dokumen || item.no_po || ('SPH-0' + (idx+1));
+                    let nominalVal = item.nominal ? (isNaN(item.nominal) ? item.nominal : 'Rp ' + Number(item.nominal).toLocaleString('id-ID')) : '-';
+                    let tujuanVal = item.tujuan || item.client_name || 'Mitra Industri';
+                    return `
+                        <tr class="hover:bg-slate-800/40 transition">
+                            <td class="p-3 text-slate-300">${item.created_at ? item.created_at.substring(0, 10) : '-'}</td>
+                            <td class="p-3 font-mono text-indigo-400 font-bold">${nomorVal}</td>
+                            <td class="p-3 text-white">${tujuanVal}</td>
+                            <td class="p-3 text-emerald-400 font-mono">${nominalVal}</td>
+                            <td class="p-3">${viewPdfBtn}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                container.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <span class="text-xs font-bold text-indigo-400"><i class="fa-solid fa-file-lines mr-1"></i> Data ${subType} (Jenis SPH dari tabel eforms)</span>
+                            <button onclick="handleActionRedirect('penawaran')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1">
+                                <i class="fa-solid fa-plus"></i> Buat ${subType} Baru
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800">
+                                    <tr>
+                                        <th class="p-2.5">Tanggal</th>
+                                        <th class="p-2.5">Nomor SPH</th>
+                                        <th class="p-2.5">Klien / Tujuan</th>
+                                        <th class="p-2.5">Nominal</th>
+                                        <th class="p-2.5">Aksi PDF</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800/60">${rows}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                container.innerHTML = `<div class="p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl text-xs text-rose-400">Gagal memuat data SPH dari Supabase: ${err.message}</div>`;
+            }
+        }
+
+        async function loadInvoiceData(subType = 'Invoice BRI') {
+            const container = document.getElementById('supabaseLiveContainer');
+            if (!container) return;
+            const compId = activeTab;
+            container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Mengambil data INVOICE (${subType}) dari tabel eforms...</div>`;
+            try {
+                let query = _supabase.from('eforms').select('*').ilike('jenis', '%INVOICE%').order('created_at', { ascending: false });
+                const { data, error } = await query;
+                if (error) throw error;
+
+                let filteredData = data || [];
+                if (filteredData.length === 0) {
+                    const resAll = await _supabase.from('eforms').select('*').limit(15);
+                    filteredData = resAll.data || [];
+                }
+
+                let rows = filteredData.map((item, idx) => {
+                    let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 rounded-lg text-[10px] font-bold border border-rose-500/30 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View Invoice</a>` : `<span class="text-slate-500 text-[10px]">No PDF</span>`;
+                    let nomorVal = item.nomor || item.nomor_dokumen || item.no_po || ('INV-0' + (idx+1));
+                    let pembeliVal = item.tujuan || item.client_name || 'Perusahaan Klien';
+                    let nominalVal = item.nominal ? (isNaN(item.nominal) ? item.nominal : 'Rp ' + Number(item.nominal).toLocaleString('id-ID')) : ('Rp ' + ((item.qty || 50) * 14500000).toLocaleString('id-ID'));
+                    return `
+                        <tr class="hover:bg-slate-800/40 transition">
+                            <td class="p-3 text-slate-300">${item.created_at ? item.created_at.substring(0, 10) : '-'}</td>
+                            <td class="p-3 font-mono text-rose-400 font-bold">${nomorVal}</td>
+                            <td class="p-3 text-white">${pembeliVal}</td>
+                            <td class="p-3 text-emerald-400 font-mono">${nominalVal}</td>
+                            <td class="p-3">${viewPdfBtn}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                container.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <span class="text-xs font-bold text-rose-400"><i class="fa-solid fa-receipt mr-1"></i> Data ${subType} (Jenis INVOICE dari tabel eforms)</span>
+                            <button onclick="handleActionRedirect('${subType}')" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1">
+                                <i class="fa-solid fa-plus"></i> Buat ${subType} Baru
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800">
+                                    <tr>
+                                        <th class="p-2.5">Tanggal</th>
+                                        <th class="p-2.5">Nomor Invoice</th>
+                                        <th class="p-2.5">Pembeli (Tujuan)</th>
+                                        <th class="p-2.5">Nominal</th>
+                                        <th class="p-2.5">Aksi PDF</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800/60">${rows}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                container.innerHTML = `<div class="p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl text-xs text-rose-400">Gagal memuat data Invoice dari Supabase: ${err.message}</div>`;
+            }
+        }
+
+        // Fungsi Redirect Khusus untuk Khatulistiwa Sinar Energi (KSE)
+        function handleActionRedirect(actionType) {
+            if (activeTab === 'kse') {
+                if (actionType === 'po') {
+                    window.location.href = 'kse_po.html';
+                } else if (actionType === 'Buat Invoice BRI') {
+                    window.location.href = 'kse_invoice_bri.html';
+                } else if (actionType === 'Buat Invoice BCA') {
+                    window.location.href = 'kse_invoice_bca.html';
+                } else if (actionType === 'penawaran') {
+                    window.location.href = 'kse_penawaran.html';
+                }
+            } else {
+                alert('Membuka Form Pembuatan ' + actionType);
+            }
+        }
+
+        function renderContent() {
+            const container = document.getElementById('contentArea');
+            if (activeTab === 'holding') {
+                container.innerHTML = `
+                    <div class="fade-in space-y-8">
+                        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-6 sm:p-10 text-white shadow-2xl">
+                            <h2 class="text-3xl font-extrabold mb-3">Holding Overview</h2>
+                            <p class="text-blue-100 text-sm">Sinergi Distributor, Agen, dan Transportir BBM Industri Terpercaya</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            ${companiesData.holding.operatingAreas.map(op => `
+                                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3 shadow-lg">
+                                    <h4 class="font-bold text-white text-base">${op.name}</h4>
+                                    <p class="text-xs text-slate-400">${op.desc}</p>
+                                    <button onclick="switchTab('${op.id}')" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition">Buka Company Profile</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                const data = companiesData[activeTab];
+                
+                let profileInfoHTML = `
+                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-emerald-400 uppercase"><i class="fa-solid fa-building mr-1"></i> Company Profile</span>
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full">${data.location || 'Head Office: Pangkalan Bun'}</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-300">
+                            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800/80 space-y-2">
+                                <div class="font-bold text-white"><i class="fa-solid fa-eye text-emerald-400 mr-1"></i> Visi Perusahaan</div>
+                                <p class="text-slate-400 leading-relaxed">${data.vision || 'Menjadi perusahaan energi terkemuka dan terpercaya di Indonesia.'}</p>
+                            </div>
+                            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800/80 space-y-2">
+                                <div class="font-bold text-white"><i class="fa-solid fa-bullseye text-emerald-400 mr-1"></i> Misi Perusahaan</div>
+                                <p class="text-slate-400 leading-relaxed">${data.mission || 'Memberikan pelayanan optimal, profesional, dan tepat waktu kepada seluruh mitra industri.'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                let transactionMenusHTML = isLoggedIn ? `
+                    <div class="mt-6 pt-6 border-t border-slate-800 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider"><i class="fa-solid fa-shield-halved mr-1"></i> Menu Transaksi (${data.shortName})</span>
+                            <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-3 py-0.5 rounded-full border border-emerald-500/20">Aktif: ${currentAdmin.name}</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <!-- Tombol Penjualan & Buat PO -->
+                            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2">
+                                <div class="text-emerald-400 font-bold text-xs"><i class="fa-solid fa-cash-register mr-1"></i> Penjualan & PO</div>
+                                <div class="space-y-1.5 pt-1 text-[11px]">
+                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenjualanData();" class="w-full text-left text-slate-300 hover:text-emerald-400">&bull; Buka Penjualan</button>
+                                    <button onclick="loadPurchaseOrdersData();" class="w-full text-left text-slate-300 hover:text-amber-400">&bull; Buka PO (PDF View)</button>
+                                    <button onclick="handleActionRedirect('po')" class="w-full text-left font-semibold text-amber-400 hover:underline">&rarr; Buat PO</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Tombol Penawaran, Penawaran Multi & Penawaran Diskon -->
+                            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2">
+                                <div class="text-indigo-400 font-bold text-xs"><i class="fa-solid fa-file-lines mr-1"></i> Penawaran (SPH)</div>
+                                <div class="space-y-1.5 pt-1 text-[11px]">
+                                    <button onclick="loadPenawaranData('Penawaran Biasa')" class="w-full text-left text-slate-300 hover:text-indigo-400">&bull; Buka Penawaran (SPH)</button>
+                                    <button onclick="loadPenawaranData('Penawaran Multi')" class="w-full text-left text-slate-300 hover:text-indigo-400">&bull; Penawaran Multi</button>
+                                    <button onclick="loadPenawaranData('Penawaran Diskon')" class="w-full text-left text-slate-300 hover:text-indigo-400">&bull; Penawaran Diskon</button>
+                                    <button onclick="handleActionRedirect('penawaran')" class="w-full text-left font-semibold text-indigo-400 hover:underline">&rarr; Buat Penawaran</button>
+                                </div>
+                            </div>
+
+                            <!-- Tombol Invoice, Buat Invoice BRI & BCA -->
+                            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2">
+                                <div class="text-rose-400 font-bold text-xs"><i class="fa-solid fa-receipt mr-1"></i> Invoice</div>
+                                <div class="space-y-1.5 pt-1 text-[11px]">
+                                    <button onclick="loadInvoiceData('Buka Invoice')" class="w-full text-left text-slate-300 hover:text-rose-400">&bull; Buka Invoice</button>
+                                    <button onclick="loadInvoiceData('Buat Invoice BRI')" class="w-full text-left text-slate-300 hover:text-rose-400">&bull; Buat Invoice BRI</button>
+                                    <button onclick="loadInvoiceData('Buat Invoice BCA')" class="w-full text-left text-slate-300 hover:text-rose-400">&bull; Buat Invoice BCA</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="supabaseLiveContainer" class="bg-slate-950 p-5 rounded-2xl border border-slate-800"><div class="text-center text-xs text-slate-400">Klik salah satu menu transaksi di atas untuk menarik data secara langsung dari Supabase.</div></div>
+                    </div>
+                ` : `
+                    <div class="mt-6 pt-6 border-t border-slate-800 text-center bg-slate-950 p-5 rounded-2xl border border-amber-500/30 space-y-3">
+                        <div class="text-amber-400 text-base"><i class="fa-solid fa-lock"></i></div>
+                        <h4 class="text-xs font-bold text-white uppercase">Menu Transaksi Terproteksi</h4>
+                        <p class="text-xs text-slate-400">Menu Penjualan, PO, Penawaran, dan Invoice disembunyikan sebelum Anda login sebagai admin.</p>
+                        <button onclick="openGeneralLogin()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition">Login untuk Membuka Menu Transaksi</button>
+                    </div>
+                `;
+
+                container.innerHTML = `
+                    <div class="fade-in space-y-8">
+                        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+                            <div class="flex items-center justify-between">
+                                <button onclick="goHome()" class="px-3 py-1.5 bg-slate-950 text-white rounded-xl text-xs border border-slate-800"><i class="fa-solid fa-arrow-left mr-1"></i> Kembali</button>
+                                <span class="text-xs font-bold text-emerald-400">${data.badge}</span>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-extrabold text-white">${data.name}</h2>
+                                <p class="text-xs text-slate-300 mt-1">${data.tagline}</p>
+                            </div>
+                            ${profileInfoHTML}
+                            ${transactionMenusHTML}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        window.onload = function() { renderNav(); renderAuthUI(); renderContent(); };
+    </script>
+</body>
+</html>
