@@ -164,9 +164,9 @@
         window.selectedMonthFilter = '-10-'; // Default bulan berjalan (Oktober 2026)[cite: 3]
 
         const adminProfiles = {
-            'admin@energyholding.co.id': { name: 'Holding Administrator', role: 'Super Admin' },
-            'direktur@energyholding.co.id': { name: 'Dr. Hendra Gunawan', role: 'Executive Director' },
-            'logistik@energyholding.co.id': { name: 'Ferry Kurniawan', role: 'Logistics & Fleet Manager' }
+            'admin@energyholding.co.id': { name: 'noto', role: 'Super Admin' },
+            'direktur@energyholding.co.id': { name: 'andi, role: 'Executive Director' },
+            'logistik@energyholding.co.id': { name: 'komar', role: 'Logistics & Fleet Manager' }
         };
 
         function fillAdminCredential(email) { document.getElementById('loginEmail').value = email; }
@@ -583,8 +583,6 @@
                 // Fallback contoh data jika tabel Supabase masih kosong
                 if (savedFaktur.length === 0) {
                     savedFaktur = [
-                        { tanggal: '2026-10-05', no_faktur: '010.005-26.00000012', npwp: '01.234.567.8-901.000', lawan: 'PT Sawit Makmur Indah', dpp: 145000000, ppn: 15950000 },
-                        { tanggal: '2026-10-12', no_faktur: '010.005-26.00000013', npwp: '02.345.678.9-102.000', lawan: 'PT Borneo Mining Utama', dpp: 290000000, ppn: 31900000 }
                     ];
                 }
 
