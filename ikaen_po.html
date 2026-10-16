@@ -534,7 +534,7 @@
 
     async function saveToSupabase() {
         const btn = document.getElementById('btn-save-sb');
-        const noPo = document.getElementById('in_no').value;
+        const noPo = document.getElementById('in_no'].value;
         if(!noPo || noPo.includes('undefined')) return alert("Nomor PO tidak valid!");
 
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> UPLOADING...'; btn.disabled = true;
@@ -546,8 +546,12 @@
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
             };
             const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-            const fileName = `pos/PO_${Date.now()}_${noPo.replace(/\//g, '_')}.pdf`;
             
+            // Membersihkan karakter nomor PO agar aman dijadikan nama file
+            const cleanNoPo = noPo.replace(/[^a-zA-Z0-9-_]/g, '_');
+            const fileName = `PO_${Date.now()}_${cleanNoPo}.pdf`;
+            
+            // Upload langsung ke root bucket 'documents' tanpa subfolder untuk menghindari error 404
             const { error: upErr } = await _supabase.storage.from('documents').upload(fileName, pdfBlob, { contentType: 'application/pdf', upsert: true });
             if (upErr) throw upErr;
 
