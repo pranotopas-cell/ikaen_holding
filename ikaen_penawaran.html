@@ -19,15 +19,16 @@
             --ikaen-primary: #800000; /* Maroon */ 
             --ikaen-accent: #ff0000; /* Merah */ 
         }
-        body { background-color: #f4f7f6; font-family: 'Courier Prime', Courier, monospace; font-size: 13px; margin: 0; padding: 0; }
+        body { background-color: #f4f7f6; font-family: 'Courier Prime', Courier, monospace; font-size: 13px; margin: 0; padding: 0; overflow-y: auto; }
         .control-nav { background: #fff; border-bottom: 2px solid #ddd; padding: 10px 20px; position: sticky; top: 0; z-index: 1000; }
         
-        /* Hilangkan tampilan scrollbar di panel input */
+        /* Layout Utama Container Mengikuti Halaman */
+        .main-wrapper { display: flex; flex-wrap: wrap; }
+        
+        /* Panel Input Mengikuti Scroll Halaman */
         .input-sidebar { 
             background: #fff; 
-            height: calc(100vh - 60px); 
-            overflow-y: auto; 
-            padding: 15px; 
+            padding: 20px 15px; 
             border-right: 1px solid #ddd; 
             scrollbar-width: none; /* Firefox */
             -ms-overflow-style: none;  /* IE and Edge */
@@ -38,9 +39,9 @@
         
         #pdf-area { background: #f4f7f6; padding: 20px 0; }
         .document-canvas { 
-            background: white; width: 210mm; height: 296mm; margin: 0 auto; 
+            background: white; width: 210mm; min-height: 296mm; margin: 0 auto; 
             padding: 10mm 15mm 10mm 15mm; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.1); 
-            box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden;
+            box-sizing: border-box; display: flex; flex-direction: column; 
             font-family: 'Courier Prime', Courier, monospace; /* Gaya font printer dot-matrix / monospace */
         }
 
@@ -90,8 +91,9 @@
         @media print {
             .control-nav, .input-sidebar { display: none !important; }
             .col-lg-9 { width: 100% !important; margin: 0 !important; }
-            #pdf-area { padding: 0 !important; }
-            .document-canvas { box-shadow: none !important; margin: 0 !important; }
+            #pdf-area { padding: 0 !important; overflow: visible !important; }
+            .document-canvas { box-shadow: none !important; margin: 0 !important; height: auto !important; }
+            body { height: auto !important; overflow: auto !important; }
         }
     </style>
 </head>
@@ -112,7 +114,7 @@
 </div>
 
 <div class="container-fluid">
-    <div class="row">
+    <div class="row main-wrapper">
         <div class="col-lg-3 input-sidebar">
             <h6 class="fw-bold mb-3 text-danger border-bottom pb-2"><i class="bi bi-pencil-square"></i> PANEL PENAWARAN</h6>
             
@@ -143,7 +145,7 @@
                 <textarea id="in_addr" class="form-control form-control-sm" rows="3" oninput="syncAll()"></textarea>
             </div>
 
-            <div class="card p-2 mb-3 border-danger">
+            <div class="card p-2 mb-3 border-danger pb-3">
                 <label class="fw-bold small text-danger text-center">DETAIL ITEM</label>
                 <hr class="my-1">
                 <label class="small fw-bold">Nama Produk</label>
@@ -320,7 +322,7 @@
         "PT. INTI DAYA MANDIRI SERVITAMA": "Jl. kawitan I No.54 RT.017 RW.000 Sidorejo Arut Selatan,\nKab.Kotawaringin Barat - Kalimantan Tengah 74111",
         "PT. BORNEO TRENGGINAS MANDIRI": "JL.Sri Kuncoro III No.142 RT.003 RW.003 Kalibanteng Kulon, Semarang Barat Kota Semarang - Jawa Tengah 50145",
         "PT. GADING SAWIT KENCANA": "Jl. Rangkas 3 No.138 RT.014 RW.005 Mentawa Baru Hulu ,Mentawa Baru Ketapang, Kab.Kotawaringin Timur - Kalimantan Tengah 74322",
-        "PT. BORNEO ARMADA PERKASA": "Jl. A.Yani Km.40 RT.021 RW.007 Pandu Sanjaya, Pangkalan Bun, Kab.Kotawringin Barat - Kalimantan Tengah 74184",
+        "PT. BORNEO ARMADA PERKASA": "Jl. A.Yani Km.40 RT.021 RW.007 Pandu Sanjaya, Pangkalan Bun, Kab.Kotwringin Barat - Kalimantan Tengah 74184",
         "PT. KORINDO ARIA BIMA SARII": "Wisma Korindo Jl. MT.Haryono Kav.62 Pancoran,Pancoran Kota Adm. DKI Jakarta 12780",
         "PT. HATAKO KHARISMA ABADI": "Jl. Masjid No.01 Kumai Hilir , Kumai, Kotawaringin Barat – Kalimantan Tengah",
         "PT. ARUT SAWIT MANDIRI": "Jl. Edy Suwargono No.39 Madurejo , Arut Selatan ,Kotawaringin Barat – Kalimantan Tengah 74112",
@@ -458,7 +460,7 @@
             const noSurat = document.getElementById('in_no').value;
             const element = document.getElementById('main-doc');
             const opt = { margin: 0, filename: `SPH-${noSurat}.pdf`, image: { type: 'jpeg', quality: 0.98 }, 
-                          html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+                        html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
 
             const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
             const fileName = `penawaran/SPH_${Date.now()}_${noSurat.replace(/\//g, '_')}.pdf`;
@@ -479,7 +481,7 @@
     function downloadPDF() {
         const element = document.getElementById('main-doc');
         html2pdf().set({ margin: 0, filename: `SPH-${document.getElementById('in_no').value}.pdf`, 
-                         html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } }).from(element).save();
+                           html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } }).from(element).save();
     }
 
     window.onload = () => {
