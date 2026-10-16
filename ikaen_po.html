@@ -21,7 +21,6 @@
         
         body { background-color: #f4f7f6; font-family: var(--doc-font); font-size: 13px; margin: 0; padding: 0; }
         
-        /* Mengubah font elemen input sidebar agar bergaya dot matrix / printer */
         .input-sidebar input, .input-sidebar textarea, .input-sidebar select, .input-sidebar label {
             font-family: 'Courier Prime', Courier, monospace !important;
         }
@@ -47,22 +46,21 @@
             font-family: 'Courier Prime', Courier, monospace !important;
         }
 
-        /* WATERMARK LOGO FULL DI TENGAH, TRANSPARAN, DAN HITAM PUTIH (GRAYSCALE) */
         .doc-watermark {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 550px;
-            opacity: 0.06; /* Tingkat transparansi watermark */
-            filter: grayscale(100%); /* Membuat logo tidak berwarna / hitam putih */
+            opacity: 0.06;
+            filter: grayscale(100%);
             pointer-events: none;
             z-index: 0;
         }
 
         .header-section, .row, .intro-text, .table-po, .terbilang-box, .destination-box, .footer-ike {
             position: relative;
-            z-index: 1; /* Memastikan konten dokumen berada di atas watermark */
+            z-index: 1;
         }
 
         .header-section { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 40px; padding-bottom: 15px; }
@@ -230,7 +228,6 @@
 
         <div class="col-lg-9 p-0" id="pdf-area">
             <div class="document-canvas" id="main-doc">
-                <!-- WATERMARK LOGO FULL & HITAM PUTIH (GRAYSCALE) -->
                 <img src="ikaen.png" class="doc-watermark" onerror="this.style.display='none'">
 
                 <div class="header-section">
@@ -358,7 +355,8 @@
         "PT. PETRO ANDALAN NUSANTARA": "Jl.Pelabuhan Cpo Bumiharjo Kumai Pangkalan Bun - Kalimantan Tengah. \nUp: Bpk. Dodi",
     };
 
-    const SB_URL = "https://fymqbeaeiqkdypgptysz.supabase.co/rest/v1/"; 
+    // URL Supabase dikembalikan ke bentuk dasar tanpa /rest/v1/ agar client supabase-js tidak error
+    const SB_URL = "https://fymqbeaeiqkdypgptysz.supabase.co"; 
     const SB_KEY = "sb_publishable_seowoV1JdzMbXlojE7dejQ_GysYC07_";
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
@@ -471,7 +469,6 @@
         const custName = document.getElementById('in_cust').value;
         if (CUSTOMER_DATABASE[custName]) {
             document.getElementById('in_addr').value = CUSTOMER_DATABASE[custName];
-            // Tujuan pengiriman dipisahkan dan tidak lagi otomatis mengikuti alamat supplier
         }
         updateView();
     }
@@ -488,7 +485,6 @@
         const v_pbbkb = hargaDasar * (p_pbbkb / 100);
         const v_pph = hargaDasar * (p_pph / 100);
         
-        // Harga Beli / Harga Net Per Liter = Harga Dasar + PPN + PBBKB + PPH
         const hargaNet = hargaDasar + v_ppn + v_pbbkb + v_pph;
         const total = qty * hargaNet;
 
@@ -534,7 +530,8 @@
 
     async function saveToSupabase() {
         const btn = document.getElementById('btn-save-sb');
-        const noPo = document.getElementById('in_no'].value;
+        // Koreksi typo kurung siku ']' menjadi kurung biasa ')'
+        const noPo = document.getElementById('in_no').value;
         if(!noPo || noPo.includes('undefined')) return alert("Nomor PO tidak valid!");
 
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> UPLOADING...'; btn.disabled = true;
@@ -547,11 +544,9 @@
             };
             const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
             
-            // Membersihkan karakter nomor PO agar aman dijadikan nama file
             const cleanNoPo = noPo.replace(/[^a-zA-Z0-9-_]/g, '_');
             const fileName = `PO_${Date.now()}_${cleanNoPo}.pdf`;
             
-            // Upload langsung ke root bucket 'documents' tanpa subfolder untuk menghindari error 404
             const { error: upErr } = await _supabase.storage.from('documents').upload(fileName, pdfBlob, { contentType: 'application/pdf', upsert: true });
             if (upErr) throw upErr;
 
