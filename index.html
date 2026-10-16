@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Integrated Corporate Dashboard - Energy Holding Group</title>
+    <title>INTEGRATED CORPORATE HOLDING</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
@@ -124,7 +124,7 @@
     <div id="pdfModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-2xl p-6 relative shadow-2xl fade-in flex flex-col max-h-[90vh]">
             <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
-                <h3 class="text-sm font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-file-pdf text-rose-400"></i> Pratinjau Faktur Pajak PDF</h3>
+                <h3 class="text-sm font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-file-pdf text-rose-400"></i> Pratinjau </h3>
                 <button onclick="closePdfModal()" class="text-slate-400 hover:text-white bg-slate-800 px-2.5 py-1 rounded-lg text-xs">Tutup</button>
             </div>
             <div id="pdfContentArea" class="flex-grow bg-slate-950 rounded-xl p-4 text-xs font-mono text-slate-300 overflow-y-auto space-y-3">
@@ -164,7 +164,7 @@
         window.selectedMonthFilter = '-10-'; // Default bulan berjalan (Oktober 2026)[cite: 3]
 
         const adminProfiles = {
-            'admin@energyholding.co.id': { name: 'Holding Administrator', role: 'Super Admin' },
+            'admin@energyholding.co.id': { name: 'Noto', role: 'Super Admin' },
             'direktur@energyholding.co.id': { name: 'Dr. Hendra Gunawan', role: 'Executive Director' },
             'logistik@energyholding.co.id': { name: 'Ferry Kurniawan', role: 'Logistics & Fleet Manager' }
         };
@@ -578,8 +578,7 @@
                 // Fallback contoh data jika tabel Supabase masih kosong
                 if (savedFaktur.length === 0) {
                     savedFaktur = [
-                        { tanggal: '2026-10-05', no_faktur: '010.005-26.00000012', npwp: '01.234.567.8-901.000', lawan: 'PT Sawit Makmur Indah', dpp: 145000000, ppn: 15950000 },
-                        { tanggal: '2026-10-12', no_faktur: '010.005-26.00000013', npwp: '02.345.678.9-102.000', lawan: 'PT Borneo Mining Utama', dpp: 290000000, ppn: 31900000 }
+                        {
                     ];
                 }
 
