@@ -141,7 +141,7 @@
             <p>&copy; 2026 Energy Holding Group. Integrated Corporate Monitoring System.</p>
             <p class="mt-2 sm:mt-0 flex items-center justify-center gap-2">
                 <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>Sistem Operasional Terproteksi &bull; Diperbarui: <strong class="text-slate-200">Oktober 2026</strong>[cite: 3]</span>
+                <span>Sistem Operasional Terproteksi &bull; Diperbarui: <strong class="text-slate-200">Oktober 2026</strong></span>
             </p>
         </div>
     </footer>
@@ -161,7 +161,7 @@
         let activeTab = 'holding';
         let currentAdmin = { name: 'Holding Administrator', email: 'admin@energyholding.co.id', role: 'Super Admin' };
         
-        window.selectedMonthFilter = '-10-'; // Default bulan berjalan (Oktober 2026)[cite: 3]
+        window.selectedMonthFilter = '-10-'; // Default bulan berjalan (Oktober 2026)
 
         const adminProfiles = {
             'admin@energyholding.co.id': { name: 'Noto', role: 'Super Admin' },
@@ -189,7 +189,7 @@
                 introduction: 'PT. Khatulistiwa Sinar Energi (KSE) didirikan sebagai pilar utama dalam sektor perdagangan energi dan komoditas BBM solar industri di wilayah Kalimantan. Dengan komitmen tinggi terhadap legalitas, keandalan rantai pasok, dan ketepatan volume, KSE telah menjadi mitra strategis terpercaya bagi berbagai sektor industri, perkebunan, dan pertambangan.',
                 vision: 'Menjadi perusahaan trading dan penyedia energi BBM industri terdepan, terpercaya, dan berstandar tinggi di Indonesia.', 
                 mission: 'Menjamin ketersediaan pasokan solar industri tepat waktu, bermutu tinggi, transparan, serta mengutamakan kepuasan mitra.',
-                board: 'Komisaris : M.Renaldi Azmi, Direktur: Supranoto,S.Ikom',
+                board: 'Komisaris : M.Renaldi Azmi, Direktur: Supranoto.S.Ikom',
                 facilities: 'Memiliki fasilitas tangki penyimpanan berkapasitas besar, laboratorium uji mutu bahan bakar terpadu, sistem digitalisasi meter arus, serta armada suplai pendukung berstandar HSE ketat.',
                 visualIcon: 'fa-oil-well',
                 visualBg: 'from-amber-500/20 via-emerald-500/10 to-transparent border-amber-500/30',
@@ -574,13 +574,6 @@
                 if (error) throw error;
 
                 let savedFaktur = data || [];
-                
-                // Fallback contoh data jika tabel Supabase masih kosong
-                if (savedFaktur.length === 0) {
-                    savedFaktur = [
-                        {
-                    ];
-                }
 
                 let filteredFaktur = savedFaktur;
                 const selectedMonth = window.selectedMonthFilter !== undefined ? window.selectedMonthFilter : '-10-';
