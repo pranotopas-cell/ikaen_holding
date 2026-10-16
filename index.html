@@ -64,7 +64,7 @@
                     <div>
                         <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
                             HOLDING GROUP
-                            <span class="text-[10px] bg-tosca-500/20 text-tosca-400 px-2 py-0.5 rounded-full border border-tosca-500/30">Corp v5.6</span>
+                            <span class="text-[10px] bg-tosca-500/20 text-tosca-400 px-2 py-0.5 rounded-full border border-tosca-500/30">Corp v5.7</span>
                         </h1>
                         <p class="text-xs text-slate-400">Integrated Corporate Dashboard</p>
                     </div>
@@ -87,7 +87,7 @@
         <div id="contentArea"></div>
     </main>
 
-    <!-- Modal Login Multi-Admin -->
+    <!-- Modal Login Single Admin -->
     <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden">
         <div class="bg-navy-900 border border-gold-500/30 rounded-3xl w-full max-w-md p-8 relative shadow-2xl fade-in overflow-hidden">
             <div class="absolute -top-24 -right-24 w-48 h-48 bg-tosca-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -96,19 +96,14 @@
             </button>
             <div class="text-center mb-6 relative z-10">
                 <div class="w-14 h-14 bg-gradient-to-tr from-tosca-600 via-gold-500 to-maroon-700 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-lg shadow-gold-500/20 border border-gold-500/40">
-                    <i class="fa-solid fa-users-gear"></i>
+                    <i class="fa-solid fa-user-shield"></i>
                 </div>
                 <h3 class="text-xl font-extrabold text-white">Login Akses Transaksi</h3>
-                <p class="text-xs text-slate-400 mt-1">Masukkan kredensial admin untuk membuka menu penjualan, PO, penawaran, invoice, dan faktur pajak.</p>
+                <p class="text-xs text-slate-400 mt-1">Masukkan kredensial administrator holding untuk membuka menu penjualan, PO, penawaran, invoice, dan faktur pajak.</p>
             </div>
             <form onsubmit="handleLogin(event)" class="space-y-4 relative z-10">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1.5"><i class="fa-solid fa-user-shield text-tosca-400 mr-1"></i> Pilih Akun Admin</label>
-                    <select id="adminSelect" onchange="fillAdminCredential(this.value)" class="w-full bg-navy-950 border border-tosca-500/30 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-tosca-400 mb-2 transition">
-                        <option value="admin@energyholding.co.id">Admin Utama</option>
-                        <option value="direktur@energyholding.co.id">Direksi </option>
-                        <option value="logistik@energyholding.co.id">Logistic</option>
-                    </select>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5"><i class="fa-solid fa-envelope text-tosca-400 mr-1"></i> Email Administrator</label>
                     <input type="email" id="loginEmail" required class="w-full bg-navy-950 border border-tosca-500/30 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-tosca-400 transition" value="admin@energyholding.co.id">
                 </div>
                 <div>
@@ -116,7 +111,7 @@
                     <input type="password" id="loginPassword" required class="w-full bg-navy-950 border border-tosca-500/30 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-tosca-400 transition" value="password123">
                 </div>
                 <button type="submit" class="w-full bg-gradient-to-r from-tosca-600 via-teal-600 to-gold-600 hover:from-tosca-500 hover:to-gold-500 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-tosca-600/30 flex items-center justify-center space-x-2 border border-gold-500/30">
-                    <span>Verifikasi</span>
+                    <span>Verifikasi Masuk</span>
                     <i class="fa-solid fa-arrow-right-to-bracket"></i>
                 </button>
             </form>
@@ -127,7 +122,7 @@
     <div id="pdfModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden">
         <div class="bg-navy-900 border border-gold-500/30 rounded-3xl w-full max-w-2xl p-6 relative shadow-2xl fade-in flex flex-col max-h-[90vh]">
             <div class="flex items-center justify-between pb-3 border-b border-tosca-500/20 mb-4">
-                <h3 class="text-sm font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-file-pdf text-maroon-600"></i> Pratinjau </h3>
+                <h3 class="text-sm font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-file-pdf text-maroon-600"></i> Pratinjau Dokumen</h3>
                 <button onclick="closePdfModal()" class="text-slate-400 hover:text-white bg-navy-800 px-2.5 py-1 rounded-lg text-xs border border-tosca-500/20">Tutup</button>
             </div>
             <div id="pdfContentArea" class="flex-grow bg-navy-950 rounded-xl p-4 text-xs font-mono text-slate-300 overflow-y-auto space-y-3 border border-tosca-500/10">
@@ -166,14 +161,6 @@
         
         window.selectedMonthFilter = '-10-'; // Default bulan berjalan (Oktober 2026)
 
-        const adminProfiles = {
-            'admin@energyholding.co.id': { name: 'Noto', role: 'Super Admin' },
-            'direktur@energyholding.co.id': { name: 'ela', role: 'Executive Director' },
-            'logistik@energyholding.co.id': { name: 'komar', role: 'Logistics & Fleet Manager' }
-        };
-
-        function fillAdminCredential(email) { document.getElementById('loginEmail').value = email; }
-
         const companiesData = {
             holding: {
                 id: 'holding', name: 'Holding Overview', shortName: 'Holding Group',
@@ -182,7 +169,7 @@
                 operatingAreas: [
                     { id: 'kse', name: 'PT. KHATULISTIWA SINAR ENERGI', focus: 'Trading BBM Solar Industri', desc: 'Berfokus pada penyediaan dan trading komoditas BBM Solar industri berskala besar maupun kecil.' },
                     { id: 'ikaen', name: 'PT. INVESTAMA KALIMANTAN ENERGI', focus: 'Agen Resmi BBM Solar Industri', desc: 'Berperan sebagai agen resmi dari Petro Andalan Nusantara dalam penyaluran BBM solar industri.' },
-                    { id: 'ide', name: 'PT. INDO DHARMA ENERGI', focus: 'Transportir BBM Industri', desc: 'Perusahaan khusus penyedia jasa transportasi/transportir BBM industri wlayah Kalteng' }
+                    { id: 'ide', name: 'PT. INDO DHARMA ENERGI', focus: 'Transportir BBM Industri', desc: 'Perusahaan khusus penyedia jasa transportasi/transportir BBM industri wilayah Kalteng' }
                 ]
             },
             kse: { 
@@ -261,7 +248,7 @@
         function handleLogin(e) {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value;
-            currentAdmin = adminProfiles[email] || { name: 'Custom Admin', email, role: 'Administrator' };
+            currentAdmin = { name: 'Holding Administrator', email, role: 'Super Administrator' };
             isLoggedIn = true;
             toggleLoginModal();
             renderNav(); renderAuthUI(); renderContent();
@@ -843,20 +830,19 @@
             document.getElementById('pdfModal').classList.add('hidden');
         }
 
-        // Fungsi Redirect Khusus untuk Khatulistiwa Sinar Energi (KSE)
+        // Fungsi Redirect Dinamis Berdasarkan Entitas Perusahaan yang Aktif (KSE, IKAEN, IDE)
         function handleActionRedirect(actionType) {
-            if (activeTab === 'kse') {
-                if (actionType === 'po') {
-                    window.location.href = 'kse_po.html';
-                } else if (actionType === 'Buat Invoice BRI') {
-                    window.location.href = 'kse_invoice_bri.html';
-                } else if (actionType === 'Buat Invoice BCA') {
-                    window.location.href = 'kse_invoice_bca.html';
-                } else if (actionType === 'penawaran') {
-                    window.location.href = 'kse_penawaran.html';
-                }
+            const prefix = activeTab; // 'kse', 'ikaen', atau 'ide'
+            if (actionType === 'po') {
+                window.location.href = `${prefix}_po.html`;
+            } else if (actionType === 'penawaran') {
+                window.location.href = `${prefix}_penawaran.html`;
+            } else if (actionType.includes('Invoice BRI')) {
+                window.location.href = `${prefix}_invoice_bri.html`;
+            } else if (actionType.includes('Invoice BCA')) {
+                window.location.href = `${prefix}_invoice_bca.html`;
             } else {
-                alert('Membuka Form Pembuatan ' + actionType);
+                window.location.href = `${prefix}_${actionType}.html`;
             }
         }
 
