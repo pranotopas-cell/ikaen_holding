@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CORPORATE INTEGRATED HOLDING</title>
+    <title>Integrated Corporate Dashboard - Energy Holding Group</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
@@ -61,10 +61,10 @@
                     </div>
                     <div>
                         <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
-                            CORPORATE HOLDING
+                            HOLDING GROUP
                             <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">Corp v5.6</span>
                         </h1>
-                        <p class="text-xs text-slate-400">Integrated Corporate Dashboard </p>
+                        <p class="text-xs text-slate-400">Integrated Corporate Dashboard & Energy Trading</p>
                     </div>
                 </div>
                 <nav class="hidden lg:flex space-x-1 bg-slate-950/60 p-1.5 rounded-xl border border-slate-800" id="desktopNav"></nav>
@@ -102,9 +102,9 @@
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1.5"><i class="fa-solid fa-user-shield text-emerald-400 mr-1"></i> Pilih Akun Admin</label>
                     <select id="adminSelect" onchange="fillAdminCredential(this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 mb-2 transition">
-                        <option value="admin@energyholding.co.id">Holding Admin</option>
-                        <option value="direktur@energyholding.co.id">Executive Admin</option>
-                        <option value="logistik@energyholding.co.id">Logistics Admin</option>
+                        <option value="admin@energyholding.co.id">Admin Utama Sistem (Holding Admin)</option>
+                        <option value="direktur@energyholding.co.id">Direksi Eksekutif (Executive Admin)</option>
+                        <option value="logistik@energyholding.co.id">Kepala Logistik & Armada (Logistics Admin)</option>
                     </select>
                     <input type="email" id="loginEmail" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-500 transition" value="admin@energyholding.co.id">
                 </div>
@@ -113,7 +113,7 @@
                     <input type="password" id="loginPassword" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-500 transition" value="password123">
                 </div>
                 <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-emerald-600/30 flex items-center justify-center space-x-2">
-                    <span>Buka Menu Transaksi</span>
+                    <span>Verifikasi & Buka Menu Transaksi</span>
                     <i class="fa-solid fa-arrow-right-to-bracket"></i>
                 </button>
             </form>
@@ -124,7 +124,7 @@
     <div id="pdfModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-2xl p-6 relative shadow-2xl fade-in flex flex-col max-h-[90vh]">
             <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
-                <h3 class="text-sm font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-file-pdf text-rose-400"></i> Pratinjau Faktur Pajak</h3>
+                <h3 class="text-sm font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-file-pdf text-rose-400"></i> Pratinjau Faktur Pajak PDF</h3>
                 <button onclick="closePdfModal()" class="text-slate-400 hover:text-white bg-slate-800 px-2.5 py-1 rounded-lg text-xs">Tutup</button>
             </div>
             <div id="pdfContentArea" class="flex-grow bg-slate-950 rounded-xl p-4 text-xs font-mono text-slate-300 overflow-y-auto space-y-3">
@@ -164,9 +164,9 @@
         window.selectedMonthFilter = '-10-'; // Default bulan berjalan (Oktober 2026)[cite: 3]
 
         const adminProfiles = {
-            'admin@energyholding.co.id': { name: 'noto', role: 'Super Admin' },
-            'direktur@energyholding.co.id': { name: 'andi', role: 'Executive Director' },
-            'logistik@energyholding.co.id': { name: 'komar', role: 'Logistics & Fleet Manager' }
+            'admin@energyholding.co.id': { name: 'Holding Administrator', role: 'Super Admin' },
+            'direktur@energyholding.co.id': { name: 'Dr. Hendra Gunawan', role: 'Executive Director' },
+            'logistik@energyholding.co.id': { name: 'Ferry Kurniawan', role: 'Logistics & Fleet Manager' }
         };
 
         function fillAdminCredential(email) { document.getElementById('loginEmail').value = email; }
@@ -222,7 +222,7 @@
                 vision: 'Menjadi penyedia jasa logistik dan transportir energi paling handal, aman, dan tepat waktu di jalur distribusi darat maupun perairan.', 
                 mission: 'Mengutamakan aspek Keselamatan Kerja & Lingkungan (HSE), keandalan armada truk tangki, serta ketepatan jadwal pengiriman.',
                 board: 'Komisaris: Ir. Darmawan, Direktur Utama: Ferry Kurniawan, Manajer Armada & HSE: Capt. Joko Prasetyo.',
-                facilities: 'Armada truck tangki berbagai kapasitas (5KL, 8KL, 10KL) dilengkapi GPS tracker, perangkat keselamatan pemadam portabel, serta bengkel perawatan mandiri berkala.',
+                facilities: 'Armada truck tangki berbagai kapasitas (8KL, 16KL, 24KL) dilengkapi GPS tracker, perangkat keselamatan pemadam portabel, serta bengkel perawatan mandiri berkala.',
                 visualIcon: 'fa-truck-fast',
                 visualBg: 'from-emerald-500/20 via-teal-500/10 to-transparent border-emerald-500/30',
                 reviews: [
@@ -578,6 +578,8 @@
                 // Fallback contoh data jika tabel Supabase masih kosong
                 if (savedFaktur.length === 0) {
                     savedFaktur = [
+                        { tanggal: '2026-10-05', no_faktur: '010.005-26.00000012', npwp: '01.234.567.8-901.000', lawan: 'PT Sawit Makmur Indah', dpp: 145000000, ppn: 15950000 },
+                        { tanggal: '2026-10-12', no_faktur: '010.005-26.00000013', npwp: '02.345.678.9-102.000', lawan: 'PT Borneo Mining Utama', dpp: 290000000, ppn: 31900000 }
                     ];
                 }
 
@@ -790,6 +792,10 @@
             if (activeTab === 'kse') {
                 if (actionType === 'po') {
                     window.location.href = 'kse_po.html';
+                } else if (actionType === 'Buat Invoice BRI') {
+                    window.location.href = 'kse_invoice_bri.html';
+                } else if (actionType === 'Buat Invoice BCA') {
+                    window.location.href = 'kse_invoice_bca.html';
                 } else if (actionType === 'penawaran') {
                     window.location.href = 'kse_penawaran.html';
                 }
@@ -957,6 +963,8 @@
                                 <div class="text-rose-400 font-bold text-xs"><i class="fa-solid fa-receipt mr-1"></i> Invoice</div>
                                 <div class="space-y-1.5 pt-1 text-[11px]">
                                     <button onclick="window.selectedMonthFilter='-10-'; loadInvoiceData('Buka Invoice');" class="w-full text-left text-slate-300 hover:text-rose-400">&bull; Buka Invoice</button>
+                                    <button onclick="handleActionRedirect('Buat Invoice BRI')" class="w-full text-left text-slate-300 hover:text-rose-400">&bull; Buat Invoice BRI</button>
+                                    <button onclick="handleActionRedirect('Buat Invoice BCA')" class="w-full text-left text-slate-300 hover:text-rose-400">&bull; Buat Invoice BCA</button>
                                 </div>
                             </div>
 
