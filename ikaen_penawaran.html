@@ -65,7 +65,11 @@
         }
 
         .header-section { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; }
+        .logo-area { display: flex; align-items: center; gap: 12px; }
         .logo-img { height: 45px; width: auto; }
+        .brand-text { display: flex; flex-direction: column; }
+        .brand-title { font-weight: 900; font-size: 20px; color: var(--ikaen-primary); line-height: 1; letter-spacing: 0.5px; }
+        .brand-subtitle { font-size: 11px; color: #555; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 3px; }
         
         .doc-identity { text-align: right; }
         .doc-identity h2 { font-weight: 900; font-style: italic; font-size: 26px; color: var(--ikaen-primary); margin: 0; line-height: 1; }
@@ -189,7 +193,13 @@
                 <img src="ikaen.png" class="watermark-bg" alt="Watermark IKAEN" onerror="this.style.display='none'">
 
                 <div class="header-section">
-                    <img src="ikaen.png" class="logo-img" onerror="this.src='https://via.placeholder.com/200x60?text=LOGO+IKAEN'">
+                    <div class="logo-area">
+                        <img src="ikaen.png" class="logo-img" onerror="this.src='https://via.placeholder.com/200x60?text=LOGO+IKAEN'">
+                        <div class="brand-text">
+                            <span class="brand-title">INVESTAMA</span>
+                            <span class="brand-subtitle">Kalimantan energi</span>
+                        </div>
+                    </div>
                     <div class="doc-identity">
                         <h2>PENAWARAN HARGA</h2>
                         <div class="sub-title-en">QUOTATION</div>
@@ -223,7 +233,7 @@
                     </div>
                 </div>
 
-                <p>Dengan hormat,<br>Bersama ini kami <strong>PT. IKAEN</strong> menawarkan supply BBM untuk operasional perusahaan Bapak/Ibu, dengan rincian sebagai berikut:</p>
+                <p>Dengan hormat,<br>Bersama ini kami <strong>PT. INVESTAMA KALIMANTAN ENERGI</strong> Agen penyalur dari PT.Petro Andalan Nusantaramenawarkan supply BBM untuk operasional perusahaan Bapak/Ibu, dengan rincian sebagai berikut:</p>
 
                 <table class="table-main">
                     <thead>
@@ -249,7 +259,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <p style="font-size: 10px; font-style: italic; margin-top: 5px;">* Harga sudah termasuk PPN , Ongkos Angkut Transportir (OAT) dan harga tidak mengikat, dapat berubah sewaktu waktu.</p>
+                <p style="font-size: 10px; font-style: italic; margin-top: 5px;">* Harga sudah termasuk PPN , PBBKB, Ongkos Angkut Transportir (OAT) dan harga tidak mengikat, dapat berubah sewaktu waktu.</p>
 
                 <div class="mt-2">
                     <table class="w-100" style="font-size: 12px; line-height: 1.6;">
@@ -280,9 +290,9 @@
                             </div>
                         </div>
                         <div class="text-end" style="font-size: 9px;">
-                            <b style="color: var(--ikaen-primary);">PT. IKAEN</b><br>
-                            Jl. Ahmad Wongso RT 18<br>
-                            0815-8841-410 | pt.ikaen@gmail.com
+                            <b style="color: var(--ikaen-primary);">PT. INVESTAMA KALIMANTAN ENERGI</b><br>
+                            Jl. Ahmad Wongso RT 18 Madurejo Pangkalan Bun<br>
+                            0852-5276-1578| investamakalimantanenergi@gmail.com
                         </div>
                     </div>
                 </div>
@@ -483,11 +493,11 @@
         document.getElementById('in_tgl_raw').value = new Date().toISOString().split('T')[0];
         handleDateChange();
         
-        document.getElementById('in_produk').value = "BIO SOLAR B50";
+        document.getElementById('in_produk').value = "BIO DIESEL PETRO 4";
         document.getElementById('in_qty').value = "5.000 liter , 8000 liter , 10.000 Liter";
         document.getElementById('in_tol').value = "0,3% (Tera Mobil Transportir/T2)";
         document.getElementById('in_pay').value = "CBD (Cash Before Delivery)";
-        document.getElementById('in_contact').value = "0815-884-1410";
+        document.getElementById('in_contact').value = "0852-5276-1578";
         
         syncAutoNumber();
     };
