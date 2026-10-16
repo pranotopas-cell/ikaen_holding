@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Integrated Corporate Dashboard - Energy Holding Group</title>
+    <title>CORPORATE INTEGRATED HOLDING</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
@@ -61,10 +61,10 @@
                     </div>
                     <div>
                         <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
-                            HOLDING GROUP
-                            <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">Corp v5.3</span>
+                            CORPORATE HOLDING
+                            <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">Corp v5.6</span>
                         </h1>
-                        <p class="text-xs text-slate-400">Integrated Corporate Dashboard & Energy Trading</p>
+                        <p class="text-xs text-slate-400">Integrated Corporate Dashboard </p>
                     </div>
                 </div>
                 <nav class="hidden lg:flex space-x-1 bg-slate-950/60 p-1.5 rounded-xl border border-slate-800" id="desktopNav"></nav>
@@ -96,15 +96,15 @@
                     <i class="fa-solid fa-users-gear"></i>
                 </div>
                 <h3 class="text-xl font-extrabold text-white">Login Akses Transaksi Korporat</h3>
-                <p class="text-xs text-slate-400 mt-1">Masukkan kredensial admin untuk membuka menu penjualan, PO, penawaran, dan invoice.</p>
+                <p class="text-xs text-slate-400 mt-1">Masukkan kredensial admin untuk membuka menu penjualan, PO, penawaran, invoice, dan faktur pajak.</p>
             </div>
             <form onsubmit="handleLogin(event)" class="space-y-4 relative z-10">
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1.5"><i class="fa-solid fa-user-shield text-emerald-400 mr-1"></i> Pilih Akun Admin</label>
                     <select id="adminSelect" onchange="fillAdminCredential(this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 mb-2 transition">
-                        <option value="admin@energyholding.co.id">Admin Utama Sistem (Holding Admin)</option>
-                        <option value="direktur@energyholding.co.id">Direksi Eksekutif (Executive Admin)</option>
-                        <option value="logistik@energyholding.co.id">Kepala Logistik & Armada (Logistics Admin)</option>
+                        <option value="admin@energyholding.co.id">Holding Admin</option>
+                        <option value="direktur@energyholding.co.id">Executive Admin</option>
+                        <option value="logistik@energyholding.co.id">Logistics Admin</option>
                     </select>
                     <input type="email" id="loginEmail" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-500 transition" value="admin@energyholding.co.id">
                 </div>
@@ -113,10 +113,26 @@
                     <input type="password" id="loginPassword" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-500 transition" value="password123">
                 </div>
                 <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-emerald-600/30 flex items-center justify-center space-x-2">
-                    <span>Verifikasi & Buka Menu Transaksi</span>
+                    <span>Buka Menu Transaksi</span>
                     <i class="fa-solid fa-arrow-right-to-bracket"></i>
                 </button>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Pratinjau PDF Faktur -->
+    <div id="pdfModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-2xl p-6 relative shadow-2xl fade-in flex flex-col max-h-[90vh]">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+                <h3 class="text-sm font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-file-pdf text-rose-400"></i> Pratinjau Faktur Pajak</h3>
+                <button onclick="closePdfModal()" class="text-slate-400 hover:text-white bg-slate-800 px-2.5 py-1 rounded-lg text-xs">Tutup</button>
+            </div>
+            <div id="pdfContentArea" class="flex-grow bg-slate-950 rounded-xl p-4 text-xs font-mono text-slate-300 overflow-y-auto space-y-3">
+                <!-- Konten dinamis faktur pajak -->
+            </div>
+            <div class="pt-4 border-t border-slate-800 flex justify-end gap-2">
+                <button onclick="window.print()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition">Cetak / Unduh PDF</button>
+            </div>
         </div>
     </div>
 
@@ -131,12 +147,12 @@
     </footer>
 
     <script>
-        // Konfigurasi Supabase untuk Penjualan (data_pengiriman) dengan API Key yang dipulihkan
+        // Konfigurasi Supabase untuk Penjualan (data_pengiriman)
         const SB_PENJUALAN_URL = 'https://ntaECTphgoelmhzrkatp.supabase.co';
         const SB_PENJUALAN_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YWVjdHBoZ29lbG1oenJrYXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzExNDYsImV4cCI6MjA4ODE0NzE0Nn0.-8E98wpkzHBARRhW6PKhBtf2XKhWFjq7idAzw9jlcKg';
         const _supabasePenjualan = supabase.createClient(SB_PENJUALAN_URL, SB_PENJUALAN_KEY);
 
-        // Konfigurasi Supabase untuk eforms (PO, SPH/Penawaran, Invoice)
+        // Konfigurasi Supabase untuk eforms & faktur_pajak
         const SB_URL = "https://yqdtgcjpfhiskywhowhu.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxZHRnY2pwZmhpc2t5d2hvd2h1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MDY0MTIsImV4cCI6MjA4NzA4MjQxMn0.Mlw3e8C4xKHcJPSMRkcsRXL5udtR9SeWk2GmqM1NyYc";
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
@@ -206,7 +222,7 @@
                 vision: 'Menjadi penyedia jasa logistik dan transportir energi paling handal, aman, dan tepat waktu di jalur distribusi darat maupun perairan.', 
                 mission: 'Mengutamakan aspek Keselamatan Kerja & Lingkungan (HSE), keandalan armada truk tangki, serta ketepatan jadwal pengiriman.',
                 board: 'Komisaris: Ir. Darmawan, Direktur Utama: Ferry Kurniawan, Manajer Armada & HSE: Capt. Joko Prasetyo.',
-                facilities: 'Armada truck tangki berbagai kapasitas (8KL, 16KL, 24KL) dilengkapi GPS tracker, perangkat keselamatan pemadam portabel, serta bengkel perawatan mandiri berkala.',
+                facilities: 'Armada truck tangki berbagai kapasitas (5KL, 8KL, 10KL) dilengkapi GPS tracker, perangkat keselamatan pemadam portabel, serta bengkel perawatan mandiri berkala.',
                 visualIcon: 'fa-truck-fast',
                 visualBg: 'from-emerald-500/20 via-teal-500/10 to-transparent border-emerald-500/30',
                 reviews: [
@@ -335,7 +351,6 @@
                     filteredData = fallbackRes.data || [];
                 }
 
-                // Terapkan filter bulan pada field created_at
                 const selectedMonth = window.selectedMonthFilter !== undefined ? window.selectedMonthFilter : '-10-';
                 if (selectedMonth !== '') {
                     filteredData = filteredData.filter(item => item.created_at && item.created_at.includes(selectedMonth));
@@ -345,7 +360,7 @@
 
                 if (filteredData.length > 0) {
                     let rows = filteredData.map(item => {
-                        let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 rounded-lg text-[10px] font-bold border border-amber-500/30 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View PDF</a>` : `<span class="text-slate-500 text-[10px]">No PDF</span>`;
+                        let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-amber-500/25 hover:bg-amber-500/40 text-amber-300 rounded-lg text-[10px] font-bold border border-amber-500/30 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View PDF</a>` : `<span class="text-slate-500 text-[10px]">No PDF</span>`;
                         let nomorVal = item.nomor || item.nomor_po || item.no_po || '-';
                         let nominalVal = item.nominal ? (isNaN(item.nominal) ? item.nominal : 'Rp ' + Number(item.nominal).toLocaleString('id-ID')) : '-';
                         let tujuanVal = item.tujuan || item.client_name || '-';
@@ -410,7 +425,6 @@
                     filteredData = resAll.data || [];
                 }
 
-                // Terapkan filter bulan pada field created_at
                 const selectedMonth = window.selectedMonthFilter !== undefined ? window.selectedMonthFilter : '-10-';
                 if (selectedMonth !== '') {
                     filteredData = filteredData.filter(item => item.created_at && item.created_at.includes(selectedMonth));
@@ -420,7 +434,7 @@
 
                 if (filteredData.length > 0) {
                     let rows = filteredData.map((item, idx) => {
-                        let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-400 rounded-lg text-[10px] font-bold border border-indigo-500/30 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View SPH</a>` : `<span class="text-slate-500 text-[10px]">No PDF</span>`;
+                        let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-indigo-500/25 hover:bg-indigo-500/40 text-indigo-300 rounded-lg text-[10px] font-bold border border-indigo-500/30 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View SPH</a>` : `<span class="text-slate-500 text-[10px]">No PDF</span>`;
                         let nomorVal = item.nomor || item.nomor_dokumen || item.no_po || ('SPH-0' + (idx+1));
                         let nominalVal = item.nominal ? (isNaN(item.nominal) ? item.nominal : 'Rp ' + Number(item.nominal).toLocaleString('id-ID')) : '-';
                         let tujuanVal = item.tujuan || item.client_name || 'Mitra Industri';
@@ -490,7 +504,6 @@
                     filteredData = resAll.data || [];
                 }
 
-                // Terapkan filter bulan pada field created_at
                 const selectedMonth = window.selectedMonthFilter !== undefined ? window.selectedMonthFilter : '-10-';
                 if (selectedMonth !== '') {
                     filteredData = filteredData.filter(item => item.created_at && item.created_at.includes(selectedMonth));
@@ -500,7 +513,7 @@
 
                 if (filteredData.length > 0) {
                     let rows = filteredData.map((item, idx) => {
-                        let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 rounded-lg text-[10px] font-bold border border-rose-500/30 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View Invoice</a>` : `<span class="text-slate-500 text-[10px]">No PDF</span>`;
+                        let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-rose-500/25 hover:bg-rose-500/40 text-rose-300 rounded-lg text-[10px] font-bold border border-rose-500/30 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View Invoice</a>` : `<span class="text-slate-500 text-[10px]">No PDF</span>`;
                         let nomorVal = item.nomor || item.nomor_dokumen || item.no_po || ('INV-0' + (idx+1));
                         let pembeliVal = item.tujuan || item.client_name || 'Perusahaan Klien';
                         let nominalVal = item.nominal ? (isNaN(item.nominal) ? item.nominal : 'Rp ' + Number(item.nominal).toLocaleString('id-ID')) : ('Rp ' + ((item.qty || 50) * 14500000).toLocaleString('id-ID'));
@@ -552,6 +565,231 @@
             } catch (err) {
                 container.innerHTML = `<div class="p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl text-xs text-rose-400">Gagal memuat data Invoice dari Supabase: ${err.message}</div>`;
             }
+        }
+
+        // --- MANAJEMEN FAKTUR PAJAK (TERINTEGRASI SUPABASE & UPLOAD CSV) ---
+        async function loadFakturPajakData() {
+            const container = document.getElementById('supabaseLiveContainer');
+            if (!container) return;
+            
+            container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Mengambil data Faktur Pajak dari database Supabase...</div>`;
+            
+            try {
+                let { data, error } = await _supabase.from('faktur_pajak').select('*').order('tanggal', { ascending: false });
+                if (error) throw error;
+
+                let savedFaktur = data || [];
+                
+                // Fallback contoh data jika tabel Supabase masih kosong
+                if (savedFaktur.length === 0) {
+                    savedFaktur = [
+                        { tanggal: '2026-10-05', no_faktur: '010.005-26.00000012', npwp: '01.234.567.8-901.000', lawan: 'PT Sawit Makmur Indah', dpp: 145000000, ppn: 15950000 },
+                        { tanggal: '2026-10-12', no_faktur: '010.005-26.00000013', npwp: '02.345.678.9-102.000', lawan: 'PT Borneo Mining Utama', dpp: 290000000, ppn: 31900000 }
+                    ];
+                }
+
+                let filteredFaktur = savedFaktur;
+                const selectedMonth = window.selectedMonthFilter !== undefined ? window.selectedMonthFilter : '-10-';
+                if (selectedMonth !== '') {
+                    filteredFaktur = filteredFaktur.filter(item => item.tanggal && item.tanggal.includes(selectedMonth));
+                }
+
+                let filterHtml = renderMonthFilterHTML('loadFakturPajakData');
+
+                let rows = filteredFaktur.length > 0 ? filteredFaktur.map((item) => {
+                    let noFakt = item.no_faktur || item.noFaktur || '-';
+                    return `
+                        <tr class="hover:bg-slate-800/40 transition">
+                            <td class="p-3 text-slate-300">${item.tanggal}</td>
+                            <td class="p-3 font-mono text-cyan-400 font-bold">${noFakt}</td>
+                            <td class="p-3 font-mono text-slate-300">${item.npwp}</td>
+                            <td class="p-3 text-white font-semibold">${item.lawan}</td>
+                            <td class="p-3 text-emerald-400 font-mono">Rp ${Number(item.dpp).toLocaleString('id-ID')}</td>
+                            <td class="p-3 text-amber-400 font-mono">Rp ${Number(item.ppn).toLocaleString('id-ID')}</td>
+                            <td class="p-3 space-x-1 flex items-center">
+                                <button onclick="previewFakturPdf('${noFakt}', '${item.tanggal}', '${item.lawan}', '${item.npwp}', ${item.dpp}, ${item.ppn})" class="px-2 py-1 bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-300 rounded text-[10px] font-bold border border-cyan-500/30 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> Lihat PDF</button>
+                                <button onclick="hapusFakturSupabase('${noFakt}')" class="text-rose-400 hover:text-rose-300 text-xs px-2 py-1 bg-rose-500/10 rounded border border-rose-500/20"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('') : `<tr><td colspan="7" class="p-4 text-center text-slate-400">Belum ada data Faktur Pajak di Supabase untuk bulan terpilih.</td></tr>`;
+
+                container.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <span class="text-xs font-bold text-cyan-400"><i class="fa-solid fa-file-invoice-dollar mr-1"></i> Rekapitulasi Faktur Pajak (Supabase & Coretax Integration)</span>
+                            ${filterHtml}
+                        </div>
+                        
+                        <!-- Panel Upload CSV & Input Manual -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Upload CSV Coretax -->
+                            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
+                                <h4 class="text-xs font-bold text-white"><i class="fa-solid fa-file-csv text-emerald-400 mr-1"></i> Upload Rekap CSV ke Supabase</h4>
+                                <p class="text-[11px] text-slate-400">Pilih file CSV Coretax DJP untuk diunggah langsung ke server database Supabase.</p>
+                                <input type="file" id="csvFileInput" accept=".csv" class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 cursor-pointer">
+                                <button onclick="handleUploadCsvSupabase()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow-md">Proses & Unggah CSV ke Server</button>
+                            </div>
+
+                            <!-- Form Input Manual -->
+                            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
+                                <h4 class="text-xs font-bold text-white"><i class="fa-solid fa-circle-plus text-cyan-400 mr-1"></i> Input Faktur Pajak Satuan</h4>
+                                <form onsubmit="handleTambahFakturSupabase(event)" class="space-y-2 text-xs">
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <input type="date" id="fakturTanggal" required class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-white" value="2026-10-15">
+                                        <input type="text" id="fakturNo" placeholder="No Faktur" required class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-white">
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <input type="text" id="fakturNpwp" placeholder="NPWP Lawan" required class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-white">
+                                        <input type="text" id="fakturLawan" placeholder="Nama Klien / Lawan" required class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-white">
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <input type="number" id="fakturDpp" placeholder="DPP (Rp)" required class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-white">
+                                        <input type="number" id="fakturPpn" placeholder="PPN (Rp)" required class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-white">
+                                    </div>
+                                    <button type="submit" class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl text-xs transition">Simpan ke Supabase</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Tabel Data Faktur -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800">
+                                    <tr>
+                                        <th class="p-2.5">Tanggal</th>
+                                        <th class="p-2.5">Nomor Faktur</th>
+                                        <th class="p-2.5">NPWP</th>
+                                        <th class="p-2.5">Lawan Transaksi</th>
+                                        <th class="p-2.5">DPP</th>
+                                        <th class="p-2.5">PPN</th>
+                                        <th class="p-2.5">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800/60">${rows}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                container.innerHTML = `<div class="p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl text-xs text-rose-400">Gagal memuat data Faktur Pajak dari Supabase: ${err.message}. Pastikan tabel 'faktur_pajak' sudah dibuat.</div>`;
+            }
+        }
+
+        // Fungsi Simpan Satuan ke Supabase
+        async function handleTambahFakturSupabase(e) {
+            e.preventDefault();
+            const dataBaru = {
+                tanggal: document.getElementById('fakturTanggal').value,
+                no_faktur: document.getElementById('fakturNo').value,
+                npwp: document.getElementById('fakturNpwp').value,
+                lawan: document.getElementById('fakturLawan').value,
+                dpp: parseFloat(document.getElementById('fakturDpp').value),
+                ppn: parseFloat(document.getElementById('fakturPpn').value)
+            };
+
+            const { error } = await _supabase.from('faktur_pajak').insert([dataBaru]);
+            if (error) {
+                alert('Gagal menyimpan ke Supabase: ' + error.message);
+            } else {
+                alert('Faktur pajak berhasil disimpan ke database Supabase!');
+                loadFakturPajakData();
+            }
+        }
+
+        // Fungsi Upload CSV ke Supabase
+        async function handleUploadCsvSupabase() {
+            const fileInput = document.getElementById('csvFileInput');
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('Silakan pilih file CSV terlebih dahulu.');
+                return;
+            }
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const text = e.target.result;
+                const lines = text.split('\n');
+                let batchData = [];
+
+                for (let i = 1; i < lines.length; i++) {
+                    let line = lines[i].trim();
+                    if (!line) continue;
+                    let cols = line.split(/[,;|]/);
+                    if (cols.length >= 6) {
+                        batchData.push({
+                            tanggal: cols[0].trim() || '2026-10-15',
+                            no_faktur: cols[1].trim() || ('010.005-26.' + Math.floor(10000000 + Math.random() * 90000000)),
+                            npwp: cols[2].trim() || '01.000.000.0-000.000',
+                            lawan: cols[3].trim() || 'Mitra Coretax',
+                            dpp: parseFloat(cols[4].replace(/[^0-9]/g, '')) || 100000000,
+                            ppn: parseFloat(cols[5].replace(/[^0-9]/g, '')) || 11000000
+                        });
+                    }
+                }
+
+                if (batchData.length > 0) {
+                    const { error } = await _supabase.from('faktur_pajak').insert(batchData);
+                    if (error) {
+                        alert('Gagal mengimpor batch ke Supabase: ' + error.message);
+                    } else {
+                        alert(`Berhasil mengimpor dan menyimpan ${batchData.length} data faktur pajak ke Supabase!`);
+                        loadFakturPajakData();
+                    }
+                } else {
+                    alert('Tidak ada format data valid yang ditemukan dalam file CSV.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Fungsi Hapus dari Supabase
+        async function hapusFakturSupabase(noFaktur) {
+            if (!confirm(`Hapus faktur pajak nomor ${noFaktur}?`)) return;
+            const { error } = await _supabase.from('faktur_pajak').delete().eq('no_faktur', noFaktur);
+            if (error) {
+                alert('Gagal menghapus data: ' + error.message);
+            } else {
+                loadFakturPajakData();
+            }
+        }
+
+        // Fungsi Pratinjau PDF Faktur Pajak
+        function previewFakturPdf(noFaktur, tanggal, lawan, npwp, dpp, ppn) {
+            const modal = document.getElementById('pdfModal');
+            const area = document.getElementById('pdfContentArea');
+            let total = dpp + ppn;
+            area.innerHTML = `
+                <div class="border-b border-slate-800 pb-3 text-center">
+                    <h2 class="text-sm font-bold text-white uppercase">KEMENTERIAN KEUANGAN REPUBLIK INDONESIA</h2>
+                    <h3 class="text-xs font-semibold text-cyan-400">FAKTUR PAJAK ELEKTRONIK (CORETAX DJP)</h3>
+                </div>
+                <div class="grid grid-cols-2 gap-2 pt-2">
+                    <div><strong>Nomor Faktur:</strong> ${noFaktur}</div>
+                    <div><strong>Tanggal:</strong> ${tanggal}</div>
+                </div>
+                <div class="pt-2 border-t border-slate-800">
+                    <p class="text-slate-400 font-bold mb-1">Pengusaha Kena Pajak (PKP):</p>
+                    <p>ENERGY HOLDING GROUP (NPWP: 01.999.888.7-501.000)</p>
+                </div>
+                <div class="pt-2 border-t border-slate-800">
+                    <p class="text-slate-400 font-bold mb-1">Pembeli Barang Kena Pajak / Penerima Jasa Kena Pajak:</p>
+                    <p><strong>Nama:</strong> ${lawan}</p>
+                    <p><strong>NPWP:</strong> ${npwp}</p>
+                </div>
+                <div class="pt-3 border-t border-slate-800 space-y-1">
+                    <div class="flex justify-between"><span>Dasar Pengenaan Pajak (DPP):</span> <span class="font-bold text-emerald-400">Rp ${Number(dpp).toLocaleString('id-ID')}</span></div>
+                    <div class="flex justify-between"><span>PPN (11%):</span> <span class="font-bold text-amber-400">Rp ${Number(ppn).toLocaleString('id-ID')}</span></div>
+                    <div class="flex justify-between border-t border-slate-800 pt-1 font-bold text-white"><span>Total Faktur:</span> <span class="text-cyan-400">Rp ${Number(total).toLocaleString('id-ID')}</span></div>
+                </div>
+                <div class="text-center pt-4 text-[10px] text-slate-500 italic">
+                    Dokumen Elektronik ini sah dan telah ditandatangani secara elektronik melalui sistem Coretax DJP.
+                </div>
+            `;
+            modal.classList.remove('hidden');
+        }
+
+        function closePdfModal() {
+            document.getElementById('pdfModal').classList.add('hidden');
         }
 
         // Fungsi Redirect Khusus untuk Khatulistiwa Sinar Energi (KSE)
@@ -686,7 +924,7 @@
                     </div>
                 `;
 
-                // Saat sudah login, halaman menampilkan fokus menu transaksi
+                // Saat sudah login, halaman menampilkan fokus menu transaksi + Menu Faktur Pajak
                 let transactionMenusHTML = isLoggedIn ? `
                     <div class="space-y-4">
                         <div class="flex items-center justify-between bg-slate-950 p-4 rounded-2xl border border-slate-800">
@@ -703,8 +941,8 @@
                                 <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Menu Utama
                             </button>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <!-- Tombol Penjualan & Buat PO -->
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                            <!-- Tombol Penjualan & PO -->
                             <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2">
                                 <div class="text-emerald-400 font-bold text-xs"><i class="fa-solid fa-cash-register mr-1"></i> Penjualan & PO</div>
                                 <div class="space-y-1.5 pt-1 text-[11px]">
@@ -714,7 +952,7 @@
                                 </div>
                             </div>
                             
-                            <!-- Tombol Penawaran, Penawaran Multi & Penawaran Diskon -->
+                            <!-- Tombol Penawaran (SPH) -->
                             <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2">
                                 <div class="text-indigo-400 font-bold text-xs"><i class="fa-solid fa-file-lines mr-1"></i> Penawaran (SPH)</div>
                                 <div class="space-y-1.5 pt-1 text-[11px]">
@@ -725,7 +963,7 @@
                                 </div>
                             </div>
 
-                            <!-- Tombol Invoice, Buat Invoice BRI & BCA -->
+                            <!-- Tombol Invoice -->
                             <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2">
                                 <div class="text-rose-400 font-bold text-xs"><i class="fa-solid fa-receipt mr-1"></i> Invoice</div>
                                 <div class="space-y-1.5 pt-1 text-[11px]">
@@ -734,8 +972,17 @@
                                     <button onclick="handleActionRedirect('Buat Invoice BCA')" class="w-full text-left text-slate-300 hover:text-rose-400">&bull; Buat Invoice BCA</button>
                                 </div>
                             </div>
+
+                            <!-- Menu Faktur Pajak -->
+                            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2">
+                                <div class="text-cyan-400 font-bold text-xs"><i class="fa-solid fa-file-invoice-dollar mr-1"></i> Faktur Pajak</div>
+                                <div class="space-y-1.5 pt-1 text-[11px]">
+                                    <button onclick="window.selectedMonthFilter='-10-'; loadFakturPajakData();" class="w-full text-left text-slate-300 hover:text-cyan-400">&bull; Rekap & Supabase Sync</button>
+                                    <span class="block text-[10px] text-slate-500 italic mt-2">Sinkronisasi pajak & pratinjau PDF.</span>
+                                </div>
+                            </div>
                         </div>
-                        <div id="supabaseLiveContainer" class="bg-slate-950 p-5 rounded-2xl border border-slate-800"><div class="text-center text-xs text-slate-400">Klik salah satu menu transaksi di atas untuk menarik data secara langsung dari Supabase (Default filter bulan berjalan: Oktober 2026).</div></div>
+                        <div id="supabaseLiveContainer" class="bg-slate-950 p-5 rounded-2xl border border-slate-800"><div class="text-center text-xs text-slate-400">Klik salah satu menu transaksi di atas untuk menarik data secara langsung (Default filter bulan berjalan: Oktober 2026).</div></div>
                     </div>
                 ` : '';
 
