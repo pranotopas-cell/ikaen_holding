@@ -64,7 +64,7 @@
                     <div>
                         <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
                             HOLDING GROUP
-                            <span class="text-[10px] bg-tosca-500/20 text-tosca-400 px-2 py-0.5 rounded-full border border-tosca-500/30">Corp v5.7</span>
+                            <span class="text-[10px] bg-tosca-500/20 text-tosca-400 px-2 py-0.5 rounded-full border border-tosca-500/30">Corp v5.8</span>
                         </h1>
                         <p class="text-xs text-slate-400">Integrated Corporate Dashboard</p>
                     </div>
@@ -150,10 +150,23 @@
         const SB_PENJUALAN_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YWVjdHBoZ29lbG1oenJrYXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzExNDYsImV4cCI6MjA4ODE0NzE0Nn0.-8E98wpkzHBARRhW6PKhBtf2XKhWFjq7idAzw9jlcKg';
         const _supabasePenjualan = supabase.createClient(SB_PENJUALAN_URL, SB_PENJUALAN_KEY);
 
-        // Konfigurasi Supabase untuk eforms & faktur_pajak
-        const SB_URL = "https://yqdtgcjpfhiskywhowhu.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxZHRnY2pwZmhpc2t5d2hvd2h1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MDY0MTIsImV4cCI6MjA4NzA4MjQxMn0.Mlw3e8C4xKHcJPSMRkcsRXL5udtR9SeWk2GmqM1NyYc";
-        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+        // Konfigurasi Supabase Utama (Khatulistiwa, dll)
+        const SB_URL_DEFAULT = "https://yqdtgcjpfhiskywhowhu.supabase.co";
+        const SB_KEY_DEFAULT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxZHRnY2pwZmhpc2t5d2hvd2h1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MDY0MTIsImV4cCI6MjA4NzA4MjQxMn0.Mlw3e8C4xKHcJPSMRkcsRXL5udtR9SeWk2GmqM1NyYc";
+        const _supabaseDefault = supabase.createClient(SB_URL_DEFAULT, SB_KEY_DEFAULT);
+
+        // Konfigurasi Supabase Khusus PT. Investama Kalimantan Energi (IKAEN) untuk eforms & faktur_pajak
+        const SB_IKAEN_URL = "https://fymqbeaeiqkdypgptysz.supabase.co";
+        const SB_IKAEN_KEY = "sb_publishable_seowoV1JdzMbXlojE7dejQ_GysYC07_";
+        const _supabaseIkaen = supabase.createClient(SB_IKAEN_URL, SB_IKAEN_KEY);
+
+        // Helper untuk memilih instance Supabase berdasarkan perusahaan yang aktif
+        function getActiveSupabaseClient() {
+            if (activeTab === 'ikaen') {
+                return _supabaseIkaen;
+            }
+            return _supabaseDefault;
+        }
 
         let isLoggedIn = false;
         let activeTab = 'holding';
@@ -354,15 +367,16 @@
             const container = document.getElementById('supabaseLiveContainer');
             if (!container) return;
             const compId = activeTab; 
+            const clientDb = getActiveSupabaseClient();
             container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2 text-gold-400"></i> Mengambil data khusus Purchase Order (${compId.toUpperCase()}) dari tabel eforms...</div>`;
             try {
-                let query = _supabase.from('eforms').select('*').or('jenis.ilike.%PO%,jenis.ilike.%Purchase Order%').order('created_at', { ascending: false });
+                let query = clientDb.from('eforms').select('*').or('jenis.ilike.%PO%,jenis.ilike.%Purchase Order%').order('created_at', { ascending: false });
                 const { data, error } = await query;
                 if (error) throw error;
 
                 let filteredData = data || [];
                 if (filteredData.length === 0) {
-                    const fallbackRes = await _supabase.from('eforms').select('*').limit(20);
+                    const fallbackRes = await clientDb.from('eforms').select('*').limit(20);
                     filteredData = fallbackRes.data || [];
                 }
 
@@ -446,15 +460,16 @@
             const container = document.getElementById('supabaseLiveContainer');
             if (!container) return;
             const compId = activeTab;
+            const clientDb = getActiveSupabaseClient();
             container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2 text-tosca-400"></i> Mengambil data SPH (${subType}) dari tabel eforms...</div>`;
             try {
-                let query = _supabase.from('eforms').select('*').ilike('jenis', '%SPH%').order('created_at', { ascending: false });
+                let query = clientDb.from('eforms').select('*').ilike('jenis', '%SPH%').order('created_at', { ascending: false });
                 const { data, error } = await query;
                 if (error) throw error;
 
                 let filteredData = data || [];
                 if (filteredData.length === 0) {
-                    const resAll = await _supabase.from('eforms').select('*').limit(15);
+                    const resAll = await clientDb.from('eforms').select('*').limit(15);
                     filteredData = resAll.data || [];
                 }
 
@@ -525,15 +540,16 @@
             const container = document.getElementById('supabaseLiveContainer');
             if (!container) return;
             const compId = activeTab;
+            const clientDb = getActiveSupabaseClient();
             container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2 text-maroon-500"></i> Mengambil data INVOICE (${subType}) dari tabel eforms...</div>`;
             try {
-                let query = _supabase.from('eforms').select('*').ilike('jenis', '%INVOICE%').order('created_at', { ascending: false });
+                let query = clientDb.from('eforms').select('*').ilike('jenis', '%INVOICE%').order('created_at', { ascending: false });
                 const { data, error } = await query;
                 if (error) throw error;
 
                 let filteredData = data || [];
                 if (filteredData.length === 0) {
-                    const resAll = await _supabase.from('eforms').select('*').limit(15);
+                    const resAll = await clientDb.from('eforms').select('*').limit(15);
                     filteredData = resAll.data || [];
                 }
 
@@ -617,11 +633,12 @@
         async function loadFakturPajakData() {
             const container = document.getElementById('supabaseLiveContainer');
             if (!container) return;
+            const clientDb = getActiveSupabaseClient();
             
             container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2 text-tosca-400"></i> Mengambil data Faktur Pajak dari database Supabase...</div>`;
             
             try {
-                let { data, error } = await _supabase.from('faktur_pajak').select('*').order('tanggal', { ascending: false });
+                let { data, error } = await clientDb.from('faktur_pajak').select('*').order('tanggal', { ascending: false });
                 if (error) throw error;
 
                 let savedFaktur = data || [];
@@ -717,6 +734,7 @@
         // Fungsi Simpan Satuan ke Supabase
         async function handleTambahFakturSupabase(e) {
             e.preventDefault();
+            const clientDb = getActiveSupabaseClient();
             const dataBaru = {
                 tanggal: document.getElementById('fakturTanggal').value,
                 no_faktur: document.getElementById('fakturNo').value,
@@ -726,7 +744,7 @@
                 ppn: parseFloat(document.getElementById('fakturPpn').value)
             };
 
-            const { error } = await _supabase.from('faktur_pajak').insert([dataBaru]);
+            const { error } = await clientDb.from('faktur_pajak').insert([dataBaru]);
             if (error) {
                 alert('Gagal menyimpan ke Supabase: ' + error.message);
             } else {
@@ -742,6 +760,7 @@
                 alert('Silakan pilih file CSV terlebih dahulu.');
                 return;
             }
+            const clientDb = getActiveSupabaseClient();
             const file = fileInput.files[0];
             const reader = new FileReader();
             reader.onload = async function(e) {
@@ -766,7 +785,7 @@
                 }
 
                 if (batchData.length > 0) {
-                    const { error } = await _supabase.from('faktur_pajak').insert(batchData);
+                    const { error } = await clientDb.from('faktur_pajak').insert(batchData);
                     if (error) {
                         alert('Gagal mengimpor batch ke Supabase: ' + error.message);
                     } else {
@@ -783,7 +802,8 @@
         // Fungsi Hapus dari Supabase
         async function hapusFakturSupabase(noFaktur) {
             if (!confirm(`Hapus faktur pajak nomor ${noFaktur}?`)) return;
-            const { error } = await _supabase.from('faktur_pajak').delete().eq('no_faktur', noFaktur);
+            const clientDb = getActiveSupabaseClient();
+            const { error } = await clientDb.from('faktur_pajak').delete().eq('no_faktur', noFaktur);
             if (error) {
                 alert('Gagal menghapus data: ' + error.message);
             } else {
