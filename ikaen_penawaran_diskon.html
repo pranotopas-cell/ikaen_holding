@@ -96,7 +96,7 @@
     <div class="d-flex gap-2">
         <button class="btn btn-dark btn-sm fw-bold" onclick="window.print()"><i class="bi bi-printer"></i> PRINT</button>
         <button class="btn btn-danger btn-sm fw-bold px-3" onclick="saveToSupabase()" id="btn-save-sb" style="background-color: var(--ike-primary); border-color: var(--ike-primary);">
-            <i class="bi bi-cloud-arrow-up"></i> SIMPAN & UPLOAD
+            <i class="bi bi-cloud-arrow-up"></i> SIMPAN 
         </button>
         <button class="btn btn-primary btn-sm fw-bold px-3" onclick="downloadPDF()" style="background-color: var(--ike-accent); border-color: var(--ike-accent);"><i class="bi bi-download"></i> DOWNLOAD PDF</button>
     </div>
@@ -414,7 +414,7 @@
                 }
             }
 
-            document.getElementById('in_no').value = `${nextNum.toString().padStart(3, '0')}/SPH-IKE/${currentRomawi}/${y}`;
+            document.getElementById('in_no').value = `${nextNum.toString().padStart(3, '0')}/SPH-IKAEN/${currentRomawi}/${y}`;
             
             let sD, eD;
             if (d <= 14) { sD = 1; eD = 14; } 
