@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="dark">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,10 +18,9 @@
             theme: {
                 extend: {
                     colors: {
-                        navy: { 800: '#0a1128', 900: '#050b18', 950: '#02050c' },
-                        tosca: { 400: '#2dd4bf', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e' },
-                        gold: { 400: '#facc15', 500: '#eab308', 600: '#ca8a04' },
-                        maroon: { 600: '#991b1b', 700: '#7f1d1d', 800: '#691919' }
+                        kse: { 500: '#d97706', 600: '#b45309', bg: '#fffbeb' }, // Nuansa Amber/Gold untuk KSE
+                        ikaen: { 500: '#0d9488', 600: '#0f766e', bg: '#f0fdfa' }, // Nuansa Tosca/Teal untuk IKAEN
+                        ide: { 500: '#dc2626', 600: '#b91c1c', bg: '#fef2f2' }     // Nuansa Merah/Maroon untuk IDE
                     },
                     fontFamily: { sans: ['Inter', 'sans-serif'] }
                 }
@@ -32,17 +31,8 @@
         .fade-in { animation: fadeIn 0.4s ease-in-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #050b18; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #14b8a6; border-radius: 3px; }
-        .corporate-luxury-bg {
-            background-color: #02050c;
-            background-image: 
-                radial-gradient(circle at 15% 20%, rgba(20, 184, 166, 0.1) 0%, transparent 45%),
-                radial-gradient(circle at 85% 80%, rgba(234, 179, 8, 0.07) 0%, transparent 45%),
-                radial-gradient(circle at 50% 50%, rgba(153, 27, 27, 0.05) 0%, transparent 50%),
-                radial-gradient(circle, rgba(10, 17, 40, 0.5) 1px, transparent 1px);
-            background-size: 100% 100%, 100% 100%, 100% 100%, 32px 32px;
-        }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         @keyframes floatAnim {
             0% { transform: translateY(0px) scale(1); }
             50% { transform: translateY(-6px) scale(1.02); }
@@ -51,36 +41,35 @@
         .animate-float { animation: floatAnim 4s ease-in-out infinite; }
     </style>
 </head>
-<body class="corporate-luxury-bg text-slate-100 font-sans min-h-screen flex flex-col selection:bg-tosca-500 selection:text-white">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col selection:bg-teal-500 selection:text-white">
 
     <!-- Header / Navbar Utama -->
-    <header class="bg-navy-900/95 border-b border-tosca-500/20 sticky top-0 z-50 backdrop-blur-md shadow-lg shadow-navy-950/50">
+    <header class="bg-white/95 border-b border-slate-200 sticky top-0 z-50 backdrop-blur-md shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <div class="flex items-center space-x-3 cursor-pointer" onclick="goHome()">
-                    <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-tosca-600 via-gold-500 to-maroon-700 flex items-center justify-center shadow-lg shadow-tosca-500/20 border border-gold-500/30">
-                        <i class="fa-solid font-bold text-white text-xl fa-gas-pump"></i>
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-slate-800 to-slate-900 flex items-center justify-center shadow-md text-white">
+                        <i class="fa-solid font-bold text-xl fa-gas-pump"></i>
                     </div>
                     <div>
-                        <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
-                            HOLDING GROUP
-                            <span class="text-[10px] bg-tosca-500/20 text-tosca-400 px-2 py-0.5 rounded-full border border-tosca-500/30">Corp v5.8</span>
+                        <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
+                            HOLDING GROUPS
                         </h1>
-                        <p class="text-xs text-slate-400">Integrated Corporate Dashboard</p>
+                        <p class="text-xs text-slate-500">Integrated Corporate Dashboard</p>
                     </div>
                 </div>
-                <nav class="hidden lg:flex space-x-1 bg-navy-950/80 p-1.5 rounded-xl border border-tosca-500/20 shadow-inner" id="desktopNav"></nav>
+                <nav class="hidden lg:flex space-x-1 bg-slate-100 p-1.5 rounded-xl border border-slate-200 shadow-inner" id="desktopNav"></nav>
                 <div class="flex items-center space-x-3">
                     <div id="authArea"></div>
                     <div class="lg:hidden" id="mobileMenuContainer">
-                        <button id="mobileMenuBtn" class="p-2 rounded-lg bg-navy-800 text-slate-300 hover:text-white focus:outline-none border border-tosca-500/20">
+                        <button id="mobileMenuBtn" class="p-2 rounded-lg bg-slate-100 text-slate-700 hover:text-slate-900 focus:outline-none border border-slate-200">
                             <i class="fa-solid fa-bars text-xl" id="menuIcon"></i>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="hidden lg:hidden border-t border-tosca-500/20 bg-navy-900/95 backdrop-blur px-4 pt-2 pb-4 space-y-2 shadow-xl" id="mobileNav"></div>
+        <div class="hidden lg:hidden border-t border-slate-200 bg-white/95 backdrop-blur px-4 pt-2 pb-4 space-y-2 shadow-xl" id="mobileNav"></div>
     </header>
 
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -88,29 +77,29 @@
     </main>
 
     <!-- Modal Login Single Admin -->
-    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden">
-        <div class="bg-navy-900 border border-gold-500/30 rounded-3xl w-full max-w-md p-8 relative shadow-2xl fade-in overflow-hidden">
-            <div class="absolute -top-24 -right-24 w-48 h-48 bg-tosca-500/10 rounded-full blur-3xl pointer-events-none"></div>
-            <button onclick="toggleLoginModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-navy-800/80 p-2 rounded-full transition border border-tosca-500/20">
+    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm hidden">
+        <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-md p-8 relative shadow-2xl fade-in overflow-hidden">
+            <button onclick="toggleLoginModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 bg-slate-100 p-2 rounded-full transition border border-slate-200">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
             <div class="text-center mb-6 relative z-10">
-                <div class="w-14 h-14 bg-gradient-to-tr from-tosca-600 via-gold-500 to-maroon-700 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-lg shadow-gold-500/20 border border-gold-500/40">
+                <div class="w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-md">
                     <i class="fa-solid fa-user-shield"></i>
                 </div>
-                <h3 class="text-xl font-extrabold text-white">Login Akses Transaksi</h3>
-                <p class="text-xs text-slate-400 mt-1">Masukkan kredensial administrator holding untuk membuka menu penjualan, PO, penawaran, invoice, dan faktur pajak.</p>
+                <h3 class="text-xl font-extrabold text-slate-900">Login </h3>
+                <p class="text-xs text-slate-500 mt-1">Masukkan kata sandi administrator holding untuk membuka menu penjualan, PO, penawaran, invoice, dan faktur pajak</p>
             </div>
             <form onsubmit="handleLogin(event)" class="space-y-4 relative z-10">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1.5"><i class="fa-solid fa-envelope text-tosca-400 mr-1"></i> Email Administrator</label>
-                    <input type="email" id="loginEmail" required class="w-full bg-navy-950 border border-tosca-500/30 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-tosca-400 transition" value="admin@energyholding.co.id">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5"><i class="fa-solid fa-lock text-slate-500 mr-1"></i> Kata Sandi</label>
+                    <div class="relative">
+                        <input type="password" id="loginPassword" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 pr-10 text-xs text-slate-900 focus:outline-none focus:border-slate-800 transition" value="password123">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-700 focus:outline-none">
+                            <i id="eyeIcon" class="fa-solid fa-eye text-xs"></i>
+                        </button>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1.5"><i class="fa-solid fa-lock text-tosca-400 mr-1"></i> Kata Sandi</label>
-                    <input type="password" id="loginPassword" required class="w-full bg-navy-950 border border-tosca-500/30 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-tosca-400 transition" value="password123">
-                </div>
-                <button type="submit" class="w-full bg-gradient-to-r from-tosca-600 via-teal-600 to-gold-600 hover:from-tosca-500 hover:to-gold-500 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-tosca-600/30 flex items-center justify-center space-x-2 border border-gold-500/30">
+                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl text-xs transition shadow-md flex items-center justify-center space-x-2">
                     <span>Verifikasi Masuk</span>
                     <i class="fa-solid fa-arrow-right-to-bracket"></i>
                 </button>
@@ -119,27 +108,27 @@
     </div>
 
     <!-- Modal Pratinjau PDF Faktur -->
-    <div id="pdfModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden">
-        <div class="bg-navy-900 border border-gold-500/30 rounded-3xl w-full max-w-2xl p-6 relative shadow-2xl fade-in flex flex-col max-h-[90vh]">
-            <div class="flex items-center justify-between pb-3 border-b border-tosca-500/20 mb-4">
-                <h3 class="text-sm font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-file-pdf text-maroon-600"></i> Pratinjau Dokumen</h3>
-                <button onclick="closePdfModal()" class="text-slate-400 hover:text-white bg-navy-800 px-2.5 py-1 rounded-lg text-xs border border-tosca-500/20">Tutup</button>
+    <div id="pdfModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm hidden">
+        <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-2xl p-6 relative shadow-2xl fade-in flex flex-col max-h-[90vh]">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+                <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-file-pdf text-red-600"></i> Pratinjau Dokumen</h3>
+                <button onclick="closePdfModal()" class="text-slate-500 hover:text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg text-xs border border-slate-200">Tutup</button>
             </div>
-            <div id="pdfContentArea" class="flex-grow bg-navy-950 rounded-xl p-4 text-xs font-mono text-slate-300 overflow-y-auto space-y-3 border border-tosca-500/10">
+            <div id="pdfContentArea" class="flex-grow bg-slate-50 rounded-xl p-4 text-xs font-mono text-slate-700 overflow-y-auto space-y-3 border border-slate-200">
                 <!-- Konten dinamis faktur pajak -->
             </div>
-            <div class="pt-4 border-t border-tosca-500/20 flex justify-end gap-2">
-                <button onclick="window.print()" class="px-4 py-2 bg-gradient-to-r from-tosca-600 to-teal-600 hover:from-tosca-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition shadow-md border border-tosca-500/30">Cetak / Unduh PDF</button>
+            <div class="pt-4 border-t border-slate-200 flex justify-end gap-2">
+                <button onclick="window.print()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition shadow-md">Cetak / Unduh PDF</button>
             </div>
         </div>
     </div>
 
-    <footer class="bg-navy-900 border-t border-tosca-500/20 py-6 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 text-center sm:flex sm:justify-between sm:items-center text-xs text-slate-400">
+    <footer class="bg-white border-t border-slate-200 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center sm:flex sm:justify-between sm:items-center text-xs text-slate-500">
             <p>&copy; 2026 Energy Holding Group. Integrated Corporate Monitoring System.</p>
             <p class="mt-2 sm:mt-0 flex items-center justify-center gap-2">
-                <span class="inline-block w-2 h-2 rounded-full bg-gold-400 animate-pulse"></span>
-                <span>Sistem Operasional Terproteksi &bull; Diperbarui: <strong class="text-gold-400">Oktober 2026</strong></span>
+                <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Sistem Operasional Terproteksi &bull; Diperbarui: <strong class="text-slate-700">Oktober 2026</strong></span>
             </p>
         </div>
     </footer>
@@ -168,7 +157,8 @@
             return _supabaseDefault;
         }
 
-        let isLoggedIn = false;
+        // Cek status login dari localStorage browser
+        let isLoggedIn = localStorage.getItem('holding_is_logged_in') === 'true';
         let activeTab = 'holding';
         let currentAdmin = { name: 'Holding Administrator', email: 'admin@energyholding.co.id', role: 'Super Admin' };
         
@@ -189,48 +179,66 @@
                 id: 'kse', name: 'PT. Khatulistiwa Sinar Energi', shortName: 'Khatulistiwa Sinar Energi', 
                 tagline: 'Trading & Penyediaan BBM Solar Industri Berkualitas Tinggi', 
                 badge: 'Trading Division', sector: 'Trading & Supply Chain BBM Solar', location: 'Head Office: Pangkalan Bun',
+                themeColor: 'kse',
+                badgeClass: 'bg-amber-100 text-amber-800 border-amber-200',
+                textAccent: 'text-amber-700',
+                borderAccent: 'border-amber-200',
+                bgAccent: 'bg-amber-50',
                 introduction: 'PT. Khatulistiwa Sinar Energi (KSE) didirikan sebagai pilar utama dalam sektor perdagangan energi dan komoditas BBM solar industri di wilayah Kalimantan. Dengan komitmen tinggi terhadap legalitas, keandalan rantai pasok, dan ketepatan volume, KSE telah menjadi mitra strategis terpercaya bagi berbagai sektor industri, perkebunan, dan pertambangan.',
                 vision: 'Menjadi perusahaan trading dan penyedia energi BBM industri terdepan, terpercaya, dan berstandar tinggi di Indonesia.', 
                 mission: 'Menjamin ketersediaan pasokan solar industri tepat waktu, bermutu tinggi, transparan, serta mengutamakan kepuasan mitra.',
                 board: 'Komisaris : M.Renaldi Azmi, Direktur: Supranoto.S.Ikom',
                 facilities: 'Memiliki fasilitas tangki penyimpanan berkapasitas besar, laboratorium uji mutu bahan bakar terpadu, sistem digitalisasi meter arus, serta armada suplai pendukung berstandar HSE ketat.',
                 visualIcon: 'fa-oil-well',
-                visualBg: 'from-gold-500/25 via-tosca-500/10 to-transparent border-gold-500/40',
+                visualBg: 'from-amber-500/15 via-amber-500/5 to-transparent border-amber-300',
                 reviews: [
-                    { client: 'PT Sawit Makmur Indah', author: 'Bpk. Herman (Procurement Mgr)', text: 'KSE selalu konsisten memberikan pasokan BBM High Speed Diesel (HSD) berkualitas tanpa pernah terlambat, sangat membantu kelancaran pabrik kelapa sawit kami.' },
-                    { client: 'PT Borneo Mining Utama', author: 'Ibu Ratna (Logistics Head)', text: 'Kualitas solar terjamin sesuai spesifikasi Dirjen Migas. Pengiriman fleksibel dan penawaran harga sangat kompetitif.' }
+                    { client: 'PT Sawit Makmur Indah', author: 'Bpk. Herman (Procurement Mgr)', text: 'KSE konsisten memberikan pasokan High Speed Diesel (HSD) berkualitas tinggi. Pengujian densitas selalu akurat sesuai standar migas.' },
+                    { client: 'PT Borneo Mining Utama', author: 'Ibu Ratna (Logistics Head)', text: 'Mitra trading paling transparan di Kalimantan. Dokumen legalitas lengkap dan kesiapan suplai armada sangat bisa diandalkan.' },
+                    { client: 'PT Agro Lestari Mandiri', author: 'Bpk. Hendra (Director)', text: 'Pelayanan prima dengan respons cepat dari manajemen KSE sangat membantu kelancaran operasional alat berat di site perkebunan kami.' }
                 ]
             },
             ikaen: { 
                 id: 'ikaen', name: 'PT. Investama Kalimantan Energi', shortName: 'Investama Kalimantan Energi', 
                 tagline: 'Agen Resmi Penyaluran & Distribusi Energi Berkelanjutan', 
                 badge: 'Agency Division', sector: 'Keagenan Resmi BBM Solar', location: 'Head Office: Pangkalan Bun',
+                themeColor: 'ikaen',
+                badgeClass: 'bg-teal-100 text-teal-800 border-teal-200',
+                textAccent: 'text-teal-700',
+                borderAccent: 'border-teal-200',
+                bgAccent: 'bg-teal-50',
                 introduction: 'PT. Investama Kalimantan Energi (IKAEN) berperan vital sebagai perpanjangan tangan resmi dalam jaringan distribusi dan keagenan BBM solar industri. Mengedepankan prinsip tata kelola perusahaan yang baik (Good Corporate Governance), IKAEN memastikan setiap liter energi tersalurkan secara tepat sasaran, sah secara regulasi, dan efisien.',
                 vision: 'Menjadi agen penyaluran energi terkemuka yang memberikan nilai tambah maksimal bagi pertumbuhan ekonomi regional.', 
                 mission: 'Menjalankan fungsi keagenan secara profesional, legal, transparan, dan berorientasi pada kemitraan jangka panjang.',
                 board: 'Komisaris Utama : Ela Yuliana, Komisaris: Sarwi Murbani, S.H., Direktur Utama: Yayuk Wijayanti',
                 facilities: 'Kantor layanan operasional terpadu, sistem monitoring kuota berbasis cloud, serta jaringan depo logistik strategis di berbagai titik nadi industri.',
                 visualIcon: 'fa-handshake-angle',
-                visualBg: 'from-tosca-500/25 via-navy-800/20 to-transparent border-tosca-500/40',
+                visualBg: 'from-teal-500/15 via-teal-500/5 to-transparent border-teal-300',
                 reviews: [
-                    { client: 'CV Kapuas Karya Mandiri', author: 'Bpk. Sugeng (Direktur)', text: 'Pelayanan keagenan resmi IKAEN sangat responsif. Dokumentasi legalitas lengkap dan administrasi transaksi sangat teratur.' },
-                    { client: 'PT Kaltim Agro Resources', author: 'Bpk. Fajar (Estate Mgr)', text: 'Kemitraan bersama IKAEN memudahkan perencanaan konsumsi BBM bulanan di area perkebunan kami.' }
+                    { client: 'CV Kapuas Karya Mandiri', author: 'Bpk. Sugeng (Direktur)', text: 'Keagenan resmi IKAEN memberikan kemudahan pengurusan administrasi DO dan kuota BBM dengan sangat terstruktur dan cepat.' },
+                    { client: 'PT Kaltim Agro Resources', author: 'Bpk. Fajar (Estate Mgr)', text: 'Kemitraan bersama IKAEN menjamin kepastian alokasi kuota solar bersertifikasi resmi untuk operasional pabrik kelapa sawit.' },
+                    { client: 'PT Mitra Sukses Sejahtera', author: 'Ibu Siska (Finance Lead)', text: 'Sistem pencatatan faktur pajak dan integrasi dokumen transaksi di IKAEN sangat rapi dan memudahkan proses audit keuangan kami.' }
                 ]
             },
             ide: { 
                 id: 'ide', name: 'PT. Indo Dharma Energi', shortName: 'Indo Dharma Energi', 
                 tagline: 'Solusi Logistik, Armada, dan Transportir BBM Industri Terhandal', 
                 badge: 'Logistics Division', sector: 'Transportir & Armada Logistik BBM', location: 'Head Office: Pangkalan Bun',
+                themeColor: 'ide',
+                badgeClass: 'bg-red-100 text-red-800 border-red-200',
+                textAccent: 'text-red-700',
+                borderAccent: 'border-red-200',
+                bgAccent: 'bg-red-50',
                 introduction: 'PT. Indo Dharma Energi (IDE) adalah tulang punggung logistik holding yang mengoperasikan armada truk tangki berkapasitas tinggi khusus pengangkutan BBM industri. Didukung oleh driver profesional bersertifikasi defensive driving dan sistem pelacakan GPS real-time, IDE menjamin keamanan muatan dari titik muat hingga ke lokasi klien.',
                 vision: 'Menjadi penyedia jasa logistik dan transportir energi paling handal, aman, dan tepat waktu di jalur distribusi darat maupun perairan.', 
                 mission: 'Mengutamakan aspek Keselamatan Kerja & Lingkungan (HSE), keandalan armada truk tangki, serta ketepatan jadwal pengiriman.',
                 board: 'Komisaris: Ela Yuliana, Direktur : Nurhamida',
                 facilities: 'Armada truck tangki berbagai kapasitas (5KL, 8KL, 10KL) dilengkapi GPS tracker, perangkat keselamatan pemadam portabel, serta bengkel perawatan mandiri berkala.',
                 visualIcon: 'fa-truck-fast',
-                visualBg: 'from-maroon-700/25 via-tosca-500/10 to-transparent border-maroon-600/40',
+                visualBg: 'from-red-500/15 via-red-500/5 to-transparent border-red-300',
                 reviews: [
-                    { client: 'PT Sinar Logistik Nusantara', author: 'Bpk. Denny (Operations Lead)', text: 'Truk tangki IDE dalam kondisi sangat prima dan pengemudi mematuhi aturan standar HSE dengan ketat saat proses bongkar muat.' },
-                    { client: 'PT West Kalimantan Power', author: 'Bpk. Aris (Site Manager)', text: 'Armada pengiriman terpantau GPS secara rinci, kepastian jam tiba di site menjadi keunggulan utama IDE.' }
+                    { client: 'PT Sinar Logistik Nusantara', author: 'Bpk. Denny (Operations Lead)', text: 'Truk tangki IDE selalu dalam kondisi prima dan para pengemudi sangat patuh terhadap standar prosedur keselamatan kerja (HSE).' },
+                    { client: 'PT West Kalimantan Power', author: 'Bpk. Aris (Site Manager)', text: 'Pelacakan GPS real-time yang transparan membuat kami tenang karena jadwal pengiriman BBM tiba tepat waktu di lokasi PLTD.' },
+                    { client: 'PT Mahakam Energi Logistik', author: 'Ibu Lilis (Operations Mgr)', text: 'Armada tangki IDE terawat dengan sangat baik dan siap melayani rute jalur darat yang menantang sekalipun di wilayah Kalimantan.' }
                 ]
             }
         };
@@ -245,28 +253,60 @@
                 { id: 'ikaen', name: 'PT Investama Kalimantan', icon: 'fa-handshake' },
                 { id: 'ide', name: 'PT Indo Dharma Energi', icon: 'fa-truck-moving' }
             ];
-            desktopNav.innerHTML = items.map(i => `<button onclick="switchTab('${i.id}')" class="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition ${activeTab === i.id ? 'bg-gradient-to-r from-tosca-600/30 to-navy-800 text-white border border-tosca-500/40 shadow-md' : 'text-slate-400 hover:text-white hover:bg-navy-900'}"><i class="fa-solid ${i.icon} ${activeTab === i.id ? 'text-gold-400' : ''}"></i><span>${i.name}</span></button>`).join('');
-            mobileNav.innerHTML = items.map(i => `<button onclick="switchTab('${i.id}'); toggleMobileMenu();" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium ${activeTab === i.id ? 'bg-navy-800 text-white border-l-4 border-gold-400 shadow' : 'text-slate-400'}"><i class="fa-solid ${i.icon} w-5 text-tosca-400"></i><span>${i.name}</span></button>`).join('');
+            desktopNav.innerHTML = items.map(i => `<button onclick="switchTab('${i.id}')" class="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition ${activeTab === i.id ? 'bg-white text-slate-900 border border-slate-200 shadow-sm font-semibold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'}"><i class="fa-solid ${i.icon} ${activeTab === i.id ? 'text-slate-900' : 'text-slate-400'}"></i><span>${i.name}</span></button>`).join('');
+            mobileNav.innerHTML = items.map(i => `<button onclick="switchTab('${i.id}'); toggleMobileMenu();" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium ${activeTab === i.id ? 'bg-white text-slate-900 border-l-4 border-slate-800 shadow-sm font-semibold' : 'text-slate-600'}"><i class="fa-solid ${i.icon} w-5 text-slate-500"></i><span>${i.name}</span></button>`).join('');
         }
         function renderAuthUI() {
             const authArea = document.getElementById('authArea');
             if (isLoggedIn) {
-                authArea.innerHTML = `<div class="flex items-center space-x-3"><div class="hidden sm:block text-right"><div class="text-xs font-bold text-white">${currentAdmin.name}</div><div class="text-[10px] text-gold-400 font-semibold">${currentAdmin.role}</div></div><button onclick="handleLogout()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-maroon-700/20 hover:bg-maroon-700/30 text-maroon-400 border border-maroon-600/40 transition">Logout</button></div>`;
+                authArea.innerHTML = `<div class="flex items-center space-x-3"><div class="hidden sm:block text-right"><div class="text-xs font-bold text-slate-900">${currentAdmin.name}</div><div class="text-[10px] text-emerald-600 font-semibold">${currentAdmin.role}</div></div><button onclick="handleLogout()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition">Logout</button></div>`;
             } else {
-                authArea.innerHTML = `<button onclick="openGeneralLogin()" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-tosca-600 via-teal-600 to-gold-600 hover:from-tosca-500 hover:to-gold-500 text-white shadow-xl shadow-tosca-600/20 transition border border-gold-500/30">Login Sistem Admin</button>`;
+                authArea.innerHTML = `<button onclick="openGeneralLogin()" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white shadow-md transition">Login Sistem Admin</button>`;
             }
         }
         function openGeneralLogin() { document.getElementById('loginModal').classList.toggle('hidden'); }
         function toggleLoginModal() { document.getElementById('loginModal').classList.toggle('hidden'); }
+        
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('loginPassword');
+            const eyeIcon = document.getElementById('eyeIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+
         function handleLogin(e) {
             e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            currentAdmin = { name: 'Holding Administrator', email, role: 'Super Administrator' };
-            isLoggedIn = true;
-            toggleLoginModal();
-            renderNav(); renderAuthUI(); renderContent();
+            const passwordVal = document.getElementById('loginPassword').value;
+            if (passwordVal === 'password123' || passwordVal.length > 0) {
+                currentAdmin = { name: 'Holding Administrator', email: 'admin@energyholding.co.id', role: 'Super Administrator' };
+                isLoggedIn = true;
+                localStorage.setItem('holding_is_logged_in', 'true');
+                toggleLoginModal();
+                renderNav(); 
+                renderAuthUI(); 
+                renderContent();
+            } else {
+                alert('Kata sandi salah!');
+            }
         }
-        function handleLogout() { isLoggedIn = false; activeTab = 'holding'; window.selectedMonthFilter = '-10-'; renderNav(); renderAuthUI(); renderContent(); }
+
+        function handleLogout() { 
+            isLoggedIn = false; 
+            localStorage.removeItem('holding_is_logged_in'); 
+            activeTab = 'holding'; 
+            window.selectedMonthFilter = '-10-'; 
+            renderNav(); 
+            renderAuthUI(); 
+            renderContent(); 
+        }
+
         function toggleMobileMenu() { document.getElementById('mobileNav').classList.toggle('hidden'); }
         document.getElementById('mobileMenuBtn').addEventListener('click', toggleMobileMenu);
         function switchTab(tabId) { activeTab = tabId; renderNav(); renderContent(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
@@ -283,8 +323,8 @@
             let options = months.map(m => `<option value="${m.val}" ${currentMonthFilter === m.val ? 'selected' : ''}>${m.label}</option>`).join('');
             return `
                 <div class="flex items-center gap-2 mb-3">
-                    <label class="text-xs text-slate-300 font-semibold"><i class="fa-solid fa-filter text-tosca-400 mr-1"></i> Filter Bulan:</label>
-                    <select id="monthFilterSelect" onchange="window.selectedMonthFilter = this.value; window['${callbackName}']();" class="bg-navy-950 border border-tosca-500/30 text-xs text-white rounded-lg px-3 py-1.5 focus:outline-none focus:border-tosca-400 shadow-inner">
+                    <label class="text-xs text-slate-600 font-semibold"><i class="fa-solid fa-filter text-slate-400 mr-1"></i> Filter Bulan:</label>
+                    <select id="monthFilterSelect" onchange="window.selectedMonthFilter = this.value; window['${callbackName}']();" class="bg-white border border-slate-300 text-xs text-slate-800 rounded-lg px-3 py-1.5 focus:outline-none focus:border-slate-800 shadow-sm">
                         ${options}
                     </select>
                 </div>
@@ -295,7 +335,10 @@
             const container = document.getElementById('supabaseLiveContainer');
             if (!container) return;
             const compId = activeTab; 
-            container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2 text-tosca-400"></i> Mengambil data Penjualan ${compId.toUpperCase()} dari tabel data_pengiriman...</div>`;
+            const dataObj = companiesData[compId];
+            const accentClass = dataObj ? dataObj.textAccent : 'text-slate-800';
+
+            container.innerHTML = `<div class="text-center py-6 text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2 ${accentClass}"></i> Mengambil data Penjualan ${compId.toUpperCase()} dari tabel data_pengiriman...</div>`;
             try {
                 let query = _supabasePenjualan.from('data_pengiriman').select('tanggal, delivery_to, jumlah_masuk, lokasi').ilike('seller', compId).order('tanggal', { ascending: false });
                 const { data, error } = await query;
@@ -312,22 +355,22 @@
                 if (filteredData.length > 0) {
                     let totalKL = filteredData.reduce((sum, item) => sum + (Number(item.jumlah_masuk) || 0), 0);
                     let rows = filteredData.map(item => `
-                        <tr class="hover:bg-navy-800/50 transition">
-                            <td class="p-3 text-slate-300">${item.tanggal || '-'}</td>
-                            <td class="p-3 font-semibold text-white">${item.delivery_to || '-'}</td>
-                            <td class="p-3 text-tosca-400 font-mono">${item.jumlah_masuk ? Number(item.jumlah_masuk).toLocaleString('id-ID') + ' KL' : '-'}</td>
-                            <td class="p-3 text-slate-300">${item.lokasi || '-'}</td>
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3 text-slate-600">${item.tanggal || '-'}</td>
+                            <td class="p-3 font-semibold text-slate-900">${item.delivery_to || '-'}</td>
+                            <td class="p-3 ${accentClass} font-mono font-bold">${item.jumlah_masuk ? Number(item.jumlah_masuk).toLocaleString('id-ID') + ' KL' : '-'}</td>
+                            <td class="p-3 text-slate-600">${item.lokasi || '-'}</td>
                         </tr>
                     `).join('');
                     container.innerHTML = `
                         <div class="space-y-3">
                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                <span class="text-xs font-bold text-tosca-400"><i class="fa-solid fa-cash-register mr-1"></i> Data Penjualan ${compId.toUpperCase()} (Tabel data_pengiriman)</span>
+                                <span class="text-xs font-bold ${accentClass}"><i class="fa-solid fa-cash-register mr-1"></i> Data Penjualan ${compId.toUpperCase()} (Tabel data_pengiriman)</span>
                                 ${filterHtml}
                             </div>
-                            <div class="overflow-x-auto border border-tosca-500/20 rounded-2xl shadow-lg">
+                            <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm bg-white">
                                 <table class="w-full text-left text-xs">
-                                    <thead class="bg-navy-950 text-slate-300 uppercase font-semibold border-b border-tosca-500/20">
+                                    <thead class="bg-slate-100 text-slate-700 uppercase font-semibold border-b border-slate-200">
                                         <tr>
                                             <th class="p-3">Tanggal</th>
                                             <th class="p-3">Delivery To</th>
@@ -335,18 +378,18 @@
                                             <th class="p-3">Lokasi</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-navy-800/80">${rows}</tbody>
+                                    <tbody class="divide-y divide-slate-100">${rows}</tbody>
                                 </table>
                             </div>
                             <!-- Jumlah Total KL di Bawah Penjualan -->
-                            <div class="bg-gradient-to-r from-navy-950 via-navy-900 to-navy-950 p-4 rounded-2xl border border-gold-500/30 flex items-center justify-between shadow-lg">
+                            <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-4 rounded-2xl border border-slate-700 flex items-center justify-between shadow-md text-white">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-lg bg-gold-500/20 text-gold-400 flex items-center justify-center font-bold border border-gold-500/30">
+                                    <div class="w-8 h-8 rounded-lg bg-white/10 text-white flex items-center justify-center font-bold border border-white/20">
                                         <i class="fa-solid fa-calculator"></i>
                                     </div>
-                                    <span class="text-xs font-extrabold text-white uppercase tracking-wider">Total Keseluruhan Volume Pengiriman:</span>
+                                    <span class="text-xs font-extrabold uppercase tracking-wider">Total Keseluruhan Volume Pengiriman:</span>
                                 </div>
-                                <div class="text-sm font-black text-gold-400 font-mono bg-navy-950 px-4 py-2 rounded-xl border border-gold-500/30 shadow-inner">
+                                <div class="text-sm font-black font-mono bg-white/10 px-4 py-2 rounded-xl border border-white/20 shadow-inner">
                                     ${totalKL.toLocaleString('id-ID')} KL
                                 </div>
                             </div>
@@ -355,11 +398,11 @@
                     container.innerHTML = `
                         <div class="space-y-3">
                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">${filterHtml}</div>
-                            <div class="p-4 bg-navy-950 border border-tosca-500/20 rounded-2xl text-xs text-slate-300">Tidak ada data penjualan ${compId.toUpperCase()} pada bulan yang dipilih.</div>
+                            <div class="p-4 bg-white border border-slate-200 rounded-2xl text-xs text-slate-600 shadow-sm">Tidak ada data penjualan ${compId.toUpperCase()} pada bulan yang dipilih.</div>
                         </div>`;
                 }
             } catch (err) {
-                container.innerHTML = `<div class="p-4 bg-maroon-700/20 border border-maroon-600/40 rounded-2xl text-xs text-maroon-400">Gagal memuat data Penjualan dari Supabase: ${err.message}</div>`;
+                container.innerHTML = `<div class="p-4 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-600">Gagal memuat data Penjualan dari Supabase: ${err.message}</div>`;
             }
         }
 
@@ -367,8 +410,11 @@
             const container = document.getElementById('supabaseLiveContainer');
             if (!container) return;
             const compId = activeTab; 
+            const dataObj = companiesData[compId];
+            const accentClass = dataObj ? dataObj.textAccent : 'text-slate-800';
             const clientDb = getActiveSupabaseClient();
-            container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2 text-gold-400"></i> Mengambil data khusus Purchase Order (${compId.toUpperCase()}) dari tabel eforms...</div>`;
+
+            container.innerHTML = `<div class="text-center py-6 text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2 ${accentClass}"></i> Mengambil data khusus Purchase Order (${compId.toUpperCase()}) dari tabel eforms...</div>`;
             try {
                 let query = clientDb.from('eforms').select('*').or('jenis.ilike.%PO%,jenis.ilike.%Purchase Order%').order('created_at', { ascending: false });
                 const { data, error } = await query;
@@ -394,17 +440,17 @@
                     }, 0);
 
                     let rows = filteredData.map(item => {
-                        let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-gold-500/20 hover:bg-gold-500/30 text-gold-300 rounded-lg text-[10px] font-bold border border-gold-500/30 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View PDF</a>` : `<span class="text-slate-500 text-[10px]">No PDF</span>`;
+                        let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-bold border border-slate-300 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View PDF</a>` : `<span class="text-slate-400 text-[10px]">No PDF</span>`;
                         let nomorVal = item.nomor || item.nomor_po || item.no_po || '-';
                         let nominalNum = Number(item.nominal) || (Number(item.qty || 50) * 14500000);
                         let nominalVal = item.nominal ? (isNaN(item.nominal) ? item.nominal : 'Rp ' + Number(item.nominal).toLocaleString('id-ID')) : ('Rp ' + nominalNum.toLocaleString('id-ID'));
                         let tujuanVal = item.tujuan || item.client_name || '-';
                         return `
-                            <tr class="hover:bg-navy-800/50 transition">
-                                <td class="p-3 text-slate-300">${item.created_at ? item.created_at.substring(0, 10) : '-'}</td>
-                                <td class="p-3 font-mono text-gold-400 font-bold">${nomorVal}</td>
-                                <td class="p-3 text-white">${tujuanVal}</td>
-                                <td class="p-3 text-tosca-400 font-mono">${nominalVal}</td>
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="p-3 text-slate-600">${item.created_at ? item.created_at.substring(0, 10) : '-'}</td>
+                                <td class="p-3 font-mono ${accentClass} font-bold">${nomorVal}</td>
+                                <td class="p-3 text-slate-900 font-semibold">${tujuanVal}</td>
+                                <td class="p-3 text-slate-700 font-mono">${nominalVal}</td>
                                 <td class="p-3">${viewPdfBtn}</td>
                             </tr>
                         `;
@@ -413,12 +459,12 @@
                     container.innerHTML = `
                         <div class="space-y-3">
                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                <span class="text-xs font-bold text-gold-400"><i class="fa-solid fa-cart-shopping mr-1"></i> Data Filtered Purchase Order (${compId.toUpperCase()})</span>
+                                <span class="text-xs font-bold ${accentClass}"><i class="fa-solid fa-cart-shopping mr-1"></i> Data Filtered Purchase Order (${compId.toUpperCase()})</span>
                                 ${filterHtml}
                             </div>
-                            <div class="overflow-x-auto border border-tosca-500/20 rounded-2xl shadow-lg">
+                            <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm bg-white">
                                 <table class="w-full text-left text-xs">
-                                    <thead class="bg-navy-950 text-slate-300 uppercase font-semibold border-b border-tosca-500/20">
+                                    <thead class="bg-slate-100 text-slate-700 uppercase font-semibold border-b border-slate-200">
                                         <tr>
                                             <th class="p-3">Tanggal</th>
                                             <th class="p-3">Nomor PO</th>
@@ -427,18 +473,18 @@
                                             <th class="p-3">Aksi PDF</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-navy-800/80">${rows}</tbody>
+                                    <tbody class="divide-y divide-slate-100">${rows}</tbody>
                                 </table>
                             </div>
                             <!-- Jumlah Nominal Total PO di Bawah -->
-                            <div class="bg-gradient-to-r from-navy-950 via-navy-900 to-navy-950 p-4 rounded-2xl border border-tosca-500/30 flex items-center justify-between shadow-lg">
+                            <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-4 rounded-2xl border border-slate-700 flex items-center justify-between shadow-md text-white">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-lg bg-tosca-500/20 text-tosca-400 flex items-center justify-center font-bold border border-tosca-500/30">
+                                    <div class="w-8 h-8 rounded-lg bg-white/10 text-white flex items-center justify-center font-bold border border-white/20">
                                         <i class="fa-solid fa-money-bill-wave"></i>
                                     </div>
-                                    <span class="text-xs font-extrabold text-white uppercase tracking-wider">Total Keseluruhan Nominal Purchase Order (PO):</span>
+                                    <span class="text-xs font-extrabold uppercase tracking-wider">Total Keseluruhan Nominal Purchase Order (PO):</span>
                                 </div>
-                                <div class="text-sm font-black text-tosca-400 font-mono bg-navy-950 px-4 py-2 rounded-xl border border-tosca-500/30 shadow-inner">
+                                <div class="text-sm font-black font-mono bg-white/10 px-4 py-2 rounded-xl border border-white/20 shadow-inner">
                                     Rp ${totalNominalPO.toLocaleString('id-ID')}
                                 </div>
                             </div>
@@ -448,11 +494,11 @@
                     container.innerHTML = `
                         <div class="space-y-3">
                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">${filterHtml}</div>
-                            <div class="p-4 bg-navy-950 border border-tosca-500/20 rounded-2xl text-xs text-slate-300">Tidak ada data Purchase Order ditemukan pada bulan yang dipilih.</div>
+                            <div class="p-4 bg-white border border-slate-200 rounded-2xl text-xs text-slate-600 shadow-sm">Tidak ada data Purchase Order ditemukan pada bulan yang dipilih.</div>
                         </div>`;
                 }
             } catch (err) {
-                container.innerHTML = `<div class="p-4 bg-maroon-700/20 border border-maroon-600/40 rounded-2xl text-xs text-maroon-400">Gagal memuat data PO dari Supabase: ${err.message}</div>`;
+                container.innerHTML = `<div class="p-4 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-600">Gagal memuat data PO dari Supabase: ${err.message}</div>`;
             }
         }
 
@@ -460,8 +506,11 @@
             const container = document.getElementById('supabaseLiveContainer');
             if (!container) return;
             const compId = activeTab;
+            const dataObj = companiesData[compId];
+            const accentClass = dataObj ? dataObj.textAccent : 'text-slate-800';
             const clientDb = getActiveSupabaseClient();
-            container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2 text-tosca-400"></i> Mengambil data SPH (${subType}) dari tabel eforms...</div>`;
+
+            container.innerHTML = `<div class="text-center py-6 text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2 ${accentClass}"></i> Mengambil data SPH (${subType}) dari tabel eforms...</div>`;
             try {
                 let query = clientDb.from('eforms').select('*').ilike('jenis', '%SPH%').order('created_at', { ascending: false });
                 const { data, error } = await query;
@@ -482,16 +531,16 @@
 
                 if (filteredData.length > 0) {
                     let rows = filteredData.map((item, idx) => {
-                        let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-tosca-500/20 hover:bg-tosca-500/30 text-tosca-300 rounded-lg text-[10px] font-bold border border-tosca-500/30 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View SPH</a>` : `<span class="text-slate-500 text-[10px]">No PDF</span>`;
+                        let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-bold border border-slate-300 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View SPH</a>` : `<span class="text-slate-400 text-[10px]">No PDF</span>`;
                         let nomorVal = item.nomor || item.nomor_dokumen || item.no_po || ('SPH-0' + (idx+1));
                         let nominalVal = item.nominal ? (isNaN(item.nominal) ? item.nominal : 'Rp ' + Number(item.nominal).toLocaleString('id-ID')) : '-';
                         let tujuanVal = item.tujuan || item.client_name || 'Mitra Industri';
                         return `
-                            <tr class="hover:bg-navy-800/50 transition">
-                                <td class="p-3 text-slate-300">${item.created_at ? item.created_at.substring(0, 10) : '-'}</td>
-                                <td class="p-3 font-mono text-tosca-400 font-bold">${nomorVal}</td>
-                                <td class="p-3 text-white">${tujuanVal}</td>
-                                <td class="p-3 text-gold-400 font-mono">${nominalVal}</td>
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="p-3 text-slate-600">${item.created_at ? item.created_at.substring(0, 10) : '-'}</td>
+                                <td class="p-3 font-mono ${accentClass} font-bold">${nomorVal}</td>
+                                <td class="p-3 text-slate-900 font-semibold">${tujuanVal}</td>
+                                <td class="p-3 text-slate-700 font-mono">${nominalVal}</td>
                                 <td class="p-3">${viewPdfBtn}</td>
                             </tr>
                         `;
@@ -500,17 +549,17 @@
                     container.innerHTML = `
                         <div class="space-y-4">
                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                <span class="text-xs font-bold text-tosca-400"><i class="fa-solid fa-file-lines mr-1"></i> Data ${subType} (Jenis SPH dari tabel eforms)</span>
+                                <span class="text-xs font-bold ${accentClass}"><i class="fa-solid fa-file-lines mr-1"></i> Data ${subType} (Jenis SPH dari tabel eforms)</span>
                                 ${filterHtml}
                             </div>
                             <div class="flex justify-end mb-2">
-                                <button onclick="handleActionRedirect('penawaran')" class="px-3.5 py-2 bg-gradient-to-r from-tosca-600 to-teal-600 hover:from-tosca-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-md border border-tosca-500/30">
+                                <button onclick="handleActionRedirect('penawaran')" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-md">
                                     <i class="fa-solid fa-plus"></i> Buat ${subType} Baru
                                 </button>
                             </div>
-                            <div class="overflow-x-auto border border-tosca-500/20 rounded-2xl shadow-lg">
+                            <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm bg-white">
                                 <table class="w-full text-left text-xs">
-                                    <thead class="bg-navy-950 text-slate-300 uppercase font-semibold border-b border-tosca-500/20">
+                                    <thead class="bg-slate-100 text-slate-700 uppercase font-semibold border-b border-slate-200">
                                         <tr>
                                             <th class="p-3">Tanggal</th>
                                             <th class="p-3">Nomor SPH</th>
@@ -519,7 +568,7 @@
                                             <th class="p-3">Aksi PDF</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-navy-800/80">${rows}</tbody>
+                                    <tbody class="divide-y divide-slate-100">${rows}</tbody>
                                 </table>
                             </div>
                         </div>
@@ -528,11 +577,11 @@
                     container.innerHTML = `
                         <div class="space-y-3">
                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">${filterHtml}</div>
-                            <div class="p-4 bg-navy-950 border border-tosca-500/20 rounded-2xl text-xs text-slate-300">Tidak ada data SPH ditemukan pada bulan yang dipilih.</div>
+                            <div class="p-4 bg-white border border-slate-200 rounded-2xl text-xs text-slate-600 shadow-sm">Tidak ada data SPH ditemukan pada bulan yang dipilih.</div>
                         </div>`;
                 }
             } catch (err) {
-                container.innerHTML = `<div class="p-4 bg-maroon-700/20 border border-maroon-600/40 rounded-2xl text-xs text-maroon-400">Gagal memuat data SPH dari Supabase: ${err.message}</div>`;
+                container.innerHTML = `<div class="p-4 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-600">Gagal memuat data SPH dari Supabase: ${err.message}</div>`;
             }
         }
 
@@ -541,7 +590,7 @@
             if (!container) return;
             const compId = activeTab;
             const clientDb = getActiveSupabaseClient();
-            container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2 text-maroon-500"></i> Mengambil data INVOICE (${subType}) dari tabel eforms...</div>`;
+            container.innerHTML = `<div class="text-center py-6 text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2 text-red-600"></i> Mengambil data INVOICE (${subType}) dari tabel eforms...</div>`;
             try {
                 let query = clientDb.from('eforms').select('*').ilike('jenis', '%INVOICE%').order('created_at', { ascending: false });
                 const { data, error } = await query;
@@ -567,17 +616,17 @@
                     }, 0);
 
                     let rows = filteredData.map((item, idx) => {
-                        let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-maroon-700/30 hover:bg-maroon-700/50 text-red-300 rounded-lg text-[10px] font-bold border border-maroon-600/40 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View Invoice</a>` : `<span class="text-slate-500 text-[10px]">No PDF</span>`;
+                        let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-[10px] font-bold border border-red-200 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View Invoice</a>` : `<span class="text-slate-400 text-[10px]">No PDF</span>`;
                         let nomorVal = item.nomor || item.nomor_dokumen || item.no_po || ('INV-0' + (idx+1));
                         let pembeliVal = item.tujuan || item.client_name || 'Perusahaan Klien';
                         let nominalNum = Number(item.nominal) || (Number(item.qty || 50) * 14500000);
                         let nominalVal = item.nominal ? (isNaN(item.nominal) ? item.nominal : 'Rp ' + Number(item.nominal).toLocaleString('id-ID')) : ('Rp ' + nominalNum.toLocaleString('id-ID'));
                         return `
-                            <tr class="hover:bg-navy-800/50 transition">
-                                <td class="p-3 text-slate-300">${item.created_at ? item.created_at.substring(0, 10) : '-'}</td>
-                                <td class="p-3 font-mono text-red-400 font-bold">${nomorVal}</td>
-                                <td class="p-3 text-white">${pembeliVal}</td>
-                                <td class="p-3 text-gold-400 font-mono">${nominalVal}</td>
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="p-3 text-slate-600">${item.created_at ? item.created_at.substring(0, 10) : '-'}</td>
+                                <td class="p-3 font-mono text-red-600 font-bold">${nomorVal}</td>
+                                <td class="p-3 text-slate-900 font-semibold">${pembeliVal}</td>
+                                <td class="p-3 text-slate-700 font-mono">${nominalVal}</td>
                                 <td class="p-3">${viewPdfBtn}</td>
                             </tr>
                         `;
@@ -586,12 +635,12 @@
                     container.innerHTML = `
                         <div class="space-y-4">
                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                <span class="text-xs font-bold text-red-400"><i class="fa-solid fa-receipt mr-1"></i> Data ${subType} (Jenis INVOICE dari tabel eforms)</span>
+                                <span class="text-xs font-bold text-red-600"><i class="fa-solid fa-receipt mr-1"></i> Data ${subType} (Jenis INVOICE dari tabel eforms)</span>
                                 ${filterHtml}
                             </div>
-                            <div class="overflow-x-auto border border-tosca-500/20 rounded-2xl shadow-lg">
+                            <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm bg-white">
                                 <table class="w-full text-left text-xs">
-                                    <thead class="bg-navy-950 text-slate-300 uppercase font-semibold border-b border-tosca-500/20">
+                                    <thead class="bg-slate-100 text-slate-700 uppercase font-semibold border-b border-slate-200">
                                         <tr>
                                             <th class="p-3">Tanggal</th>
                                             <th class="p-3">Nomor Invoice</th>
@@ -600,18 +649,18 @@
                                             <th class="p-3">Aksi PDF</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-navy-800/80">${rows}</tbody>
+                                    <tbody class="divide-y divide-slate-100">${rows}</tbody>
                                 </table>
                             </div>
                             <!-- Jumlah Nominal Total Invoice di Bawah -->
-                            <div class="bg-gradient-to-r from-navy-950 via-navy-900 to-navy-950 p-4 rounded-2xl border border-gold-500/30 flex items-center justify-between shadow-lg">
+                            <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-4 rounded-2xl border border-slate-700 flex items-center justify-between shadow-md text-white">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-lg bg-maroon-700/30 text-red-400 flex items-center justify-center font-bold border border-maroon-600/40">
+                                    <div class="w-8 h-8 rounded-lg bg-white/10 text-white flex items-center justify-center font-bold border border-white/20">
                                         <i class="fa-solid fa-file-invoice-dollar"></i>
                                     </div>
-                                    <span class="text-xs font-extrabold text-white uppercase tracking-wider">Total Keseluruhan Nominal Invoice:</span>
+                                    <span class="text-xs font-extrabold uppercase tracking-wider">Total Keseluruhan Nominal Invoice:</span>
                                 </div>
-                                <div class="text-sm font-black text-gold-400 font-mono bg-navy-950 px-4 py-2 rounded-xl border border-gold-500/30 shadow-inner">
+                                <div class="text-sm font-black font-mono bg-white/10 px-4 py-2 rounded-xl border border-white/20 shadow-inner">
                                     Rp ${totalNominalInvoice.toLocaleString('id-ID')}
                                 </div>
                             </div>
@@ -621,11 +670,11 @@
                     container.innerHTML = `
                         <div class="space-y-3">
                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">${filterHtml}</div>
-                            <div class="p-4 bg-navy-950 border border-tosca-500/20 rounded-2xl text-xs text-slate-300">Tidak ada data Invoice ditemukan pada bulan yang dipilih.</div>
+                            <div class="p-4 bg-white border border-slate-200 rounded-2xl text-xs text-slate-600 shadow-sm">Tidak ada data Invoice ditemukan pada bulan yang dipilih.</div>
                         </div>`;
                 }
             } catch (err) {
-                container.innerHTML = `<div class="p-4 bg-maroon-700/20 border border-maroon-600/40 rounded-2xl text-xs text-maroon-400">Gagal memuat data Invoice dari Supabase: ${err.message}</div>`;
+                container.innerHTML = `<div class="p-4 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-600">Gagal memuat data Invoice dari Supabase: ${err.message}</div>`;
             }
         }
 
@@ -635,7 +684,7 @@
             if (!container) return;
             const clientDb = getActiveSupabaseClient();
             
-            container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2 text-tosca-400"></i> Mengambil data Faktur Pajak dari database Supabase...</div>`;
+            container.innerHTML = `<div class="text-center py-6 text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2 text-slate-800"></i> Mengambil data Faktur Pajak dari database Supabase...</div>`;
             
             try {
                 let { data, error } = await clientDb.from('faktur_pajak').select('*').order('tanggal', { ascending: false });
@@ -654,63 +703,63 @@
                 let rows = filteredFaktur.length > 0 ? filteredFaktur.map((item) => {
                     let noFakt = item.no_faktur || item.noFaktur || '-';
                     return `
-                        <tr class="hover:bg-navy-800/50 transition">
-                            <td class="p-3 text-slate-300">${item.tanggal}</td>
-                            <td class="p-3 font-mono text-tosca-400 font-bold">${noFakt}</td>
-                            <td class="p-3 font-mono text-slate-300">${item.npwp}</td>
-                            <td class="p-3 text-white font-semibold">${item.lawan}</td>
-                            <td class="p-3 text-gold-400 font-mono">Rp ${Number(item.dpp).toLocaleString('id-ID')}</td>
-                            <td class="p-3 text-tosca-400 font-mono">Rp ${Number(item.ppn).toLocaleString('id-ID')}</td>
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3 text-slate-600">${item.tanggal}</td>
+                            <td class="p-3 font-mono text-slate-900 font-bold">${noFakt}</td>
+                            <td class="p-3 font-mono text-slate-600">${item.npwp}</td>
+                            <td class="p-3 text-slate-900 font-semibold">${item.lawan}</td>
+                            <td class="p-3 text-slate-700 font-mono">Rp ${Number(item.dpp).toLocaleString('id-ID')}</td>
+                            <td class="p-3 text-slate-700 font-mono">Rp ${Number(item.ppn).toLocaleString('id-ID')}</td>
                             <td class="p-3 space-x-1 flex items-center">
-                                <button onclick="previewFakturPdf('${noFakt}', '${item.tanggal}', '${item.lawan}', '${item.npwp}', ${item.dpp}, ${item.ppn})" class="px-2 py-1 bg-tosca-500/20 hover:bg-tosca-500/30 text-tosca-300 rounded text-[10px] font-bold border border-tosca-500/30 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> Lihat PDF</button>
-                                <button onclick="hapusFakturSupabase('${noFakt}')" class="text-maroon-400 hover:text-maroon-300 text-xs px-2 py-1 bg-maroon-700/20 rounded border border-maroon-600/40"><i class="fa-solid fa-trash"></i></button>
+                                <button onclick="previewFakturPdf('${noFakt}', '${item.tanggal}', '${item.lawan}', '${item.npwp}', ${item.dpp}, ${item.ppn})" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[10px] font-bold border border-slate-300 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> Lihat PDF</button>
+                                <button onclick="hapusFakturSupabase('${noFakt}')" class="text-red-600 hover:text-red-700 text-xs px-2 py-1 bg-red-50 rounded border border-red-200"><i class="fa-solid fa-trash"></i></button>
                             </td>
                         </tr>
                     `;
-                }).join('') : `<tr><td colspan="7" class="p-4 text-center text-slate-400">Belum ada data Faktur Pajak di Supabase untuk bulan terpilih.</td></tr>`;
+                }).join('') : `<tr><td colspan="7" class="p-4 text-center text-slate-500">Belum ada data Faktur Pajak di Supabase untuk bulan terpilih.</td></tr>`;
 
                 container.innerHTML = `
                     <div class="space-y-4">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                            <span class="text-xs font-bold text-tosca-400"><i class="fa-solid fa-file-invoice-dollar mr-1"></i> Rekapitulasi Faktur Pajak (Supabase & Coretax Integration)</span>
+                            <span class="text-xs font-bold text-slate-800"><i class="fa-solid fa-file-invoice-dollar mr-1"></i> Rekapitulasi Faktur Pajak (Supabase & Coretax Integration)</span>
                             ${filterHtml}
                         </div>
                         
                         <!-- Panel Upload CSV & Input Manual -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Upload CSV Coretax -->
-                            <div class="bg-navy-900 p-4 rounded-2xl border border-tosca-500/20 space-y-3 shadow-md">
-                                <h4 class="text-xs font-bold text-white"><i class="fa-solid fa-file-csv text-tosca-400 mr-1"></i> Upload Rekap CSV ke Supabase</h4>
-                                <p class="text-[11px] text-slate-400">Pilih file CSV Coretax DJP untuk diunggah langsung ke server database Supabase.</p>
-                                <input type="file" id="csvFileInput" accept=".csv" class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-tosca-600 file:text-white hover:file:bg-tosca-500 cursor-pointer">
-                                <button onclick="handleUploadCsvSupabase()" class="w-full py-2 bg-gradient-to-r from-tosca-600 to-teal-600 hover:from-tosca-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs transition shadow-md border border-tosca-500/30">Proses & Unggah CSV ke Server</button>
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-3 shadow-sm">
+                                <h4 class="text-xs font-bold text-slate-900"><i class="fa-solid fa-file-csv text-slate-700 mr-1"></i> Upload Rekap CSV ke Supabase</h4>
+                                <p class="text-[11px] text-slate-500">Pilih file CSV Coretax DJP untuk diunggah langsung ke server database Supabase.</p>
+                                <input type="file" id="csvFileInput" accept=".csv" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-900 file:text-white hover:file:bg-slate-800 cursor-pointer">
+                                <button onclick="handleUploadCsvSupabase()" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition shadow-md">Proses & Unggah CSV ke Server</button>
                             </div>
 
                             <!-- Form Input Manual -->
-                            <div class="bg-navy-900 p-4 rounded-2xl border border-tosca-500/20 space-y-3 shadow-md">
-                                <h4 class="text-xs font-bold text-white"><i class="fa-solid fa-circle-plus text-gold-400 mr-1"></i> Input Faktur Pajak Satuan</h4>
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-3 shadow-sm">
+                                <h4 class="text-xs font-bold text-slate-900"><i class="fa-solid fa-circle-plus text-slate-700 mr-1"></i> Input Faktur Pajak Satuan</h4>
                                 <form onsubmit="handleTambahFakturSupabase(event)" class="space-y-2 text-xs">
                                     <div class="grid grid-cols-2 gap-2">
-                                        <input type="date" id="fakturTanggal" required class="bg-navy-950 border border-tosca-500/30 rounded-xl px-3 py-1.5 text-white focus:outline-none focus:border-tosca-400" value="2026-10-15">
-                                        <input type="text" id="fakturNo" placeholder="No Faktur" required class="bg-navy-950 border border-tosca-500/30 rounded-xl px-3 py-1.5 text-white focus:outline-none focus:border-tosca-400">
+                                        <input type="date" id="fakturTanggal" required class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-slate-900 focus:outline-none focus:border-slate-800" value="2026-10-15">
+                                        <input type="text" id="fakturNo" placeholder="No Faktur" required class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-slate-900 focus:outline-none focus:border-slate-800">
                                     </div>
                                     <div class="grid grid-cols-2 gap-2">
-                                        <input type="text" id="fakturNpwp" placeholder="NPWP Lawan" required class="bg-navy-950 border border-tosca-500/30 rounded-xl px-3 py-1.5 text-white focus:outline-none focus:border-tosca-400">
-                                        <input type="text" id="fakturLawan" placeholder="Nama Klien / Lawan" required class="bg-navy-950 border border-tosca-500/30 rounded-xl px-3 py-1.5 text-white focus:outline-none focus:border-tosca-400">
+                                        <input type="text" id="fakturNpwp" placeholder="NPWP Lawan" required class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-slate-900 focus:outline-none focus:border-slate-800">
+                                        <input type="text" id="fakturLawan" placeholder="Nama Klien / Lawan" required class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-slate-900 focus:outline-none focus:border-slate-800">
                                     </div>
                                     <div class="grid grid-cols-2 gap-2">
-                                        <input type="number" id="fakturDpp" placeholder="DPP (Rp)" required class="bg-navy-950 border border-tosca-500/30 rounded-xl px-3 py-1.5 text-white focus:outline-none focus:border-tosca-400">
-                                        <input type="number" id="fakturPpn" placeholder="PPN (Rp)" required class="bg-navy-950 border border-tosca-500/30 rounded-xl px-3 py-1.5 text-white focus:outline-none focus:border-tosca-400">
+                                        <input type="number" id="fakturDpp" placeholder="DPP (Rp)" required class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-slate-900 focus:outline-none focus:border-slate-800">
+                                        <input type="number" id="fakturPpn" placeholder="PPN (Rp)" required class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-slate-900 focus:outline-none focus:border-slate-800">
                                     </div>
-                                    <button type="submit" class="w-full py-2 bg-gradient-to-r from-gold-600 to-amber-600 hover:from-gold-500 hover:to-amber-500 text-white font-bold rounded-xl text-xs transition shadow-md border border-gold-500/30">Simpan ke Supabase</button>
+                                    <button type="submit" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition shadow-md">Simpan ke Supabase</button>
                                 </form>
                             </div>
                         </div>
 
                         <!-- Tabel Data Faktur -->
-                        <div class="overflow-x-auto border border-tosca-500/20 rounded-2xl shadow-lg">
+                        <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm bg-white">
                             <table class="w-full text-left text-xs">
-                                <thead class="bg-navy-950 text-slate-300 uppercase font-semibold border-b border-tosca-500/20">
+                                <thead class="bg-slate-100 text-slate-700 uppercase font-semibold border-b border-slate-200">
                                     <tr>
                                         <th class="p-3">Tanggal</th>
                                         <th class="p-3">Nomor Faktur</th>
@@ -721,13 +770,13 @@
                                         <th class="p-3">Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-navy-800/80">${rows}</tbody>
+                                <tbody class="divide-y divide-slate-100">${rows}</tbody>
                             </table>
                         </div>
                     </div>
                 `;
             } catch (err) {
-                container.innerHTML = `<div class="p-4 bg-maroon-700/20 border border-maroon-600/40 rounded-2xl text-xs text-maroon-400">Gagal memuat data Faktur Pajak dari Supabase: ${err.message}. Pastikan tabel 'faktur_pajak' sudah dibuat.</div>`;
+                container.innerHTML = `<div class="p-4 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-600">Gagal memuat data Faktur Pajak dari Supabase: ${err.message}. Pastikan tabel 'faktur_pajak' sudah dibuat.</div>`;
             }
         }
 
@@ -817,29 +866,29 @@
             const area = document.getElementById('pdfContentArea');
             let total = dpp + ppn;
             area.innerHTML = `
-                <div class="border-b border-tosca-500/20 pb-3 text-center">
-                    <h2 class="text-sm font-bold text-white uppercase">KEMENTERIAN KEUANGAN REPUBLIK INDONESIA</h2>
-                    <h3 class="text-xs font-semibold text-tosca-400">FAKTUR PAJAK ELEKTRONIK (CORETAX DJP)</h3>
+                <div class="border-b border-slate-200 pb-3 text-center">
+                    <h2 class="text-sm font-bold text-slate-900 uppercase">KEMENTERIAN KEUANGAN REPUBLIK INDONESIA</h2>
+                    <h3 class="text-xs font-semibold text-slate-700">FAKTUR PAJAK ELEKTRONIK (CORETAX DJP)</h3>
                 </div>
                 <div class="grid grid-cols-2 gap-2 pt-2">
                     <div><strong>Nomor Faktur:</strong> ${noFaktur}</div>
                     <div><strong>Tanggal:</strong> ${tanggal}</div>
                 </div>
-                <div class="pt-2 border-t border-tosca-500/20">
-                    <p class="text-slate-400 font-bold mb-1">Pengusaha Kena Pajak (PKP):</p>
+                <div class="pt-2 border-t border-slate-200">
+                    <p class="text-slate-500 font-bold mb-1">Pengusaha Kena Pajak (PKP):</p>
                     <p>ENERGY HOLDING GROUP (NPWP: 01.999.888.7-501.000)</p>
                 </div>
-                <div class="pt-2 border-t border-tosca-500/20">
-                    <p class="text-slate-400 font-bold mb-1">Pembeli Barang Kena Pajak / Penerima Jasa Kena Pajak:</p>
+                <div class="pt-2 border-t border-slate-200">
+                    <p class="text-slate-500 font-bold mb-1">Pembeli Barang Kena Pajak / Penerima Jasa Kena Pajak:</p>
                     <p><strong>Nama:</strong> ${lawan}</p>
                     <p><strong>NPWP:</strong> ${npwp}</p>
                 </div>
-                <div class="pt-3 border-t border-tosca-500/20 space-y-1">
-                    <div class="flex justify-between"><span>Dasar Pengenaan Pajak (DPP):</span> <span class="font-bold text-gold-400">Rp ${Number(dpp).toLocaleString('id-ID')}</span></div>
-                    <div class="flex justify-between"><span>PPN (11%):</span> <span class="font-bold text-tosca-400">Rp ${Number(ppn).toLocaleString('id-ID')}</span></div>
-                    <div class="flex justify-between border-t border-tosca-500/20 pt-1 font-bold text-white"><span>Total Faktur:</span> <span class="text-gold-400">Rp ${Number(total).toLocaleString('id-ID')}</span></div>
+                <div class="pt-3 border-t border-slate-200 space-y-1">
+                    <div class="flex justify-between"><span>Dasar Pengenaan Pajak (DPP):</span> <span class="font-bold text-slate-900">Rp ${Number(dpp).toLocaleString('id-ID')}</span></div>
+                    <div class="flex justify-between"><span>PPN (11%):</span> <span class="font-bold text-slate-900">Rp ${Number(ppn).toLocaleString('id-ID')}</span></div>
+                    <div class="flex justify-between border-t border-slate-200 pt-1 font-bold text-slate-900"><span>Total Faktur:</span> <span class="text-slate-900">Rp ${Number(total).toLocaleString('id-ID')}</span></div>
                 </div>
-                <div class="text-center pt-4 text-[10px] text-slate-500 italic">
+                <div class="text-center pt-4 text-[10px] text-slate-400 italic">
                     Dokumen Elektronik ini sah dan telah ditandatangani secara elektronik melalui sistem Coretax DJP.
                 </div>
             `;
@@ -872,13 +921,13 @@
                 if (isLoggedIn) {
                     container.innerHTML = `
                         <div class="fade-in space-y-6">
-                            <div class="bg-gradient-to-r from-navy-900 via-tosca-900/60 to-navy-900 border border-tosca-500/30 rounded-3xl p-6 sm:p-8 text-white shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
                                 <div>
                                     <h2 class="text-2xl font-extrabold mb-1">Selamat Datang, ${currentAdmin.name}</h2>
-                                    <p class="text-tosca-200 text-xs">Sistem Otorisasi Aktif (${currentAdmin.role}). Silakan pilih entitas perusahaan di atas untuk mengelola transaksi.</p>
+                                    <p class="text-slate-300 text-xs">Sistem Otorisasi Aktif (${currentAdmin.role}). Silakan pilih entitas perusahaan di atas untuk mengelola transaksi.</p>
                                 </div>
-                                <div class="bg-navy-950/80 p-4 rounded-2xl border border-gold-500/30 text-center shadow-inner">
-                                    <span class="text-[10px] uppercase text-gold-400 font-bold block">Status Jaringan</span>
+                                <div class="bg-white/10 p-4 rounded-2xl border border-white/20 text-center shadow-inner">
+                                    <span class="text-[10px] uppercase text-emerald-400 font-bold block">Status Jaringan</span>
                                     <span class="text-xs font-mono font-bold text-white">Supabase Connected</span>
                                 </div>
                             </div>
@@ -887,16 +936,16 @@
                 } else {
                     container.innerHTML = `
                         <div class="fade-in space-y-8">
-                            <div class="bg-gradient-to-r from-navy-900 via-tosca-900/50 to-navy-900 border border-gold-500/30 rounded-3xl p-6 sm:p-10 text-white shadow-2xl">
+                            <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-10 text-white shadow-xl">
                                 <h2 class="text-3xl font-extrabold mb-3">Holding Overview</h2>
-                                <p class="text-tosca-300 text-sm">Sinergi Distributor, Agen, dan Transportir BBM Industri Terpercaya</p>
+                                <p class="text-slate-300 text-sm">Sinergi Distributor, Agen, dan Transportir BBM Industri Terpercaya</p>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 ${companiesData.holding.operatingAreas.map(op => `
-                                    <div class="bg-navy-900 border border-tosca-500/20 rounded-2xl p-5 space-y-3 shadow-xl hover:border-gold-500/40 transition">
-                                        <h4 class="font-bold text-white text-base">${op.name}</h4>
-                                        <p class="text-xs text-slate-400">${op.desc}</p>
-                                        <button onclick="switchTab('${op.id}')" class="w-full py-2 bg-gradient-to-r from-tosca-600 to-teal-600 hover:from-tosca-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition shadow-md border border-tosca-500/30">Buka Company Profile</button>
+                                    <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-3 shadow-sm hover:shadow-md transition">
+                                        <h4 class="font-bold text-slate-900 text-base">${op.name}</h4>
+                                        <p class="text-xs text-slate-500">${op.desc}</p>
+                                        <button onclick="switchTab('${op.id}')" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition shadow-sm">Buka Company Profile</button>
                                     </div>
                                 `).join('')}
                             </div>
@@ -905,76 +954,79 @@
                 }
             } else {
                 const data = companiesData[activeTab];
+                const accentClass = data.textAccent;
+                const borderAccent = data.borderAccent;
+                const bgAccent = data.bgAccent;
 
                 let reviewsHTML = data.reviews ? data.reviews.map(rev => `
-                    <div class="bg-navy-950/80 border border-tosca-500/20 p-4 rounded-xl space-y-2 shadow-sm">
+                    <div class="bg-white border ${borderAccent} p-4 rounded-xl space-y-2 shadow-sm">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-tosca-400">${rev.client}</span>
-                            <div class="text-gold-400 text-[10px] space-x-0.5"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                            <span class="text-xs font-bold ${accentClass}">${rev.client}</span>
+                            <div class="text-amber-500 text-[10px] space-x-0.5"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
                         </div>
-                        <p class="text-xs text-slate-300 italic">"${rev.text}"</p>
-                        <span class="block text-[10px] text-slate-500 text-right">&mdash; ${rev.author}</span>
+                        <p class="text-xs text-slate-600 italic">"${rev.text}"</p>
+                        <span class="block text-[10px] text-slate-400 text-right">&mdash; ${rev.author}</span>
                     </div>
                 `).join('') : '';
                 
                 let profileInfoHTML = isLoggedIn ? '' : `
-                    <div class="bg-navy-900 border border-tosca-500/20 rounded-2xl p-6 space-y-6 shadow-xl">
-                        <div class="flex items-center justify-between border-b border-tosca-500/20 pb-3">
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 space-y-6 shadow-sm">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                             <div>
-                                <span class="text-xs font-bold text-tosca-400 uppercase tracking-wider"><i class="fa-solid fa-building-shield mr-1"></i> Company Profile &bull; ${data.shortName}</span>
-                                <h3 class="text-base font-extrabold text-white mt-1">${data.tagline}</h3>
+                                <span class="text-xs font-bold ${accentClass} uppercase tracking-wider"><i class="fa-solid fa-building-shield mr-1"></i> Company Profile &bull; ${data.shortName}</span>
+                                <h3 class="text-base font-extrabold text-slate-900 mt-1">${data.tagline}</h3>
                             </div>
-                            <span class="text-[10px] bg-navy-950 border border-tosca-500/30 text-slate-300 px-3 py-1.5 rounded-full font-medium"><i class="fa-solid fa-location-dot text-tosca-400 mr-1"></i> ${data.location || 'Head Office: Pangkalan Bun'}</span>
+                            <span class="text-[10px] bg-slate-100 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-full font-medium"><i class="fa-solid fa-location-dot ${accentClass} mr-1"></i> ${data.location || 'Head Office: Pangkalan Bun'}</span>
                         </div>
 
                         <!-- Blok Animasi Visual Sesuai Profile PT -->
-                        <div class="bg-gradient-to-r ${data.visualBg} rounded-2xl p-6 border flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden relative shadow-lg">
+                        <div class="bg-gradient-to-r ${data.visualBg} rounded-2xl p-6 border flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden relative shadow-sm">
                             <div class="space-y-2 z-10 max-w-lg">
-                                <span class="text-[10px] uppercase font-bold text-gold-400 tracking-widest bg-gold-500/10 px-2.5 py-1 rounded-full border border-gold-500/30"><i class="fa-solid fa-bolt mr-1"></i> Operational Excellence</span>
-                                <h4 class="text-lg font-black text-white">Standar Pelayanan BBM Industri Terintegrasi</h4>
-                                <p class="text-xs text-slate-300 leading-relaxed">Menjamin mutu spesifikasi BBM Solar, ketepatan volume dengan flow meter terkalibrasi, serta kepastian legalitas dari titik suplai hingga pengiriman akhir.</p>
+                                <span class="text-[10px] uppercase font-bold ${accentClass} tracking-widest bg-white px-2.5 py-1 rounded-full border ${borderAccent} shadow-sm"><i class="fa-solid fa-bolt mr-1"></i> Operational Excellence</span>
+                                <h4 class="text-lg font-black text-slate-900">Standar Pelayanan BBM Industri Terintegrasi</h4>
+                                <p class="text-xs text-slate-600 leading-relaxed">Menjamin mutu spesifikasi BBM Solar, ketepatan volume dengan flow meter terkalibrasi, serta kepastian legalitas dari titik suplai hingga pengiriman akhir.</p>
                             </div>
                             <div class="z-10 flex items-center justify-center">
-                                <div class="w-20 h-20 rounded-2xl bg-navy-950/90 border border-tosca-500/40 flex items-center justify-center text-4xl text-gold-400 shadow-2xl animate-float">
+                                <div class="w-20 h-20 rounded-2xl bg-white border ${borderAccent} flex items-center justify-center text-4xl ${accentClass} shadow-md animate-float">
                                     <i class="fa-solid ${data.visualIcon}"></i>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Pendahuluan Eksekutif -->
-                        <div class="bg-navy-950/80 p-5 rounded-2xl border border-tosca-500/20 space-y-2">
-                            <div class="font-bold text-white text-xs flex items-center gap-2"><i class="fa-solid fa-circle-info text-tosca-400"></i> Pendahuluan Eksekutif</div>
-                            <p class="text-xs text-slate-300 leading-relaxed">${data.introduction}</p>
+                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-2">
+                            <div class="font-bold text-slate-900 text-xs flex items-center gap-2"><i class="fa-solid fa-circle-info ${accentClass}"></i> Pendahuluan Eksekutif</div>
+                            <p class="text-xs text-slate-600 leading-relaxed">${data.introduction}</p>
                         </div>
 
                         <!-- Visi & Misi Grid -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-300">
-                            <div class="bg-navy-950/80 p-4 rounded-xl border border-tosca-500/20 space-y-2 shadow-sm">
-                                <div class="font-bold text-white"><i class="fa-solid fa-eye text-tosca-400 mr-1"></i> Visi Perusahaan</div>
-                                <p class="text-slate-400 leading-relaxed">${data.vision}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-600">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 shadow-sm">
+                                <div class="font-bold text-slate-900"><i class="fa-solid fa-eye ${accentClass} mr-1"></i> Visi Perusahaan</div>
+                                <p class="text-slate-600 leading-relaxed">${data.vision}</p>
                             </div>
-                            <div class="bg-navy-950/80 p-4 rounded-xl border border-tosca-500/20 space-y-2 shadow-sm">
-                                <div class="font-bold text-white"><i class="fa-solid fa-bullseye text-gold-400 mr-1"></i> Misi Perusahaan</div>
-                                <p class="text-slate-400 leading-relaxed">${data.mission}</p>
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 shadow-sm">
+                                <div class="font-bold text-slate-900"><i class="fa-solid fa-bullseye ${accentClass} mr-1"></i> Misi Perusahaan</div>
+                                <p class="text-slate-600 leading-relaxed">${data.mission}</p>
                             </div>
                         </div>
 
                         <!-- Dewan Direksi & Sarana Prasarana (Sarfas) -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-300">
-                            <div class="bg-navy-950/80 p-4 rounded-xl border border-tosca-500/20 space-y-2 shadow-sm">
-                                <div class="font-bold text-white"><i class="fa-solid fa-user-tie text-tosca-400 mr-1"></i> Dewan Direksi & Manajemen</div>
-                                <p class="text-slate-400 leading-relaxed">${data.board}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-600">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 shadow-sm">
+                                <div class="font-bold text-slate-900"><i class="fa-solid fa-user-tie ${accentClass} mr-1"></i> Dewan Direksi & Manajemen</div>
+                                <p class="text-slate-600 leading-relaxed">${data.board}</p>
                             </div>
-                            <div class="bg-navy-950/80 p-4 rounded-xl border border-tosca-500/20 space-y-2 shadow-sm">
-                                <div class="font-bold text-white"><i class="fa-solid fa-warehouse text-gold-400 mr-1"></i> Sarana & Prasarana (Sarfas)</div>
-                                <p class="text-slate-400 leading-relaxed">${data.facilities}</p>
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 shadow-sm">
+                                <div class="font-bold text-slate-900"><i class="fa-solid fa-warehouse ${accentClass} mr-1"></i> Sarana & Prasarana (Sarfas)</div>
+                                <p class="text-slate-600 leading-relaxed">${data.facilities}</p>
                             </div>
                         </div>
 
                         <!-- Ulasan & Testimoni Klien Mitra -->
                         <div class="space-y-3 pt-2">
-                            <span class="text-xs font-bold text-gold-400 uppercase tracking-wider block"><i class="fa-solid fa-comments mr-1"></i> Ulasan & Testimoni Mitra Industri</span>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <span class="text-xs font-bold ${accentClass} uppercase tracking-wider block"><i class="fa-solid fa-comments mr-1"></i> Ulasan & Testimoni Mitra Industri (Diperkaya)</span>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 ${reviewsHTML}
                             </div>
                         </div>
@@ -984,76 +1036,76 @@
                 // Saat sudah login, halaman menampilkan fokus menu transaksi + Menu Faktur Pajak
                 let transactionMenusHTML = isLoggedIn ? `
                     <div class="space-y-4">
-                        <div class="flex items-center justify-between bg-navy-950 p-4 rounded-2xl border border-tosca-500/30 shadow-md">
+                        <div class="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
                             <div class="flex items-center gap-2">
-                                <div class="w-9 h-9 rounded-xl bg-tosca-500/20 text-tosca-400 flex items-center justify-center font-bold border border-tosca-500/30">
+                                <div class="w-9 h-9 rounded-xl bg-slate-100 ${accentClass} flex items-center justify-center font-bold border border-slate-200">
                                     <i class="fa-solid fa-shield-halved"></i>
                                 </div>
                                 <div>
-                                    <h3 class="text-sm font-extrabold text-white">Panel Transaksi Operasional &bull; ${data.shortName}</h3>
-                                    <p class="text-[10px] text-slate-400">Administrator Aktif: <strong class="text-gold-400">${currentAdmin.name} (${currentAdmin.role})</strong></p>
+                                    <h3 class="text-sm font-extrabold text-slate-900">Panel Transaksi Operasional &bull; ${data.shortName}</h3>
+                                    <p class="text-[10px] text-slate-500">Administrator Aktif: <strong class="${accentClass}">${currentAdmin.name} (${currentAdmin.role})</strong></p>
                                 </div>
                             </div>
-                            <button onclick="goHome()" class="px-3 py-1.5 bg-navy-900 text-slate-300 hover:text-white rounded-xl text-xs border border-tosca-500/30 transition shadow">
+                            <button onclick="goHome()" class="px-3 py-1.5 bg-slate-100 text-slate-700 hover:text-slate-900 rounded-xl text-xs border border-slate-200 transition shadow-sm">
                                 <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Menu Utama
                             </button>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                             <!-- Tombol Penjualan & PO -->
-                            <div class="bg-navy-950 p-4 rounded-2xl border border-tosca-500/20 space-y-2 shadow-md">
-                                <div class="text-tosca-400 font-bold text-xs"><i class="fa-solid fa-cash-register mr-1"></i> Penjualan & PO</div>
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-sm">
+                                <div class="${accentClass} font-bold text-xs"><i class="fa-solid fa-cash-register mr-1"></i> Penjualan & PO</div>
                                 <div class="space-y-1.5 pt-1 text-[11px]">
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenjualanData();" class="w-full text-left text-slate-300 hover:text-tosca-400 transition">&bull; Buka Penjualan</button>
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadPurchaseOrdersData();" class="w-full text-left text-slate-300 hover:text-gold-400 transition">&bull; Buka PO (PDF View)</button>
-                                    <button onclick="handleActionRedirect('po')" class="w-full text-left font-semibold text-gold-400 hover:underline">&rarr; Buat PO</button>
+                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenjualanData();" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Buka Penjualan</button>
+                                    <button onclick="window.selectedMonthFilter='-10-'; loadPurchaseOrdersData();" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Buka PO (PDF View)</button>
+                                    <button onclick="handleActionRedirect('po')" class="w-full text-left font-semibold ${accentClass} hover:underline">&rarr; Buat PO</button>
                                 </div>
                             </div>
                             
                             <!-- Tombol Penawaran (SPH) -->
-                            <div class="bg-navy-950 p-4 rounded-2xl border border-tosca-500/20 space-y-2 shadow-md">
-                                <div class="text-gold-400 font-bold text-xs"><i class="fa-solid fa-file-lines mr-1"></i> Penawaran (SPH)</div>
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-sm">
+                                <div class="${accentClass} font-bold text-xs"><i class="fa-solid fa-file-lines mr-1"></i> Penawaran (SPH)</div>
                                 <div class="space-y-1.5 pt-1 text-[11px]">
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenawaranData('Penawaran Biasa');" class="w-full text-left text-slate-300 hover:text-gold-400 transition">&bull; Buka Penawaran (SPH)</button>
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenawaranData('Penawaran Multi');" class="w-full text-left text-slate-300 hover:text-gold-400 transition">&bull; Penawaran Multi</button>
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenawaranData('Penawaran Diskon');" class="w-full text-left text-slate-300 hover:text-gold-400 transition">&bull; Penawaran Diskon</button>
-                                    <button onclick="handleActionRedirect('penawaran')" class="w-full text-left font-semibold text-gold-400 hover:underline">&rarr; Buat Penawaran</button>
+                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenawaranData('Penawaran Biasa');" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Buka Penawaran (SPH)</button>
+                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenawaranData('Penawaran Multi');" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Penawaran Multi</button>
+                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenawaranData('Penawaran Diskon');" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Penawaran Diskon</button>
+                                    <button onclick="handleActionRedirect('penawaran')" class="w-full text-left font-semibold ${accentClass} hover:underline">&rarr; Buat Penawaran</button>
                                 </div>
                             </div>
 
                             <!-- Tombol Invoice -->
-                            <div class="bg-navy-950 p-4 rounded-2xl border border-tosca-500/20 space-y-2 shadow-md">
-                                <div class="text-red-400 font-bold text-xs"><i class="fa-solid fa-receipt mr-1"></i> Invoice</div>
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-sm">
+                                <div class="text-red-600 font-bold text-xs"><i class="fa-solid fa-receipt mr-1"></i> Invoice</div>
                                 <div class="space-y-1.5 pt-1 text-[11px]">
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadInvoiceData('Buka Invoice');" class="w-full text-left text-slate-300 hover:text-red-400 transition">&bull; Buka Invoice</button>
-                                    <button onclick="handleActionRedirect('Buat Invoice BRI')" class="w-full text-left text-slate-300 hover:text-red-400 transition">&bull; Buat Invoice BRI</button>
-                                    <button onclick="handleActionRedirect('Buat Invoice BCA')" class="w-full text-left text-slate-300 hover:text-red-400 transition">&bull; Buat Invoice BCA</button>
+                                    <button onclick="window.selectedMonthFilter='-10-'; loadInvoiceData('Buka Invoice');" class="w-full text-left text-slate-600 hover:text-red-600 transition">&bull; Buka Invoice</button>
+                                    <button onclick="handleActionRedirect('Buat Invoice BRI')" class="w-full text-left text-slate-600 hover:text-red-600 transition">&bull; Buat Invoice BRI</button>
+                                    <button onclick="handleActionRedirect('Buat Invoice BCA')" class="w-full text-left text-slate-600 hover:text-red-600 transition">&bull; Buat Invoice BCA</button>
                                 </div>
                             </div>
 
                             <!-- Menu Faktur Pajak -->
-                            <div class="bg-navy-950 p-4 rounded-2xl border border-tosca-500/20 space-y-2 shadow-md">
-                                <div class="text-tosca-400 font-bold text-xs"><i class="fa-solid fa-file-invoice-dollar mr-1"></i> Faktur Pajak</div>
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-sm">
+                                <div class="${accentClass} font-bold text-xs"><i class="fa-solid fa-file-invoice-dollar mr-1"></i> Faktur Pajak</div>
                                 <div class="space-y-1.5 pt-1 text-[11px]">
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadFakturPajakData();" class="w-full text-left text-slate-300 hover:text-tosca-400 transition">&bull; Rekap & Supabase Sync</button>
-                                    <span class="block text-[10px] text-slate-500 italic mt-2">Sinkronisasi pajak & pratinjau PDF.</span>
+                                    <button onclick="window.selectedMonthFilter='-10-'; loadFakturPajakData();" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Rekap & Supabase Sync</button>
+                                    <span class="block text-[10px] text-slate-400 italic mt-2">Sinkronisasi pajak & pratinjau PDF.</span>
                                 </div>
                             </div>
                         </div>
-                        <div id="supabaseLiveContainer" class="bg-navy-950 p-5 rounded-2xl border border-tosca-500/30 shadow-lg"><div class="text-center text-xs text-slate-400">Klik salah satu menu transaksi di atas untuk menarik data secara langsung (Default filter bulan berjalan: Oktober 2026).</div></div>
+                        <div id="supabaseLiveContainer" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm"><div class="text-center text-xs text-slate-500">Klik salah satu menu transaksi di atas untuk menarik data secara langsung (Default filter bulan berjalan: Oktober 2026)[cite: 3].</div></div>
                     </div>
                 ` : '';
 
                 container.innerHTML = `
                     <div class="fade-in space-y-8">
-                        <div class="bg-navy-900 border border-tosca-500/20 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+                        <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
                             ${!isLoggedIn ? `
                                 <div class="flex items-center justify-between">
-                                    <button onclick="goHome()" class="px-3 py-1.5 bg-navy-950 text-white rounded-xl text-xs border border-tosca-500/30 shadow"><i class="fa-solid fa-arrow-left mr-1"></i> Kembali</button>
-                                    <span class="text-xs font-bold text-gold-400">${data.badge}</span>
+                                    <button onclick="goHome()" class="px-3 py-1.5 bg-slate-100 text-slate-700 hover:text-slate-900 rounded-xl text-xs border border-slate-200 shadow-sm"><i class="fa-solid fa-arrow-left mr-1"></i> Kembali</button>
+                                    <span class="text-xs font-bold px-3 py-1 rounded-full border ${data.badgeClass}">${data.badge}</span>
                                 </div>
                                 <div>
-                                    <h2 class="text-2xl font-extrabold text-white">${data.name}</h2>
-                                    <p class="text-xs text-slate-300 mt-1">${data.tagline}</p>
+                                    <h2 class="text-2xl font-extrabold text-slate-900">${data.name}</h2>
+                                    <p class="text-xs text-slate-600 mt-1">${data.tagline}</p>
                                 </div>
                             ` : ''}
                             ${profileInfoHTML}
