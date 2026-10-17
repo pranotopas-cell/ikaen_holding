@@ -275,7 +275,7 @@
             if (isLoggedIn) {
                 authArea.innerHTML = `<div class="flex items-center space-x-3"><div class="hidden sm:block text-right"><div class="text-xs font-bold text-slate-900">${currentAdmin.name}</div><div class="text-[10px] text-emerald-600 font-semibold">${currentAdmin.role}</div></div><button onclick="handleLogout()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition">Logout</button></div>`;
             } else {
-                authArea.innerHTML = `<button onclick="openGeneralLogin()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white shadow-md transition">Login Single Admin</button>`;
+                authArea.innerHTML = `<button onclick="openGeneralLogin()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white shadow-md transition">Login</button>`;
             }
         }
 
@@ -299,7 +299,7 @@
             e.preventDefault();
             const passwordVal = document.getElementById('loginPassword').value;
             if (passwordVal === 'password123' || passwordVal.length > 0) {
-                currentAdmin = { name: 'Administrator', email: 'admin@energyholding.co.id'};
+                currentAdmin = { name: 'Administrator', email: 'admin@energyholding.co.id', 'role: noto' };
                 isLoggedIn = true;
                 localStorage.setItem('holding_is_logged_in', 'true');
                 openGeneralLogin();
