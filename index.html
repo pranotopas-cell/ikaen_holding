@@ -187,7 +187,7 @@
                 board: 'Komisaris : M.Renaldi Azmi, Direktur: Supranoto.S.Ikom',
                 facilities: 'Memiliki fasilitas tangki penyimpanan berkapasitas besar, laboratorium uji mutu bahan bakar terpadu, sistem digitalisasi meter arus, serta armada suplai pendukung.',
                 visualIcon: 'fa-oil-well',
-                visualBg: 'from-amber-900/30 via-slate-900 to-slate-950 border-amber-500/40 text-amber-400',
+                visualBg: 'from-amber-950 via-slate-900 to-slate-950 border-amber-500/50 text-amber-400',
                 reviews: [
                     { client: 'PT Sawit Makmur Indah', author: 'Bpk. Herman (Procurement Mgr)', text: 'KSE konsisten memberikan pasokan High Speed Diesel (HSD) berkualitas tinggi.' },
                     { client: 'PT Borneo Mining Utama', author: 'Ibu Ratna (Logistics Head)', text: 'Mitra trading paling transparan di Kalimantan.' },
@@ -209,7 +209,7 @@
                 board: 'Komisaris Utama : Ela Yuliana, Komisaris: Sarwi Murbani, S.H., Direktur Utama: Yayuk Wijayanti',
                 facilities: 'Kantor layanan operasional terpadu, sistem monitoring kuota berbasis cloud, serta jaringan depo logistik strategis.',
                 visualIcon: 'fa-handshake-angle',
-                visualBg: 'from-teal-900/30 via-slate-900 to-slate-950 border-teal-500/40 text-teal-400',
+                visualBg: 'from-teal-950 via-slate-900 to-slate-950 border-teal-500/50 text-teal-400',
                 reviews: [
                     { client: 'CV Kapuas Karya Mandiri', author: 'Bpk. Sugeng (Direktur)', text: 'Keagenan resmi IKAEN memberikan kemudahan pengurusan administrasi.' },
                     { client: 'PT Kaltim Agro Resources', author: 'Bpk. Fajar (Estate Mgr)', text: 'Kemitraan bersama IKAEN menjamin kepastian alokasi kuota solar.' },
@@ -231,7 +231,7 @@
                 board: 'Komisaris: Ela Yuliana, Direktur : Nurhamida',
                 facilities: 'Armada truck tangki berbagai kapasitas (5KL, 8KL, 10KL) dilengkapi GPS tracker dan perangkat keselamatan.',
                 visualIcon: 'fa-truck-fast',
-                visualBg: 'from-red-900/30 via-slate-900 to-slate-950 border-red-500/40 text-red-400',
+                visualBg: 'from-red-950 via-slate-900 to-slate-950 border-red-500/50 text-red-400',
                 reviews: [
                     { client: 'PT Sinar Logistik Nusantara', author: 'Bpk. Denny (Operations Lead)', text: 'Truk tangki IDE selalu dalam kondisi prima.' },
                     { client: 'PT West Kalimantan Power', author: 'Bpk. Aris (Site Manager)', text: 'Pelacakan GPS real-time yang transparan membuat kami tenang.' },
@@ -993,17 +993,19 @@
                             <span class="text-[10px] bg-slate-100 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-full font-medium"><i class="fa-solid fa-location-dot ${accentClass} mr-1"></i> ${data.location || 'Head Office: Pangkalan Bun'}</span>
                         </div>
                         
-                        <!-- Gambar / Banner Samping Holding (Menggunakan holding.png) -->
+                        <!-- Banner Profil dengan Gambar holding.png dan Background Elegan -->
                         <div class="bg-gradient-to-r ${data.visualBg} rounded-2xl p-6 sm:p-8 border flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden relative shadow-xl">
-                            <div class="absolute right-0 top-0 bottom-0 w-1/2 opacity-15 bg-[radial-gradient(#d97706_1px,transparent_1px)] [background-size:12px_12px]"></div>
+                            <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#f59e0b_1.5px,transparent_1.5px)] [background-size:16px_16px]"></div>
+                            <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-amber-500/10 rounded-full blur-2xl"></div>
+                            
                             <div class="space-y-3 z-10 max-w-xl text-white">
                                 <span class="text-[10px] uppercase font-extrabold tracking-widest bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full border border-amber-500/40 shadow-sm inline-flex items-center gap-1.5"><i class="fa-solid fa-gem"></i> Luxury Energy Standards</span>
                                 <h4 class="text-xl sm:text-2xl font-black text-white">Standar Pelayanan BBM Industri Terintegrasi</h4>
                                 <p class="text-xs text-slate-300 leading-relaxed">Menjamin mutu spesifikasi BBM Solar, ketepatan volume dengan flow meter terkalibrasi presisi tinggi, serta legalitas hukum terverifikasi penuh dari titik suplai hingga pengiriman akhir klien.</p>
                             </div>
                             <div class="z-10 flex items-center justify-center shrink-0">
-                                <div class="w-28 h-28 rounded-2xl bg-gradient-to-tr from-slate-900 to-amber-950 border border-amber-500/50 flex items-center justify-center overflow-hidden shadow-2xl animate-float p-2">
-                                    <img src="holding.png" alt="Holding Logo" class="w-full h-full object-contain">
+                                <div class="w-28 h-28 rounded-2xl bg-gradient-to-tr from-slate-950 via-slate-900 to-amber-950/80 border border-amber-500/40 flex items-center justify-center overflow-hidden shadow-2xl animate-float p-3 backdrop-blur-md">
+                                    <img src="holding.png" alt="Holding Logo" class="w-full h-full object-contain drop-shadow-md">
                                 </div>
                             </div>
                         </div>
