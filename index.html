@@ -38,25 +38,25 @@
         .animate-float { animation: floatAnim 4s ease-in-out infinite; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col selection:bg-teal-500 selection:text-white">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col selection:bg-amber-500 selection:text-white">
 
     <!-- Header / Navbar Utama -->
     <header class="bg-white/95 border-b border-slate-200 sticky top-0 z-50 backdrop-blur-md shadow-sm">
         <div class="max-w-[96rem] mx-auto px-3 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <div class="flex items-center space-x-2.5 cursor-pointer shrink-0" onclick="goHome()">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-slate-800 to-slate-900 flex items-center justify-center shadow-md text-white">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 to-slate-900 flex items-center justify-center shadow-md text-white border border-amber-500/30">
                         <i class="fa-solid font-bold text-lg fa-gas-pump"></i>
                     </div>
                     <div>
                         <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-900 flex items-center gap-1.5">
                             HOLDING GROUP
-                            <span class="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.2 rounded-full border border-slate-200">v5.9</span>
+                            <span class="text-[9px] bg-amber-50 text-amber-700 px-1.5 py-0.2 rounded-full border border-amber-200 font-bold">v6.0 LUXURY</span>
                         </h1>
                         <p class="text-[10px] text-slate-500">Integrated Corporate Dashboard</p>
                     </div>
                 </div>
-                <!-- Navigation Bar: Teks Diperkecil & Tanpa Scroll (Muat Satu Baris) -->
+                <!-- Navigation Bar -->
                 <nav class="hidden lg:flex items-center space-x-1 bg-slate-100 p-1.5 rounded-xl border border-slate-200 shadow-inner" id="desktopNav"></nav>
                 <div class="flex items-center space-x-3 shrink-0">
                     <div id="authArea"></div>
@@ -76,31 +76,31 @@
     </main>
 
     <!-- Modal Login Single Admin -->
-    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm hidden">
+    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm hidden">
         <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-md p-8 relative shadow-2xl fade-in overflow-hidden">
-            <!-- Tombol X Diperbaiki -->
+            <!-- Tombol X -->
             <button onclick="openGeneralLogin()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 bg-slate-100 p-2 rounded-full transition border border-slate-200 focus:outline-none">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
             <div class="text-center mb-6 relative z-10">
-                <div class="w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-md">
+                <div class="w-14 h-14 bg-gradient-to-tr from-amber-600 to-slate-900 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-lg border border-amber-500/30">
                     <i class="fa-solid fa-user-shield"></i>
                 </div>
                 <h3 class="text-xl font-extrabold text-slate-900">Login Akses Transaksi</h3>
-                <p class="text-xs text-slate-500 mt-1">Masukkan kata sandi administrator holding untuk membuka menu penjualan, PO, penawaran, invoice, dan faktur pajak[cite: 3].</p>
+                <p class="text-xs text-slate-500 mt-1">Masukkan kata sandi administrator holding untuk membuka menu penjualan, PO, penawaran, invoice, dan faktur pajak.</p>
             </div>
             <form onsubmit="handleLogin(event)" class="space-y-4 relative z-10">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5"><i class="fa-solid fa-lock text-slate-500 mr-1"></i> Kata Sandi</label>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5"><i class="fa-solid fa-lock text-amber-600 mr-1"></i> Kata Sandi</label>
                     <div class="relative">
-                        <!-- Password Otomatis Terisi -->
-                        <input type="password" id="loginPassword" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 pr-10 text-xs text-slate-900 focus:outline-none focus:border-slate-800 transition" value="password123">
+                        <!-- Password Tidak Langsung Tampil (Value Dikosongkan) -->
+                        <input type="password" id="loginPassword" required placeholder="Masukkan kata sandi..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 pr-10 text-xs text-slate-900 focus:outline-none focus:border-amber-600 transition" value="">
                         <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-700 focus:outline-none">
                             <i id="eyeIcon" class="fa-solid fa-eye text-xs"></i>
                         </button>
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl text-xs transition shadow-md flex items-center justify-center space-x-2">
+                <button type="submit" class="w-full bg-gradient-to-r from-slate-900 via-slate-800 to-amber-700 hover:from-slate-800 hover:to-amber-600 text-white font-bold py-3 rounded-xl text-xs transition shadow-md flex items-center justify-center space-x-2 border border-amber-500/30">
                     <span>Verifikasi Masuk</span>
                     <i class="fa-solid fa-arrow-right-to-bracket"></i>
                 </button>
@@ -157,7 +157,7 @@
 
         let isLoggedIn = localStorage.getItem('holding_is_logged_in') === 'true';
         let activeTab = 'holding';
-        let currentAdmin = { name: 'Administrator', email: 'admin@energyholding.co.id'};
+        let currentAdmin = { name: 'Holding Administrator', email: 'admin@energyholding.co.id', role: 'Single Administrator' };
         
         window.selectedMonthFilter = '-10-';
 
@@ -187,7 +187,7 @@
                 board: 'Komisaris : M.Renaldi Azmi, Direktur: Supranoto.S.Ikom',
                 facilities: 'Memiliki fasilitas tangki penyimpanan berkapasitas besar, laboratorium uji mutu bahan bakar terpadu, sistem digitalisasi meter arus, serta armada suplai pendukung.',
                 visualIcon: 'fa-oil-well',
-                visualBg: 'from-amber-500/15 via-amber-500/5 to-transparent border-amber-300',
+                visualBg: 'from-amber-900/30 via-slate-900 to-slate-950 border-amber-500/40 text-amber-400',
                 reviews: [
                     { client: 'PT Sawit Makmur Indah', author: 'Bpk. Herman (Procurement Mgr)', text: 'KSE konsisten memberikan pasokan High Speed Diesel (HSD) berkualitas tinggi.' },
                     { client: 'PT Borneo Mining Utama', author: 'Ibu Ratna (Logistics Head)', text: 'Mitra trading paling transparan di Kalimantan.' },
@@ -209,7 +209,7 @@
                 board: 'Komisaris Utama : Ela Yuliana, Komisaris: Sarwi Murbani, S.H., Direktur Utama: Yayuk Wijayanti',
                 facilities: 'Kantor layanan operasional terpadu, sistem monitoring kuota berbasis cloud, serta jaringan depo logistik strategis.',
                 visualIcon: 'fa-handshake-angle',
-                visualBg: 'from-teal-500/15 via-teal-500/5 to-transparent border-teal-300',
+                visualBg: 'from-teal-900/30 via-slate-900 to-slate-950 border-teal-500/40 text-teal-400',
                 reviews: [
                     { client: 'CV Kapuas Karya Mandiri', author: 'Bpk. Sugeng (Direktur)', text: 'Keagenan resmi IKAEN memberikan kemudahan pengurusan administrasi.' },
                     { client: 'PT Kaltim Agro Resources', author: 'Bpk. Fajar (Estate Mgr)', text: 'Kemitraan bersama IKAEN menjamin kepastian alokasi kuota solar.' },
@@ -231,7 +231,7 @@
                 board: 'Komisaris: Ela Yuliana, Direktur : Nurhamida',
                 facilities: 'Armada truck tangki berbagai kapasitas (5KL, 8KL, 10KL) dilengkapi GPS tracker dan perangkat keselamatan.',
                 visualIcon: 'fa-truck-fast',
-                visualBg: 'from-red-500/15 via-red-500/5 to-transparent border-red-300',
+                visualBg: 'from-red-900/30 via-slate-900 to-slate-950 border-red-500/40 text-red-400',
                 reviews: [
                     { client: 'PT Sinar Logistik Nusantara', author: 'Bpk. Denny (Operations Lead)', text: 'Truk tangki IDE selalu dalam kondisi prima.' },
                     { client: 'PT West Kalimantan Power', author: 'Bpk. Aris (Site Manager)', text: 'Pelacakan GPS real-time yang transparan membuat kami tenang.' },
@@ -275,7 +275,7 @@
             if (isLoggedIn) {
                 authArea.innerHTML = `<div class="flex items-center space-x-3"><div class="hidden sm:block text-right"><div class="text-xs font-bold text-slate-900">${currentAdmin.name}</div><div class="text-[10px] text-emerald-600 font-semibold">${currentAdmin.role}</div></div><button onclick="handleLogout()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition">Logout</button></div>`;
             } else {
-                authArea.innerHTML = `<button onclick="openGeneralLogin()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white shadow-md transition">Login</button>`;
+                authArea.innerHTML = `<button onclick="openGeneralLogin()" class="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-slate-900 to-amber-700 hover:from-slate-800 hover:to-amber-600 text-white shadow-md transition border border-amber-500/30">Login Single Admin</button>`;
             }
         }
 
@@ -299,7 +299,7 @@
             e.preventDefault();
             const passwordVal = document.getElementById('loginPassword').value;
             if (passwordVal === 'password123' || passwordVal.length > 0) {
-                currentAdmin = { name: 'Administrator', email: 'admin@energyholding.co.id', role: 'noto' };
+                currentAdmin = { name: 'Holding Administrator', email: 'admin@energyholding.co.id', role: 'Single Administrator' };
                 isLoggedIn = true;
                 localStorage.setItem('holding_is_logged_in', 'true');
                 openGeneralLogin();
@@ -379,7 +379,7 @@
                     container.innerHTML = `
                         <div class="space-y-3">
                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                <span class="text-xs font-bold ${accentClass}"><i class="fa-solid fa-cash-register mr-1"></i> Data Penjualan ${compId.toUpperCase()} </span>
+                                <span class="text-xs font-bold ${accentClass}"><i class="fa-solid fa-cash-register mr-1"></i> Data Penjualan ${compId.toUpperCase()} (Tabel data_pengiriman)</span>
                                 ${filterHtml}
                             </div>
                             <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm bg-white">
@@ -400,7 +400,7 @@
                                     <div class="w-8 h-8 rounded-lg bg-white/10 text-white flex items-center justify-center font-bold border border-white/20">
                                         <i class="fa-solid fa-calculator"></i>
                                     </div>
-                                    <span class="text-xs font-extrabold uppercase tracking-wider">Total Volume Pengiriman:</span>
+                                    <span class="text-xs font-extrabold uppercase tracking-wider">Total Keseluruhan Volume Pengiriman:</span>
                                 </div>
                                 <div class="text-sm font-black font-mono bg-white/10 px-4 py-2 rounded-xl border border-white/20 shadow-inner">
                                     ${totalKL.toLocaleString('id-ID')} KL
@@ -918,9 +918,12 @@
                 if (isLoggedIn) {
                     container.innerHTML = `
                         <div class="fade-in space-y-6">
-                            <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-amber-950 border border-amber-500/30 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
                                 <div>
-                                    <h2 class="text-2xl font-extrabold mb-1">Selamat Datang, ${currentAdmin.name}</h2>
+                                    <h2 class="text-2xl font-extrabold mb-1 flex items-center gap-2">
+                                        Selamat Datang, ${currentAdmin.name} 
+                                        <span class="text-xs bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded-full border border-amber-500/40">VIP Access</span>
+                                    </h2>
                                     <p class="text-slate-300 text-xs">Sistem Otorisasi Aktif (${currentAdmin.role}). Silakan pilih entitas perusahaan di atas untuk mengelola transaksi.</p>
                                 </div>
                                 <div class="bg-white/10 p-4 rounded-2xl border border-white/20 text-center shadow-inner">
@@ -933,16 +936,26 @@
                 } else {
                     container.innerHTML = `
                         <div class="fade-in space-y-8">
-                            <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-10 text-white shadow-xl">
-                                <h2 class="text-3xl font-extrabold mb-3">Holding Overview</h2>
-                                <p class="text-slate-300 text-sm">Sinergi Distributor, Agen, dan Transportir BBM Industri Terpercaya</p>
+                            <div class="bg-gradient-to-r from-slate-900 via-slate-900 to-amber-950 border border-amber-500/30 rounded-3xl p-6 sm:p-10 text-white shadow-2xl relative overflow-hidden">
+                                <div class="absolute right-0 top-0 bottom-0 w-1/3 opacity-10 bg-[radial-gradient(#d97706_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                                <div class="relative z-10 max-w-2xl space-y-3">
+                                    <span class="text-[10px] uppercase tracking-widest bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full border border-amber-500/40 font-bold"><i class="fa-solid fa-crown mr-1"></i> Executive Holding Portal</span>
+                                    <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Holding Overview</h2>
+                                    <p class="text-slate-300 text-sm leading-relaxed">Sinergi Distributor, Agen, dan Transportir BBM Industri Terpercaya dengan standar pelayanan korporat tingkat tinggi.</p>
+                                </div>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 ${companiesData.holding.operatingAreas.map(op => `
-                                    <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-3 shadow-sm hover:shadow-md transition">
+                                    <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-3 shadow-sm hover:shadow-lg transition group">
+                                        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold border border-amber-200 group-hover:bg-amber-600 group-hover:text-white transition">
+                                            <i class="fa-solid fa-building"></i>
+                                        </div>
                                         <h4 class="font-bold text-slate-900 text-base">${op.name}</h4>
-                                        <p class="text-xs text-slate-500">${op.desc}</p>
-                                        <button onclick="switchTab('${op.id}')" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition shadow-sm">Buka Company Profile</button>
+                                        <p class="text-xs text-slate-500 leading-relaxed">${op.desc}</p>
+                                        <button onclick="switchTab('${op.id}')" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center gap-2">
+                                            <span>Buka Company Profile</span>
+                                            <i class="fa-solid fa-arrow-right"></i>
+                                        </button>
                                     </div>
                                 `).join('')}
                             </div>
@@ -975,18 +988,22 @@
                             </div>
                             <span class="text-[10px] bg-slate-100 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-full font-medium"><i class="fa-solid fa-location-dot ${accentClass} mr-1"></i> ${data.location || 'Head Office: Pangkalan Bun'}</span>
                         </div>
-                        <div class="bg-gradient-to-r ${data.visualBg} rounded-2xl p-6 border flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden relative shadow-sm">
-                            <div class="space-y-2 z-10 max-w-lg">
-                                <span class="text-[10px] uppercase font-bold ${accentClass} tracking-widest bg-white px-2.5 py-1 rounded-full border ${borderAccent} shadow-sm"><i class="fa-solid fa-bolt mr-1"></i> Operational Excellence</span>
-                                <h4 class="text-lg font-black text-slate-900">Standar Pelayanan BBM Industri Terintegrasi</h4>
-                                <p class="text-xs text-slate-600 leading-relaxed">Menjamin mutu spesifikasi BBM Solar, ketepatan volume dengan flow meter terkalibrasi, serta kepastian legalitas dari titik suplai hingga pengiriman akhir.</p>
+                        
+                        <!-- Gambar / Banner Samping Holding (Diperbarui Menjadi Mewah & Berkelas) -->
+                        <div class="bg-gradient-to-r ${data.visualBg} rounded-2xl p-6 sm:p-8 border flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden relative shadow-xl">
+                            <div class="absolute right-0 top-0 bottom-0 w-1/2 opacity-15 bg-[radial-gradient(#d97706_1px,transparent_1px)] [background-size:12px_12px]"></div>
+                            <div class="space-y-3 z-10 max-w-xl text-white">
+                                <span class="text-[10px] uppercase font-extrabold tracking-widest bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full border border-amber-500/40 shadow-sm inline-flex items-center gap-1.5"><i class="fa-solid fa-gem"></i> Luxury Energy Standards</span>
+                                <h4 class="text-xl sm:text-2xl font-black text-white">Standar Pelayanan BBM Industri Terintegrasi</h4>
+                                <p class="text-xs text-slate-300 leading-relaxed">Menjamin mutu spesifikasi BBM Solar, ketepatan volume dengan flow meter terkalibrasi presisi tinggi, serta legalitas hukum terverifikasi penuh dari titik suplai hingga pengiriman akhir klien.</p>
                             </div>
-                            <div class="z-10 flex items-center justify-center">
-                                <div class="w-20 h-20 rounded-2xl bg-white border ${borderAccent} flex items-center justify-center text-4xl ${accentClass} shadow-md animate-float">
+                            <div class="z-10 flex items-center justify-center shrink-0">
+                                <div class="w-24 h-24 rounded-2xl bg-gradient-to-tr from-slate-900 to-amber-950 border border-amber-500/50 flex items-center justify-center text-4xl text-amber-400 shadow-2xl animate-float">
                                     <i class="fa-solid ${data.visualIcon}"></i>
                                 </div>
                             </div>
                         </div>
+
                         <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-2">
                             <div class="font-bold text-slate-900 text-xs flex items-center gap-2"><i class="fa-solid fa-circle-info ${accentClass}"></i> Pendahuluan Eksekutif</div>
                             <p class="text-xs text-slate-600 leading-relaxed">${data.introduction}</p>
@@ -1070,7 +1087,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="supabaseLiveContainer" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm"><div class="text-center text-xs text-slate-500">Klik salah satu menu transaksi di atas untuk menarik data secara langsung[cite: 3].</div></div>
+                        <div id="supabaseLiveContainer" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm"><div class="text-center text-xs text-slate-500">Klik salah satu menu transaksi di atas untuk menarik data secara langsung.</div></div>
                     </div>
                 ` : '';
 
