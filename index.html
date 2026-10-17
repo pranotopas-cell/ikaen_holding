@@ -299,7 +299,7 @@
             e.preventDefault();
             const passwordVal = document.getElementById('loginPassword').value;
             if (passwordVal === 'password123' || passwordVal.length > 0) {
-                currentAdmin = { name: 'Administrator', email: 'admin@energyholding.co.id', 'role: noto' };
+                currentAdmin = { name: 'Administrator', email: 'admin@energyholding.co.id', role: 'noto' };
                 isLoggedIn = true;
                 localStorage.setItem('holding_is_logged_in', 'true');
                 openGeneralLogin();
