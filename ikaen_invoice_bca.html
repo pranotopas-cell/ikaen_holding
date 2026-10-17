@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IKE - INVOICE BCA</title>
+    <title>IKAEN - INVOICE BCA</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -234,7 +234,7 @@
                             <tr>
                                 <td>NPWP<span class="lang-en">Tax ID Number</span></td>
                                 <td>:</td>
-                                <td>1000000007734310</td>
+                                <td>1xxxxxxxxxxxxxx</td>
                             </tr>
                             <tr>
                                 <td>TANGGAL PO<span class="lang-en">PO Date</span></td>
@@ -305,10 +305,10 @@
                 <div class="row">
                     <div class="col-8">
                         <p class="mb-1 text-decoration-underline fw-bold">Pembayaran / <span class="text-muted">Payment:</span></p>
-                        <p class="mb-0" style="font-size:12px;">1. Cash / Tunai</p>
+                        <p class="mb-0" style="font-size:12px;">1. Cash/Tunai</p>
                         <p class="mb-0" style="font-size:12px;">2. Transfer Bank Central Asia ( BCA )</p>
                         <p class="mb-0 ms-3" style="font-size:12px;">Account Name   : <b>PT. INVESTAMA KALIMANTAN ENERGI</b></p>
-                        <p class="mb-0 ms-3" style="font-size:12px;">Account Number : <b>010-551-9988</b></p>
+                        <p class="mb-0 ms-3" style="font-size:12px;">Account Number : <b>010-xxxxx-xxxx</b></p>
                     </div>
                 </div>
 
@@ -317,7 +317,7 @@
                         <p class="mb-0">Regard,</p>
                         <p class="fw-bold mb-0">PT. INVESTAMA KALIMANTAN ENERGI</p>
                         <div class="signature-space"></div><br>
-                        <p class="fw-bold text-decoration-underline mb-0 text-uppercase" style="font-size: 14px;">SUPRANOTO</p>
+                        <p class="fw-bold text-decoration-underline mb-0 text-uppercase" style="font-size: 14px;">YAYUK WIJAYANTI</p>
                         <p class="mb-0 small">Direktur</p>
                     </div>
                 </div>
@@ -327,11 +327,11 @@
                         <div class="d-flex align-items-center gap-2">
                             <img id="qr_footer" src="" width="70">
                             <div style="font-size: 8px; line-height: 1.2;">
-                                <b>Digital E-Form IKE System</b><br>Scan QR untuk validasi Invoice.<br><span id="qr_timestamp" style="color: #888; font-size: 7px;"></span>
+                                <b>Digital E-Form IKAEN System</b><br>Scan QR untuk validasi Invoice.<br><span id="qr_timestamp" style="color: #888; font-size: 7px;"></span>
                             </div>
                         </div>
                         <div class="text-end" style="font-size: 9px;">
-                            <b style="font-size: 10px; color: var(--kse-primary);">PT. INVESTAMA KALIMANTAN ENERGI</b><br>Jl. Ahmad Wongso RT. 18 Madurejo, Pangkalan Bun<br>pt.investamakalimantanenergi@gmail.com | 0815-884-1410
+                            <b style="font-size: 10px; color: var(--kse-primary);">PT. INVESTAMA KALIMANTAN ENERGI</b><br>Jl. Ahmad Wongso RT. 18 Madurejo, Pangkalan Bun<br>investamakalimantanenergi@gmail.com | 0852-5276-1578
                         </div>
                     </div>
                 </div>
@@ -401,9 +401,9 @@
         const y = d.getFullYear();
         
         const urut = document.getElementById('in_no_urut').value || "001";
-        const fullNo = `${urut} / INV-IKE / ${monthRomawi[m]} / ${y}`;
+        const fullNo = `${urut}/INV-IKAEN/${monthRomawi[m]}/${y}`;
         
-        document.getElementById('in_no_preview').innerText = ` / INV-IKE / ${monthRomawi[m]} / ${y}`;
+        document.getElementById('in_no_preview').innerText = `/INV-IKAEN/${monthRomawi[m]}/${y}`;
         document.getElementById('out_no').innerText = fullNo;
 
         document.getElementById('out_cust').innerText = document.getElementById('in_cust').value;
@@ -519,7 +519,7 @@
     function updateQRCode(grandTotal) {
         const noInv = document.getElementById('out_no').innerText;
         const customer = document.getElementById('in_cust').value;
-        const qrContent = `IKE-INV|NO:${noInv}|CUST:${customer}|TOTAL:Rp${formatIDR(grandTotal)}`;
+        const qrContent = `IKAEN-INV|NO:${noInv}|CUST:${customer}|TOTAL:Rp${formatIDR(grandTotal)}`;
         document.getElementById('qr_footer').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrContent)}`;
         document.getElementById('qr_timestamp').innerText = `Generated: ${new Date().toLocaleString('id-ID')}`;
     }
@@ -562,7 +562,7 @@
             alert("Berhasil! Data & PDF tersimpan di Cloud.");
             initAutoNumber(); 
         } catch (e) { alert("Error: " + e.message); }
-        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN DATA & AUTO UPLOAD'; btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN DATA'; btn.disabled = false;
     }
 
     function downloadPDF() {
@@ -597,7 +597,7 @@
         const now = new Date();
         document.getElementById('in_tgl_raw').value = now.toISOString().split('T')[0];
         handleDateChange();
-        document.getElementById('in_produk').value = "BIO SOLAR B50";
+        document.getElementById('in_produk').value = "BIO DEISEL PETRO 4;
         document.getElementById('in_qty_text').value = "";
         document.getElementById('in_h_nett_text').value = "";
         calculateFromBasic();
