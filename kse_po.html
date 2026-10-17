@@ -29,7 +29,7 @@
         .document-canvas { 
             background: white; 
             width: 210mm; 
-            height: 296mm; 
+            min-height: 296mm; 
             margin: 0 auto; 
             padding: 10mm 15mm 10mm 15mm; 
             position: relative;
@@ -37,7 +37,6 @@
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            overflow: hidden; 
             color: #222;
         }
 
@@ -82,11 +81,31 @@
         label.small { font-weight: 700; color: #444; margin-bottom: 4px; display: block; }
 
         @media print {
-            body { background: none; }
+            body { background: none; height: auto !important; overflow: auto !important; }
             .control-nav, .input-sidebar { display: none !important; }
             .col-lg-9 { width: 100% !important; margin: 0 !important; padding: 0 !important; }
             #pdf-area { padding: 0 !important; }
-            .document-canvas { margin: 0 !important; box-shadow: none !important; width: 100% !important; height: 100% !important; }
+            
+            html, body {
+                height: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .document-canvas { 
+                margin: 0 !important; 
+                box-shadow: none !important; 
+                width: 100% !important; 
+                min-height: 100vh !important;
+                height: 100% !important;
+                display: flex !important;
+                flex-direction: column !important;
+            }
+
+            .footer-kse {
+                margin-top: auto !important;
+                page-break-inside: avoid !important;
+            }
         }
     </style>
 </head>
@@ -298,7 +317,6 @@
 </div>
 
 <script>
-    // --- KONFIGURASI ---
     const CUSTOMER_DATABASE = {
         "PT. TELADAN MAKMUR JAYA": "Jl.Hksn no.23 Alalak Utara ,Banjarmasin - Kalimantan Selatan. \nUp: Ibu amel",
         "PT. OCEAN INDONESIA ENERGY": "Jl. Alalak Utara RT.016 Kel.Alalak Utara , \nBanjarmasin - Kalimantan Selatan.\nUp.Ibu Yuliana",
@@ -311,8 +329,6 @@
 
     const monthRomawi = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
     const monthsIndo = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
-
-    // --- FUNGSI LOGIKA ---
 
     function terbilang(angka) {
         angka = Math.floor(Math.abs(angka));
