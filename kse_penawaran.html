@@ -18,7 +18,7 @@
         
         #pdf-area { background: #f4f7f6; padding: 20px 0; }
         .document-canvas { 
-            background: white; width: 210mm; height: 296mm; margin: 0 auto; 
+            background: white; width: 210mm; min-height: 296mm; margin: 0 auto; 
             padding: 10mm 15mm 10mm 15mm; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.1); 
             box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden;
         }
@@ -46,7 +46,28 @@
             .control-nav, .input-sidebar { display: none !important; }
             .col-lg-9 { width: 100% !important; margin: 0 !important; }
             #pdf-area { padding: 0 !important; }
-            .document-canvas { box-shadow: none !important; margin: 0 !important; }
+            
+            html, body {
+                height: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: auto !important;
+            }
+
+            .document-canvas { 
+                box-shadow: none !important; 
+                margin: 0 !important; 
+                width: 100% !important;
+                min-height: 100vh !important;
+                height: 100% !important;
+                display: flex !important;
+                flex-direction: column !important;
+            }
+
+            .footer-kse {
+                margin-top: auto !important;
+                page-break-inside: avoid !important;
+            }
         }
     </style>
 </head>
@@ -265,7 +286,7 @@
         "PT. INTI DAYA MANDIRI SERVITAMA": "Jl. kawitan I No.54 RT.017 RW.000 Sidorejo Arut Selatan,\nKab.Kotawaringin Barat - Kalimantan Tengah 74111",
         "PT. BORNEO TRENGGINAS MANDIRI": "JL.Sri Kuncoro III No.142 RT.003 RW.003 Kalibanteng Kulon, Semarang Barat Kota Semarang - Jawa Tengah 50145",
         "PT. GADING SAWIT KENCANA": "Jl. Rangkas 3 No.138 RT.014 RW.005 Mentawa Baru Hulu ,Mentawa Baru Ketapang, Kab.Kotawaringin Timur - Kalimantan Tengah 74322",
-        "PT. BORNEO ARMADA PERKASA": "Jl. A.Yani Km.40 RT.021 RW.007 Pandu Sanjaya, Pangkalan Bun, Kab.Kotawringin Barat - Kalimantan Tengah 74184",
+        "PT. BORNEO ARMADA PERKASA": "Jl. A.Yani Km.40 RT.021 RW.007 Pandu Sanjaya, Pangkalan Bun, Kab.Kotwringin Barat - Kalimantan Tengah 74184",
         "PT. KORINDO ARIA BIMA SARII": "Wisma Korindo Jl. MT.Haryono Kav.62 Pancoran,Pancoran Kota Adm. DKI Jakarta 12780",
         "PT. HATAKO KHARISMA ABADI": "Jl. Masjid No.01 Kumai Hilir , Kumai, Kotawaringin Barat – Kalimantan Tengah",
         "PT. ARUT SAWIT MANDIRI": "Jl. Edy Suwargono No.39 Madurejo , Arut Selatan ,Kotawaringin Barat – Kalimantan Tengah 74112",
@@ -283,22 +304,17 @@
         return parseFloat(val).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    // --- LOGIKA PENOMORAN SEKUENSAL ---
-    // --- LOGIKA PENOMORAN SEKUENSAL PER BULAN ---
     async function syncAutoNumber() {
         try {
             const tglVal = document.getElementById('in_tgl_raw').value;
             const refDate = tglVal ? new Date(tglVal) : new Date();
             
-            // 1. Ambil tanggal awal dan tanggal akhir dari bulan yang dipilih
             const year = refDate.getFullYear();
-            const month = refDate.getMonth(); // 0 - 11
+            const month = refDate.getMonth();
             
-            // Format YYYY-MM-DD local time
             const firstDay = new Date(year, month, 1).toLocaleDateString('en-CA');
             const lastDay = new Date(year, month + 1, 0).toLocaleDateString('en-CA');
 
-            // 2. Tarik SEMUA nomor SPH pada rentang bulan & tahun tersebut
             const { data, error } = await _supabase
                 .from('eforms')
                 .select('nomor')
@@ -311,7 +327,6 @@
             let nextNum = 1;
 
             if (data && data.length > 0) {
-                // 3. Ekstrak nomor urut terdekat (3 digit depan) dan cari angka tertinggi
                 const numbers = data.map(item => {
                     if (item.nomor) {
                         const parts = item.nomor.split('/');
@@ -324,7 +339,6 @@
                 nextNum = maxNum + 1;
             }
 
-            // 4. Set nomor urut ke input
             document.getElementById('in_no_urut').value = nextNum;
             formatFullNumber();
             updatePeriode(refDate);
@@ -431,7 +445,7 @@
     function downloadPDF() {
         const element = document.getElementById('main-doc');
         html2pdf().set({ margin: 0, filename: `SPH-${document.getElementById('in_no').value}.pdf`, 
-                         html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } }).from(element).save();
+                           html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } }).from(element).save();
     }
 
     window.onload = () => {
@@ -445,7 +459,6 @@
         document.getElementById('in_tgl_raw').value = new Date().toISOString().split('T')[0];
         handleDateChange();
         
-        // Defaults
         document.getElementById('in_produk').value = "BIO SOLAR B50";
         document.getElementById('in_qty').value = "5.000 liter , 8000 liter , 10.000 Liter";
         document.getElementById('in_tol').value = "0,3% (Tera Mobil Transportir/T2)";
