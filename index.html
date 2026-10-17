@@ -903,6 +903,10 @@
                 window.location.href = `${prefix}_po.html`;
             } else if (actionType === 'penawaran') {
                 window.location.href = `${prefix}_penawaran.html`;
+            } else if (actionType === 'penawaran_diskon') {
+                window.location.href = `${prefix}_penawaran_diskon.html`;
+            } else if (actionType === 'penawaran_multi') {
+                window.location.href = `${prefix}_penawaran_multi.html`;
             } else if (actionType.includes('Invoice BRI')) {
                 window.location.href = `${prefix}_invoice_bri.html`;
             } else if (actionType.includes('Invoice BCA')) {
@@ -989,7 +993,7 @@
                             <span class="text-[10px] bg-slate-100 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-full font-medium"><i class="fa-solid fa-location-dot ${accentClass} mr-1"></i> ${data.location || 'Head Office: Pangkalan Bun'}</span>
                         </div>
                         
-                        <!-- Gambar / Banner Samping Holding (Diperbarui Menjadi Mewah & Berkelas) -->
+                        <!-- Gambar / Banner Samping Holding (Menggunakan holding.png) -->
                         <div class="bg-gradient-to-r ${data.visualBg} rounded-2xl p-6 sm:p-8 border flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden relative shadow-xl">
                             <div class="absolute right-0 top-0 bottom-0 w-1/2 opacity-15 bg-[radial-gradient(#d97706_1px,transparent_1px)] [background-size:12px_12px]"></div>
                             <div class="space-y-3 z-10 max-w-xl text-white">
@@ -998,8 +1002,8 @@
                                 <p class="text-xs text-slate-300 leading-relaxed">Menjamin mutu spesifikasi BBM Solar, ketepatan volume dengan flow meter terkalibrasi presisi tinggi, serta legalitas hukum terverifikasi penuh dari titik suplai hingga pengiriman akhir klien.</p>
                             </div>
                             <div class="z-10 flex items-center justify-center shrink-0">
-                                <div class="w-24 h-24 rounded-2xl bg-gradient-to-tr from-slate-900 to-amber-950 border border-amber-500/50 flex items-center justify-center text-4xl text-amber-400 shadow-2xl animate-float">
-                                    <i class="fa-solid ${data.visualIcon}"></i>
+                                <div class="w-28 h-28 rounded-2xl bg-gradient-to-tr from-slate-900 to-amber-950 border border-amber-500/50 flex items-center justify-center overflow-hidden shadow-2xl animate-float p-2">
+                                    <img src="holding.png" alt="Holding Logo" class="w-full h-full object-contain">
                                 </div>
                             </div>
                         </div>
@@ -1069,6 +1073,8 @@
                                     <button onclick="window.selectedMonthFilter='-10-'; loadPenawaranData('Penawaran Multi');" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Penawaran Multi</button>
                                     <button onclick="window.selectedMonthFilter='-10-'; loadPenawaranData('Penawaran Diskon');" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Penawaran Diskon</button>
                                     <button onclick="handleActionRedirect('penawaran')" class="w-full text-left font-semibold ${accentClass} hover:underline">&rarr; Buat Penawaran</button>
+                                    <button onclick="handleActionRedirect('penawaran_diskon')" class="w-full text-left font-semibold ${accentClass} hover:underline">&rarr; Klik Penawaran Diskon</button>
+                                    <button onclick="handleActionRedirect('penawaran_multi')" class="w-full text-left font-semibold ${accentClass} hover:underline">&rarr; Klik Penawaran Multi</button>
                                 </div>
                             </div>
                             <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-sm">
