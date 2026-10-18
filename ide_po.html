@@ -164,7 +164,9 @@
                     <label class="small">Supplier</label>
                     <input list="list_cust" id="in_cust" class="form-control form-control-sm" placeholder="Pilih atau ketik nama supplier..." oninput="handleCustChange()">
                     <datalist id="list_cust">
-                        <option value="PT. PETRO ANDALAN NUSANTARA">
+                        <option value="PT. TELADAN MAKMUR JAYA">
+                        <option value="PT. OCEAN INDONESIA ENERGY">
+                        <option value="PT. GLOBAL BORNEO ENERGI"> 
                     </datalist>
                 </div>
                 <div class="col-12">
@@ -178,7 +180,7 @@
                 <hr class="my-1">
                 <div class="col-12">
                     <label class="small">Nama Barang</label>
-                    <input list="list_barang" id="in_barang" class="form-control form-control-sm" value="BIO DIESEL PETRO 4" oninput="updateView()">
+                    <input list="list_barang" id="in_barang" class="form-control form-control-sm" value="BIO SOLAR B50" oninput="updateView()">
                     <datalist id="list_barang">
                         <option value="BIO DIESEL PETRO 4 ">
                         <option value="BIO SOLAR ( B50 )">
@@ -352,11 +354,10 @@
 <script>
     // --- KONFIGURASI ---
     const CUSTOMER_DATABASE = {
-        const CUSTOMER_DATABASE = {
         "PT. TELADAN MAKMUR JAYA": "Jl.Hksn no.23 Alalak Utara ,Banjarmasin - Kalimantan Selatan. \nUp: Ibu amel",
         "PT. OCEAN INDONESIA ENERGY": "Jl. Alalak Utara RT.016 Kel.Alalak Utara , \nBanjarmasin - Kalimantan Selatan.\nUp.Ibu Yuliana",
         "PT. GLOBAL BORNEO ENERGI": "Jl. Hasan Basri Komp.Ruko Kayu Tangi  ,\nBanjarmasin - Kalimantan Selatan.\nUp.Bpk.Abd.Muthalib"
-        },
+    };
     const SB_URL = "https://fymqbeaeiqkdypgptysz.supabase.co"; 
     const SB_KEY = "sb_publishable_seowoV1JdzMbXlojE7dejQ_GysYC07_";
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
