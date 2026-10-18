@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KSE - Penawaran Harga Dual Price</title>
+    <title>KSE - Penawaran Harga Diskon</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -27,8 +27,8 @@
         .logo-img { height: 45px; width: auto; }
         
         .doc-identity { text-align: right; }
-        .doc-identity h2 { font-weight: 900; font-style: italic; font-size: 26px; color: var(--kse-primary); margin: 0; line-height: 1; }
-        .doc-identity .sub-title-en { font-size: 14px; color: #666; font-style: italic; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .doc-identity h2 { font-weight: 900; font-style: italic; font-size: 20px; color: var(--kse-primary); margin: 0; line-height: 1; }
+        .doc-identity .sub-title-en { font-size: 11px; color: #666; font-style: italic; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
         
         .table-main { width: 100%; border-collapse: collapse; margin-top: 10px; border: 1.5px solid #000; }
         .table-main th { background-color: var(--kse-primary) !important; color: white !important; padding: 5px; border: 1px solid #000; text-align: center; font-size: 11px; }
@@ -62,9 +62,9 @@
     <div class="d-flex gap-2">
         <button class="btn btn-dark btn-sm fw-bold" onclick="window.print()"><i class="bi bi-printer"></i> PRINT</button>
         <button class="btn btn-warning btn-sm fw-bold px-3" onclick="saveToSupabase()" id="btn-save-sb">
-            <i class="bi bi-cloud-arrow-up"></i> SIMPAN & UPLOAD
+            <i class="bi bi-cloud-arrow-up"></i> SIMPAN 
         </button>
-        <button class="btn btn-primary btn-sm fw-bold px-3" onclick="downloadPDF()"><i class="bi bi-download"></i> DOWNLOAD PDF</button>
+        <button class="btn btn-primary btn-sm fw-bold px-3" onclick="downloadPDF()"><i class="bi bi-download"></i> DOWNLOAD </button>
     </div>
 </div>
 
@@ -248,8 +248,8 @@
                     <p class="mb-0">Hormat Kami / <span class="fst-italic">Best Regards,</span></p>
                     <p class="fw-bold mb-0">PT. KHATULISTIWA SINAR ENERGI</p>
                     <div style="height: 60px; margin: 5px 0;"><img src="ttd.png" style="height: 60px;" onerror="this.style.display='none'"></div>
-                    <p class="fw-bold text-decoration-underline mb-0 text-uppercase" style="font-size: 13px;">SUPRANOTO</p>
-                    <p class="mb-0 small">Direktur</p>
+                    <p class="fw-bold text-decoration-underline mb-0 text-uppercase" style="font-size: 13px;">ZULFA NURMALIKA</p>
+                    <p class="mb-0 small">Marketing Direktor</p>
                 </div>
 
                 <div class="footer-kse">
@@ -263,7 +263,8 @@
                         </div>
                         <div class="text-end" style="font-size: 8px;">
                             <b style="color: var(--kse-primary);">PT. KHATULISTIWA SINAR ENERGI</b><br>
-                            Jl. H.M. Rafi'i RT.24 Pangkalan Bun, Kalimantan Tengah
+                            Jl. H.M. Rafi'i RT.24 Madurejo Pangkalan Bun, Kalimantan Tengah<br>
+                            pt.khatulistiwa.sinar.energi@gmail.com | 0815-884-1410
                         </div>
                     </div>
                 </div>
@@ -462,7 +463,7 @@
         handleDateChange();
         
         // Default Value
-        document.getElementById('in_produk').value = "BBM SOLAR INDUSTRI";
+        document.getElementById('in_produk').value = "BBM SOLAR B50";
         document.getElementById('in_dest').value = " ";
         document.getElementById('in_qty').value = "5.000 liter , 8.000 liter , 10.000 Liter";
         document.getElementById('in_tol').value = "0,3% (Tera Mobil Transportir / T2)";
