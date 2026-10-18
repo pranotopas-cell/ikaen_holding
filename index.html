@@ -183,13 +183,13 @@
 
         const companiesData = {
             holding: {
-                id: 'holding', name: 'Holding Overview', shortName: 'Holding Group',
-                tagline: 'Sinergi Distributor, Agen, dan Transportir BBM Industri Terpercaya',
-                badge: 'Group Synergy',
-                operatingAreas: [
-                    { id: 'kse', name: 'KHATULISTIWA SINAR ENERGI', logo: 'header1.png', focus: 'Trading BBM Solar Industri', desc: 'Berfokus pada penyediaan dan trading komoditas BBM Solar industri berskala besar maupun kecil.' },
-                    { id: 'ikaen', name: 'INVESTAMA KALIMANTAN ENERGI', logo: 'ikaen.png', focus: 'Agen Resmi BBM Solar Industri', desc: 'Berperan sebagai agen resmi dari Petro Andalan Nusantara dalam penyaluran BBM solar industri.' },
-                    { id: 'ide', name: 'INDO DHARMA ENERGI', logo: 'ide1.png', focus: 'Transportir BBM Industri', desc: 'Perusahaan khusus penyedia jasa transportasi/transportir BBM industri wilayah Kalteng' }
+                    id: 'holding', name: 'Holding Overview', shortName: 'Holding Group',
+                    tagline: 'Sinergi Distributor, Agen, dan Transportir BBM Industri Terpercaya',
+                    badge: 'Group Synergy',
+                    operatingAreas: [
+                    { id: 'kse', name: 'KHATULISTIWA SINAR ENERGI', logo: 'header1.png', logoSize: 'max-h-6 max-w-[60px]', focus: 'Trading BBM Solar Industri', desc: 'Berfokus pada penyediaan dan trading komoditas BBM Solar industri berskala besar maupun kecil.' }, // <-- Tambahkan/atur logoSize di sini untuk KSE
+                    { id: 'ikaen', name: 'INVESTAMA KALIMANTAN ENERGI', logo: 'ikaen.png', logoSize: 'max-h-8 max-w-[85px]', focus: 'Agen Resmi BBM Solar Industri', desc: 'Berperan sebagai agen resmi dari Petro Andalan Nusantara dalam penyaluran BBM solar industri.' },
+                    { id: 'ide', name: 'INDO DHARMA ENERGI', logo: 'ide1.png', logoSize: 'max-h-8 max-w-[85px]', focus: 'Transportir BBM Industri', desc: 'Perusahaan khusus penyedia jasa transportasi/transportir BBM industri wilayah Kalteng' }
                 ]
             },
             kse: { 
@@ -982,7 +982,7 @@
                                     <div class="bg-gradient-to-b from-white via-slate-50/70 to-slate-100/50 border border-slate-200/80 rounded-2xl p-6 space-y-4 shadow-sm hover:shadow-xl hover:border-slate-300 transition group flex flex-col justify-between">
                                         <div class="flex flex-col items-center text-center">
                                             <div class="w-24 h-12 rounded-lg bg-white border border-slate-100 flex items-center justify-center p-1.5 mb-4 group-hover:border-slate-300 transition shadow-sm overflow-hidden">
-                                                <img src="${op.logo}" alt="${op.name} Logo" class="max-h-8 max-w-[85px] object-contain filter drop-shadow-sm">
+                                                <img src="${op.logo}" alt="${op.name} Logo" class="${op.logoSize || 'max-h-8 max-w-[85px]'} object-contain filter drop-shadow-sm">
                                             </div>
                                             <h4 class="font-extrabold text-slate-900 text-xs sm:text-sm tracking-tight uppercase">${op.name}</h4>
                                             <p class="text-xs text-slate-500 leading-relaxed mt-2">${op.desc}</p>
