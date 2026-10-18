@@ -18,9 +18,9 @@
             theme: {
                 extend: {
                     colors: {
-                        kse: { 500: '#d97706', 600: '#b45309', bg: '#fffbeb' },
+                        kse: { 500: '#1e3a8a', 600: '#1e40af', bg: '#eff6ff' },
                         ikaen: { 500: '#0d9488', 600: '#0f766e', bg: '#f0fdfa' },
-                        ide: { 500: '#dc2626', 600: '#b91c1c', bg: '#fef2f2' }
+                        ide: { 500: '#991b1b', 600: '#7f1d1d', bg: '#fef2f2' }
                     },
                     fontFamily: { sans: ['Inter', 'sans-serif'] }
                 }
@@ -45,7 +45,7 @@
             100% { background-position: 0% 50%; }
         }
         .animated-corp-bg {
-            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #311006, #0f172a, #18181b);
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #0f2942, #0f172a, #18181b);
             background-size: 400% 400%;
             animation: bgGradientMove 12s ease infinite;
         }
@@ -63,7 +63,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col selection:bg-amber-500 selection:text-white">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col selection:bg-blue-600 selection:text-white">
 
     <!-- Header / Navbar Utama -->
     <header class="bg-white/95 border-b border-slate-200 sticky top-0 z-50 backdrop-blur-md shadow-sm">
@@ -71,13 +71,13 @@
             <div class="flex items-center justify-between h-20">
                 <!-- Penggantian gambar gas pump dengan holding.png -->
                 <div class="flex items-center space-x-2.5 cursor-pointer shrink-0" onclick="goHome()">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-slate-950 via-slate-900 to-amber-950/80 p-1.5 flex items-center justify-center shadow-md border border-amber-500/30 overflow-hidden">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-slate-950 via-slate-900 to-blue-950/80 p-1.5 flex items-center justify-center shadow-md border border-blue-500/30 overflow-hidden">
                         <img src="holding.png" alt="Holding Logo" class="w-full h-full object-contain drop-shadow-sm">
                     </div>
                     <div>
                         <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-900 flex items-center gap-1.5">
                             HOLDING GROUP
-                            <span class="text-[9px] bg-amber-50 text-amber-700 px-1.5 py-0.2 rounded-full border border-amber-200 font-bold">v6.0 LUXURY</span>
+                            <span class="text-[9px] bg-blue-50 text-blue-700 px-1.5 py-0.2 rounded-full border border-blue-200 font-bold">v6.0 LUXURY</span>
                         </h1>
                         <p class="text-[10px] text-slate-500">Integrated Corporate Dashboard</p>
                     </div>
@@ -109,7 +109,7 @@
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
             <div class="text-center mb-6 relative z-10">
-                <div class="w-14 h-14 bg-gradient-to-tr from-amber-600 to-slate-900 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-lg border border-amber-500/30">
+                <div class="w-14 h-14 bg-gradient-to-tr from-blue-700 to-slate-900 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-lg border border-blue-500/30">
                     <i class="fa-solid fa-user-shield"></i>
                 </div>
                 <h3 class="text-xl font-extrabold text-slate-900">Login Akses Transaksi</h3>
@@ -117,16 +117,16 @@
             </div>
             <form onsubmit="handleLogin(event)" class="space-y-4 relative z-10">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5"><i class="fa-solid fa-lock text-amber-600 mr-1"></i> Kata Sandi</label>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5"><i class="fa-solid fa-lock text-blue-600 mr-1"></i> Kata Sandi</label>
                     <div class="relative">
                         <!-- Password Tidak Langsung Tampil (Value Dikosongkan) -->
-                        <input type="password" id="loginPassword" required placeholder="Masukkan kata sandi..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 pr-10 text-xs text-slate-900 focus:outline-none focus:border-amber-600 transition" value="">
+                        <input type="password" id="loginPassword" required placeholder="Masukkan kata sandi..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 pr-10 text-xs text-slate-900 focus:outline-none focus:border-blue-600 transition" value="">
                         <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-700 focus:outline-none">
                             <i id="eyeIcon" class="fa-solid fa-eye text-xs"></i>
                         </button>
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-gradient-to-r from-slate-900 via-slate-800 to-amber-700 hover:from-slate-800 hover:to-amber-600 text-white font-bold py-3 rounded-xl text-xs transition shadow-md flex items-center justify-center space-x-2 border border-amber-500/30">
+                <button type="submit" class="w-full bg-gradient-to-r from-slate-900 via-slate-800 to-blue-800 hover:from-slate-800 hover:to-blue-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-md flex items-center justify-center space-x-2 border border-blue-500/30">
                     <span>Verifikasi Masuk</span>
                     <i class="fa-solid fa-arrow-right-to-bracket"></i>
                 </button>
@@ -193,9 +193,9 @@
                 tagline: 'Sinergi Distributor, Agen, dan Transportir BBM Industri Terpercaya',
                 badge: 'Group Synergy',
                 operatingAreas: [
-                    { id: 'kse', name: 'PT. KHATULISTIWA SINAR ENERGI', focus: 'Trading BBM Solar Industri', desc: 'Berfokus pada penyediaan dan trading komoditas BBM Solar industri berskala besar maupun kecil.' },
-                    { id: 'ikaen', name: 'PT. INVESTAMA KALIMANTAN ENERGI', focus: 'Agen Resmi BBM Solar Industri', desc: 'Berperan sebagai agen resmi dari Petro Andalan Nusantara dalam penyaluran BBM solar industri.' },
-                    { id: 'ide', name: 'PT. INDO DHARMA ENERGI', focus: 'Transportir BBM Industri', desc: 'Perusahaan khusus penyedia jasa transportasi/transportir BBM industri wilayah Kalteng' }
+                    { id: 'kse', name: 'PT. KHATULISTIWA SINAR ENERGI', logo: 'header1.png', focus: 'Trading BBM Solar Industri', desc: 'Berfokus pada penyediaan dan trading komoditas BBM Solar industri berskala besar maupun kecil.' },
+                    { id: 'ikaen', name: 'PT. INVESTAMA KALIMANTAN ENERGI', logo: 'ikaen.png', focus: 'Agen Resmi BBM Solar Industri', desc: 'Berperan sebagai agen resmi dari Petro Andalan Nusantara dalam penyaluran BBM solar industri.' },
+                    { id: 'ide', name: 'PT. INDO DHARMA ENERGI', logo: 'ide1.png', focus: 'Transportir BBM Industri', desc: 'Perusahaan khusus penyedia jasa transportasi/transportir BBM industri wilayah Kalteng' }
                 ]
             },
             kse: { 
@@ -203,17 +203,18 @@
                 tagline: 'Trading & Penyediaan BBM Solar Industri Berkualitas Tinggi', 
                 badge: 'Trading Division', sector: 'Trading & Supply Chain BBM Solar', location: 'Head Office: Pangkalan Bun',
                 themeColor: 'kse',
-                badgeClass: 'bg-amber-100 text-amber-800 border-amber-200',
-                textAccent: 'text-amber-700',
-                borderAccent: 'border-amber-200',
-                bgAccent: 'bg-amber-50',
+                badgeClass: 'bg-blue-100 text-blue-800 border-blue-200',
+                textAccent: 'text-blue-700',
+                borderAccent: 'border-blue-200',
+                bgAccent: 'bg-blue-50',
+                headerLogo: 'header1.png',
                 introduction: 'PT. Khatulistiwa Sinar Energi (KSE) didirikan sebagai pilar utama dalam sektor perdagangan energi dan komoditas BBM solar industri di wilayah Kalimantan.',
                 vision: 'Menjadi perusahaan trading dan penyedia energi BBM industri terdepan, terpercaya, dan berstandar tinggi di Indonesia.', 
                 mission: 'Menjamin ketersediaan pasokan solar industri tepat waktu, bermutu tinggi, transparan, serta mengutamakan kepuasan mitra.',
                 board: 'Komisaris : M.Renaldi Azmi, Direktur: Supranoto.S.Ikom',
                 facilities: 'Memiliki fasilitas tangki penyimpanan berkapasitas besar, laboratorium uji mutu bahan bakar terpadu, sistem digitalisasi meter arus, serta armada suplai pendukung.',
                 visualIcon: 'fa-oil-well',
-                visualBg: 'from-amber-950 via-slate-900 to-slate-950 border-amber-500/50 text-amber-400',
+                visualBg: 'from-blue-950 via-slate-900 to-slate-950 border-blue-500/50 text-blue-400',
                 reviews: [
                     { client: 'PT Sawit Makmur Indah', author: 'Bpk. Herman (Procurement Mgr)', text: 'KSE konsisten memberikan pasokan High Speed Diesel (HSD) berkualitas tinggi.' },
                     { client: 'PT Borneo Mining Utama', author: 'Ibu Ratna (Logistics Head)', text: 'Mitra trading paling transparan di Kalimantan.' },
@@ -229,6 +230,7 @@
                 textAccent: 'text-teal-700',
                 borderAccent: 'border-teal-200',
                 bgAccent: 'bg-teal-50',
+                headerLogo: 'ikaen.png',
                 introduction: 'PT. Investama Kalimantan Energi (IKAEN) berperan vital sebagai perpanjangan tangan resmi dalam jaringan distribusi dan keagenan BBM solar industri.',
                 vision: 'Menjadi agen penyaluran energi terkemuka yang memberikan nilai tambah maksimal bagi pertumbuhan ekonomi regional.', 
                 mission: 'Menjalankan fungsi keagenan secara profesional, legal, transparan, dan berorientasi pada kemitraan jangka panjang.',
@@ -251,6 +253,7 @@
                 textAccent: 'text-red-700',
                 borderAccent: 'border-red-200',
                 bgAccent: 'bg-red-50',
+                headerLogo: 'ide1.png',
                 introduction: 'PT. Indo Dharma Energi (IDE) adalah tulang punggung logistik holding yang mengoperasikan armada truk tangki berkapasitas tinggi.',
                 vision: 'Menjadi penyedia jasa logistik dan transportir energi paling handal, aman, dan tepat waktu di jalur distribusi.', 
                 mission: 'Mengutamakan aspek Keselamatan Kerja & Lingkungan (HSE), keandalan armada truk tangki, serta ketepatan jadwal.',
@@ -273,9 +276,9 @@
             const mobileNav = document.getElementById('mobileNav');
             const items = [
                 { id: 'holding', name: 'OVERVIEW', icon: 'fa-network-wired', activeColor: 'text-slate-900 border-slate-300 bg-white' },
-                { id: 'kse', name: 'PT KSE', icon: 'fa-sun', activeColor: 'text-amber-700 border-amber-300 bg-amber-50/80 font-bold' },
-                { id: 'ikaen', name: 'PT IKAEN', icon: 'fa-handshake', activeColor: 'text-teal-700 border-teal-300 bg-teal-50/80 font-bold' },
-                { id: 'ide', name: 'PT IDE', icon: 'fa-truck-moving', activeColor: 'text-red-700 border-red-300 bg-red-50/80 font-bold' }
+                { id: 'kse', name: 'KHATULISTIWA SINAR ENERGI', icon: 'fa-sun', activeColor: 'text-blue-700 border-blue-300 bg-blue-50/80 font-bold' },
+                { id: 'ikaen', name: 'INVESTAMA KALIMANTAN ENERGI', icon: 'fa-handshake', activeColor: 'text-teal-700 border-teal-300 bg-teal-50/80 font-bold' },
+                { id: 'ide', name: 'INDO DHARMA ENERGI', icon: 'fa-truck-moving', activeColor: 'text-red-700 border-red-300 bg-red-50/80 font-bold' }
             ];
 
             desktopNav.innerHTML = items.map(i => {
@@ -283,7 +286,7 @@
                 let textColor = 'text-slate-600 hover:text-slate-900';
                 let iconColor = 'text-slate-400';
                 
-                if (i.id === 'kse') { textColor = isActive ? 'text-amber-700' : 'text-amber-600 hover:text-amber-800'; iconColor = 'text-amber-500'; }
+                if (i.id === 'kse') { textColor = isActive ? 'text-blue-700' : 'text-blue-600 hover:text-blue-800'; iconColor = 'text-blue-500'; }
                 else if (i.id === 'ikaen') { textColor = isActive ? 'text-teal-700' : 'text-teal-600 hover:text-teal-800'; iconColor = 'text-teal-500'; }
                 else if (i.id === 'ide') { textColor = isActive ? 'text-red-700' : 'text-red-600 hover:text-red-800'; iconColor = 'text-red-500'; }
 
@@ -301,7 +304,7 @@
             if (isLoggedIn) {
                 authArea.innerHTML = `<div class="flex items-center space-x-3"><div class="hidden sm:block text-right"><div class="text-xs font-bold text-slate-900">${currentAdmin.name}</div><div class="text-[10px] text-emerald-600 font-semibold">${currentAdmin.role}</div></div><button onclick="handleLogout()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition">Logout</button></div>`;
             } else {
-                authArea.innerHTML = `<button onclick="openGeneralLogin()" class="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-slate-900 to-amber-700 hover:from-slate-800 hover:to-amber-600 text-white shadow-md transition border border-amber-500/30">Login </button>`;
+                authArea.innerHTML = `<button onclick="openGeneralLogin()" class="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-slate-900 to-blue-800 hover:from-slate-800 hover:to-blue-700 text-white shadow-md transition border border-blue-500/30">Login </button>`;
             }
         }
 
@@ -949,16 +952,16 @@
                     container.innerHTML = `
                         <div class="fade-in space-y-6">
                             <!-- Background Banner Utama yang Telah Diperbarui dengan Animasi Gradien Modern -->
-                            <div class="animated-corp-bg border border-amber-500/40 rounded-3xl p-6 sm:p-8 text-white shadow-2xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div class="animated-corp-bg border border-blue-500/40 rounded-3xl p-6 sm:p-8 text-white shadow-2xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-4">
                                 <!-- Lapisan Efek Partikel & Grid Overlay Modern -->
-                                <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#f59e0b_1.5px,transparent_1.5px)] [background-size:18px_18px]"></div>
-                                <div class="absolute -top-12 -left-12 w-48 h-48 bg-amber-500/20 rounded-full blur-3xl glow-orb-1 pointer-events-none"></div>
+                                <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#3b82f6_1.5px,transparent_1.5px)] [background-size:18px_18px]"></div>
+                                <div class="absolute -top-12 -left-12 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl glow-orb-1 pointer-events-none"></div>
                                 <div class="absolute -bottom-12 -right-12 w-56 h-56 bg-indigo-500/20 rounded-full blur-3xl glow-orb-2 pointer-events-none"></div>
 
                                 <div class="relative z-10">
                                     <h2 class="text-2xl font-extrabold mb-1 flex items-center gap-2">
                                         Selamat Datang, ${currentAdmin.name} 
-                                        <span class="text-xs bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded-full border border-amber-500/40 shadow-sm font-bold"><i class="fa-solid fa-crown mr-1"></i> VIP Access</span>
+                                        <span class="text-xs bg-blue-500/20 text-blue-300 px-2.5 py-0.5 rounded-full border border-blue-500/40 shadow-sm font-bold"><i class="fa-solid fa-crown mr-1"></i> VIP Access</span>
                                     </h2>
                                     <p class="text-slate-300 text-xs">Sistem Otorisasi Aktif (${currentAdmin.role}). Silakan pilih entitas perusahaan di atas untuk mengelola transaksi.</p>
                                 </div>
@@ -972,24 +975,26 @@
                 } else {
                     container.innerHTML = `
                         <div class="fade-in space-y-8">
-                            <div class="animated-corp-bg border border-amber-500/30 rounded-3xl p-6 sm:p-10 text-white shadow-2xl relative overflow-hidden">
-                                <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#f59e0b_1.5px,transparent_1.5px)] [background-size:18px_18px]"></div>
-                                <div class="absolute -top-10 -left-10 w-48 h-48 bg-amber-500/20 rounded-full blur-3xl glow-orb-1 pointer-events-none"></div>
+                            <div class="animated-corp-bg border border-blue-500/30 rounded-3xl p-6 sm:p-10 text-white shadow-2xl relative overflow-hidden">
+                                <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#3b82f6_1.5px,transparent_1.5px)] [background-size:18px_18px]"></div>
+                                <div class="absolute -top-10 -left-10 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl glow-orb-1 pointer-events-none"></div>
                                 <div class="relative z-10 max-w-2xl space-y-3">
-                                    <span class="text-[10px] uppercase tracking-widest bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full border border-amber-500/40 font-bold"><i class="fa-solid fa-crown mr-1"></i> Executive Holding Portal</span>
+                                    <span class="text-[10px] uppercase tracking-widest bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full border border-blue-500/40 font-bold"><i class="fa-solid fa-crown mr-1"></i> Executive Holding Portal</span>
                                     <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Holding Overview</h2>
                                     <p class="text-slate-300 text-sm leading-relaxed">Sinergi Distributor, Agen, dan Transportir BBM Industri Terpercaya dengan standar pelayanan korporat tingkat tinggi.</p>
                                 </div>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 ${companiesData.holding.operatingAreas.map(op => `
-                                    <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-3 shadow-sm hover:shadow-lg transition group">
-                                        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold border border-amber-200 group-hover:bg-amber-600 group-hover:text-white transition">
-                                            <i class="fa-solid fa-building"></i>
+                                    <div class="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm hover:shadow-lg transition group flex flex-col justify-between">
+                                        <div>
+                                            <div class="w-full h-16 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2 mb-3 group-hover:border-slate-300 transition overflow-hidden">
+                                                <img src="${op.logo}" alt="${op.name} Logo" class="max-h-full max-w-full object-contain filter drop-shadow-sm">
+                                            </div>
+                                            <h4 class="font-bold text-slate-900 text-sm tracking-tight">${op.name}</h4>
+                                            <p class="text-xs text-slate-500 leading-relaxed mt-2">${op.desc}</p>
                                         </div>
-                                        <h4 class="font-bold text-slate-900 text-base">${op.name}</h4>
-                                        <p class="text-xs text-slate-500 leading-relaxed">${op.desc}</p>
-                                        <button onclick="switchTab('${op.id}')" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center gap-2">
+                                        <button onclick="switchTab('${op.id}')" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center gap-2 mt-3">
                                             <span>Buka Company Profile</span>
                                             <i class="fa-solid fa-arrow-right"></i>
                                         </button>
@@ -1026,19 +1031,19 @@
                             <span class="text-[10px] bg-slate-100 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-full font-medium"><i class="fa-solid fa-location-dot ${accentClass} mr-1"></i> ${data.location || 'Head Office: Pangkalan Bun'}</span>
                         </div>
                         
-                        <!-- Banner Profil dengan Gambar holding.png dan Background Elegan -->
+                        <!-- Banner Profil dengan Gambar Header & Background Elegan -->
                         <div class="bg-gradient-to-r ${data.visualBg} rounded-2xl p-6 sm:p-8 border flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden relative shadow-xl">
-                            <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#f59e0b_1.5px,transparent_1.5px)] [background-size:16px_16px]"></div>
-                            <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-amber-500/10 rounded-full blur-2xl"></div>
+                            <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#3b82f6_1.5px,transparent_1.5px)] [background-size:16px_16px]"></div>
+                            <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl"></div>
                             
                             <div class="space-y-3 z-10 max-w-xl text-white">
-                                <span class="text-[10px] uppercase font-extrabold tracking-widest bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full border border-amber-500/40 shadow-sm inline-flex items-center gap-1.5"><i class="fa-solid fa-gem"></i> Luxury Energy Standards</span>
+                                <span class="text-[10px] uppercase font-extrabold tracking-widest bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full border border-blue-500/40 shadow-sm inline-flex items-center gap-1.5"><i class="fa-solid fa-gem"></i> Luxury Energy Standards</span>
                                 <h4 class="text-xl sm:text-2xl font-black text-white">Standar Pelayanan BBM Industri Terintegrasi</h4>
                                 <p class="text-xs text-slate-300 leading-relaxed">Menjamin mutu spesifikasi BBM Solar, ketepatan volume dengan flow meter terkalibrasi presisi tinggi, serta legalitas hukum terverifikasi penuh dari titik suplai hingga pengiriman akhir klien.</p>
                             </div>
                             <div class="z-10 flex items-center justify-center shrink-0">
-                                <div class="w-28 h-28 rounded-2xl bg-gradient-to-tr from-slate-950 via-slate-900 to-amber-950/80 border border-amber-500/40 flex items-center justify-center overflow-hidden shadow-2xl animate-float p-3 backdrop-blur-md">
-                                    <img src="holding.png" alt="Holding Logo" class="w-full h-full object-contain drop-shadow-md">
+                                <div class="w-32 h-20 rounded-2xl bg-white/95 border border-slate-200 flex items-center justify-center overflow-hidden shadow-2xl animate-float p-3 backdrop-blur-md">
+                                    <img src="${data.headerLogo}" alt="${data.shortName} Logo" class="w-full h-full object-contain drop-shadow-md">
                                 </div>
                             </div>
                         </div>
