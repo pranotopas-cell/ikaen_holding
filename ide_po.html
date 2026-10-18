@@ -65,7 +65,7 @@
 
         .header-section { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 40px; padding-bottom: 15px; }
         .header-brand { display: flex; align-items: center; gap: 12px; }
-        .logo-img { height: 50px; width: auto; object-fit: contain; }
+        .logo-img { height: 60px; width: auto; object-fit: contain; }
         .brand-text { display: flex; flex-direction: column; line-height: 1.15; }
         .brand-title { font-weight: 800; font-size: 18px; color: var(--ide-primary); letter-spacing: 0.5px; text-transform: uppercase; }
         .brand-subtitle { font-weight: 700; font-size: 14px; color: var(--ide-accent); letter-spacing: 0.5px; text-transform: uppercase; }
@@ -137,9 +137,9 @@
     <div class="d-flex gap-2">
         <button class="btn btn-dark btn-sm fw-bold" onclick="window.print()"><i class="bi bi-printer"></i> PRINT</button>
         <button class="btn btn-warning btn-sm fw-bold px-3" onclick="saveToSupabase()" id="btn-save-sb">
-            <i class="bi bi-cloud-arrow-up"></i> SIMPAN & AUTO UPLOAD
+            <i class="bi bi-cloud-arrow-up"></i> SIMPAN
         </button>
-        <button class="btn btn-sm fw-bold px-3 text-white" style="background-color: var(--ide-accent);" onclick="downloadPDF()"><i class="bi bi-download"></i> DOWNLOAD PDF</button>
+        <button class="btn btn-sm fw-bold px-3 text-white" style="background-color: var(--ide-accent);" onclick="downloadPDF()"><i class="bi bi-download"></i> DOWNLOAD</button>
     </div>
 </div>
 
@@ -185,11 +185,11 @@
                     </datalist>
                 </div>
                 <div class="col-6">
-                    <label class="small" style="color: var(--ide-primary);">Harga per Liter (Beli)</label>
+                    <label class="small" style="color: var(--ide-primary);">Harga Beli</label>
                     <input type="number" id="in_hargaperliter" class="form-control form-control-sm" style="border-color: var(--ide-primary);" value="" oninput="calculate()">
                 </div>
                 <div class="col-6">
-                    <label class="small">Qty (Ltr)</label>
+                    <label class="small">Qty</label>
                     <input type="number" id="in_qty" class="form-control form-control-sm" value="" oninput="calculate()">
                 </div>
                 
@@ -324,7 +324,7 @@
                         <div style="height: 80px; margin: 5px 0; display: flex; align-items: center;">
                             <img src="ttd.png" style="height: 75px;" onerror="this.style.display='none'">
                         </div>
-                        <p class="fw-bold text-decoration-underline mb-0 text-uppercase" style="font-size: 14px; letter-spacing: 0.5px;">Ela Yuliana</p>
+                        <p class="fw-bold text-decoration-underline mb-0 text-uppercase" style="font-size: 14px; letter-spacing: 0.5px;">Nurhamida</p>
                         <p class="mb-0" style="font-size: 11px; color: #555;">Direktur</p>
                     </div>
                 </div>
