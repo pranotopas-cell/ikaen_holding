@@ -76,7 +76,7 @@
                     <div>
                         <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-900 flex items-center gap-1.5">
                             HOLDING GROUP
-                            <span class="text-[9px] bg-blue-50 text-blue-700 px-1.5 py-0.2 rounded-full border border-blue-200 font-bold">v6.0 LUXURY</span>
+                            <span class="text-[9px] bg-blue-50 text-blue-700 px-1.5 py-0.2 rounded-full border border-blue-200 font-bold">B-0550-LAR</span>
                         </h1>
                         <p class="text-[10px] text-slate-500">Integrated Corporate Dashboard</p>
                     </div>
@@ -177,33 +177,33 @@
 
         let isLoggedIn = localStorage.getItem('holding_is_logged_in') === 'true';
         let activeTab = 'holding';
-        let currentAdmin = { name: 'Holding Administrator', email: 'admin@energyholding.co.id', role: 'Single Administrator' };
+        let currentAdmin = { name: 'Admin' , email: 'admin@energyholding.co.id', role: 'Noto' };
         
         window.selectedMonthFilter = '-10-';
 
         const companiesData = {
             holding: {
             id: 'holding', name: 'Holding Overview', shortName: 'Holding Group',
-            tagline: 'Sinergi Distributor, Agen, dan Transportir BBM Industri Terpercaya',
+            tagline: 'Sinergi Supplier, Agen Penyalur, dan Transportir BBM Industri B50 Terpercaya',
             badge: 'Group Synergy',
             operatingAreas: [
-            { id: 'kse', name: 'KHATULISTIWA SINAR ENERGI', logo: 'header1.png', logoSize: 'max-h-6 max-w-[60px]', focus: 'Trading BBM Solar Industri', desc: 'Berfokus pada penyediaan dan trading komoditas BBM Solar industri berskala besar maupun kecil.' }, // <-- Tambahkan/atur logoSize di sini untuk KSE
-            { id: 'ikaen', name: 'INVESTAMA KALIMANTAN ENERGI', logo: 'ikaen.png', logoSize: 'max-h-8 max-w-[85px]', focus: 'Agen Resmi BBM Solar Industri', desc: 'Berperan sebagai agen resmi dari Petro Andalan Nusantara dalam penyaluran BBM solar industri.' },
+            { id: 'kse', name: 'KHATULISTIWA SINAR ENERGI', logo: 'header1.png', logoSize: 'max-h-6 max-w-[60px]', focus: 'Supplier BBM Solar Industri B50', desc: 'Berfokus pada penyediaan dan trading komoditas BBM Solar industri berskala besar maupun kecil.' }, // <-- Tambahkan/atur logoSize di sini untuk KSE
+            { id: 'ikaen', name: 'INVESTAMA KALIMANTAN ENERGI', logo: 'ikaen.png', logoSize: 'max-h-8 max-w-[85px]', focus: 'Agen Penyalur  BBM Solar Industri', desc: 'Berperan sebagai agen resmi dari Petro Andalan Nusantara dalam penyaluran BBM solar industri.' },
             { id: 'ide', name: 'INDO DHARMA ENERGI', logo: 'ide1.png', logoSize: 'max-h-8 max-w-[85px]', focus: 'Transportir BBM Industri', desc: 'Perusahaan khusus penyedia jasa transportasi/transportir BBM industri wilayah Kalteng' }
         ]
     },
             kse: { 
                 id: 'kse', name: 'PT. Khatulistiwa Sinar Energi', shortName: 'Khatulistiwa Sinar Energi', 
-                tagline: 'Trading & Penyediaan BBM Solar Industri Berkualitas Tinggi', 
-                badge: 'Trading Division', sector: 'Trading & Supply Chain BBM Solar', location: 'Head Office: Pangkalan Bun',
+                tagline: 'Supplier & Trading  BBM industri B50 dengan support supplay dari PT.OCEANINDO ENERGY ', 
+                badge: 'Sinergi Mengalirkan Energi', sector: 'Trading & Supply Chain BBM Solar Industri B50', location: 'Head Office: Pangkalan Bun',
                 themeColor: 'kse',
                 badgeClass: 'bg-blue-100 text-blue-800 border-blue-200',
                 textAccent: 'text-blue-700',
                 borderAccent: 'border-blue-200',
                 bgAccent: 'bg-blue-50',
                 headerLogo: 'header1.png',
-                introduction: 'PT. Khatulistiwa Sinar Energi (KSE) didirikan sebagai pilar utama dalam sektor perdagangan energi dan komoditas BBM solar industri di wilayah Kalimantan.',
-                vision: 'Menjadi perusahaan trading dan penyedia energi BBM industri terdepan, terpercaya, dan berstandar tinggi di Indonesia.', 
+                introduction: 'PT. Khatulistiwa Sinar Energi (KSE) didirikan sebagai pilar utama dalam sektor perdagangan energi dan komoditas BBM solar industri B50 di wilayah Kalimantan.',
+                vision: 'Menjadi perusahaan supplier dan penyedia energi BBM industri terdepan, terpercaya, dan berstandar tinggi di Indonesia.', 
                 mission: 'Menjamin ketersediaan pasokan solar industri tepat waktu, bermutu tinggi, transparan, serta mengutamakan kepuasan mitra.',
                 board: 'Komisaris : M.Renaldi Azmi, Direktur: Supranoto.S.Ikom',
                 facilities: 'Memiliki fasilitas tangki penyimpanan berkapasitas besar, laboratorium uji mutu bahan bakar terpadu, sistem digitalisasi meter arus, serta armada suplai pendukung.',
@@ -217,8 +217,8 @@
             },
             ikaen: { 
                 id: 'ikaen', name: 'PT. Investama Kalimantan Energi', shortName: 'Investama Kalimantan Energi', 
-                tagline: 'Agen Resmi Penyaluran & Distribusi Energi Berkelanjutan', 
-                badge: 'Agency Division', sector: 'Keagenan Resmi BBM Solar', location: 'Head Office: Pangkalan Bun',
+                tagline: 'Agen Penyalur dari PT.PETRO ANDALAN NUSANTARA & Distribusi Energi Berkelanjutan', 
+                badge: 'Pejuang Energi', sector: 'Keagenan Resmi BBM Solar B50 dari PT.PAN', location: 'Head Office: Pangkalan Bun',
                 themeColor: 'ikaen',
                 badgeClass: 'bg-teal-100 text-teal-800 border-teal-200',
                 textAccent: 'text-teal-700',
@@ -241,7 +241,7 @@
             ide: { 
                 id: 'ide', name: 'PT. Indo Dharma Energi', shortName: 'Indo Dharma Energi', 
                 tagline: 'Solusi Logistik, Armada, dan Transportir BBM Industri Terhandal', 
-                badge: 'Logistics Division', sector: 'Transportir & Armada Logistik BBM', location: 'Head Office: Pangkalan Bun',
+                badge: 'SPIRIT', sector: 'Transportir & Armada Logistik BBM Industri', location: 'Head Office: Pangkalan Bun',
                 themeColor: 'ide',
                 badgeClass: 'bg-red-100 text-red-800 border-red-200',
                 textAccent: 'text-red-700',
