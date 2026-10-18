@@ -183,13 +183,13 @@
 
         const companiesData = {
             holding: {
-                    id: 'holding', name: 'Holding Overview', shortName: 'Holding Group',
-                    tagline: 'Sinergi Distributor, Agen, dan Transportir BBM Industri Terpercaya',
-                    badge: 'Group Synergy',
-                    operatingAreas: [
-                    { id: 'kse', name: 'KHATULISTIWA SINAR ENERGI', logo: 'header1.png', logoSize: 'max-h-6 max-w-[55px]', focus: 'Trading BBM Solar Industri', desc: 'Berfokus pada penyediaan dan trading komoditas BBM Solar industri berskala besar maupun kecil.' }, // <-- Tambahkan/atur logoSize di sini untuk KSE
-                    { id: 'ikaen', name: 'INVESTAMA KALIMANTAN ENERGI', logo: 'ikaen.png', logoSize: 'max-h-8 max-w-[85px]', focus: 'Agen Resmi BBM Solar Industri', desc: 'Berperan sebagai agen resmi dari Petro Andalan Nusantara dalam penyaluran BBM solar industri.' },
-                    { id: 'ide', name: 'INDO DHARMA ENERGI', logo: 'ide1.png', logoSize: 'max-h-8 max-w-[85px]', focus: 'Transportir BBM Industri', desc: 'Perusahaan khusus penyedia jasa transportasi/transportir BBM industri wilayah Kalteng' }
+                id: 'holding', name: 'Holding Overview', shortName: 'Holding Group',
+                tagline: 'Sinergi Distributor, Agen, dan Transportir BBM Industri Terpercaya',
+                badge: 'Group Synergy',
+                operatingAreas: [
+                    { id: 'kse', name: 'KHATULISTIWA SINAR ENERGI', logo: 'header1.png', focus: 'Trading BBM Solar Industri', desc: 'Berfokus pada penyediaan dan trading komoditas BBM Solar industri berskala besar maupun kecil.' },
+                    { id: 'ikaen', name: 'INVESTAMA KALIMANTAN ENERGI', logo: 'ikaen.png', focus: 'Agen Resmi BBM Solar Industri', desc: 'Berperan sebagai agen resmi dari Petro Andalan Nusantara dalam penyaluran BBM solar industri.' },
+                    { id: 'ide', name: 'INDO DHARMA ENERGI', logo: 'ide1.png', focus: 'Transportir BBM Industri', desc: 'Perusahaan khusus penyedia jasa transportasi/transportir BBM industri wilayah Kalteng' }
                 ]
             },
             kse: { 
@@ -650,6 +650,14 @@
                         return sum + val;
                     }, 0);
 
+                    // Kalkulasi PPN berdasarkan rumus baru:
+                    // 1. Jumlah Invoice x 100 / 111 = DPP
+                    // 2. DPP x 11 / 12 = DPP Nilai Lain
+                    // 3. DPP Nilai Lain x 12% = Jumlah PPN Keluaran
+                    let calcDpp = totalNominalInvoice * (100 / 111);
+                    let calcDppNilaiLain = calcDpp * (11 / 12);
+                    let calcPpnKeluaran = calcDppNilaiLain * 0.12;
+
                     let rows = filteredData.map((item, idx) => {
                         let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-[10px] font-bold border border-red-200 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View Invoice</a>` : `<span class="text-slate-400 text-[10px]">No PDF</span>`;
                         let nomorVal = item.nomor || item.nomor_dokumen || item.no_po || ('INV-0' + (idx+1));
@@ -687,15 +695,31 @@
                                     <tbody class="divide-y divide-slate-100">${rows}</tbody>
                                 </table>
                             </div>
-                            <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-4 rounded-2xl border border-slate-700 flex items-center justify-between shadow-md text-white">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-lg bg-white/10 text-white flex items-center justify-center font-bold border border-white/20">
-                                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                            <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-5 rounded-2xl border border-slate-700 shadow-xl text-white space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-8 h-8 rounded-lg bg-white/10 text-white flex items-center justify-center font-bold border border-white/20">
+                                            <i class="fa-solid fa-file-invoice-dollar"></i>
+                                        </div>
+                                        <span class="text-xs font-extrabold uppercase tracking-wider">Total Keseluruhan Nominal Invoice:</span>
                                     </div>
-                                    <span class="text-xs font-extrabold uppercase tracking-wider">Total Keseluruhan Nominal Invoice:</span>
+                                    <div class="text-sm font-black font-mono bg-white/10 px-4 py-2 rounded-xl border border-white/20 shadow-inner">
+                                        Rp ${totalNominalInvoice.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                                    </div>
                                 </div>
-                                <div class="text-sm font-black font-mono bg-white/10 px-4 py-2 rounded-xl border border-white/20 shadow-inner">
-                                    Rp ${totalNominalInvoice.toLocaleString('id-ID')}
+                                <div class="border-t border-slate-700/80 pt-3 space-y-2 text-xs">
+                                    <div class="flex justify-between items-center text-slate-300">
+                                        <span>&bull; DPP (Invoice $\times$ 100/111):</span>
+                                        <span class="font-mono font-bold text-white">Rp ${calcDpp.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center text-slate-300">
+                                        <span>&bull; DPP Nilai Lain (DPP $\times$ 11/12):</span>
+                                        <span class="font-mono font-bold text-white">Rp ${calcDppNilaiLain.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center bg-white/5 p-2.5 rounded-xl border border-white/10 text-emerald-400 font-bold">
+                                        <span><i class="fa-solid fa-calculator mr-1"></i> Jumlah PPN Keluaran (DPP Nilai Lain $\times$ 12%):</span>
+                                        <span class="font-mono text-sm">Rp ${calcPpnKeluaran.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -976,13 +1000,12 @@
                                     <p class="text-slate-300 text-sm leading-relaxed">Sinergi Distributor, Agen, dan Transportir BBM Industri Terpercaya dengan standar pelayanan korporat tingkat tinggi.</p>
                                 </div>
                             </div>
-                            <!-- Kartu Operasional dengan Background Soft, Logo Lebih Kecil, dan Nama Center di Bawah Logo Tanpa Kata PT -->
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 ${companiesData.holding.operatingAreas.map(op => `
                                     <div class="bg-gradient-to-b from-white via-slate-50/70 to-slate-100/50 border border-slate-200/80 rounded-2xl p-6 space-y-4 shadow-sm hover:shadow-xl hover:border-slate-300 transition group flex flex-col justify-between">
                                         <div class="flex flex-col items-center text-center">
                                             <div class="w-24 h-12 rounded-lg bg-white border border-slate-100 flex items-center justify-center p-1.5 mb-4 group-hover:border-slate-300 transition shadow-sm overflow-hidden">
-                                                <img src="${op.logo}" alt="${op.name} Logo" class="${op.logoSize || 'max-h-8 max-w-[85px]'} object-contain filter drop-shadow-sm">
+                                                <img src="${op.logo}" alt="${op.name} Logo" class="max-h-8 max-w-[85px] object-contain filter drop-shadow-sm">
                                             </div>
                                             <h4 class="font-extrabold text-slate-900 text-xs sm:text-sm tracking-tight uppercase">${op.name}</h4>
                                             <p class="text-xs text-slate-500 leading-relaxed mt-2">${op.desc}</p>
@@ -1024,7 +1047,6 @@
                             <span class="text-[10px] bg-slate-100 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-full font-medium"><i class="fa-solid fa-location-dot ${accentClass} mr-1"></i> ${data.location || 'Head Office: Pangkalan Bun'}</span>
                         </div>
                         
-                        <!-- Banner Profil dengan Logo Lebih Kecil dan Elegan -->
                         <div class="bg-gradient-to-r ${data.visualBg} rounded-2xl p-6 sm:p-8 border flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden relative shadow-xl">
                             <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#3b82f6_1.5px,transparent_1.5px)] [background-size:16px_16px]"></div>
                             <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl"></div>
