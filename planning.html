@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RENCANA PENGIRIMAN </title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <style>
+        /* Skema Warna: Dark Blue Theme */
+        :root {
+            --bg-body: #e9ecef;
+            --bg-card: #ffffff;
+            --primary: #002d5b;
+            --primary-light: #004080;
+            --secondary: #495057;
+            --accent-green: #1e7e34;
+            --accent-blue: #002d5b;
+            --accent-red: #bd2130;
+            --accent-purple: #4b2394;
+            --accent-yellow: #d39e00;
+            --text-dark: #1a1a1a;
+            --border-color: #ced4da;
+        }
+
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 5px; background-color: var(--bg-body); color: var(--text-dark); -webkit-text-size-adjust: 100%; touch-action: manipulation; }
+        #main-dashboard { padding: 5px; border-radius: 4px; }
+        
+        .header-container { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: stretch; 
+            margin-bottom: 10px; 
+            background: var(--bg-card); 
+            padding: 10px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+            gap: 15px; 
+            border-bottom: 3px solid var(--primary); 
+        }
+        
+        .info-panel { display: flex; flex-direction: column; justify-content: space-between; gap: 5px; flex: 1; min-width: 150px; }
+        .title-area { flex: 2; text-align: center; display: flex; flex-direction: column; justify-content: center; min-width: 200px; }
+        .action-buttons { display: flex; flex-direction: column; justify-content: space-between; gap: 5px; flex: 1; min-width: 120px; }
+
+        .search-box, .live-clock, .today-summary, .btn-common { 
+            height: 32px; display: flex; align-items: center; justify-content: center; margin: 0; box-sizing: border-box; 
+        }
+
+        .search-box { padding: 4px 8px; border: 2px solid var(--primary); border-radius: 4px; font-size: 11px; outline: none; width: 100%; background: #fff; font-weight: bold; color: var(--primary); cursor: pointer; }
+        .live-clock { font-size: 10px; font-weight: bold; color: #fff; background: var(--primary); border-radius: 3px; }
+        .today-summary { font-size: 8.5px; font-weight: 800; color: #fff; background: var(--accent-green); border-radius: 3px; text-align: center; flex-direction: column; line-height: 1.2; padding: 2px; }
+        
+        .quote-box { 
+            font-style: italic; color: #555; font-size: 12px; margin: 0 auto 5px auto; line-height: 1.1; 
+            background: #fffde7; padding: 6px; border-radius: 4px; border: 1px solid #ffe082; width: 100%; box-sizing: border-box; 
+        }
+        .quote-source { font-weight: bold; color: var(--accent-red); display: block; font-size: 11px; margin-top: 2px; }
+        h2 { color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 2px 0; font-size: 13px; font-weight: 800; line-height: 1.2; }
+
+        .po-summary-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 4px;
+            margin-top: 5px;
+            background: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 4px;
+        }
+        .po-item {
+            flex: 1;
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 2px 4px;
+            text-align: center;
+        }
+        .po-title { font-size: 8px; font-weight: bold; color: var(--primary); border-bottom: 1px solid #eee; margin-bottom: 2px; }
+        .po-detail { font-size: 8px; color: #333; line-height: 1.2; }
+        .po-sisa { font-size: 9px; font-weight: 800; color: var(--accent-red); margin-top: 1px; }
+
+        .btn-common { border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 10px; transition: transform 0.1s; text-decoration: none; text-align: center; width: 100%; }
+        .btn-common:active { transform: scale(0.95); }
+        .btn-save { background-color: var(--primary); color: white; }
+        .btn-wa { background-color: #128c7e; color: white; }
+        .btn-home { background-color: #343a40; color: white; }
+        
+        .chart-wrapper { background: var(--bg-card); padding: 10px; border-radius: 8px; margin: 0 auto 10px auto; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: calc(100% - 10px); box-sizing: border-box; }
+        .chart-container { height: 120px; position: relative; width: 100%; }
+        
+        .table-container { background: var(--bg-card); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; min-width: 1250px; table-layout: fixed; }
+        th { background-color: var(--primary); color: white; padding: 8px 2px; border: 1px solid #001a35; font-size: 10px; text-transform: uppercase; font-weight: bold; position: sticky; top: 0; }
+        td { border: 1px solid #dee2e6; padding: 2px 2px; text-align: center; font-size: 10.5px; color: var(--text-dark); height: 30px; vertical-align: middle; font-weight: 600; overflow: hidden; word-wrap: break-word; }
+        tr:nth-child(even) { background-color: #f1f3f5; }
+        
+        .today-row { background-color: #fffde7 !important; border: 2px solid #fbc02d !important; }
+        .cell-status { white-space: pre-line; line-height: 1.1; font-size: 9px; min-height: 28px; display: flex; align-items: center; justify-content: center; text-align: center; border-radius: 2px; font-weight: 800;}
+        
+        .status-delivered { background-color: #1e7e34 !important; color: #ffffff !important; }
+        .status-proses { background-color: #004080 !important; color: #ffffff !important; }
+        .status-tunggu { background-color: #bd2130 !important; color: #ffffff !important; }
+        .status-ngisi { background-color: #d39e00  !important; color: #212529  !important; }
+        .status-planning { background-color: #4b2394 !important; color: #ffffff !important; }
+        .status-langsir { background-color: #4b2394 !important; color: #ffffff !important; }
+        .status-oper { background-color: #fd7e14 !important; color: #ffffff !important; }
+        
+        .input-combo { width: 92%; font-size: 11px; padding: 3px 1px; border: 1px solid #ced4da; border-radius: 2px; text-align: center; color: #495057; font-weight: bold; margin: 1px 0; background: #fff; }
+        .no-sj-display { font-size: 9.5px; font-weight: bold; color: var(--accent-red); background: #e8f4fd; border: 1px dashed #b6d4fe; border-radius: 2px; padding: 1px 2px; margin-top: 2px; word-break: break-all; min-height: 14px; }
+        .no-rangka-display { font-size: 10px; font-weight: bold; color: #bd2130 ; background: #e9ecef; border-radius: 2px; padding: 1px 2px; margin-top: 2px; word-break: break-all; }
+        .action-cell { display: flex; gap: 3px; justify-content: center; align-items: center; height: 100%; }
+        .btn-add, .btn-del { border: 1px solid #ced4da; background: #fff; border-radius: 3px; width: 24px; height: 24px; cursor: pointer; font-size: 16px; font-weight: bold; color: var(--primary); display: flex; align-items: center; justify-content: center; }
+        
+        .bottom-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-top: 15px; padding-bottom: 50px; }
+        .box { background: white; padding: 10px; border-radius: 8px; border-top: 4px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .standby-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 5px; font-size: 10px; }
+        .standby-item { padding: 6px; background: #e9ecef; border-radius: 2px; border-left: 4px solid var(--primary); text-align: center; font-weight: bold; color: var(--primary);}
+        .standby-rangka { font-size: 8px; color: #555; display: block; font-weight: normal; margin-top: 2px; }
+
+        #waModal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(3px); }
+        .modal-content { background-color: #fff; margin: 5% auto; padding: 20px; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        #waTextEditor { width: 100%; height: 250px; font-family: 'Courier New', monospace; font-size: 14px; padding: 10px; border: 2px solid #25d366; border-radius: 4px; resize: none; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+    <datalist id="list-nopol">
+        <option value="KH 8068 GR"> <option value="KH 8734 GH">
+        <option value="KH 8141 GM"> <option value="KH 8942 GN">
+        <option value="KH 8943 GN"> <option value="L 9761 UJ">
+    </datalist>
+
+    <datalist id="list-sopir">
+        <option value="AGUS WANTO"> <option value="KEKER DWI">
+        <option value="SUPRIYADI"> <option value="NUR KHOLIS"> <option value="ALFIN">
+        <option value="AGUS MULYANTO"> <option value="MISNAN">
+    </datalist>
+
+    <div id="waModal">
+        <div class="modal-content">
+            <div style="font-weight:bold; margin-bottom:10px; color: #25d366; font-size: 16px;">EDIT PESAN WHATSAPP</div>
+            <textarea id="waTextEditor"></textarea>
+            <div style="display:flex; justify-content: flex-end; gap:10px; margin-top:15px;">
+                <button onclick="closeWaModal()" class="btn-common" style="background:#6c757d; color:white; width: 80px;">BATAL</button>
+                <button onclick="sendToWhatsApp()" class="btn-common btn-wa" style="width: 100px;">KIRIM WA</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-dashboard">
+        <div class="header-container">
+            <div class="info-panel">
+                <select id="monthSelect" class="search-box" onchange="loadData()">
+                </select>
+                <div id="liveClock" class="live-clock">Memuat Waktu...</div>
+                <div id="todayTotal" class="today-summary">PAN: 0 | ANDALAN: 0<br>OCEAN: 0 | SSS: 0 | TMJ: 0 | GLOBAL: 0</div>
+            </div>
+            <div class="title-area">
+                <div class="quote-box">
+                    <span id="dailyQuote">"Bekerjalah dengan cinta..."</span>
+                    <span id="quoteSource" class="quote-source">— Bijak Hari Ini</span>
+                </div>
+                <h2>RENCANA PENGIRIMAN BBM SOLAR INDUSTRI</h2>
+
+                <!-- BOX SISA QUOTA PO TERBARU -->
+                <div class="po-summary-container">
+                    <div class="po-item">
+                        <div class="po-title">ANDALAN</div>
+                        <div class="po-detail">PO: <span id="po-andalan">0</span> | Kirim: <span id="out-andalan">0</span></div>
+                        <div class="po-sisa">Sisa: <span id="sisa-andalan">0</span> KL</div>
+                    </div>
+                    <div class="po-item">
+                        <div class="po-title">OCEAN</div>
+                        <div class="po-detail">PO: <span id="po-ocean">0</span> | Kirim: <span id="out-ocean">0</span></div>
+                        <div class="po-sisa">Sisa: <span id="sisa-ocean">0</span> KL</div>
+                    </div>
+                    <div class="po-item">
+                        <div class="po-title">TMJ</div>
+                        <div class="po-detail">PO: <span id="po-tmj">0</span> | Kirim: <span id="out-tmj">0</span></div>
+                        <div class="po-sisa">Sisa: <span id="sisa-tmj">0</span> KL</div>
+                    </div>
+                    <div class="po-item">
+                        <div class="po-title">GLOBAL</div>
+                        <div class="po-detail">PO: <span id="po-global">0</span> | Kirim: <span id="out-global">0</span></div>
+                        <div class="po-sisa">Sisa: <span id="sisa-global">0</span> KL</div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="action-buttons">
+                <button class="btn-common btn-save" id="btnSave" onclick="saveData()">SIMPAN DATA</button>
+                <button class="btn-common btn-wa" id="btnShare" onclick="openWaModal()">BAGIKAN JADWAL</button>
+                <a href="index.html" class="btn-common btn-home">HOME</a>
+            </div>
+        </div>
+
+        <div class="chart-wrapper">
+            <div class="chart-container">
+                <canvas id="deliveryChart"></canvas>
+            </div>
+            <div id="chartTitle" style="text-align: center; font-size: 10px; font-weight: bold; color: var(--primary); margin-top: 5px;">AKUMULASI BULAN INI</div>
+        </div>
+        
+        <div class="table-container">
+            <table id="deliveryTable">
+                <thead>
+                    <tr>
+                        <th style="width: 75px;">TGL</th>
+                        <th style="width: 65px;">HARI</th>
+                        <th style="width: 80px;">SELLER</th>
+                        <th style="width: 85px;">SUPPLIER</th>
+                        <th style="width: 45px;">IN</th>
+                        <th style="width: 120px;">DELIVERY TO / NO SJ</th>
+                        <th style="width: 45px;">+/-</th>
+                        <th style="width: 95px;">LOKASI</th>
+                        <th style="width: 140px;">NOPOL / SOPIR / NO RANGKA</th>
+                        <th style="width: 45px;">OUT</th>
+                        <th style="width: 105px;">STATUS</th>
+                        <th style="width: 50px;">KM PP</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+                <tfoot>
+                    <tr style="background:#e9ecef; font-weight: bold; color: var(--primary); border-top: 2px solid var(--primary);">
+                        <td colspan="4">TOTAL MONITORING</td>
+                        <td id="totalIn">0</td>
+                        <td colspan="4"></td>
+                        <td id="totalOut">0</td>
+                        <td>TOTAL KM PP</td>
+                        <td id="grandKmPp">0</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="bottom-section">
+            <div class="box">
+                <div style="font-weight:bold; color:var(--primary); border-bottom:2px solid #eee; margin-bottom:5px; font-size: 11px;">LEGENDA STATUS</div>
+                <div style="font-size:10px; font-weight: bold; line-height: 1.6;">
+                    <span style="color:#1e7e34">■ DELIVERED</span>: Terkirim.<br>
+                    <span style="color:#004080">■ PROSES</span>: Unit Jalan Menuju Lokasi.<br>
+                    <span style="color:#4b2394">■ TERJADWAL</span>: Berangkat ngisi Ada Tujuan.<br>
+                    <span style="color:#d39e00; background: #333; padding: 0 2px;">■ LANGSIRAN</span>: Kirim besok sudah muatan.<br>
+                    <span style="color:#fd7e14">■ OPER MUAT</span>: Pindah Muatan .<br>
+                    <span style="color:#004080">■ NGISI AJA</span>: Untuk stock Belum ada jadwal tapi sdh muatan.<br>
+                    <span style="color:#bd2130">■ TUNGGU</span>: Pending/Antri belum terkonfirmasi.
+                </div>
+            </div>
+            <div class="box">
+                <div style="font-weight:bold; color:var(--primary); margin-bottom:5px; font-size: 11px;">STANDBY UNIT</div>
+                <div id="standbyUnit" class="standby-grid"></div>
+            </div>
+            <div class="box">
+                <div style="font-weight:bold; color:var(--primary); margin-bottom:5px; font-size: 11px;">STANDBY SOPIR</div>
+                <div id="standbySopir" class="standby-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const NO_RANGKA_MASTER = {
+            "KH8141GM": "MHCNKR71HGJ073847-B073847",
+            "KH8068GR": "MJECCB2F5P5013281-N04CWYJ23297",
+            "KH8734GH": "MHMFM517AGK011327-6D16P81301",
+            "KH8942GN": "MJECCB2FXN5006243-N04CWYJ16214",
+            "KH8943GN": "MJECCB2P8N5006242-N04CWYJ16213",
+            "L9761UJ":  "MJECCB2F2R5019154-N04CWYJ29070"
+        };
+
+        const SUPABASE_URL = 'https://ntaectphgoelmhzrkatp.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YWVjdHBoZ29lbG1oenJrYXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzExNDYsImV4cCI6MjA4ODE0NzE0Nn0.-8E98wpkzHBARRhW6PKhBtf2XKhWFjq7idAzw9jlcKg';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let poiMap = {};
+        let deliveryChart;
+        let fleetData = [
+            { id: 'KH 8734 GH', cap: 10 }, { id: 'KH 8068 GR', cap: 5 },
+            { id: 'KH 8141 GM', cap: 5 }, { id: 'KH 8942 GN', cap: 5 },
+            { id: 'KH 8943 GN', cap: 5 }, { id: 'L 9761 UJ', cap: 8 }
+        ];
+        const sopirMaster = ['AGUS WANTO', 'KEKER DWI', 'SUPRIYADI', 'NUR KHOLIS', 'ALFIN', 'MISNAN', 'AGUS MULYANTO'];
+        const quotes = [
+            { q: "Cintai pekerjaanmu, maka kamu tidak perlu bekerja satu hari pun dalam hidupmu.", s: "Confucius" },
+            { q: "Satu-satunya cara untuk melakukan pekerjaan besar adalah dengan mencintai apa yang Anda lakukan.", s: "Steve Jobs" },
+            { q: "Jangan kurangi ambisinya, tingkatkan usahanya. Enjoy prosesnya!", s: "Anonim" },
+            { q: "Bekerjalah seolah-olah semuanya bergantung padamu. Berdoalah seolah-olah semuanya bergantung pada Tuhan.", s: "Augustinus" },
+            { q: "Kesuksesan bukanlah kunci kebahagiaan. Kebahagiaanlah kunci kesuksesan.", s: "Albert Schweitzer" }
+        ];
+
+        let calcTimeout = null;
+
+        async function fetchPoiLokasi() {
+            try {
+                const { data, error } = await _supabase.from('poi_lokasi').select('nama, km_pp');
+                if (!error && data) {
+                    poiMap = {};
+                    data.forEach(item => {
+                        if (item.nama) {
+                            poiMap[item.nama.trim().toUpperCase()] = item.km_pp;
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error("Gagal mengambil data poi_lokasi:", err);
+            }
+        }
+
+        function getNoRangka(nopol) {
+            if (!nopol) return '-';
+            const cleanNopol = String(nopol).replace(/\s+/g, '').toUpperCase(); 
+            return NO_RANGKA_MASTER[cleanNopol] || '-';
+        }
+
+        function getSelectedDateRange() {
+            const val = document.getElementById('monthSelect').value;
+            const [year, monthStr] = val.split('-');
+            const month = parseInt(monthStr) - 1;
+            
+            const firstDayIso = `${year}-${monthStr}-01`;
+            const lastDayDate = new Date(year, month + 1, 0).getDate();
+            const lastDayIso = `${year}-${monthStr}-${String(lastDayDate).padStart(2, '0')}`;
+            
+            return { start: firstDayIso, end: lastDayIso };
+        }
+
+        function singkatNama(nama) {
+            if (!nama) return "";
+            const kata = nama.trim().split(/\s+/);
+            if (kata.length >= 3) {
+                return (kata[0][0] + kata[1][0] + kata[2][0]).toUpperCase();
+            } else if (kata.length === 2) {
+                return (kata[0][0] + kata[1][0]).toUpperCase();
+            } else {
+                return kata[0].substring(0, 3).toUpperCase();
+            }
+        }
+
+        function getWIBDate() { return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Jakarta"})); }
+        
+        function updateClock() {
+            const now = getWIBDate();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            document.getElementById('liveClock').innerText = now.toLocaleDateString('id-ID', options).toUpperCase();
+        }
+        setInterval(updateClock, 1000);
+
+        function initMonthDropdown() {
+            const select = document.getElementById('monthSelect');
+            const now = getWIBDate();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth(); // 0-11
+            const monthNames = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
+            
+            select.innerHTML = '';
+            for (let i = 0; i < 12; i++) {
+                const opt = document.createElement('option');
+                opt.value = `${currentYear}-${String(i + 1).padStart(2, '0')}`;
+                opt.innerText = `${monthNames[i]} ${currentYear}`;
+                if (i === currentMonth) {
+                    opt.selected = true;
+                }
+                select.appendChild(opt);
+            }
+        }
+
+        function formatDateID(dateStr) {
+            const d = new Date(dateStr);
+            return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+        }
+
+        async function fetchPOSummary() {
+            const range = getSelectedDateRange();
+            const targets = ['ANDALAN', 'OCEAN', 'TMJ', 'GLOBAL'];
+            const summary = {
+                ANDALAN: { po: 0, out: 0 },
+                OCEAN: { po: 0, out: 0 },
+                TMJ: { po: 0, out: 0 },
+                GLOBAL: { po: 0, out: 0 }
+            };
+
+            const { data: poData } = await _supabase
+                .from('purchase_orders')
+                .select('*')
+                .gte('tgl_po', range.start)
+                .lte('tgl_po', range.end);
+            
+            if (poData) {
+                poData.forEach(p => {
+                    const inuVal = (p.tujuan || '').toUpperCase().trim();
+                    const qtyVal = parseFloat(p.qty) || 0;
+
+                    targets.forEach(t => {
+                        if (inuVal === t) {
+                            summary[t].po += qtyVal;
+                        }
+                    });
+                });
+            }
+
+            const { data: logData } = await _supabase
+                .from('data_pengiriman')
+                .select('*')
+                .gte('tanggal', range.start)
+                .lte('tanggal', range.end);
+
+            if (logData) {
+                const filteredOutData = logData.filter(d => {
+                    const s = (d.supplier || '').toLowerCase();
+                    return !s.includes('petro') && !s.includes('pan') && !s.includes('transport');
+                });
+
+                filteredOutData.forEach(d => {
+                    const suppVal = (d.supplier || '').toUpperCase().trim();
+                    const outVal = parseFloat(d.jumlah_keluar) || 0;
+
+                    targets.forEach(t => {
+                        if (suppVal === t) {
+                            summary[t].out += outVal;
+                        }
+                    });
+                });
+            }
+
+            targets.forEach(t => {
+                const key = t.toLowerCase();
+                const poVal = summary[t].po;
+                const outVal = summary[t].out;
+                const sisaVal = poVal - outVal;
+
+                document.getElementById(`po-${key}`).innerText = poVal.toLocaleString('id-ID');
+                document.getElementById(`out-${key}`).innerText = outVal.toLocaleString('id-ID');
+                document.getElementById(`sisa-${key}`).innerText = sisaVal.toLocaleString('id-ID');
+            });
+        }
+
+        async function loadData() {
+            await fetchPoiLokasi();
+
+            const range = getSelectedDateRange();
+            const now = getWIBDate();
+            const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+            const displayDates = [];
+            let curDate = new Date(range.start + 'T00:00:00');
+            const endDate = new Date(range.end + 'T00:00:00');
+
+            while (curDate <= endDate) {
+                const y = curDate.getFullYear();
+                const m = String(curDate.getMonth() + 1).padStart(2, '0');
+                const day = String(curDate.getDate()).padStart(2, '0');
+                displayDates.push(`${y}-${m}-${day}`);
+                curDate.setDate(curDate.getDate() + 1);
+            }
+
+            const { data } = await _supabase.from('data_pengiriman')
+                .select('*')
+                .gte('tanggal', range.start)
+                .lte('tanggal', range.end);
+
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            displayDates.forEach(dateStr => {
+                const dayRows = data ? data.filter(r => r.tanggal === dateStr) : [];
+                const finalRows = dayRows.length > 0 ? dayRows : [{ seller: '', supplier: '', jumlah_masuk: '', delivery_to: '', no_sj: '', lokasi: '', nopol: '', sopir: '', jumlah_keluar: '', status: '' }];
+                finalRows.forEach((item, i) => {
+                    const tr = createRow(dateStr, item, i, finalRows.length, todayStr);
+                    tbody.appendChild(tr);
+                });
+            });
+
+            if(!deliveryChart) initChart();
+            updateQuote();
+            processCalculations(true);
+            fetchPOSummary();
+        }
+
+        function createRow(tgl, item, idx, totalInDay, todayStr) {
+            const tr = document.createElement('tr');
+            tr.dataset.tgl = tgl;
+            if(tgl === todayStr) tr.classList.add('today-row');
+            const dObj = new Date(tgl + 'T00:00:00');
+            const dateHtml = idx === 0 ? `<td rowspan="${totalInDay}" class="date-cell">${formatDateID(tgl)}</td><td rowspan="${totalInDay}" class="day-cell">${dObj.toLocaleDateString('id-ID',{weekday:'long'}).toUpperCase()}</td>` : '';
+
+            const noRangka = getNoRangka(item.nopol);
+
+            tr.innerHTML = `
+                ${dateHtml}
+                <td contenteditable="true" class="cell-data cell-seller">${item.seller || ''}</td>
+                <td contenteditable="true" class="cell-data cell-supplier">${item.supplier || ''}</td>
+                <td contenteditable="true" class="cell-data cell-in">${item.jumlah_masuk || ''}</td>
+                <td>
+                    <div contenteditable="true" class="cell-data cell-to">${item.delivery_to || ''}</div>
+                    <div contenteditable="true" class="cell-data cell-sj no-sj-display" placeholder="NO SJ">${item.no_sj || ''}</div>
+                </td>
+                <td class="action-cell">
+                    <button class="btn-add" onclick="addLine(this)">+</button>
+                    <button class="btn-del" onclick="removeLine(this)">-</button>
+                </td>
+                <td contenteditable="true" class="cell-data cell-lokasi">${item.lokasi || ''}</td>
+                <td>
+                    <input list="list-nopol" class="input-combo inp-nopol" value="${item.nopol || ''}" placeholder="NOPOL">
+                    <input list="list-sopir" class="input-combo inp-sopir" value="${item.sopir || ''}" placeholder="SOPIR">
+                    <div class="no-rangka-display">${noRangka}</div>
+                </td>
+                <td contenteditable="true" class="cell-data cell-out">${item.jumlah_keluar || ''}</td>
+                <td contenteditable="true" class="cell-status">${item.status || ''}</td>
+                <td class="val-km-pp">-</td>
+            `;
+
+            tr.querySelectorAll('[contenteditable="true"], input').forEach(el => {
+                el.addEventListener('input', () => handleInput(el));
+            });
+            updateRowStyle(tr.querySelector('.cell-status'));
+            return tr;
+        }
+
+        function addLine(btn) {
+            const currentRow = btn.closest('tr');
+            const tgl = currentRow.dataset.tgl;
+            const now = getWIBDate();
+            const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            const newRow = createRow(tgl, {}, 1, 1, todayStr);
+            currentRow.parentNode.insertBefore(newRow, currentRow.nextSibling);
+            updateDateRowspan(tgl);
+            processCalculations(false);
+            fetchPOSummary();
+        }
+
+        function removeLine(btn) {
+            const currentRow = btn.closest('tr');
+            const tgl = currentRow.dataset.tgl;
+            const allRowsOfDate = document.querySelectorAll(`tr[data-tgl="${tgl}"]`);
+            if(allRowsOfDate.length > 1) {
+                if(currentRow.querySelector('.date-cell')) {
+                    const nextRow = currentRow.nextSibling;
+                    if(nextRow && nextRow.dataset.tgl === tgl) {
+                        nextRow.insertAdjacentHTML('afterbegin', currentRow.querySelector('.date-cell').outerHTML + currentRow.querySelector('.day-cell').outerHTML);
+                    }
+                }
+                currentRow.remove();
+            } else {
+                currentRow.querySelectorAll('.cell-data, .input-combo, .cell-status').forEach(el => {
+                    if(el.tagName === 'INPUT') el.value = ''; else el.innerText = '';
+                });
+                currentRow.querySelector('.no-rangka-display').innerText = '';
+            }
+            updateDateRowspan(tgl);
+            processCalculations(false);
+            fetchPOSummary();
+        }
+
+        function updateDateRowspan(tgl) {
+            const rows = document.querySelectorAll(`tr[data-tgl="${tgl}"]`);
+            const firstRow = rows[0];
+            const dateCell = firstRow.querySelector('.date-cell');
+            const dayCell = firstRow.querySelector('.day-cell');
+            if(dateCell) dateCell.rowSpan = rows.length;
+            if(dayCell) dayCell.rowSpan = rows.length;
+        }
+
+        function handleInput(el) {
+            const row = el.closest('tr');
+            if(el.classList.contains('inp-nopol')) {
+                const match = fleetData.find(f => f.id === el.value.toUpperCase());
+                if(match) row.querySelector('.cell-out').innerText = match.cap;
+                
+                const rangkaDisplay = row.querySelector('.no-rangka-display');
+                if (rangkaDisplay) {
+                    rangkaDisplay.innerText = getNoRangka(el.value);
+                }
+            }
+            if(el.classList.contains('cell-status')) {
+                let v = el.innerText.toUpperCase().trim();
+                if(v === "DE") el.innerText = "DELIVERED\n" + getTsText();
+                else if(v === "PR") el.innerText = "PROSES";
+                else if(v === "TU") el.innerText = "TUNGGU INFO";
+                else if(v === "TE") el.innerText = "TERJADWAL";
+                else if(v === "NG") el.innerText = "NGISI AJA";
+                else if(v === "LA") el.innerText = "LANGSIRAN";
+                else if(v === "OP") el.innerText = "OPER MUATAN";
+                updateRowStyle(el);
+            }
+
+            clearTimeout(calcTimeout);
+            calcTimeout = setTimeout(() => {
+                processCalculations(false);
+                fetchPOSummary();
+            }, 300);
+        }
+
+        function getTsText() {
+            const now = getWIBDate();
+            return `${now.toLocaleDateString('id-ID', { weekday: 'long' })}, ${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')} - ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} WIB`;
+        }
+
+        function updateRowStyle(c) {
+            if(!c) return;
+            const v = c.innerText.toUpperCase();
+            c.className = 'cell-status';
+            if(v.includes("DELIVERED")) c.classList.add('status-delivered');
+            else if(v.includes("PROSES")) c.classList.add('status-proses');
+            else if(v.includes("TUNGGU")) c.classList.add('status-tungtu') || c.classList.add('status-tunggu');
+            else if(v.includes("TERJADWAL")) c.classList.add('status-planning');
+            else if(v.includes("LANGSIRAN")) c.classList.add('status-langsir');
+            else if(v.includes("NGISI")) c.classList.add('status-ngisi');
+            else if(v.includes("OPER MUATAN")) c.classList.add('status-oper');
+        }
+
+        function processCalculations(fetchCloudChart = false) {
+            const rows = document.querySelectorAll('#tableBody tr');
+            let tIn = 0, tOut = 0, totalKmPp = 0;
+            const busyN = new Set(), busyS = new Set();
+
+            let panTotal = 0, andalanTotal = 0, oceanTotal = 0, sssTotal = 0, globalTotal = 0, tmjTotal = 0;
+
+            rows.forEach(r => {
+                const valIn = parseFloat(r.querySelector('.cell-in').innerText) || 0;
+                const valOut = parseFloat(r.querySelector('.cell-out').innerText) || 0;
+                const st = r.querySelector('.cell-status').innerText.toUpperCase();
+                const nopol = r.querySelector('.inp-nopol').value;
+                const sopir = r.querySelector('.inp-sopir').value.toUpperCase();
+
+                tIn += valIn;
+                let effOut = st.includes("TUNGGU") ? 0 : valOut;
+                tOut += effOut;
+                
+                const toText = r.querySelector('.cell-to').innerText.toUpperCase().trim();
+                const suppText = r.querySelector('.cell-supplier').innerText.toUpperCase().trim();
+
+                if (toText.includes('PAN') || suppText.includes('PAN')) panTotal += effOut;
+                if (toText.includes('ANDALAN') || suppText.includes('ANDALAN')) andalanTotal += effOut;
+                if (toText.includes('OCEAN') || suppText.includes('OCEAN')) oceanTotal += effOut;
+                if (toText.includes('SSS') || suppText.includes('SSS')) sssTotal += effOut;
+                if (toText.includes('GLOBAL') || suppText.includes('GLOBAL')) globalTotal += effOut;
+                if (toText.includes('TMJ') || suppText.includes('TMJ')) tmjTotal += effOut;
+
+                const kmValue = poiMap[toText];
+                if (kmValue !== undefined && kmValue !== null) {
+                    r.querySelector('.val-km-pp').innerText = kmValue;
+                    totalKmPp += (parseFloat(kmValue) || 0);
+                } else {
+                    r.querySelector('.val-km-pp').innerText = '-';
+                }
+
+                if(st.includes('PROSES') || st.includes('TERJADWAL') || st.includes('LANGSIR') || st.includes('OPER MUATAN')) {
+                    if(nopol) busyN.add(nopol);
+                    if(sopir) {
+                        const individualSopir = sopir.split(/[/,]+/).map(s => s.trim()).filter(s => s !== "");
+                        individualSopir.forEach(s => busyS.add(s));
+                    }
+                }
+            });
+
+            document.getElementById('totalIn').innerText = tIn;
+            document.getElementById('totalOut').innerText = tOut;
+            document.getElementById('grandKmPp').innerText = Math.round(totalKmPp);
+            
+            document.getElementById('todayTotal').innerHTML = `PAN: ${panTotal} KL | GLOBAL: ${globalTotal} KL | ANDALAN: ${andalanTotal} KL<br>OCEAN: ${oceanTotal} KL | SSS: ${sssTotal} KL | TMJ: ${tmjTotal} KL`;
+            
+            document.getElementById('standbyUnit').innerHTML = fleetData.filter(f => !busyN.has(f.id)).map(f => {
+                const nr = getNoRangka(f.id);
+                return `<div class="standby-item">${f.id}<span class="standby-rangka">${nr}</span></div>`;
+            }).join('');
+            
+            document.getElementById('standbySopir').innerHTML = sopirMaster.filter(s => !busyS.has(s.toUpperCase())).map(s => `<div class="standby-item">${s}</div>`).join('');
+            
+            if (fetchCloudChart) {
+                updateChartFromCloud();
+            } else {
+                updateChartLocal();
+            }
+        }
+
+        function stringToColor(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
+            const colors = ['#002d5b', '#004080', '#1e7e34', '#bd2130', '#4b2394', '#d39e00', '#fd7e14', '#20c997', '#6f42c1', '#e83e8c'];
+            return colors[Math.abs(hash) % colors.length];
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('deliveryChart').getContext('2d');
+            deliveryChart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: [], datasets: [{ label: 'Volume (KL)', data: [], backgroundColor: [] }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', font: { weight: 'bold', size: 9 }, formatter: Math.round } },
+                    scales: { y: { display: false, grid: { display: false } }, x: { grid: { display: false }, ticks: { font: { size: 9, weight: 'bold' } } } }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+        function updateChartLocal() {
+            if(!deliveryChart) return;
+            const rows = document.querySelectorAll('#tableBody tr');
+            const mapData = {};
+
+            rows.forEach(r => {
+                const st = r.querySelector('.cell-status').innerText.toUpperCase();
+                if(st.includes("TUNGGU")) return;
+                const outVal = parseFloat(r.querySelector('.cell-out').innerText) || 0;
+                if(outVal === 0) return;
+                const key = (r.querySelector('.cell-to').innerText || 'LAIN-LAIN').toUpperCase().trim();
+                mapData[key] = (mapData[key] || 0) + outVal;
+            });
+
+            const sortedKeys = Object.keys(mapData).sort((a,b) => mapData[b] - mapData[a]);
+            deliveryChart.data.labels = sortedKeys.map(k => k.length > 12 ? singkatNama(k) : k);
+            deliveryChart.data.datasets[0].data = sortedKeys.map(k => mapData[k]);
+            deliveryChart.data.datasets[0].backgroundColor = sortedKeys.map(k => stringToColor(k));
+            deliveryChart.update('none');
+        }
+
+        async function updateChartFromCloud() {
+            if(!deliveryChart) return;
+            const selectValue = document.getElementById('monthSelect').value;
+            const [year, month] = selectValue.split('-').map(Number);
+            
+            const firstDay = new Date(year, month - 1, 1).toISOString().split('T')[0];
+            const lastDay = new Date(year, month, 0).toISOString().split('T')[0];
+
+            const { data, error } = await _supabase.from('data_pengiriman').select('delivery_to, jumlah_keluar, status').gte('tanggal', firstDay).lte('tanggal', lastDay);
+            if(error) return;
+
+            const mapData = {};
+            data.forEach(r => {
+                const st = (r.status || '').toUpperCase();
+                if(st.includes("TUNGGU")) return;
+                const outVal = parseFloat(r.jumlah_keluar) || 0;
+                if(outVal === 0) return;
+                const key = (r.delivery_to || 'LAIN-LAIN').toUpperCase().trim();
+                mapData[key] = (mapData[key] || 0) + outVal;
+            });
+
+            const sortedKeys = Object.keys(mapData).sort((a,b) => mapData[b] - mapData[a]);
+            deliveryChart.data.labels = sortedKeys.map(k => k.length > 12 ? singkatNama(k) : k);
+            deliveryChart.data.datasets[0].data = sortedKeys.map(k => mapData[k]);
+            deliveryChart.data.datasets[0].backgroundColor = sortedKeys.map(k => stringToColor(k));
+            deliveryChart.update();
+        }
+
+        function updateQuote() {
+            const now = getWIBDate();
+            const startOfYear = new Date(now.getFullYear(), 0, 1);
+            const diff = now - startOfYear;
+            const oneDay = 1000 * 60 * 60 * 24;
+            const dayOfYear = Math.floor(diff / oneDay);
+            const q = quotes[dayOfYear % quotes.length];
+            document.getElementById('dailyQuote').innerText = `"${q.q}"`;
+            document.getElementById('quoteSource').innerText = `— ${q.s}`;
+        }
+
+        async function saveData() {
+            const range = getSelectedDateRange();
+
+            const rows = document.querySelectorAll('#tableBody tr');
+            const records = [];
+            
+            rows.forEach(r => {
+                const tanggal = r.dataset.tgl;
+                const seller = r.querySelector('.cell-seller').innerText.trim();
+                const supplier = r.querySelector('.cell-supplier').innerText.trim();
+                const jumlah_masuk = parseFloat(r.querySelector('.cell-in').innerText) || null;
+                const delivery_to = r.querySelector('.cell-to').innerText.trim();
+                const no_sj = r.querySelector('.cell-sj').innerText.trim();
+                const lokasi = r.querySelector('.cell-lokasi').innerText.trim();
+                const nopol = r.querySelector('.inp-nopol').value.trim();
+                const sopir = r.querySelector('.inp-sopir').value.trim();
+                const jumlah_keluar = parseFloat(r.querySelector('.cell-out').innerText) || null;
+                const status = r.querySelector('.cell-status').innerText.trim();
+                const no_rangka = getNoRangka(nopol);
+
+                if(seller || supplier || jumlah_masuk || delivery_to || no_sj || lokasi || nopol || sopir || jumlah_keluar || status) {
+                    records.push({ tanggal, seller, supplier, jumlah_masuk, delivery_to, no_sj, lokasi, nopol, sopir, jumlah_keluar, status, no_rangka });
+                }
+            });
+
+            try {
+                const btn = document.getElementById('btnSave');
+                btn.innerText = "MENYIMPAN...";
+                btn.disabled = true;
+
+                await _supabase.from('data_pengiriman')
+                    .delete()
+                    .gte('tanggal', range.start)
+                    .lte('tanggal', range.end);
+
+                if(records.length > 0) {
+                    const { error } = await _supabase.from('data_pengiriman').insert(records);
+                    if(error) throw error;
+                }
+                alert('Data berhasil disimpan ke cloud database!');
+                loadData();
+            } catch (err) {
+                alert('Gagal menyimpan data: ' + err.message);
+            } finally {
+                const btn = document.getElementById('btnSave');
+                btn.innerText = "SIMPAN DATA";
+                btn.disabled = false;
+            }
+        }
+
+        function closeWaModal() { 
+            document.getElementById('waModal').style.display = 'none'; 
+        }
+
+        function openWaModal() {
+            const sekarang = getWIBDate();
+            const besok = new Date(sekarang);
+            besok.setDate(sekarang.getDate() + 1);
+        
+            const y = besok.getFullYear();
+            const m = String(besok.getMonth() + 1).padStart(2, '0');
+            const d = String(besok.getDate()).padStart(2, '0');
+            const tglBesokISO = `${y}-${m}-${d}`;
+        
+            const opsiHeader = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            const headerTgl = besok.toLocaleDateString('id-ID', opsiHeader).toLowerCase();
+
+            let txt = `*Jadwal Pengiriman*\n*${headerTgl}*\n__________________________________\n\n`;
+        
+            let dataLangsir = [];
+            let dataTerjadwal = [];
+            let dataNgisiAja = [];
+
+            document.querySelectorAll('#tableBody tr').forEach(r => {
+                if (r.dataset.tgl === tglBesokISO) {
+                    const stRaw = r.querySelector('.cell-status').innerText.toUpperCase();
+                
+                    if (stRaw.includes("TERJADWAL") || stRaw.includes("LANGSIRAN") || stRaw.includes("NGISI")) {
+                        const to = (r.querySelector('.cell-to').innerText || "-").toLowerCase();
+                        const nopol = (r.querySelector('.inp-nopol').value || "-").toLowerCase();
+                        const sopir = (r.querySelector('.inp-sopir').value || "-").toLowerCase();
+
+                        let barisTeks = `• ${nopol} - ${sopir}\n  ${to}\n\n`;
+
+                        if (stRaw.includes("LANGSIR")) {
+                            dataLangsir.push(barisTeks);
+                        } else if (stRaw.includes("TERJADWAL")) {
+                            dataTerjadwal.push(barisTeks);
+                        } else if (stRaw.includes("NGISI")) {
+                            dataNgisiAja.push(barisTeks);
+                        }
+                    }
+                }
+            });
+
+            let hasData = false;
+
+            if (dataLangsir.length > 0) {
+                txt += `• LANGSIRAN\n`;
+                txt += dataLangsir.join("");
+                txt += `\n`;
+                hasData = true;
+            }
+
+            if (dataTerjadwal.length > 0) {
+                txt += `• NGISI DEPO\n`;
+                txt += dataTerjadwal.join("");
+                txt += `\n`;
+                hasData = true;
+            }
+
+            if (dataNgisiAja.length > 0) {
+                txt += `• NGISI AJA\n`;
+                txt += dataNgisiAja.join("");
+                txt += `\n`;
+                hasData = true;
+            }
+
+            if(!hasData) txt += "_tidak ada jadwal_\n\n";
+            
+            txt += `*NOTE:* Jadwal dapat berubah sewaktu-waktu. Jangan lupa klik "AMBIL JOB" setelah unit muatan dan "DONE" saat tiba lokasi di https://jadwal-besok.vercel.app \nDRIVE SAVE , STAY SAVE`;
+            
+            document.getElementById('waTextEditor').value = txt;
+            document.getElementById('waModal').style.display = 'block';
+        }
+
+        function sendToWhatsApp() {
+            window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(document.getElementById('waTextEditor').value), "_blank");
+            closeWaModal();
+        }
+
+        initMonthDropdown();
+        loadData();
+    </script>
+</body>
+</html>
