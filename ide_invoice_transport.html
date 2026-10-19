@@ -66,7 +66,7 @@
         .doc-identity .sub-doc { font-family: 'Courier New', Courier, monospace; font-size: 12px; font-style: italic; color: #555; font-weight: bold; margin-top: -2px; }
 
         .meta-table { width: 100%; border-collapse: collapse; }
-        .meta-table td { border: none !important; padding: 2px 0; font-size: 11px; font-weight: bold; white-space: nowrap; }
+        .meta-table td { border: none !important; padding: 2px 0; font-size: 9px; font-weight: bold; white-space: nowrap; }
         .lang-en { font-style: italic; font-size: 8px; color: #666; display: block; margin-top: -1px; font-weight: normal; }
         
         /* TABEL MODEL BIRU */
@@ -138,21 +138,10 @@
                 <label class="fw-bold small">Customer</label>
                 <input list="list_cust" id="in_cust" class="form-control form-control-sm" oninput="autoFillCustomer()">
                 <datalist id="list_cust">
-                    <option value="CV. SAMI JAYA">
-                    <option value="PT. PELAYARAN JASA SAMUDRA SHIPPING">
-                    <option value="PT. EXPLOITASI ENERGI INDONESIA, Tbk">
-                    <option value="PT. SINAR BAHAGIA INDAH">
-                    <option value="PT. FORTUNA LANCAR ADIMAKMUR">
-                    <option value="PT. BUMI RAYA NUSANTARA">
-                    <option value="PT. BUMI AGRO PRIMA">
-                    <option value="PT. BORNEO ARMADA PERKASA">
-                    <option value="PT. BORNEO TRENGGINAS MANDIRI">
-                    <option value="PT. ANGKASA MITRA SEJATI">
-                    <option value="PT. NEW WAHYU BAROKAH">
-                    <option value="PT. INTI DAYA MANDIRI SERVITAMA">
+                    <option value="PT. KHATULISTIWA SINAR ENERGI">
                     <option value="PT. GERBANG PERKASA PRATAMA">
-                    <option value="PT. GADING SAWIT KENCANA">
-                    <option value="PT. QSD INDONESIA">
+                    <option value="PT. INVESTAMA KALIMANTAN ENERGI">
+                    <option value="PT. PETRO ANDALAN NUSANTARA">
                 </datalist>
                 <label class="fw-bold small mt-1">Alamat</label>
                 <textarea id="in_addr" class="form-control form-control-sm mb-1" rows="3" oninput="syncAll()"></textarea>
@@ -219,7 +208,7 @@
                             <tr>
                                 <td>NPWP<span class="lang-en">Tax ID Number</span></td>
                                 <td>:</td>
-                                <td>1xxxxxxxxxxxxxx</td>
+                                <td>0405 3267 1171 3000</td>
                             </tr>
                             <tr>
                                 <td>TANGGAL PO<span class="lang-en">PO Date</span></td>
@@ -283,7 +272,7 @@
                         <p class="mb-0" style="font-size:12px;">1. Cash/Tunai</p>
                         <p class="mb-0" style="font-size:12px;">2. Transfer Bank Central Asia (BCA)</p>
                         <p class="mb-0 ms-3" style="font-size:12px;">Account Name   : <b>PT. INDO DHARMA ENERGI</b></p>
-                        <p class="mb-0 ms-3" style="font-size:12px;">Account Number : <b>010-xxxxx-xxxx</b></p>
+                        <p class="mb-0 ms-3" style="font-size:12px;">Account Number : <b>010-810-6088</b></p>
                     </div>
                 </div>
 
@@ -452,22 +441,11 @@
         const custValue = document.getElementById('in_cust').value;
         const addrField = document.getElementById('in_addr');
         const daftarAlamat = {
-            "CV. SAMI JAYA": "Jl. HM Arsyad No.05 Sampit,\nKotawaringin Timur - Kalimantan Tengah",
-            "PT. PELAYARAN JASA SAMUDRA SHIPPING": "Jl. Gatot Subroto No.15 Pangkalan Bun,\nKotawaringin Barat - Kalimantan Tengah",
-            "PT. EXPLOITASI ENERGI INDONESIA, Tbk": "Jl. Rungun RT.10 Desa Pasir Panjang Pangkalan Bun,\nKotawaringin Barat - Kalimantan Tengah",
-            "PT. SINAR BAHAGIA INDAH": "Jl. Kapten Mulyono No.174B RT.23 RW.008 Mentawa Baru Hulu,Mentawa Baru Ketapang, Kab Kotawaringin Timur - Kalimantan Tengah",
-            "PT. FORTUNA LANCAR ADIMAKMUR": "Jl. Bypass Pandaan No.88 Karangjati Pandaan,\nKab.Pasuruan - Jawa Timur",
-            "PT. BUMI RAYA NUSANTARA": "Jl. Kapten Mulyono No.55 RT 029 RW.008,\nMentawa Baru Hilir, Mentawa Baru Ketapang, Kab.Kotawaringin Timur - Kalimantan Tengah",
-            "PT. BUMI AGRO PRIMA": "Jl. Rangkas 3 No.138 RT.014 RW.005 Mentawa Baru Hulu,\nMentawa Baru Ketapang, Kab.Kotawaringin Timur - Kalimantan Tengah 74322",
-            "PT. INTI DAYA MANDIRI SERVITAMA": "Jl. kawitan I No.54 RT.017 RW.000 Sidorejo Arut Selatan, Kab.Kotawaringin Barat - Kalimantan Tengah 74111",
-            "PT. BORNEO TRENGGINAS MANDIRI": " JL.Sri Kuncoro III No.142 RT.003 RW.003 Kalibanteng Kulon, Semarang Barat Kota Semarang - Jawa Tengah 50145",
-            "PT. GADING SAWIT KENCANA": "Jl. Rangkas 3 No.138 RT.014 RW.005 Mentawa Baru Hulu ,Mentawa Baru Ketapang, Kab.Kotawaringin Timur - Kalimantan Tengah 74322",
-            "PT. BORNEO ARMADA PERKASA": "Jl. A.Yani Km.40 RT.021 RW.007 Pandu Sanjaya, Pangkalan Bun, Kab.Kotawringin Barat - Kalimantan Tengah 74184",
-            "PT. GERBANG PERKASA PRATAMA": "Raya Darmo Permai 3/26  Kel.Tanjungsari Kec.Sukomanunggal, Kota Surabaya – Jawa Timur 60187 ",
-            "PT. NEW WAHYU BAROKAH": "Jl. A.Yani Km.38 RT.030 RW.008 Pandu Sanjaya, Pangkalan Lada, Kab.Kotawringin Barat - Kalimantan Tengah 74184",
-            "PT. TRIDEA SENADA": "JL.Gatot Subroto No.14 Kota Tinggi,Pekan Baru Kota,Kota Pekan Baru - Riau 28112",
-            "PT. QSD INDONESIA": "JL.Rancabolang No.106 RT.001 RW.004,Sekajati Buahbatu KOta Bandung - Jawa Barat 40268"
-        };
+            "PT. KHATULISTIWA SINAR ENERGI": "Jl. A.Yani Km.40 RT.021 RW.007 Pandu Sanjaya, Pangkalan Bun, Kab.Kotawringin Barat - Kalimantan Tengah 74184",
+            "PT. INVESTAMA KALIMANTAN ENERGI": "Raya Darmo Permai 3/26  Kel.Tanjungsari Kec.Sukomanunggal, Kota Surabaya – Jawa Timur 60187 ",
+            "PT. GERBANG PERKASA PRATAMA": "Jl. A.Yani Km.38 RT.030 RW.008 Pandu Sanjaya, Pangkalan Lada, Kab.Kotawringin Barat - Kalimantan Tengah 74184",
+            "PT. PETRO ANDALAN NUSANTARA": "JL.Gatot Subroto No.14 Kota Tinggi,Pekan Baru Kota,Kota Pekan Baru - Riau 28112"
+            };
         if (daftarAlamat[custValue]) {
             addrField.value = daftarAlamat[custValue];
         }
