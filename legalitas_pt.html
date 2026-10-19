@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Font Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Supabase JS Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <script>
         tailwind.config = {
@@ -34,7 +36,6 @@
         }
     </script>
     <style>
-        /* Custom scrollbar for better visuals */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -57,7 +58,7 @@
     <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <!-- Logo & Portal Title -->
+                <!-- Logo & Title -->
                 <div class="flex items-center space-x-3">
                     <div class="bg-sky-600 p-2 rounded-lg text-white">
                         <i class="fa-solid fa-file-contract text-xl"></i>
@@ -68,7 +69,7 @@
                     </div>
                 </div>
 
-                <!-- Global Quick Action / Info -->
+                <!-- Global Quick Action -->
                 <div class="flex items-center space-x-4">
                     <button onclick="openModalUpload()" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2 shadow-sm">
                         <i class="fa-solid fa-plus"></i>
@@ -94,14 +95,14 @@
                 <button onclick="filterCompany('ALL')" id="tab-ALL" class="company-tab flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition bg-sky-600 text-white shadow-sm">
                     Semua Perusahaan
                 </button>
-                <button onclick="filterCompany('Investama Kalimantan Energi')" id="tab-PT Investama" class="company-tab flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition bg-slate-100 text-slate-600 hover:bg-slate-200">
-                    PT Investama
+                <button onclick="filterCompany('Investama Kalimantan Energi')" id="tab-Investama Kalimantan Energi" class="company-tab flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+                    Investama Kalimantan Energi
                 </button>
-                <button onclick="filterCompany('Khatulistiwa Sinar Energi')" id="tab-PT Khatulistiwa" class="company-tab flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition bg-slate-100 text-slate-600 hover:bg-slate-200">
-                    PT Khatulistiwa
+                <button onclick="filterCompany('Khatulistiwa Sinar Energi')" id="tab-Khatulistiwa Sinar Energi" class="company-tab flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+                    Khatulistiwa Sinar Energi
                 </button>
-                <button onclick="filterCompany('Indo Dharma Energi')" id="tab-PT Indo Dharma" class="company-tab flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition bg-slate-100 text-slate-600 hover:bg-slate-200">
-                    PT Indo Dharma
+                <button onclick="filterCompany('Indo Dharma Energi')" id="tab-Indo Dharma Energi" class="company-tab flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+                    Indo Dharma Energi
                 </button>
             </div>
         </div>
@@ -228,7 +229,7 @@
 
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 mt-auto py-4 text-center text-xs text-slate-500">
-        &copy; 2026 Sistem Dokumen Legalitas — ikaen| kse | ide
+        &copy; 2026 Sistem Dokumen Legalitas — Investama Kalimantan Energi | Khatulistiwa Sinar Energi | Indo Dharma Energi
     </footer>
 
     <!-- MODAL FORM UPLOAD / EDIT DOKUMEN -->
@@ -238,7 +239,7 @@
             <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
                 <h3 class="font-bold text-lg flex items-center space-x-2" id="modalTitle">
                     <i class="fa-solid fa-cloud-arrow-up text-sky-400"></i>
-                    <span>Tambah Dokumen </span>
+                    <span>Tambah Dokumen Legalitas Baru</span>
                 </h3>
                 <button onclick="closeModalUpload()" class="text-slate-400 hover:text-white transition">
                     <i class="fa-solid fa-xmark text-xl"></i>
@@ -255,9 +256,9 @@
                         <label class="block text-xs font-semibold text-slate-700 mb-1">Perusahaan <span class="text-rose-500">*</span></label>
                         <select id="formCompany" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
                             <option value="">-- Pilih Perusahaan --</option>
-                            <option value="PT Investama">Investama Kalimantan Energi</option>
-                            <option value="PT Khatulistiwa">Khatulistiwa Sinar Energi</option>
-                            <option value="PT Indo Dharma">Indo Dharma Energi</option>
+                            <option value="Investama Kalimantan Energi">Investama Kalimantan Energi</option>
+                            <option value="Khatulistiwa Sinar Energi">Khatulistiwa Sinar Energi</option>
+                            <option value="Indo Dharma Energi">Indo Dharma Energi</option>
                         </select>
                     </div>
 
@@ -379,125 +380,57 @@
 
     <!-- SCRIPT APPLICATION LOGIC -->
     <script>
-        // Key Storage
-        const STORAGE_KEY = 'LEGALDOC_HUB_DATA_V1';
+        // Supabase Configuration
+        const SB_URL = "https://qlsvvxfykteqxzcppnfv.supabase.co";
+        const SB_KEY = "sb_publishable_YlFIMi2XTpX77USP0qxAzw_SatAvLT6";
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-        // Sample Pre-populated Mock Data
-        const initialMockData = [
-            {
-                id: 'doc-1',
-                company: 'PT Investama',
-                category: 'Akta Pendirian',
-                title: 'Akta Pendirian & Perubahan Direksi',
-                number: '04/NOT-JKT/2018',
-                issueDate: '2018-05-12',
-                expiryDate: null,
-                isLifetime: true,
-                fileName: 'Akta_Pendirian_Investama.pdf',
-                notes: 'Notaris Anita Wijaya, SH.'
-            },
-            {
-                id: 'doc-2',
-                company: 'PT Investama',
-                category: 'NIB/OSS',
-                title: 'NIB Perizinan Berusaha',
-                number: '9120001234567',
-                issueDate: '2020-01-15',
-                expiryDate: null,
-                isLifetime: true,
-                fileName: 'NIB_Investama.pdf',
-                notes: 'Tercatat di sistem OSS RBA.'
-            },
-            {
-                id: 'doc-3',
-                company: 'PT Khatulistiwa',
-                category: 'SIUP/TDP',
-                title: 'Izin Usaha Perdagangan Operasional',
-                number: '503/128/SIUP-B/2021',
-                issueDate: '2021-03-10',
-                expiryDate: getRelativeDate(15), // Expiring in 15 days
-                isLifetime: false,
-                fileName: 'SIUP_Khatulistiwa.pdf',
-                notes: 'Perlu diperpanjang segera di Dinas Perizinan.'
-            },
-            {
-                id: 'doc-4',
-                company: 'PT Khatulistiwa',
-                category: 'SK Kemenkumham',
-                title: 'SK Kemenkumham Pendirian PT',
-                number: 'AHU-0019283.AH.01.01.2019',
-                issueDate: '2019-08-20',
-                expiryDate: null,
-                isLifetime: true,
-                fileName: 'SK_Kemenkumham_Khatulistiwa.pdf',
-                notes: 'Sah dari Kementerian Hukum dan HAM.'
-            },
-            {
-                id: 'doc-5',
-                company: 'PT Indo Dharma',
-                category: 'Izin Operasional',
-                title: 'Izin Operasional Khusus Industri',
-                number: 'IZIN-OPS/2022/9981',
-                issueDate: '2022-01-01',
-                expiryDate: getRelativeDate(-45), // Expired 45 days ago
-                isLifetime: false,
-                fileName: 'Izin_Ops_IndoDharma.pdf',
-                notes: 'Masa berlaku telah usai. Proses registrasi ulang.'
-            },
-            {
-                id: 'doc-6',
-                company: 'PT Indo Dharma',
-                category: 'NPWP Perusahaan',
-                title: 'Kartu & SKT NPWP Perusahaan',
-                number: '01.234.567.8-012.000',
-                issueDate: '2017-04-11',
-                expiryDate: null,
-                isLifetime: true,
-                fileName: 'NPWP_IndoDharma.pdf',
-                notes: 'KPP Pratama Jakarta Selatan.'
-            }
-        ];
-
-        // State Variables
         let documents = [];
         let currentCompanyFilter = 'ALL';
         let activeUploadedFile = null;
 
-        // Helper date generator for mocks
         function getRelativeDate(daysOffset) {
             const date = new Date();
             date.setDate(date.getDate() + daysOffset);
             return date.toISOString().split('T')[0];
         }
 
-        // Initialize App
         window.addEventListener('DOMContentLoaded', () => {
-            loadDocuments();
+            loadDocumentsFromSupabase();
             setupDragAndDrop();
-            renderTable();
         });
 
-        // Load Documents from LocalStorage
-        function loadDocuments() {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                try {
-                    documents = JSON.parse(stored);
-                } catch (e) {
-                    documents = initialMockData;
-                }
-            } else {
-                documents = initialMockData;
-                saveToStorage();
+        // Load Documents from Supabase
+        async function loadDocumentsFromSupabase() {
+            showToast('Memuat data dari Supabase...', 'info');
+            const { data, error } = await _supabase
+                .from('documents')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Error fetching data:', error);
+                showToast('Gagal memuat data dari database!', 'error');
+                return;
             }
+
+            // Map database field names to JS object properties if needed
+            documents = (data || []).map(item => ({
+                id: item.id,
+                company: item.company,
+                category: item.category,
+                title: item.title,
+                number: item.number,
+                issueDate: item.issue_date,
+                expiryDate: item.expiry_date,
+                isLifetime: item.is_lifetime,
+                fileName: item.file_name,
+                notes: item.notes
+            }));
+
+            renderTable();
         }
 
-        // Save Documents to LocalStorage
-        function saveToStorage() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(documents));
-        }
-
-        // Calculate Status Document
         function getDocumentStatus(doc) {
             if (doc.isLifetime || !doc.expiryDate) {
                 return { code: 'LIFETIME', label: 'Berlaku Selamanya', badge: 'bg-blue-100 text-blue-800 border-blue-200' };
@@ -520,11 +453,9 @@
             }
         }
 
-        // Filter Company Trigger
         function filterCompany(companyName) {
             currentCompanyFilter = companyName;
 
-            // Update tab styles
             document.querySelectorAll('.company-tab').forEach(btn => {
                 btn.classList.remove('bg-sky-600', 'text-white', 'shadow-sm');
                 btn.classList.add('bg-slate-100', 'text-slate-600');
@@ -539,28 +470,21 @@
             renderTable();
         }
 
-        // Filter & Render Table Data
         function renderTable() {
             const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
             const categoryVal = document.getElementById('filterCategory').value;
             const statusVal = document.getElementById('filterStatus').value;
 
-            // Filter process
             const filtered = documents.filter(doc => {
-                // Perusahaan
                 if (currentCompanyFilter !== 'ALL' && doc.company !== currentCompanyFilter) return false;
-
-                // Kategori
                 if (categoryVal !== 'ALL' && doc.category !== categoryVal) return false;
 
-                // Search
                 if (searchVal) {
                     const matchTitle = doc.title.toLowerCase().includes(searchVal);
                     const matchNum = doc.number.toLowerCase().includes(searchVal);
                     if (!matchTitle && !matchNum) return false;
                 }
 
-                // Status
                 if (statusVal !== 'ALL') {
                     const status = getDocumentStatus(doc);
                     if (status.code !== statusVal) return false;
@@ -569,10 +493,8 @@
                 return true;
             });
 
-            // Update Quick Stats (Global or Per Active Company Filter)
             updateQuickStats();
 
-            // Populate Table
             const tbody = document.getElementById('documentTableBody');
             const emptyState = document.getElementById('emptyState');
 
@@ -634,7 +556,6 @@
             });
         }
 
-        // Update Stats Cards
         function updateQuickStats() {
             const scopeDocs = currentCompanyFilter === 'ALL' 
                 ? documents 
@@ -658,7 +579,6 @@
             document.getElementById('stat-expired').innerText = expired;
         }
 
-        // Drag & Drop Upload Handlers
         function setupDragAndDrop() {
             const dropZone = document.getElementById('dropZone');
 
@@ -725,7 +645,6 @@
             }
         }
 
-        // Open & Close Modals
         function openModalUpload() {
             resetForm();
             document.getElementById('modalTitle').innerText = 'Tambah Dokumen Legalitas Baru';
@@ -747,8 +666,8 @@
             toggleLifetime(false);
         }
 
-        // Save Document (Create/Edit)
-        function saveDocument(e) {
+        // Save Document (Create/Update to Supabase)
+        async function saveDocument(e) {
             e.preventDefault();
 
             const docId = document.getElementById('docId').value;
@@ -756,9 +675,9 @@
             const category = document.getElementById('formCategory').value;
             const title = document.getElementById('formTitle').value.trim();
             const number = document.getElementById('formNumber').value.trim();
-            const issueDate = document.getElementById('formIssueDate').value;
+            const issueDate = document.getElementById('formIssueDate').value || null;
             const isLifetime = document.getElementById('formIsLifetime').checked;
-            const expiryDate = isLifetime ? null : document.getElementById('formExpiryDate').value;
+            const expiryDate = isLifetime ? null : (document.getElementById('formExpiryDate').value || null);
             const notes = document.getElementById('formNotes').value.trim();
 
             if (!company || !category || !title || !number) {
@@ -766,48 +685,52 @@
                 return;
             }
 
+            const payload = {
+                company,
+                category,
+                title,
+                number,
+                issue_date: issueDate,
+                expiry_date: expiryDate,
+                is_lifetime: isLifetime,
+                file_name: activeUploadedFile || 'dokumen_legalitas.pdf',
+                notes
+            };
+
+            showToast('Menyimpan ke Supabase...', 'info');
+
             if (docId) {
-                // Update
-                const index = documents.findIndex(d => d.id === docId);
-                if (index !== -1) {
-                    documents[index] = {
-                        ...documents[index],
-                        company,
-                        category,
-                        title,
-                        number,
-                        issueDate,
-                        expiryDate,
-                        isLifetime,
-                        fileName: activeUploadedFile || documents[index].fileName || 'dokumen.pdf',
-                        notes
-                    };
-                    showToast('Dokumen berhasil diperbarui!', 'success');
+                // Update existing record
+                const { error } = await _supabase
+                    .from('documents')
+                    .update(payload)
+                    .eq('id', docId);
+
+                if (error) {
+                    console.error('Error updating:', error);
+                    showToast('Gagal memperbarui dokumen!', 'error');
+                    return;
                 }
+                showToast('Dokumen berhasil diperbarui!', 'success');
             } else {
-                // Create New
-                const newDoc = {
-                    id: 'doc-' + Date.now(),
-                    company,
-                    category,
-                    title,
-                    number,
-                    issueDate,
-                    expiryDate,
-                    isLifetime,
-                    fileName: activeUploadedFile || 'dokumen_legalitas.pdf',
-                    notes
-                };
-                documents.unshift(newDoc);
+                // Insert new record
+                payload.id = 'doc-' + Date.now();
+                const { error } = await _supabase
+                    .from('documents')
+                    .insert([payload]);
+
+                if (error) {
+                    console.error('Error inserting:', error);
+                    showToast('Gagal menyimpan dokumen baru!', 'error');
+                    return;
+                }
                 showToast('Dokumen berhasil disimpan!', 'success');
             }
 
-            saveToStorage();
             closeModalUpload();
-            renderTable();
+            loadDocumentsFromSupabase();
         }
 
-        // Edit Document
         function editDocument(id) {
             const doc = documents.find(d => d.id === id);
             if (!doc) return;
@@ -839,7 +762,6 @@
             document.getElementById('modalForm').classList.remove('hidden');
         }
 
-        // View Detail Modal
         function viewDetail(id) {
             const doc = documents.find(d => d.id === id);
             if (!doc) return;
@@ -898,17 +820,26 @@
             document.getElementById('modalDetail').classList.remove('hidden');
         }
 
-        // Delete Document
-        function deleteDocument(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus dokumen legalitas ini?')) {
-                documents = documents.filter(d => d.id !== id);
-                saveToStorage();
-                renderTable();
+        // Delete Document from Supabase
+        async function deleteDocument(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus dokumen legalitas ini dari database?')) {
+                showToast('Menghapus dari Supabase...', 'info');
+                const { error } = await _supabase
+                    .from('documents')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) {
+                    console.error('Error deleting:', error);
+                    showToast('Gagal menghapus dokumen!', 'error');
+                    return;
+                }
+
                 showToast('Dokumen berhasil dihapus!', 'info');
+                loadDocumentsFromSupabase();
             }
         }
 
-        // Export to CSV
         function exportToCSV() {
             if (documents.length === 0) {
                 showToast('Tidak ada data untuk diekspor', 'error');
@@ -943,12 +874,10 @@
             showToast('Data berhasil diekspor ke CSV/Excel', 'success');
         }
 
-        // Simulate Download Action
         function simulateDownload(id) {
             const doc = documents.find(d => d.id === id);
             if (!doc) return;
 
-            // Generate dummy text file for download simulation
             const content = `Simulasi File Dokumen Legalitas:\n\nPerusahaan: ${doc.company}\nJudul: ${doc.title}\nNomor: ${doc.number}\nKategori: ${doc.category}\nStatus: ${getDocumentStatus(doc).label}\nCatatan: ${doc.notes || '-'}`;
             const blob = new Blob([content], { type: 'text/plain' });
             const url = window.URL.createObjectURL(blob);
@@ -963,7 +892,6 @@
             showToast(`Mengunduh: ${doc.fileName || 'Dokumen.pdf'}`, 'success');
         }
 
-        // Toast Notification System
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -988,12 +916,10 @@
 
             container.appendChild(toast);
 
-            // Animate in
             setTimeout(() => {
                 toast.classList.remove('translate-y-2', 'opacity-0');
             }, 10);
 
-            // Animate out
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-y-2');
                 setTimeout(() => {
@@ -1002,7 +928,6 @@
             }, 3000);
         }
 
-        // Utilities
         function formatDate(dateStr) {
             if (!dateStr) return '-';
             const options = { year: 'numeric', month: 'short', day: 'numeric' };
