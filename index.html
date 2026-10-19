@@ -154,20 +154,20 @@
     <script>
         const SB_URL = 'https://ntaECTphgoelmhzrkatp.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YWVjdHBoZ29lbG1oenJrYXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzExNDYsImV4cCI6MjA4ODE0NzE0Nn0.-8E98wpkzHBARRhW6PKhBtf2XKhWFjq7idAzw9jlcKg';
-        const _supabasePenjualan = supabase.createClient(SB_URL, SB_PENJUALAN_KEY);
+        const _supabase= supabase.createClient(SB_URL, SB_KEY);
 
-        const SB_URL_DEFAULT = "https://yqdtgcjpfhiskywhowhu.supabase.co";
-        const SB_KEY_DEFAULT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxZHRnY2pwZmhpc2t5d2hvd2h1Iiwicm9sZSI6ImFub24iOjE3NzE1MDY0MTIsImV4cCI6MjA4NzA4MjQxMn0.Mlw3e8C4xKHcJPSMRkcsRXL5udtR9SeWk2GmqM1NyYc";
-        const _supabaseDefault = supabase.createClient(SB_URL_DEFAULT, SB_KEY_DEFAULT);
+        const SB_URL = "https://yqdtgcjpfhiskywhowhu.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxZHRnY2pwZmhpc2t5d2hvd2h1Iiwicm9sZSI6ImFub24iOjE3NzE1MDY0MTIsImV4cCI6MjA4NzA4MjQxMn0.Mlw3e8C4xKHcJPSMRkcsRXL5udtR9SeWk2GmqM1NyYc";
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
         const SB_IKAEN_URL = "https://fymqbeaeiqkdypgptysz.supabase.co";
         const SB_IKAEN_KEY = "sb_publishable_seowoV1JdzMbXlojE7dejQ_GysYC07_";
-        const _supabaseIkaen = supabase.createClient(SB_IKAEN_URL, SB_IKAEN_KEY);
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
         // Penambahan konfigurasi Supabase untuk Indo Dharma Energi (IDE)[cite: 1]
-        const SB_IDE_URL = "https://qlsvvxfykteqxzcppnfv.supabase.co"; 
-        const SB_IDE_KEY = "sb_publishable_YlFIMi2XTpX77USP0qxAzw_SatAvLT6";
-        const _supabaseIde = supabase.createClient(SB_IDE_URL, SB_IDE_KEY);
+        const SB_URL = "https://qlsvvxfykteqxzcppnfv.supabase.co"; 
+        const SB_KEY = "sb_publishable_YlFIMi2XTpX77USP0qxAzw_SatAvLT6";
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
         function getActiveSupabaseClient() {
             if (activeTab === 'ikaen') {
