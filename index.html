@@ -12,6 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Supabase JS Client CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- SheetJS (XLSX) CDN untuk membaca file Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -770,31 +772,13 @@
                             <span class="text-xs font-bold text-slate-800"><i class="fa-solid fa-file-invoice-dollar mr-1"></i> Rekapitulasi Faktur Pajak (Supabase & Coretax Integration)</span>
                             ${filterHtml}
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-3 shadow-sm">
-                                <h4 class="text-xs font-bold text-slate-900"><i class="fa-solid fa-file-csv text-slate-700 mr-1"></i> Upload Rekap CSV ke Supabase</h4>
-                                <p class="text-[11px] text-slate-500">Pilih file CSV Coretax DJP untuk diunggah langsung ke server database Supabase.</p>
-                                <input type="file" id="csvFileInput" accept=".csv" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-900 file:text-white hover:file:bg-slate-800 cursor-pointer">
-                                <button onclick="handleUploadCsvSupabase()" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition shadow-md">Proses & Unggah CSV ke Server</button>
-                            </div>
-                            <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-3 shadow-sm">
-                                <h4 class="text-xs font-bold text-slate-900"><i class="fa-solid fa-circle-plus text-slate-700 mr-1"></i> Input Faktur Pajak Satuan</h4>
-                                <form onsubmit="handleTambahFakturSupabase(event)" class="space-y-2 text-xs">
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <input type="date" id="fakturTanggal" required class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-slate-900 focus:outline-none focus:border-slate-800" value="2026-10-15">
-                                        <input type="text" id="fakturNo" placeholder="No Faktur" required class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-slate-900 focus:outline-none focus:border-slate-800">
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <input type="text" id="fakturNpwp" placeholder="NPWP Lawan" required class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-slate-900 focus:outline-none focus:border-slate-800">
-                                        <input type="text" id="fakturLawan" placeholder="Nama Klien / Lawan" required class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-slate-900 focus:outline-none focus:border-slate-800">
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <input type="number" id="fakturDpp" placeholder="DPP (Rp)" required class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-slate-900 focus:outline-none focus:border-slate-800">
-                                        <input type="number" id="fakturPpn" placeholder="PPN (Rp)" required class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-slate-900 focus:outline-none focus:border-slate-800">
-                                    </div>
-                                    <button type="submit" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition shadow-md">Simpan ke Supabase</button>
-                                </form>
-                            </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 space-y-3 shadow-sm max-w-xl">
+                            <h4 class="text-xs font-bold text-slate-900"><i class="fa-solid fa-file-excel text-emerald-600 mr-1"></i> Upload Rekap Excel (.xlsx / .xls) ke Supabase</h4>
+                            <p class="text-[11px] text-slate-500">Pilih file Excel rekapitulasi Coretax DJP untuk diunggah dan disimpan langsung ke server database Supabase.</p>
+                            <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-700 file:text-white hover:file:bg-emerald-800 cursor-pointer">
+                            <button onclick="handleUploadExcelSupabase()" class="w-full py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs transition shadow-md flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Proses & Unggah Excel ke Supabase
+                            </button>
                         </div>
                         <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm bg-white">
                             <table class="w-full text-left text-xs">
@@ -819,70 +803,64 @@
             }
         }
 
-        async function handleTambahFakturSupabase(e) {
-            e.preventDefault();
-            const clientDb = getActiveSupabaseClient();
-            const dataBaru = {
-                tanggal: document.getElementById('fakturTanggal').value,
-                no_faktur: document.getElementById('fakturNo').value,
-                npwp: document.getElementById('fakturNpwp').value,
-                lawan: document.getElementById('fakturLawan').value,
-                dpp: parseFloat(document.getElementById('fakturDpp').value),
-                ppn: parseFloat(document.getElementById('fakturPpn').value)
-            };
-
-            const { error } = await clientDb.from('faktur_pajak').insert([dataBaru]);
-            if (error) {
-                alert('Gagal menyimpan ke Supabase: ' + error.message);
-            } else {
-                alert('Faktur pajak berhasil disimpan ke database Supabase!');
-                loadFakturPajakData();
-            }
-        }
-
-        async function handleUploadCsvSupabase() {
-            const fileInput = document.getElementById('csvFileInput');
+        async function handleUploadExcelSupabase() {
+            const fileInput = document.getElementById('excelFileInput');
             if (!fileInput.files || fileInput.files.length === 0) {
-                alert('Silakan pilih file CSV terlebih dahulu.');
+                alert('Silakan pilih file Excel (.xlsx / .xls) terlebih dahulu.');
                 return;
             }
+
             const clientDb = getActiveSupabaseClient();
             const file = fileInput.files[0];
             const reader = new FileReader();
-            reader.onload = async function(e) {
-                const text = e.target.result;
-                const lines = text.split('\n');
-                let batchData = [];
 
-                for (let i = 1; i < lines.length; i++) {
-                    let line = lines[i].trim();
-                    if (!line) continue;
-                    let cols = line.split(/[,;|]/);
-                    if (cols.length >= 6) {
+            reader.onload = async function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                    let batchData = [];
+                    // Mulai dari baris index 1 (asumsi baris 0 adalah header)
+                    for (let i = 1; i < jsonRows.length; i++) {
+                        let cols = jsonRows[i];
+                        if (!cols || cols.length === 0) continue;
+                        
+                        let tanggalVal = cols[0] ? String(cols[0]).trim() : '2026-10-15';
+                        let noFakturVal = cols[1] ? String(cols[1]).trim() : ('010.005-26.' + Math.floor(10000000 + Math.random() * 90000000));
+                        let npwpVal = cols[2] ? String(cols[2]).trim() : '01.000.000.0-000.000';
+                        let lawanVal = cols[3] ? String(cols[3]).trim() : 'Mitra Coretax';
+                        let dppVal = cols[4] ? parseFloat(String(cols[4]).replace(/[^0-9.]/g, '')) || 0 : 0;
+                        let ppnVal = cols[5] ? parseFloat(String(cols[5]).replace(/[^0-9.]/g, '')) || 0 : 0;
+
                         batchData.push({
-                            tanggal: cols[0].trim() || '2026-10-15',
-                            no_faktur: cols[1].trim() || ('010.005-26.' + Math.floor(10000000 + Math.random() * 90000000)),
-                            npwp: cols[2].trim() || '01.000.000.0-000.000',
-                            lawan: cols[3].trim() || 'Mitra Coretax',
-                            dpp: parseFloat(cols[4].replace(/[^0-9]/g, '')) || 100000000,
-                            ppn: parseFloat(cols[5].replace(/[^0-9]/g, '')) || 11000000
+                            tanggal: tanggalVal,
+                            no_faktur: noFakturVal,
+                            npwp: npwpVal,
+                            lawan: lawanVal,
+                            dpp: dppVal,
+                            ppn: ppnVal
                         });
                     }
-                }
 
-                if (batchData.length > 0) {
-                    const { error } = await clientDb.from('faktur_pajak').insert(batchData);
-                    if (error) {
-                        alert('Gagal mengimpor batch ke Supabase: ' + error.message);
+                    if (batchData.length > 0) {
+                        const { error } = await clientDb.from('faktur_pajak').insert(batchData);
+                        if (error) {
+                            alert('Gagal mengimpor data Excel ke Supabase: ' + error.message);
+                        } else {
+                            alert(`Berhasil mengimpor dan menyimpan ${batchData.length} data faktur pajak dari file Excel ke Supabase!`);
+                            loadFakturPajakData();
+                        }
                     } else {
-                        alert(`Berhasil mengimpor dan menyimpan ${batchData.length} data faktur pajak ke Supabase!`);
-                        loadFakturPajakData();
+                        alert('Tidak ada baris data valid yang ditemukan pada file Excel.');
                     }
-                } else {
-                    alert('Tidak ada format data valid yang ditemukan dalam file CSV.');
+                } catch (err) {
+                    alert('Terjadi kesalahan saat memproses file Excel: ' + err.message);
                 }
             };
-            reader.readAsText(file);
+            reader.readAsArrayBuffer(file);
         }
 
         async function hapusFakturSupabase(noFaktur) {
@@ -944,6 +922,8 @@
                 window.location.href = `${prefix}_penawaran_diskon.html`;
             } else if (actionType === 'penawaran_multi') {
                 window.location.href = `${prefix}_penawaran_multi.html`;
+            } else if (actionType === 'invoice_transport') {
+                window.location.href = `${prefix}_invoice_transport.html`;
             } else if (actionType.includes('Invoice BRI')) {
                 window.location.href = `${prefix}_invoice_bri.html`;
             } else if (actionType.includes('Invoice BCA')) {
@@ -975,6 +955,51 @@
                                     <span class="text-[10px] uppercase text-emerald-400 font-extrabold tracking-wider block"><i class="fa-solid fa-signal mr-1"></i> Status Jaringan</span>
                                     <span class="text-xs font-mono font-bold text-white">Supabase Connected</span>
                                 </div>
+                            </div>
+                            <!-- KOTAK MENU NAVIGASI TAMBAHAN DI BAWAH KOTAK SELAMAT DATANG ADMIN -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+                                <a href="konfirmasi.htm" class="bg-white hover:bg-slate-50 border border-slate-200 hover:border-blue-500 p-4 rounded-2xl text-center space-y-2 transition shadow-sm group">
+                                    <div class="w-10 h-10 mx-auto rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-base group-hover:scale-110 transition">
+                                        <i class="fa-solid fa-circle-check"></i>
+                                    </div>
+                                    <span class="block text-xs font-bold text-slate-800">Konfirmasi</span>
+                                </a>
+                                <a href="planning.html" class="bg-white hover:bg-slate-50 border border-slate-200 hover:border-teal-500 p-4 rounded-2xl text-center space-y-2 transition shadow-sm group">
+                                    <div class="w-10 h-10 mx-auto rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold text-base group-hover:scale-110 transition">
+                                        <i class="fa-solid fa-calendar-days"></i>
+                                    </div>
+                                    <span class="block text-xs font-bold text-slate-800">Planning</span>
+                                </a>
+                                <a href="po.html" class="bg-white hover:bg-slate-50 border border-slate-200 hover:border-indigo-500 p-4 rounded-2xl text-center space-y-2 transition shadow-sm group">
+                                    <div class="w-10 h-10 mx-auto rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-base group-hover:scale-110 transition">
+                                        <i class="fa-solid fa-cart-shopping"></i>
+                                    </div>
+                                    <span class="block text-xs font-bold text-slate-800">Purchase Order</span>
+                                </a>
+                                <a href="oat.html" class="bg-white hover:bg-slate-50 border border-slate-200 hover:border-amber-500 p-4 rounded-2xl text-center space-y-2 transition shadow-sm group">
+                                    <div class="w-10 h-10 mx-auto rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-base group-hover:scale-110 transition">
+                                        <i class="fa-solid fa-truck"></i>
+                                    </div>
+                                    <span class="block text-xs font-bold text-slate-800">Oatall</span>
+                                </a>
+                                <a href="oat_jo.html" class="bg-white hover:bg-slate-50 border border-slate-200 hover:border-rose-500 p-4 rounded-2xl text-center space-y-2 transition shadow-sm group">
+                                    <div class="w-10 h-10 mx-auto rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-base group-hover:scale-110 transition">
+                                        <i class="fa-solid fa-file-contract"></i>
+                                    </div>
+                                    <span class="block text-xs font-bold text-slate-800">Oat-JO</span>
+                                </a>
+                                <a href="tracking.html" class="bg-white hover:bg-slate-50 border border-slate-200 hover:border-emerald-500 p-4 rounded-2xl text-center space-y-2 transition shadow-sm group">
+                                    <div class="w-10 h-10 mx-auto rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-base group-hover:scale-110 transition">
+                                        <i class="fa-solid fa-location-crosshairs"></i>
+                                    </div>
+                                    <span class="block text-xs font-bold text-slate-800">Tracking</span>
+                                </a>
+                                <a href="dataunit.html" class="bg-white hover:bg-slate-50 border border-slate-200 hover:border-cyan-500 p-4 rounded-2xl text-center space-y-2 transition shadow-sm group">
+                                    <div class="w-10 h-10 mx-auto rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center font-bold text-base group-hover:scale-110 transition">
+                                        <i class="fa-solid fa-truck-monster"></i>
+                                    </div>
+                                    <span class="block text-xs font-bold text-slate-800">Data Unit</span>
+                                </a>
                             </div>
                         </div>
                     `;
@@ -1086,6 +1111,10 @@
                     </div>
                 `;
 
+                let transportInvoiceMenuHTML = (activeTab === 'ikaen' || activeTab === 'ide') ? `
+                    <button onclick="handleActionRedirect('invoice_transport')" class="w-full text-left text-slate-600 hover:text-red-600 transition">&bull; Buat Invoice Transport</button>
+                ` : '';
+
                 let transactionMenusHTML = isLoggedIn ? `
                     <div class="space-y-4">
                         <div class="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
@@ -1114,12 +1143,10 @@
                             <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-sm">
                                 <div class="${accentClass} font-bold text-xs"><i class="fa-solid fa-file-lines mr-1"></i> Penawaran (SPH)</div>
                                 <div class="space-y-1.5 pt-1 text-[11px]">
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenawaranData('Penawaran Biasa');" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Buka Penawaran (SPH)</button>
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenawaranData('Penawaran Multi');" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Penawaran Multi</button>
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenawaranData('Penawaran Diskon');" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Penawaran Diskon</button>
-                                    <button onclick="handleActionRedirect('penawaran')" class="w-full text-left font-semibold ${accentClass} hover:underline">&rarr; Buat Penawaran</button>
-                                    <button onclick="handleActionRedirect('penawaran_diskon')" class="w-full text-left font-semibold ${accentClass} hover:underline">&rarr; Klik Penawaran Diskon</button>
-                                    <button onclick="handleActionRedirect('penawaran_multi')" class="w-full text-left font-semibold ${accentClass} hover:underline">&rarr; Klik Penawaran Multi</button>
+                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenawaranData('Penawaran Biasa');" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; buka penawaran</button>
+                                    <button onclick="handleActionRedirect('penawaran')" class="w-full text-left font-semibold ${accentClass} hover:underline">&rarr; buat penawaran</button>
+                                    <button onclick="handleActionRedirect('penawaran_multi')" class="w-full text-left font-semibold ${accentClass} hover:underline">&rarr; buat penawaran multi</button>
+                                    <button onclick="handleActionRedirect('penawaran_diskon')" class="w-full text-left font-semibold ${accentClass} hover:underline">&rarr; buat penawaran diskon</button>
                                 </div>
                             </div>
                             <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-sm">
@@ -1128,6 +1155,7 @@
                                     <button onclick="window.selectedMonthFilter='-10-'; loadInvoiceData('Buka Invoice');" class="w-full text-left text-slate-600 hover:text-red-600 transition">&bull; Buka Invoice</button>
                                     <button onclick="handleActionRedirect('Buat Invoice BRI')" class="w-full text-left text-slate-600 hover:text-red-600 transition">&bull; Buat Invoice BRI</button>
                                     <button onclick="handleActionRedirect('Buat Invoice BCA')" class="w-full text-left text-slate-600 hover:text-red-600 transition">&bull; Buat Invoice BCA</button>
+                                    ${transportInvoiceMenuHTML}
                                 </div>
                             </div>
                             <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-sm">
