@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDE - INVOICE ONGKOS ANGKUT</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root { 
+            --kse-dark: #1B1B3A; 
+            --kse-primary: #0d6efd; 
+            --kse-accent: #1B1B3A; 
+        }
+        body { background-color: #f4f7f6; font-family: 'Arial', sans-serif; font-size: 13px; margin: 0; padding: 0; }
+        .control-nav { background: #fff; border-bottom: 2px solid #ddd; padding: 10px 20px; position: sticky; top: 0; z-index: 1000; }
+        .input-sidebar { background: #fff; height: calc(100vh - 60px); overflow-y: auto; padding: 15px; border-right: 1px solid #ddd; }
+        
+        #pdf-area { background: #f4f7f6; padding: 20px 0; }
+        
+        .document-canvas { 
+            background: white; 
+            width: 210mm; 
+            min-height: 296mm; 
+            margin: 0 auto; 
+            padding: 10mm 15mm; 
+            position: relative;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1); 
+            box-sizing: border-box;
+            display: flex; 
+            flex-direction: column;
+            overflow: hidden; 
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .header-section { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+        .logo-container { display: flex; align-items: center; gap: 15px; }
+        .logo-img { height: 55px; width: auto; object-fit: contain; }
+        .brand-text h1 { 
+            font-family: 'Courier New', Courier, monospace; 
+            font-weight: 900; 
+            font-size: 24px; 
+            color: var(--kse-primary); 
+            margin: 0; 
+            letter-spacing: 2px;
+            text-transform: uppercase; 
+            line-height: 1;
+        }
+        .brand-text p { 
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px; 
+            margin-top: 4px; 
+            margin-bottom: 0;
+            color: var(--kse-dark); 
+            font-weight: bold; 
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        
+        .doc-identity { text-align: right; }
+        .doc-identity h2 { font-family: 'Courier New', Courier, monospace; font-weight: 900; font-style: italic; font-size: 32px; color: var(--kse-primary); margin: 0; letter-spacing: 1px; }
+        .doc-identity .sub-doc { font-family: 'Courier New', Courier, monospace; font-size: 12px; font-style: italic; color: #555; font-weight: bold; margin-top: -2px; }
+
+        .meta-table { width: 100%; border-collapse: collapse; }
+        .meta-table td { border: none !important; padding: 2px 0; font-size: 11px; font-weight: bold; white-space: nowrap; }
+        .lang-en { font-style: italic; font-size: 8px; color: #666; display: block; margin-top: -1px; font-weight: normal; }
+        
+        /* TABEL MODEL BIRU */
+        .table-main { width: 100%; border-collapse: collapse; margin-top: 10px; border: 1.5px solid #000; font-size: 12px; color: #000; }
+        .table-main th { background-color: var(--kse-primary) !important; color: #fff !important; padding: 6px 8px; border: 1.5px solid #000; text-align: center; font-weight: bold; font-size: 13px; text-transform: uppercase; }
+        .table-main td { border: 1.5px solid #000; padding: 4px 8px; vertical-align: middle; }
+        
+        .terbilang-box { border: 1.5px solid #000; border-top: none; padding: 10px; font-style: italic; background: #fff; font-size: 12px; }
+        
+        .signature-row { display: flex; justify-content: flex-start; margin-top: 20px; }
+        .signature-box { text-align: left; width: 280px; }
+        .signature-space { height: 70px; margin: 5px 0; } 
+        
+        .footer-kse { margin-top: auto; padding-top: 15px; padding-bottom: 5px; border-top: 1px dashed #ccc; }
+
+        .item-input-card { background: #f8f9fa; border: 1px solid #ced4da; border-radius: 4px; padding: 8px; margin-bottom: 8px; }
+
+        @media print {
+            body { background: none; }
+            .control-nav, .input-sidebar { display: none !important; }
+            .col-lg-9 { width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            #pdf-area { padding: 0 !important; }
+            .document-canvas { margin: 0 !important; box-shadow: none !important; width: 100% !important; height: 100% !important; }
+        }
+    </style>
+</head>
+<body>
+
+<datalist id="list_qty">
+    <option value="5000"></option>
+    <option value="8000"></option>
+    <option value="10000"></option>
+</datalist>
+
+<div class="control-nav shadow-sm d-flex justify-content-between align-items-center">
+    <div class="d-flex gap-2">
+        <a href="index.html" class="btn btn-outline-primary btn-sm fw-bold"><i class="bi bi-house"></i> HOME</a>
+        <button class="btn btn-outline-secondary btn-sm" onclick="initAutoNumber()"><i class="bi bi-arrow-clockwise"></i> RESET NO</button>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-dark btn-sm fw-bold" onclick="window.print()"><i class="bi bi-printer"></i> PRINT</button>
+        <button class="btn btn-warning btn-sm fw-bold px-3" onclick="saveToSupabase()" id="btn-save-sb">
+            <i class="bi bi-cloud-arrow-up"></i> SIMPAN 
+        </button>
+        <button class="btn btn-primary btn-sm fw-bold px-3" onclick="downloadPDF()"><i class="bi bi-download"></i> DOWNLOAD </button>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- SIDEBAR INPUT -->
+        <div class="col-lg-3 input-sidebar">
+            <h6 class="fw-bold mb-3 text-primary border-bottom pb-2"><i class="bi bi-pencil-square"></i> INPUT PANEL</h6>
+            
+            <div class="mb-2">
+                <label class="fw-bold small">Nomor Urut Manual</label>
+                <div class="input-group input-group-sm">
+                    <input type="text" id="in_no_urut" class="form-control" placeholder="001" oninput="syncAll()">
+                    <span class="input-group-text bg-light" id="in_no_preview" style="font-size: 10px; font-weight: bold;">/ INV-IDE / ...</span>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="fw-bold small">Tanggal Invoice</label>
+                <input type="date" id="in_tgl_raw" class="form-control form-control-sm" oninput="handleDateChange()">
+            </div>
+
+            <div class="card p-2 mb-3 bg-light border-0">
+                <label class="fw-bold small">Customer</label>
+                <input list="list_cust" id="in_cust" class="form-control form-control-sm" oninput="autoFillCustomer()">
+                <datalist id="list_cust">
+                    <option value="CV. SAMI JAYA">
+                    <option value="PT. PELAYARAN JASA SAMUDRA SHIPPING">
+                    <option value="PT. EXPLOITASI ENERGI INDONESIA, Tbk">
+                    <option value="PT. SINAR BAHAGIA INDAH">
+                    <option value="PT. FORTUNA LANCAR ADIMAKMUR">
+                    <option value="PT. BUMI RAYA NUSANTARA">
+                    <option value="PT. BUMI AGRO PRIMA">
+                    <option value="PT. BORNEO ARMADA PERKASA">
+                    <option value="PT. BORNEO TRENGGINAS MANDIRI">
+                    <option value="PT. ANGKASA MITRA SEJATI">
+                    <option value="PT. NEW WAHYU BAROKAH">
+                    <option value="PT. INTI DAYA MANDIRI SERVITAMA">
+                    <option value="PT. GERBANG PERKASA PRATAMA">
+                    <option value="PT. GADING SAWIT KENCANA">
+                    <option value="PT. QSD INDONESIA">
+                </datalist>
+                <label class="fw-bold small mt-1">Alamat</label>
+                <textarea id="in_addr" class="form-control form-control-sm mb-1" rows="3" oninput="syncAll()"></textarea>
+                <label class="fw-bold small">NPWP</label>
+                <input type="text" id="in_npwp" class="form-control form-control-sm" oninput="syncAll()">
+            </div>
+
+            <div class="row g-2 mb-3">
+                <div class="col-6"><label class="small fw-bold">No. PO</label><input type="text" id="in_po_no" class="form-control form-control-sm" oninput="syncAll()"></div>
+                <div class="col-6"><label class="small fw-bold">Tgl PO</label><input type="text" id="in_po_tgl" class="form-control form-control-sm" oninput="syncAll()"></div>
+            </div>
+
+            <!-- HEADER / DESKRIPSI UTAMA -->
+            <div class="mb-2">
+                <label class="fw-bold small">Judul / Deskripsi Periode</label>
+                <input type="text" id="in_header_desc" class="form-control form-control-sm" value="Ongkos Angkut Periode I Oktober 2026 :" oninput="syncAll()">
+            </div>
+
+            <!-- PANEL INPUT ITEMS DINAMIS -->
+            <div class="card p-2 mb-3 border-primary">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="fw-bold small text-primary mb-0">RINCIAN PENGIRIMAN</label>
+                    <button class="btn btn-sm btn-primary py-0 px-2" onclick="addItemRow()"><i class="bi bi-plus-lg"></i> Tambah</button>
+                </div>
+                <div id="item_input_container"></div>
+            </div>
+        </div>
+
+        <!-- AREA DOKUMEN PREVIEW -->
+        <div class="col-lg-9 p-0" id="pdf-area">
+            <div class="document-canvas" id="main-doc">
+                <div class="header-section">
+                    <div class="logo-container">
+                        <img src="ide1.png" class="logo-img" onerror="this.src='https://via.placeholder.com/200x60?text=IDE'">
+                        <div class="brand-text">
+                            <h1>INDO DHARMA</h1>
+                            <p>ENERGI</p>
+                        </div>
+                    </div>
+                    <div class="doc-identity">
+                        <h2>INVOICE</h2>
+                        <div class="sub-doc">FAKTUR PENJUALAN</div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <p class="mb-1">Kepada yang kami hormati,</p>
+                        <h6 class="fw-bold mb-1 text-uppercase" id="out_cust" style="font-size: 14px; color: var(--kse-primary);"></h6>
+                        <div id="out_addr" style="white-space: pre-line; line-height: 1.4; font-size: 12px;"></div>
+                    </div>
+                    <div class="col-6 ps-4">
+                        <table class="w-100 meta-table">
+                            <tr>
+                                <td width="35%">TANGGAL<span class="lang-en">Date</span></td>
+                                <td width="5%">:</td>
+                                <td width="60%" id="out_tgl"></td>
+                            </tr>
+                            <tr>
+                                <td>NOMOR INVOICE<span class="lang-en">Invoice Number</span></td>
+                                <td>:</td>
+                                <td id="out_no"></td>
+                            </tr>
+                            <tr>
+                                <td>NPWP<span class="lang-en">Tax ID Number</span></td>
+                                <td>:</td>
+                                <td>1xxxxxxxxxxxxxx</td>
+                            </tr>
+                            <tr>
+                                <td>TANGGAL PO<span class="lang-en">PO Date</span></td>
+                                <td>:</td>
+                                <td id="out_po_tgl"></td>
+                            </tr>
+                            <tr>
+                                <td>NOMOR PO<span class="lang-en">PO Number</span></td>
+                                <td>:</td>
+                                <td id="out_po_no"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TABEL DENGAN HEADER BIRU -->
+                <table class="table-main">
+                    <thead>
+                        <tr>
+                            <th width="42%">Tujuan Pengiriman</th>
+                            <th width="15%">Qty (L)</th>
+                            <th width="21%">Harga Per-Liter (Rp.)</th>
+                            <th width="22%">Harga Total (Rp.)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="out_table_body">
+                        <!-- Baris diisi oleh JS -->
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td rowspan="5" colspan="2" class="p-0 align-bottom" style="border-right: 1.5px solid #000;">
+                                <div class="terbilang-box border-0 m-0">
+                                    Terbilang : “ <span id="out_terbilang"></span> “
+                                </div>
+                            </td>
+                            <td class="text-end fw-bold">Total</td>
+                            <td class="text-end fw-bold" id="out_total_val">Rp.0,-</td>
+                        </tr>
+                        <tr>
+                            <td class="text-end">DPP Nilai Lain</td>
+                            <td class="text-end" id="out_dpp_val">Rp.0,-</td>
+                        </tr>
+                        <tr>
+                            <td class="text-end">PPN</td>
+                            <td class="text-end" id="out_ppn_val">Rp.0,-</td>
+                        </tr>
+                        <tr>
+                            <td class="text-end">Pot. PPh Pasal 23</td>
+                            <td class="text-end text-danger" id="out_pph23_val">(Rp.0,-)</td>
+                        </tr>
+                        <tr class="fw-bold">
+                            <td class="text-end">Grand Total</td>
+                            <td class="text-end" id="out_grand_val">Rp.0,-</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <div class="row mt-3">
+                    <div class="col-8">
+                        <p class="mb-1 text-decoration-underline fw-bold">Pembayaran / <span class="text-muted">Payment:</span></p>
+                        <p class="mb-0" style="font-size:12px;">1. Cash/Tunai</p>
+                        <p class="mb-0" style="font-size:12px;">2. Transfer Bank Central Asia (BCA)</p>
+                        <p class="mb-0 ms-3" style="font-size:12px;">Account Name   : <b>PT. INDO DHARMA ENERGI</b></p>
+                        <p class="mb-0 ms-3" style="font-size:12px;">Account Number : <b>010-xxxxx-xxxx</b></p>
+                    </div>
+                </div>
+
+                <div class="signature-row">
+                    <div class="signature-box">
+                        <p class="mb-0">Regard,</p>
+                        <p class="fw-bold mb-0">PT. INDO DHARMA ENERGI</p>
+                        <div class="signature-space"></div>
+                        <p class="fw-bold text-decoration-underline mb-0 text-uppercase" style="font-size: 14px;">NURHAMIDA</p>
+                        <p class="mb-0 small">Direktur</p>
+                    </div>
+                </div>
+
+                <div class="footer-kse">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <img id="qr_footer" src="" width="40">
+                            <div style="font-size: 8px; line-height: 1.2;">
+                                <b>Digital E-Form IDE System</b><br>Scan QR untuk validasi Invoice.<br><span id="qr_timestamp" style="color: #888; font-size: 7px;"></span>
+                            </div>
+                        </div>
+                        <div class="text-end" style="font-size: 9px;">
+                            <b style="color: var(--ide-accent);">PT. INDO DHARMA ENERGI</b><br>
+                            Jl. Ahmad Yani KM 7 Pangkalan Bun<br>
+                            0852-5276-1578 | indodharmaenergi@gmail.com
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SB_URL = "https://qlsvvxfykteqxzcppnfv.supabase.co"; 
+    const SB_KEY = "sb_publishable_YlFIMi2XTpX77USP0qxAzw_SatAvLT6";
+    const _supabase = supabase.createClient(SB_URL, SB_KEY);
+    const monthRomawi = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+    const monthsIndo = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+    function formatRP(num, isBracket = false) {
+        let val = Math.abs(Math.round(num)).toLocaleString('id-ID');
+        if (isBracket) {
+            return `(Rp.${val},-);`
+        }
+        return `Rp.${val},-`;
+    }
+
+    function formatNumber(num) {
+        return Math.round(num).toLocaleString('id-ID');
+    }
+
+    // Default tampilan awal 2 baris item
+    let items = [
+        { tujuan: "CV. BTM", qty: 10000, harga: 350 },
+        { tujuan: "PT. NWB – Depo Ocean BJM", qty: 5000, harga: 1350 }
+    ];
+
+    function renderItemInputs() {
+        const container = document.getElementById('item_input_container');
+        container.innerHTML = '';
+        items.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'item-input-card';
+            card.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="badge bg-secondary">Item ${index + 1}</span>
+                    <button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="removeItemRow(${index})"><i class="bi bi-trash"></i></button>
+                </div>
+                <input type="text" class="form-control form-control-sm mb-1" placeholder="Tujuan Pengiriman" value="${item.tujuan}" oninput="updateItemData(${index}, 'tujuan', this.value)">
+                <div class="row g-1">
+                    <div class="col-6">
+                        <input type="number" list="list_qty" class="form-control form-control-sm" placeholder="Qty (L)" value="${item.qty}" oninput="updateItemData(${index}, 'qty', this.value)">
+                    </div>
+                    <div class="col-6">
+                        <input type="number" class="form-control form-control-sm" placeholder="Harga/L" value="${item.harga}" oninput="updateItemData(${index}, 'harga', this.value)">
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+        syncAll();
+    }
+
+    function addItemRow() {
+        items.push({ tujuan: "", qty: 0, harga: 0 });
+        renderItemInputs();
+    }
+
+    function removeItemRow(index) {
+        items.splice(index, 1);
+        renderItemInputs();
+    }
+
+    function updateItemData(index, field, value) {
+        if (field === 'qty' || field === 'harga') {
+            items[index][field] = parseFloat(value) || 0;
+        } else {
+            items[index][field] = value;
+        }
+        syncAll();
+    }
+
+    function syncAll() {
+        const tglInput = document.getElementById('in_tgl_raw').value;
+        const d = tglInput ? new Date(tglInput) : new Date();
+        const m = d.getMonth();
+        const y = d.getFullYear();
+        
+        const urut = document.getElementById('in_no_urut').value || "001";
+        const fullNo = `${urut}/INV-IDE/${monthRomawi[m]}/${y}`;
+        
+        document.getElementById('in_no_preview').innerText = `/INV-IDE/${monthRomawi[m]}/${y}`;
+        document.getElementById('out_no').innerText = fullNo;
+
+        document.getElementById('out_cust').innerText = document.getElementById('in_cust').value;
+        document.getElementById('out_addr').innerText = document.getElementById('in_addr').value;
+        document.getElementById('out_po_no').innerText = document.getElementById('in_po_no').value;
+        document.getElementById('out_po_tgl').innerText = document.getElementById('in_po_tgl').value;
+
+        const tbody = document.getElementById('out_table_body');
+        tbody.innerHTML = '';
+
+        const headerDesc = document.getElementById('in_header_desc').value;
+        if (headerDesc) {
+            const trHeader = document.createElement('tr');
+            trHeader.innerHTML = `<td colspan="4" class="fw-bold bg-light">${headerDesc}</td>`;
+            tbody.appendChild(trHeader);
+        }
+
+        let totalSub = 0;
+
+        items.forEach(item => {
+            const rowTotal = item.qty * item.harga;
+            totalSub += rowTotal;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${item.tujuan}</td>
+                <td class="text-center">${item.qty > 0 ? formatNumber(item.qty) : ''}</td>
+                <td class="text-end">${item.harga > 0 ? formatRP(item.harga) : ''}</td>
+                <td class="text-end">${rowTotal > 0 ? formatRP(rowTotal) : ''}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        const dppLain = Math.round(totalSub * (11 / 12));
+        const ppn = Math.round(dppLain * 0.12);
+        
+        // PPh 23 (2%) dihitung langsung dari Total (totalSub)
+        const pph23 = Math.round(totalSub * 0.02);
+        
+        const grandTotal = Math.round(totalSub + ppn - pph23);
+
+        document.getElementById('out_total_val').innerText = formatRP(totalSub);
+        document.getElementById('out_dpp_val').innerText = formatRP(dppLain);
+        document.getElementById('out_ppn_val').innerText = formatRP(ppn);
+        document.getElementById('out_pph23_val').innerText = `(${formatRP(pph23)})`;
+        document.getElementById('out_grand_val').innerText = formatRP(grandTotal);
+
+        document.getElementById('out_terbilang').innerText = grandTotal !== 0 ? terbilang(grandTotal) + " rupiah" : "-";
+        updateQRCode(grandTotal);
+    }
+
+    function autoFillCustomer() {
+        const custValue = document.getElementById('in_cust').value;
+        const addrField = document.getElementById('in_addr');
+        const daftarAlamat = {
+            "CV. SAMI JAYA": "Jl. HM Arsyad No.05 Sampit,\nKotawaringin Timur - Kalimantan Tengah",
+            "PT. PELAYARAN JASA SAMUDRA SHIPPING": "Jl. Gatot Subroto No.15 Pangkalan Bun,\nKotawaringin Barat - Kalimantan Tengah",
+            "PT. EXPLOITASI ENERGI INDONESIA, Tbk": "Jl. Rungun RT.10 Desa Pasir Panjang Pangkalan Bun,\nKotawaringin Barat - Kalimantan Tengah",
+            "PT. SINAR BAHAGIA INDAH": "Jl. Kapten Mulyono No.174B RT.23 RW.008 Mentawa Baru Hulu,Mentawa Baru Ketapang, Kab Kotawaringin Timur - Kalimantan Tengah",
+            "PT. FORTUNA LANCAR ADIMAKMUR": "Jl. Bypass Pandaan No.88 Karangjati Pandaan,\nKab.Pasuruan - Jawa Timur",
+            "PT. BUMI RAYA NUSANTARA": "Jl. Kapten Mulyono No.55 RT 029 RW.008,\nMentawa Baru Hilir, Mentawa Baru Ketapang, Kab.Kotawaringin Timur - Kalimantan Tengah",
+            "PT. BUMI AGRO PRIMA": "Jl. Rangkas 3 No.138 RT.014 RW.005 Mentawa Baru Hulu,\nMentawa Baru Ketapang, Kab.Kotawaringin Timur - Kalimantan Tengah 74322",
+            "PT. INTI DAYA MANDIRI SERVITAMA": "Jl. kawitan I No.54 RT.017 RW.000 Sidorejo Arut Selatan, Kab.Kotawaringin Barat - Kalimantan Tengah 74111",
+            "PT. BORNEO TRENGGINAS MANDIRI": " JL.Sri Kuncoro III No.142 RT.003 RW.003 Kalibanteng Kulon, Semarang Barat Kota Semarang - Jawa Tengah 50145",
+            "PT. GADING SAWIT KENCANA": "Jl. Rangkas 3 No.138 RT.014 RW.005 Mentawa Baru Hulu ,Mentawa Baru Ketapang, Kab.Kotawaringin Timur - Kalimantan Tengah 74322",
+            "PT. BORNEO ARMADA PERKASA": "Jl. A.Yani Km.40 RT.021 RW.007 Pandu Sanjaya, Pangkalan Bun, Kab.Kotawringin Barat - Kalimantan Tengah 74184",
+            "PT. GERBANG PERKASA PRATAMA": "Raya Darmo Permai 3/26  Kel.Tanjungsari Kec.Sukomanunggal, Kota Surabaya – Jawa Timur 60187 ",
+            "PT. NEW WAHYU BAROKAH": "Jl. A.Yani Km.38 RT.030 RW.008 Pandu Sanjaya, Pangkalan Lada, Kab.Kotawringin Barat - Kalimantan Tengah 74184",
+            "PT. TRIDEA SENADA": "JL.Gatot Subroto No.14 Kota Tinggi,Pekan Baru Kota,Kota Pekan Baru - Riau 28112",
+            "PT. QSD INDONESIA": "JL.Rancabolang No.106 RT.001 RW.004,Sekajati Buahbatu KOta Bandung - Jawa Barat 40268"
+        };
+        if (daftarAlamat[custValue]) {
+            addrField.value = daftarAlamat[custValue];
+        }
+        syncAll();
+    }
+
+    async function initAutoNumber() {
+        try {
+            const tglInput = document.getElementById('in_tgl_raw').value;
+            const d = tglInput ? new Date(tglInput) : new Date();
+            
+            const year = d.getFullYear();
+            const monthStr = String(d.getMonth() + 1).padStart(2, '0'); 
+            
+            const startDate = `${year}-${monthStr}-01`;
+            const lastDayNum = new Date(year, d.getMonth() + 1, 0).getDate();
+            const endDate = `${year}-${monthStr}-${String(lastDayNum).padStart(2, '0')}`;
+
+            const { data, error } = await _supabase
+                .from('eforms')
+                .select('nomor')
+                .eq('jenis', 'INVOICE')
+                .gte('tanggal', startDate)
+                .lte('tanggal', endDate);
+
+            if (error) throw error;
+
+            let maxNum = 0;
+            if (data && data.length > 0) {
+                data.forEach(row => {
+                    if (row.nomor) {
+                        const parts = row.nomor.split(' / ');
+                        const num = parseInt(parts[0], 10);
+                        if (!isNaN(num) && num > maxNum) {
+                            maxNum = num;
+                        }
+                    }
+                });
+            }
+
+            const nextNum = maxNum + 1;
+            document.getElementById('in_no_urut').value = nextNum.toString().padStart(3, '0');
+            syncAll();
+        } catch (err) { 
+            console.error("AutoNumber Error:", err); 
+            document.getElementById('in_no_urut').value = "001";
+            syncAll();
+        }
+    }
+
+    function handleDateChange() {
+        const val = document.getElementById('in_tgl_raw').value;
+        if (!val) return;
+        const d = new Date(val);
+        document.getElementById('out_tgl').innerText = `${d.getDate()} ${monthsIndo[d.getMonth()]} ${d.getFullYear()}`;
+        initAutoNumber();
+        syncAll();
+    }
+
+    function updateQRCode(grandTotal) {
+        const noInv = document.getElementById('out_no').innerText;
+        const customer = document.getElementById('in_cust').value;
+        const qrContent = `IDE-INV|NO:${noInv}|CUST:${customer}|TOTAL:${formatRP(grandTotal)}`;
+        document.getElementById('qr_footer').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrContent)}`;
+        document.getElementById('qr_timestamp').innerText = `Generated: ${new Date().toLocaleString('id-ID')}`;
+    }
+
+    async function saveToSupabase() {
+        const btn = document.getElementById('btn-save-sb');
+        const noInv = document.getElementById('out_no').innerText;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> UPLOADING...'; btn.disabled = true;
+        
+        try {
+            const element = document.getElementById('main-doc');
+            const opt = {
+                margin: 0,
+                filename: `INV-${noInv}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+            const fileName = `invoices/INV_${Date.now()}_${noInv.replace(/\//g, '_').replace(/ /g, '')}.pdf`;
+            const { error: upErr } = await _supabase.storage.from('documents').upload(fileName, pdfBlob, { contentType: 'application/pdf', upsert: true });
+            if (upErr) throw upErr;
+
+            const { data: urlData } = _supabase.storage.from('documents').getPublicUrl(fileName);
+            const publicUrl = urlData.publicUrl;
+
+            const payload = {
+                jenis: "INVOICE", 
+                nomor: noInv,
+                tanggal: document.getElementById('in_tgl_raw').value,
+                tujuan: document.getElementById('in_cust').value,
+                nominal: Math.round(parseFloat(document.getElementById('out_grand_val').innerText.replace(/[^\d]/g, ''))),
+                pdf_url: publicUrl,
+                client_email: "system@indodharmaenergi.co.id"
+            };
+            const { error: dbErr } = await _supabase.from('eforms').insert([payload]);
+            if (dbErr) throw dbErr;
+
+            alert("Berhasil! Data & PDF tersimpan di Cloud.");
+            initAutoNumber(); 
+        } catch (e) { alert("Error: " + e.message); }
+        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN DATA'; btn.disabled = false;
+    }
+
+    function downloadPDF() {
+        const element = document.getElementById('main-doc');
+        const opt = {
+            margin: 0,
+            filename: `INV-${document.getElementById('out_no').innerText}.pdf`,
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+
+    function terbilang(a) {
+        a = Math.floor(Math.abs(a));
+        if (a === 0) return "";
+        var bil = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+        var hasil = "";
+        if (a < 12) { hasil = bil[a]; } 
+        else if (a < 20) { hasil = terbilang(a - 10) + " Belas"; } 
+        else if (a < 100) { hasil = terbilang(Math.floor(a / 10)) + " Puluh " + terbilang(a % 10); } 
+        else if (a < 200) { hasil = "Seratus " + terbilang(a - 100); } 
+        else if (a < 1000) { hasil = terbilang(Math.floor(a / 100)) + " Ratus " + terbilang(a % 100); } 
+        else if (a < 2000) { hasil = "Seribu " + terbilang(a - 1000); } 
+        else if (a < 1000000) { hasil = terbilang(Math.floor(a / 1000)) + " Ribu " + terbilang(a % 1000); } 
+        else if (a < 1000000000) { hasil = terbilang(Math.floor(a / 1000000)) + " Juta " + terbilang(a % 1000000); } 
+        else if (a < 1000000000000) { hasil = terbilang(Math.floor(a / 1000000000)) + " Milyar " + terbilang(a % 1000000000); }
+        return hasil.trim().toLowerCase().replace(/\s+/g, ' ');
+    }
+
+    window.onload = () => {
+        const now = new Date();
+        document.getElementById('in_tgl_raw').value = now.toISOString().split('T')[0];
+        handleDateChange();
+        renderItemInputs();
+    };
+</script>
+</body>
+</html>
