@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Manajemen Dokumen Legalitas Perusahaan</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            800: '#0c4a6e',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for better visuals */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Top Header -->
+    <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo & Portal Title -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-sky-600 p-2 rounded-lg text-white">
+                        <i class="fa-solid fa-file-contract text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold leading-tight">LegalDoc Hub</h1>
+                        <p class="text-xs text-slate-400 hidden sm:block">Sistem Dokumen Legalitas Multi-Perusahaan</p>
+                    </div>
+                </div>
+
+                <!-- Global Quick Action / Info -->
+                <div class="flex items-center space-x-4">
+                    <button onclick="openModalUpload()" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2 shadow-sm">
+                        <i class="fa-solid fa-plus"></i>
+                        <span class="hidden sm:inline">Upload Dokumen</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+        <!-- Company Filter Selector Bar -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-2 w-full md:w-auto">
+                <i class="fa-solid fa-building text-sky-600 text-lg"></i>
+                <span class="font-semibold text-slate-700 whitespace-nowrap">Perusahaan:</span>
+            </div>
+            
+            <!-- Tab buttons for quick filter -->
+            <div class="flex flex-wrap gap-2 w-full md:w-auto" id="companyTabs">
+                <button onclick="filterCompany('ALL')" id="tab-ALL" class="company-tab flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition bg-sky-600 text-white shadow-sm">
+                    Semua Perusahaan
+                </button>
+                <button onclick="filterCompany('PT Investama')" id="tab-PT Investama" class="company-tab flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+                    PT Investama
+                </button>
+                <button onclick="filterCompany('PT Khatulistiwa')" id="tab-PT Khatulistiwa" class="company-tab flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+                    PT Khatulistiwa
+                </button>
+                <button onclick="filterCompany('PT Indo Dharma')" id="tab-PT Indo Dharma" class="company-tab flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-lg transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+                    PT Indo Dharma
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Total Dokumen -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Dokumen</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mt-1" id="stat-total">0</h3>
+                </div>
+                <div class="w-12 h-12 bg-sky-50 text-sky-600 rounded-xl flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+            </div>
+
+            <!-- Dokumen Aktif -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Dokumen Aktif</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mt-1" id="stat-active">0</h3>
+                </div>
+                <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+            </div>
+
+            <!-- Segera Expired -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-amber-600 uppercase tracking-wider">Segera Expired (&lt; 30 Hr)</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mt-1" id="stat-warning">0</h3>
+                </div>
+                <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+            </div>
+
+            <!-- Expired -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-rose-600 uppercase tracking-wider">Dokumen Expired</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mt-1" id="stat-expired">0</h3>
+                </div>
+                <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter & Search Controls -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
+            <div class="flex flex-col md:flex-row gap-3 justify-between items-center">
+                <!-- Search Box -->
+                <div class="relative w-full md:w-80">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="searchInput" oninput="renderTable()" placeholder="Cari Judul atau Nomor..." class="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none">
+                </div>
+
+                <!-- Dropdown Filters -->
+                <div class="flex flex-wrap sm:flex-nowrap gap-3 w-full md:w-auto">
+                    <!-- Kategori Filter -->
+                    <select id="filterCategory" onchange="renderTable()" class="w-full sm:w-auto border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-sky-500 outline-none">
+                        <option value="ALL">Semua Kategori</option>
+                        <option value="Akta Pendirian">Akta Pendirian</option>
+                        <option value="NIB/OSS">NIB / OSS</option>
+                        <option value="NPWP Perusahaan">NPWP Perusahaan</option>
+                        <option value="SIUP/TDP">SIUP / TDP</option>
+                        <option value="SK Kemenkumham">SK Kemenkumham</option>
+                        <option value="Izin Operasional">Izin Operasional</option>
+                        <option value="Dokumen Direksi/KTP/NPWP">Dokumen Direksi/KTP/NPWP</option>
+                        <option value="Kontrak/MOU">Kontrak / MOU</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+
+                    <!-- Status Filter -->
+                    <select id="filterStatus" onchange="renderTable()" class="w-full sm:w-auto border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-sky-500 outline-none">
+                        <option value="ALL">Semua Status Masa Berlaku</option>
+                        <option value="AKTIF">Aktif</option>
+                        <option value="WARNING">Mendekati Expired (&lt; 30 Hari)</option>
+                        <option value="EXPIRED">Expired</option>
+                        <option value="LIFETIME">Berlaku Selamanya</option>
+                    </select>
+
+                    <!-- Export Excel/CSV Button -->
+                    <button onclick="exportToCSV()" class="w-full sm:w-auto border border-emerald-600 text-emerald-700 hover:bg-emerald-50 px-3 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-file-excel"></i>
+                        <span>Ekspor CSV</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Table -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead>
+                        <tr class="bg-slate-100/70 border-b border-slate-200 text-slate-600 font-semibold text-xs uppercase tracking-wider">
+                            <th class="p-4">Perusahaan & Dokumen</th>
+                            <th class="p-4">Kategori</th>
+                            <th class="p-4">Nomor Dokumen</th>
+                            <th class="p-4">Masa Berlaku</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="documentTableBody" class="divide-y divide-slate-100">
+                        <!-- Content populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden p-8 text-center text-slate-500">
+                <i class="fa-regular fa-folder-open text-4xl mb-3 text-slate-300"></i>
+                <p class="font-medium text-slate-600">Tidak ada dokumen yang ditemukan</p>
+                <p class="text-xs text-slate-400 mt-1">Coba sesuaikan kata kunci pencarian atau filter Anda.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-auto py-4 text-center text-xs text-slate-500">
+        &copy; 2026 Sistem Dokumen Legalitas — PT Investama | PT Khatulistiwa | PT Indo Dharma
+    </footer>
+
+    <!-- MODAL FORM UPLOAD / EDIT DOKUMEN -->
+    <div id="modalForm" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl my-8 overflow-hidden transform transition-all">
+            <!-- Modal Header -->
+            <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-lg flex items-center space-x-2" id="modalTitle">
+                    <i class="fa-solid fa-cloud-arrow-up text-sky-400"></i>
+                    <span>Tambah Dokumen Legalitas Baru</span>
+                </h3>
+                <button onclick="closeModalUpload()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Modal Form Body -->
+            <form id="docForm" onsubmit="saveDocument(event)" class="p-6 space-y-4">
+                <input type="hidden" id="docId">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Perusahaan -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Perusahaan <span class="text-rose-500">*</span></label>
+                        <select id="formCompany" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                            <option value="">-- Pilih Perusahaan --</option>
+                            <option value="PT Investama">PT Investama</option>
+                            <option value="PT Khatulistiwa">PT Khatulistiwa</option>
+                            <option value="PT Indo Dharma">PT Indo Dharma</option>
+                        </select>
+                    </div>
+
+                    <!-- Kategori -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Kategori Dokumen <span class="text-rose-500">*</span></label>
+                        <select id="formCategory" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                            <option value="">-- Pilih Kategori --</option>
+                            <option value="Akta Pendirian">Akta Pendirian</option>
+                            <option value="NIB/OSS">NIB / OSS</option>
+                            <option value="NPWP Perusahaan">NPWP Perusahaan</option>
+                            <option value="SIUP/TDP">SIUP / TDP</option>
+                            <option value="SK Kemenkumham">SK Kemenkumham</option>
+                            <option value="Izin Operasional">Izin Operasional</option>
+                            <option value="Dokumen Direksi/KTP/NPWP">Dokumen Direksi/KTP/NPWP</option>
+                            <option value="Kontrak/MOU">Kontrak / MOU</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Nama / Judul Dokumen -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Judul / Nama Dokumen <span class="text-rose-500">*</span></label>
+                        <input type="text" id="formTitle" required placeholder="Contoh: Akta Pendirian Perubahan 2023" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                    </div>
+
+                    <!-- Nomor Dokumen -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nomor Dokumen <span class="text-rose-500">*</span></label>
+                        <input type="text" id="formNumber" required placeholder="Contoh: AHU-001234.AH.01.01" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Tanggal Terbit -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Terbit</label>
+                        <input type="date" id="formIssueDate" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                    </div>
+
+                    <!-- Tanggal Expired -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-xs font-semibold text-slate-700">Tanggal Kadaluarsa</label>
+                            <label class="text-xs text-sky-600 flex items-center space-x-1 cursor-pointer">
+                                <input type="checkbox" id="formIsLifetime" onchange="toggleLifetime(this.checked)" class="rounded text-sky-600 focus:ring-sky-500">
+                                <span>Berlaku Selamanya</span>
+                            </label>
+                        </div>
+                        <input type="date" id="formExpiryDate" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                    </div>
+                </div>
+
+                <!-- File Drag & Drop Zone -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">File Dokumen (PDF, JPG, PNG)</label>
+                    <div id="dropZone" class="border-2 border-dashed border-slate-300 hover:border-sky-500 rounded-xl p-4 text-center cursor-pointer transition bg-slate-50 hover:bg-sky-50/30">
+                        <input type="file" id="formFile" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" class="hidden" onchange="handleFileSelect(event)">
+                        <div id="uploadPrompt" class="space-y-1">
+                            <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-400"></i>
+                            <p class="text-sm font-medium text-slate-600">Klik atau Drag & Drop file ke sini</p>
+                            <p class="text-xs text-slate-400">Format PDF, PNG, JPG (Maks. 10MB)</p>
+                        </div>
+                        <div id="filePreview" class="hidden flex items-center justify-between bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                            <div class="flex items-center space-x-3 overflow-hidden">
+                                <i class="fa-solid fa-file-pdf text-2xl text-rose-500"></i>
+                                <div class="text-left truncate">
+                                    <p class="text-xs font-semibold text-slate-700 truncate" id="fileName">document.pdf</p>
+                                    <p class="text-[10px] text-slate-400" id="fileSize">1.2 MB</p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="removeFile(event)" class="text-slate-400 hover:text-rose-500 p-1">
+                                <i class="fa-solid fa-circle-xmark text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Catatan -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Catatan / Keterangan Tambahan</label>
+                    <textarea id="formNotes" rows="2" placeholder="Catatan opsional..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-sky-500 outline-none"></textarea>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-end space-x-3 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeModalUpload()" class="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-600 hover:bg-slate-50 font-medium">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-sm font-medium shadow-sm transition">Simpan Dokumen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DETAIL DOKUMEN -->
+    <div id="modalDetail" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-xl overflow-hidden transform transition-all">
+            <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-lg flex items-center space-x-2">
+                    <i class="fa-solid fa-circle-info text-sky-400"></i>
+                    <span>Detail Dokumen Legalitas</span>
+                </h3>
+                <button onclick="closeModalDetail()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4 text-sm" id="detailContent">
+                <!-- Populated dynamically -->
+            </div>
+            <div class="bg-slate-50 px-6 py-3 border-t border-slate-100 flex justify-end">
+                <button onclick="closeModalDetail()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-sm font-medium text-slate-700">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+    <!-- SCRIPT APPLICATION LOGIC -->
+    <script>
+        // Key Storage
+        const STORAGE_KEY = 'LEGALDOC_HUB_DATA_V1';
+
+        // Sample Pre-populated Mock Data
+        const initialMockData = [
+            {
+                id: 'doc-1',
+                company: 'PT Investama',
+                category: 'Akta Pendirian',
+                title: 'Akta Pendirian & Perubahan Direksi',
+                number: '04/NOT-JKT/2018',
+                issueDate: '2018-05-12',
+                expiryDate: null,
+                isLifetime: true,
+                fileName: 'Akta_Pendirian_Investama.pdf',
+                notes: 'Notaris Anita Wijaya, SH.'
+            },
+            {
+                id: 'doc-2',
+                company: 'PT Investama',
+                category: 'NIB/OSS',
+                title: 'NIB Perizinan Berusaha',
+                number: '9120001234567',
+                issueDate: '2020-01-15',
+                expiryDate: null,
+                isLifetime: true,
+                fileName: 'NIB_Investama.pdf',
+                notes: 'Tercatat di sistem OSS RBA.'
+            },
+            {
+                id: 'doc-3',
+                company: 'PT Khatulistiwa',
+                category: 'SIUP/TDP',
+                title: 'Izin Usaha Perdagangan Operasional',
+                number: '503/128/SIUP-B/2021',
+                issueDate: '2021-03-10',
+                expiryDate: getRelativeDate(15), // Expiring in 15 days
+                isLifetime: false,
+                fileName: 'SIUP_Khatulistiwa.pdf',
+                notes: 'Perlu diperpanjang segera di Dinas Perizinan.'
+            },
+            {
+                id: 'doc-4',
+                company: 'PT Khatulistiwa',
+                category: 'SK Kemenkumham',
+                title: 'SK Kemenkumham Pendirian PT',
+                number: 'AHU-0019283.AH.01.01.2019',
+                issueDate: '2019-08-20',
+                expiryDate: null,
+                isLifetime: true,
+                fileName: 'SK_Kemenkumham_Khatulistiwa.pdf',
+                notes: 'Sah dari Kementerian Hukum dan HAM.'
+            },
+            {
+                id: 'doc-5',
+                company: 'PT Indo Dharma',
+                category: 'Izin Operasional',
+                title: 'Izin Operasional Khusus Industri',
+                number: 'IZIN-OPS/2022/9981',
+                issueDate: '2022-01-01',
+                expiryDate: getRelativeDate(-45), // Expired 45 days ago
+                isLifetime: false,
+                fileName: 'Izin_Ops_IndoDharma.pdf',
+                notes: 'Masa berlaku telah usai. Proses registrasi ulang.'
+            },
+            {
+                id: 'doc-6',
+                company: 'PT Indo Dharma',
+                category: 'NPWP Perusahaan',
+                title: 'Kartu & SKT NPWP Perusahaan',
+                number: '01.234.567.8-012.000',
+                issueDate: '2017-04-11',
+                expiryDate: null,
+                isLifetime: true,
+                fileName: 'NPWP_IndoDharma.pdf',
+                notes: 'KPP Pratama Jakarta Selatan.'
+            }
+        ];
+
+        // State Variables
+        let documents = [];
+        let currentCompanyFilter = 'ALL';
+        let activeUploadedFile = null;
+
+        // Helper date generator for mocks
+        function getRelativeDate(daysOffset) {
+            const date = new Date();
+            date.setDate(date.getDate() + daysOffset);
+            return date.toISOString().split('T')[0];
+        }
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDocuments();
+            setupDragAndDrop();
+            renderTable();
+        });
+
+        // Load Documents from LocalStorage
+        function loadDocuments() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                try {
+                    documents = JSON.parse(stored);
+                } catch (e) {
+                    documents = initialMockData;
+                }
+            } else {
+                documents = initialMockData;
+                saveToStorage();
+            }
+        }
+
+        // Save Documents to LocalStorage
+        function saveToStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(documents));
+        }
+
+        // Calculate Status Document
+        function getDocumentStatus(doc) {
+            if (doc.isLifetime || !doc.expiryDate) {
+                return { code: 'LIFETIME', label: 'Berlaku Selamanya', badge: 'bg-blue-100 text-blue-800 border-blue-200' };
+            }
+
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const expiry = new Date(doc.expiryDate);
+            expiry.setHours(0,0,0,0);
+
+            const diffTime = expiry - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) {
+                return { code: 'EXPIRED', label: 'Expired', badge: 'bg-rose-100 text-rose-800 border-rose-200', days: Math.abs(diffDays) };
+            } else if (diffDays <= 30) {
+                return { code: 'WARNING', label: `Mendekati Expired (${diffDays} hari)`, badge: 'bg-amber-100 text-amber-800 border-amber-200', days: diffDays };
+            } else {
+                return { code: 'AKTIF', label: 'Aktif', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200' };
+            }
+        }
+
+        // Filter Company Trigger
+        function filterCompany(companyName) {
+            currentCompanyFilter = companyName;
+
+            // Update tab styles
+            document.querySelectorAll('.company-tab').forEach(btn => {
+                btn.classList.remove('bg-sky-600', 'text-white', 'shadow-sm');
+                btn.classList.add('bg-slate-100', 'text-slate-600');
+            });
+
+            const activeTab = document.getElementById(`tab-${companyName}`);
+            if (activeTab) {
+                activeTab.classList.remove('bg-slate-100', 'text-slate-600');
+                activeTab.classList.add('bg-sky-600', 'text-white', 'shadow-sm');
+            }
+
+            renderTable();
+        }
+
+        // Filter & Render Table Data
+        function renderTable() {
+            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+            const categoryVal = document.getElementById('filterCategory').value;
+            const statusVal = document.getElementById('filterStatus').value;
+
+            // Filter process
+            const filtered = documents.filter(doc => {
+                // Perusahaan
+                if (currentCompanyFilter !== 'ALL' && doc.company !== currentCompanyFilter) return false;
+
+                // Kategori
+                if (categoryVal !== 'ALL' && doc.category !== categoryVal) return false;
+
+                // Search
+                if (searchVal) {
+                    const matchTitle = doc.title.toLowerCase().includes(searchVal);
+                    const matchNum = doc.number.toLowerCase().includes(searchVal);
+                    if (!matchTitle && !matchNum) return false;
+                }
+
+                // Status
+                if (statusVal !== 'ALL') {
+                    const status = getDocumentStatus(doc);
+                    if (status.code !== statusVal) return false;
+                }
+
+                return true;
+            });
+
+            // Update Quick Stats (Global or Per Active Company Filter)
+            updateQuickStats();
+
+            // Populate Table
+            const tbody = document.getElementById('documentTableBody');
+            const emptyState = document.getElementById('emptyState');
+
+            tbody.innerHTML = '';
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            filtered.forEach(doc => {
+                const status = getDocumentStatus(doc);
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
+
+                tr.innerHTML = `
+                    <td class="p-4">
+                        <div class="font-bold text-slate-800">${escapeHtml(doc.title)}</div>
+                        <div class="text-xs text-sky-700 font-medium mt-0.5">
+                            <i class="fa-solid fa-building text-[11px] mr-1"></i>${escapeHtml(doc.company)}
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        <span class="inline-block bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md text-xs font-medium">
+                            ${escapeHtml(doc.category)}
+                        </span>
+                    </td>
+                    <td class="p-4 font-mono text-xs text-slate-600">
+                        ${escapeHtml(doc.number)}
+                    </td>
+                    <td class="p-4 text-xs text-slate-600">
+                        ${doc.isLifetime ? '<i>Berlaku Selamanya</i>' : (doc.expiryDate ? formatDate(doc.expiryDate) : '-')}
+                    </td>
+                    <td class="p-4">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${status.badge}">
+                            ${status.label}
+                        </span>
+                    </td>
+                    <td class="p-4 text-center">
+                        <div class="flex items-center justify-center space-x-2">
+                            <button onclick="viewDetail('${doc.id}')" title="Lihat Detail" class="p-1.5 text-slate-500 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                            <button onclick="simulateDownload('${doc.id}')" title="Download File" class="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition">
+                                <i class="fa-solid fa-download"></i>
+                            </button>
+                            <button onclick="editDocument('${doc.id}')" title="Edit Dokumen" class="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="deleteDocument('${doc.id}')" title="Hapus Dokumen" class="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Update Stats Cards
+        function updateQuickStats() {
+            const scopeDocs = currentCompanyFilter === 'ALL' 
+                ? documents 
+                : documents.filter(d => d.company === currentCompanyFilter);
+
+            let total = scopeDocs.length;
+            let active = 0;
+            let warning = 0;
+            let expired = 0;
+
+            scopeDocs.forEach(doc => {
+                const status = getDocumentStatus(doc);
+                if (status.code === 'AKTIF' || status.code === 'LIFETIME') active++;
+                if (status.code === 'WARNING') warning++;
+                if (status.code === 'EXPIRED') expired++;
+            });
+
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-active').innerText = active;
+            document.getElementById('stat-warning').innerText = warning;
+            document.getElementById('stat-expired').innerText = expired;
+        }
+
+        // Drag & Drop Upload Handlers
+        function setupDragAndDrop() {
+            const dropZone = document.getElementById('dropZone');
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.add('border-sky-500', 'bg-sky-50/50'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.remove('border-sky-500', 'bg-sky-50/50'), false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) {
+                    document.getElementById('formFile').files = files;
+                    handleFileSelect({ target: { files: files } });
+                }
+            });
+
+            dropZone.addEventListener('click', (e) => {
+                if (e.target.closest('#filePreview')) return;
+                document.getElementById('formFile').click();
+            });
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                activeUploadedFile = file.name;
+                document.getElementById('fileName').innerText = file.name;
+                document.getElementById('fileSize').innerText = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+                document.getElementById('uploadPrompt').classList.add('hidden');
+                document.getElementById('filePreview').classList.remove('hidden');
+            }
+        }
+
+        function removeFile(e) {
+            if (e) e.stopPropagation();
+            activeUploadedFile = null;
+            document.getElementById('formFile').value = '';
+            document.getElementById('uploadPrompt').classList.remove('hidden');
+            document.getElementById('filePreview').classList.add('hidden');
+        }
+
+        function toggleLifetime(isChecked) {
+            const expiryInput = document.getElementById('formExpiryDate');
+            if (isChecked) {
+                expiryInput.value = '';
+                expiryInput.disabled = true;
+                expiryInput.classList.add('bg-slate-100', 'cursor-not-allowed');
+            } else {
+                expiryInput.disabled = false;
+                expiryInput.classList.remove('bg-slate-100', 'cursor-not-allowed');
+            }
+        }
+
+        // Open & Close Modals
+        function openModalUpload() {
+            resetForm();
+            document.getElementById('modalTitle').innerText = 'Tambah Dokumen Legalitas Baru';
+            document.getElementById('modalForm').classList.remove('hidden');
+        }
+
+        function closeModalUpload() {
+            document.getElementById('modalForm').classList.add('hidden');
+        }
+
+        function closeModalDetail() {
+            document.getElementById('modalDetail').classList.add('hidden');
+        }
+
+        function resetForm() {
+            document.getElementById('docForm').reset();
+            document.getElementById('docId').value = '';
+            removeFile();
+            toggleLifetime(false);
+        }
+
+        // Save Document (Create/Edit)
+        function saveDocument(e) {
+            e.preventDefault();
+
+            const docId = document.getElementById('docId').value;
+            const company = document.getElementById('formCompany').value;
+            const category = document.getElementById('formCategory').value;
+            const title = document.getElementById('formTitle').value.trim();
+            const number = document.getElementById('formNumber').value.trim();
+            const issueDate = document.getElementById('formIssueDate').value;
+            const isLifetime = document.getElementById('formIsLifetime').checked;
+            const expiryDate = isLifetime ? null : document.getElementById('formExpiryDate').value;
+            const notes = document.getElementById('formNotes').value.trim();
+
+            if (!company || !category || !title || !number) {
+                showToast('Mohon lengkapi semua kolom wajib!', 'error');
+                return;
+            }
+
+            if (docId) {
+                // Update
+                const index = documents.findIndex(d => d.id === docId);
+                if (index !== -1) {
+                    documents[index] = {
+                        ...documents[index],
+                        company,
+                        category,
+                        title,
+                        number,
+                        issueDate,
+                        expiryDate,
+                        isLifetime,
+                        fileName: activeUploadedFile || documents[index].fileName || 'dokumen.pdf',
+                        notes
+                    };
+                    showToast('Dokumen berhasil diperbarui!', 'success');
+                }
+            } else {
+                // Create New
+                const newDoc = {
+                    id: 'doc-' + Date.now(),
+                    company,
+                    category,
+                    title,
+                    number,
+                    issueDate,
+                    expiryDate,
+                    isLifetime,
+                    fileName: activeUploadedFile || 'dokumen_legalitas.pdf',
+                    notes
+                };
+                documents.unshift(newDoc);
+                showToast('Dokumen berhasil disimpan!', 'success');
+            }
+
+            saveToStorage();
+            closeModalUpload();
+            renderTable();
+        }
+
+        // Edit Document
+        function editDocument(id) {
+            const doc = documents.find(d => d.id === id);
+            if (!doc) return;
+
+            document.getElementById('modalTitle').innerText = 'Edit Dokumen Legalitas';
+            document.getElementById('docId').value = doc.id;
+            document.getElementById('formCompany').value = doc.company;
+            document.getElementById('formCategory').value = doc.category;
+            document.getElementById('formTitle').value = doc.title;
+            document.getElementById('formNumber').value = doc.number;
+            document.getElementById('formIssueDate').value = doc.issueDate || '';
+            document.getElementById('formNotes').value = doc.notes || '';
+
+            document.getElementById('formIsLifetime').checked = !!doc.isLifetime;
+            toggleLifetime(!!doc.isLifetime);
+
+            if (!doc.isLifetime) {
+                document.getElementById('formExpiryDate').value = doc.expiryDate || '';
+            }
+
+            if (doc.fileName) {
+                activeUploadedFile = doc.fileName;
+                document.getElementById('fileName').innerText = doc.fileName;
+                document.getElementById('fileSize').innerText = 'Terlampir';
+                document.getElementById('uploadPrompt').classList.add('hidden');
+                document.getElementById('filePreview').classList.remove('hidden');
+            }
+
+            document.getElementById('modalForm').classList.remove('hidden');
+        }
+
+        // View Detail Modal
+        function viewDetail(id) {
+            const doc = documents.find(d => d.id === id);
+            if (!doc) return;
+
+            const status = getDocumentStatus(doc);
+            const detailContainer = document.getElementById('detailContent');
+
+            detailContainer.innerHTML = `
+                <div class="space-y-3">
+                    <div class="flex justify-between items-start border-b border-slate-100 pb-3">
+                        <div>
+                            <span class="text-xs font-semibold text-sky-600 block uppercase tracking-wider">${escapeHtml(doc.company)}</span>
+                            <h4 class="text-base font-bold text-slate-800">${escapeHtml(doc.title)}</h4>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${status.badge}">
+                            ${status.label}
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div>
+                            <p class="text-slate-400">Kategori Dokumen</p>
+                            <p class="font-medium text-slate-700 mt-0.5">${escapeHtml(doc.category)}</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-400">Nomor Dokumen</p>
+                            <p class="font-mono font-medium text-slate-700 mt-0.5">${escapeHtml(doc.number)}</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-400">Tanggal Terbit</p>
+                            <p class="font-medium text-slate-700 mt-0.5">${doc.issueDate ? formatDate(doc.issueDate) : '-'}</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-400">Masa Berlaku</p>
+                            <p class="font-medium text-slate-700 mt-0.5">${doc.isLifetime ? 'Berlaku Selamanya' : (doc.expiryDate ? formatDate(doc.expiryDate) : '-')}</p>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-100 pt-3">
+                        <p class="text-xs text-slate-400 mb-1">File Terlampir</p>
+                        <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                            <span class="text-xs font-medium text-slate-700 truncate"><i class="fa-solid fa-file-pdf text-rose-500 mr-2"></i>${escapeHtml(doc.fileName || 'File_Dokumen.pdf')}</span>
+                            <button onclick="simulateDownload('${doc.id}')" class="text-xs text-sky-600 hover:text-sky-700 font-semibold ml-2">Unduh</button>
+                        </div>
+                    </div>
+
+                    ${doc.notes ? `
+                    <div class="border-t border-slate-100 pt-3">
+                        <p class="text-xs text-slate-400 mb-0.5">Catatan / Keterangan</p>
+                        <p class="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200">${escapeHtml(doc.notes)}</p>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+
+            document.getElementById('modalDetail').classList.remove('hidden');
+        }
+
+        // Delete Document
+        function deleteDocument(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus dokumen legalitas ini?')) {
+                documents = documents.filter(d => d.id !== id);
+                saveToStorage();
+                renderTable();
+                showToast('Dokumen berhasil dihapus!', 'info');
+            }
+        }
+
+        // Export to CSV
+        function exportToCSV() {
+            if (documents.length === 0) {
+                showToast('Tidak ada data untuk diekspor', 'error');
+                return;
+            }
+
+            const headers = ['Perusahaan', 'Kategori', 'Judul Dokumen', 'Nomor Dokumen', 'Tanggal Terbit', 'Masa Berlaku', 'Status', 'Catatan'];
+            
+            const rows = documents.map(doc => {
+                const status = getDocumentStatus(doc);
+                return [
+                    `"${doc.company}"`,
+                    `"${doc.category}"`,
+                    `"${doc.title.replace(/"/g, '""')}"`,
+                    `"${doc.number}"`,
+                    `"${doc.issueDate || '-'}"`,
+                    `"${doc.isLifetime ? 'Berlaku Selamanya' : (doc.expiryDate || '-')}"`,
+                    `"${status.label}"`,
+                    `"${(doc.notes || '').replace(/"/g, '""')}"`
+                ];
+            });
+
+            const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', `Dokumen_Legalitas_${currentCompanyFilter}_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast('Data berhasil diekspor ke CSV/Excel', 'success');
+        }
+
+        // Simulate Download Action
+        function simulateDownload(id) {
+            const doc = documents.find(d => d.id === id);
+            if (!doc) return;
+
+            // Generate dummy text file for download simulation
+            const content = `Simulasi File Dokumen Legalitas:\n\nPerusahaan: ${doc.company}\nJudul: ${doc.title}\nNomor: ${doc.number}\nKategori: ${doc.category}\nStatus: ${getDocumentStatus(doc).label}\nCatatan: ${doc.notes || '-'}`;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = doc.fileName || `${doc.title}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            showToast(`Mengunduh: ${doc.fileName || 'Dokumen.pdf'}`, 'success');
+        }
+
+        // Toast Notification System
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+
+            let bgColors = {
+                success: 'bg-emerald-600 text-white',
+                error: 'bg-rose-600 text-white',
+                info: 'bg-slate-800 text-white'
+            };
+
+            let icons = {
+                success: 'fa-circle-check',
+                error: 'fa-circle-xmark',
+                info: 'fa-circle-info'
+            };
+
+            toast.className = `pointer-events-auto flex items-center space-x-2 px-4 py-3 rounded-lg shadow-lg text-sm transition transform translate-y-2 opacity-0 ${bgColors[type] || bgColors.info}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${icons[type] || icons.info}"></i>
+                <span>${escapeHtml(message)}</span>
+            `;
+
+            container.appendChild(toast);
+
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            // Animate out
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // Utilities
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateStr).toLocaleDateString('id-ID', options);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;")
+                      .replace(/</g, "&lt;")
+                      .replace(/>/g, "&gt;")
+                      .replace(/"/g, "&quot;")
+                      .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
