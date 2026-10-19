@@ -1133,26 +1133,26 @@
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                             <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-sm">
-                                <div class="${accentClass} font-bold text-xs"><i class="fa-solid fa-cash-register mr-1"></i> Penjualan & PO</div>
+                                <div class="${accentClass} font-bold text-xs"><i class="fa-solid fa-cash-register mr-1"></i> Data Penjualan & Purchase Order</div>
                                 <div class="space-y-1.5 pt-1 text-[11px]">
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenjualanData();" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Buka Penjualan</button>
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadPurchaseOrdersData();" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Buka PO (PDF View)</button>
-                                    <button onclick="handleActionRedirect('po')" class="w-full text-left font-semibold ${accentClass} hover:underline">&rarr; Buat PO</button>
+                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenjualanData();" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Buka Data Penjualan</button>
+                                    <button onclick="window.selectedMonthFilter='-10-'; loadPurchaseOrdersData();" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Buka Semua Purchase Order</button>
+                                    <button onclick="handleActionRedirect('po')" class="w-full text-left font-semibold ${accentClass} hover:underline">&bull; Buat Purchase Order</button>
                                 </div>
                             </div>
                             <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-sm">
                                 <div class="${accentClass} font-bold text-xs"><i class="fa-solid fa-file-lines mr-1"></i> Penawaran (SPH)</div>
                                 <div class="space-y-1.5 pt-1 text-[11px]">
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenawaranData('Penawaran Biasa');" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; buka penawaran</button>
-                                    <button onclick="handleActionRedirect('penawaran')" class="w-full text-left font-semibold ${accentClass} hover:underline">&rarr; buat penawaran</button>
-                                    <button onclick="handleActionRedirect('penawaran_multi')" class="w-full text-left font-semibold ${accentClass} hover:underline">&rarr; buat penawaran multi</button>
-                                    <button onclick="handleActionRedirect('penawaran_diskon')" class="w-full text-left font-semibold ${accentClass} hover:underline">&rarr; buat penawaran diskon</button>
+                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenawaranData('Penawaran Biasa');" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Buka Semua penawaran</button>
+                                    <button onclick="handleActionRedirect('penawaran')" class="w-full text-left font-semibold ${accentClass} hover:underline">&bull; Buat penawaran</button>
+                                    <button onclick="handleActionRedirect('penawaran_multi')" class="w-full text-left font-semibold ${accentClass} hover:underline">&bull; Buat penawaran multi</button>
+                                    <button onclick="handleActionRedirect('penawaran_diskon')" class="w-full text-left font-semibold ${accentClass} hover:underline">&bull; Buat penawaran diskon</button>
                                 </div>
                             </div>
                             <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-sm">
                                 <div class="text-red-600 font-bold text-xs"><i class="fa-solid fa-receipt mr-1"></i> Invoice</div>
                                 <div class="space-y-1.5 pt-1 text-[11px]">
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadInvoiceData('Buka Invoice');" class="w-full text-left text-slate-600 hover:text-red-600 transition">&bull; Buka Invoice</button>
+                                    <button onclick="window.selectedMonthFilter='-10-'; loadInvoiceData('Buka Invoice');" class="w-full text-left text-slate-600 hover:text-red-600 transition">&bull; Buka Semua Invoice</button>
                                     <button onclick="handleActionRedirect('Buat Invoice BRI')" class="w-full text-left text-slate-600 hover:text-red-600 transition">&bull; Buat Invoice BRI</button>
                                     <button onclick="handleActionRedirect('Buat Invoice BCA')" class="w-full text-left text-slate-600 hover:text-red-600 transition">&bull; Buat Invoice BCA</button>
                                     ${transportInvoiceMenuHTML}
