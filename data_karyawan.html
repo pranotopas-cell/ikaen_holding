@@ -258,9 +258,9 @@
                     <label class="block text-[11px] font-semibold uppercase text-slate-600 tracking-wider mb-1">Perusahaan Unit *</label>
                     <select id="empCompany" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:border-blue-500 focus:outline-none">
                         <option value="">-- Pilih Perusahaan Unit --</option>
-                        <option value="Investama Kalimantan Energi">Investama Kalimantan Energi</option>
-                        <option value="Khatulistiwa Sinar Energi">Khatulistiwa Sinar Energi</option>
-                        <option value="Indo Dharma Energi">Indo Dharma Energi</option>
+                        <option value="PT. INVESTAMA KALIMANTAN ENERGI">PT. INVESTAMA KALIMANTAN ENERGI</option>
+                        <option value="PT. KHATULISTIWA SINAR ENERGI">PT. KHATULISTIWA SINAR ENERGI</option>
+                        <option value="PT. INDO DHARMA ENERGI">PT. INDO DHARMA ENERGI</option>
                     </select>
                 </div>
 
@@ -330,45 +330,11 @@
     <!-- JAVASCRIPT APP LOGIC -->
     <script>
         // SUPABASE CONFIGURATION
-        const SB_URL = "https://qlsvvxfykteqxzcppnfv.supabase.co";
-        const SB_KEY = "sb_publishable_YlFIMi2XTpX77USP0qxAzw_SatAvLT6";
+        const SB_URL = "https://qnamtickoteyvydayyor.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuYW10aWNrb3RleXZ5ZGF5eW9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4OTU2MzksImV4cCI6MjA5MzQ3MTYzOX0.VAeN0JVnz4WNPzY5NTGmtGeHD-Da_qkCvy84ZDYZNHo";
         
         let _supabase = null;
         let isSupabaseReady = false;
-
-        // INITIAL DUMMY DATA FOR DEMO / LOCAL FALLBACK
-        const initialEmployees = [
-            {
-                id: "emp-101",
-                company: "Investama Kalimantan Energi",
-                name: "Ir. Ahmad Fauzi, M.T.",
-                position: "Senior Mining Operations Manager",
-                phone: "0811-5523-8891",
-                year: "2018",
-                address: "Jl. Mulawarman No. 88, Balikpapan, Kaltim",
-                photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=250"
-            },
-            {
-                id: "emp-201",
-                company: "Khatulistiwa Sinar Energi",
-                name: "Bambang Trimulyo, S.T.",
-                position: "Chief Solar Systems Engineer",
-                phone: "0852-4411-9988",
-                year: "2021",
-                address: "Jl. Gajah Mada No. 104, Pontianak",
-                photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=250"
-            },
-            {
-                id: "emp-301",
-                company: "Indo Dharma Energi",
-                name: "Hendrik Wijaya, M.B.A.",
-                position: "Business Development Director",
-                phone: "0811-3344-5566",
-                year: "2019",
-                address: "Jl. HR Rasuna Said, Kuningan, Jakarta Selatan",
-                photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250"
-            }
-        ];
 
         // GLOBAL APP STATE
         let employees = [];
@@ -376,12 +342,31 @@
         let currentCompanyFilter = 'ALL';
         let base64Photo = '';
 
-        // LOGO MAP FOR COMPANIES
-        const companyLogos = {
-            "Investama Kalimantan Energi": "ikaen.png",
-            "Khatulistiwa Sinar Energi": "header1.png",
-            "Indo Dharma Energi": "ide1.png"
-        };
+        // Helper untuk membersihkan string agar pencarian/filter tidak sensitif terhadap 'pt', spasi, atau kapitalisasi
+        function cleanString(str) {
+            if (!str) return '';
+            return str.toString()
+                .toLowerCase()
+                .replace(/^pt\.?\s*/i, '') // Hapus kata PT / PT. di depan
+                .replace(/[^a-z0-9]/g, ''); // Hapus spasi dan karakter khusus
+        }
+
+        // Helper untuk memvalidasi dan memformat URL foto dari Supabase
+        function formatPhotoUrl(url) {
+            if (!url || typeof url !== 'string') return '';
+            let cleanedUrl = url.trim();
+            if (!cleanedUrl || cleanedUrl === 'null' || cleanedUrl === 'undefined') return '';
+            
+            // Jika foto merupakan Base64 atau URL HTTP/HTTPS lengkap
+            if (cleanedUrl.startsWith('data:image') || cleanedUrl.startsWith('http://') || cleanedUrl.startsWith('https://')) {
+                return cleanedUrl;
+            }
+            // Jika foto berupa path relatif storage
+            if (cleanedUrl.startsWith('/')) {
+                return `${SB_URL}/storage/v1/object/public${cleanedUrl}`;
+            }
+            return `${SB_URL}/storage/v1/object/public/${cleanedUrl}`;
+        }
 
         // APPLICATION INIT
         window.onload = async function() {
@@ -418,32 +403,65 @@
             }
         }
 
-        // LOAD EMPLOYEES FROM SUPABASE OR LOCAL STORAGE
+        // LOAD EMPLOYEES FROM SUPABASE (attendances table)
         async function loadEmployees() {
             if (isSupabaseReady && _supabase) {
                 try {
-                    const { data, error } = await _supabase.from('karyawan').select('*');
+                    // Tarik seluruh baris attendances diurutkan dari terlama ke terbaru
+                    const { data, error } = await _supabase.from('attendances').select('*').order('created_at', { ascending: true });
+                    
                     if (!error && data && data.length > 0) {
-                        employees = data;
+                        const uniqueMap = new Map();
+                        
+                        data.forEach((item, index) => {
+                            // Baca kolom user_name & company_name persis sesuai tabel Supabase
+                            const userName = item.user_name || item.name || '';
+                            if (!userName.trim()) return;
+
+                            const key = userName.trim().toLowerCase();
+                            const compName = item.company_name || item.cmpany_name || 'PT. INVESTAMA KALIMANTAN ENERGI';
+                            const validPhoto = formatPhotoUrl(item.photo_url || item.photo);
+
+                            if (!uniqueMap.has(key)) {
+                                uniqueMap.set(key, {
+                                    id: item.id ? String(item.id) : 'emp-att-' + index,
+                                    company: compName,
+                                    name: userName.trim(),
+                                    position: item.position || 'Staff',
+                                    phone: item.phone || '-',
+                                    year: item.year || '2022',
+                                    address: item.address || 'Alamat Input Manual',
+                                    photo: validPhoto
+                                });
+                            } else {
+                                // Timpa dengan data paling baru, dan pertahankan foto jika ada foto baru
+                                const prev = uniqueMap.get(key);
+                                uniqueMap.set(key, {
+                                    id: item.id ? String(item.id) : prev.id,
+                                    company: compName || prev.company,
+                                    name: userName.trim(),
+                                    position: item.position || prev.position,
+                                    phone: item.phone || prev.phone,
+                                    year: item.year || prev.year,
+                                    address: item.address || prev.address,
+                                    photo: validPhoto || prev.photo
+                                });
+                            }
+                        });
+
+                        employees = Array.from(uniqueMap.values());
                         saveLocalBackup();
                         return;
                     }
                 } catch(e) {
-                    console.log("Fetching from Supabase failed, fallback to local storage");
+                    console.error("Gagal mengambil data dari Supabase:", e);
                 }
             }
 
-            // LocalStorage Fallback
+            // Fallback LocalStorage
             const saved = localStorage.getItem('corporate_employees_exec');
             if (saved) {
-                try {
-                    employees = JSON.parse(saved);
-                } catch(e) {
-                    employees = [...initialEmployees];
-                }
-            } else {
-                employees = [...initialEmployees];
-                saveLocalBackup();
+                try { employees = JSON.parse(saved); } catch(e) { employees = []; }
             }
         }
 
@@ -455,7 +473,19 @@
         async function syncEmployeeToSupabase(employee) {
             if (!isSupabaseReady || !_supabase) return;
             try {
-                await _supabase.from('karyawan').upsert([employee]);
+                const payload = {
+                    company_name: employee.company,
+                    user_name: employee.name,
+                    position: employee.position,
+                    phone: employee.phone,
+                    address: employee.address,
+                    year: employee.year,
+                    photo_url: employee.photo
+                };
+                if (!employee.id.startsWith('emp-att-') && !isNaN(employee.id)) {
+                    payload.id = parseInt(employee.id);
+                }
+                await _supabase.from('attendances').upsert([payload]);
             } catch(e) {
                 console.error("Supabase Sync Error:", e);
             }
@@ -465,7 +495,8 @@
         async function deleteEmployeeFromSupabase(id) {
             if (!isSupabaseReady || !_supabase) return;
             try {
-                await _supabase.from('karyawan').delete().eq('id', id);
+                let queryId = isNaN(id) ? id : parseInt(id);
+                await _supabase.from('attendances').delete().eq('id', queryId);
             } catch(e) {
                 console.error("Supabase Delete Error:", e);
             }
@@ -475,7 +506,6 @@
         function setCompanyFilter(company) {
             currentCompanyFilter = company;
             
-            // Update Active Buttons
             ['ALL', 'IKE', 'KSE', 'IDE'].forEach(type => {
                 const btn = document.getElementById(`filterBtn${type}`);
                 if (!btn) return;
@@ -495,10 +525,20 @@
 
         // RENDER DATA & STATS
         function renderData() {
-            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            const searchInputEl = document.getElementById('searchInput');
+            const searchQuery = searchInputEl ? searchInputEl.value.toLowerCase().trim() : '';
 
             const filtered = employees.filter(emp => {
-                const matchCompany = currentCompanyFilter === 'ALL' || emp.company === currentCompanyFilter;
+                // Saring company_name secara aman
+                let matchCompany = false;
+                if (currentCompanyFilter === 'ALL') {
+                    matchCompany = true;
+                } else {
+                    const empClean = cleanString(emp.company);
+                    const targetClean = cleanString(currentCompanyFilter);
+                    matchCompany = empClean.includes(targetClean) || targetClean.includes(empClean);
+                }
+
                 const matchSearch = emp.name.toLowerCase().includes(searchQuery) ||
                                     emp.position.toLowerCase().includes(searchQuery) ||
                                     emp.phone.toLowerCase().includes(searchQuery);
@@ -526,18 +566,28 @@
         // UPDATE DASHBOARD STATS
         function updateStats() {
             document.getElementById('statTotal').innerText = employees.length;
-            document.getElementById('statIKE').innerText = employees.filter(e => e.company === 'Investama Kalimantan Energi').length;
-            document.getElementById('statKSE').innerText = employees.filter(e => e.company === 'Khatulistiwa Sinar Energi').length;
-            document.getElementById('statIDE').innerText = employees.filter(e => e.company === 'Indo Dharma Energi').length;
+            document.getElementById('statIKE').innerText = employees.filter(e => cleanString(e.company).includes('investama') || cleanString(e.company).includes('kalimantan')).length;
+            document.getElementById('statKSE').innerText = employees.filter(e => cleanString(e.company).includes('khatulistiwa')).length;
+            document.getElementById('statIDE').innerText = employees.filter(e => cleanString(e.company).includes('indodharma')).length;
         }
 
-        // RENDER CARD VIEW (WHITE THEME)
+        // LOGO COMPANY HELPER
+        function getCompanyLogo(company) {
+            const cleaned = cleanString(company);
+            if (cleaned.includes('investama') || cleaned.includes('kalimantan')) return 'ikaen.png';
+            if (cleaned.includes('khatulistiwa')) return 'header1.png';
+            if (cleaned.includes('indodharma')) return 'ide1.png';
+            return '';
+        }
+
+        // RENDER CARD VIEW
         function renderCardView(data) {
             const container = document.getElementById('cardViewContainer');
             container.innerHTML = '';
 
             data.forEach(emp => {
-                const logoSrc = companyLogos[emp.company] || '';
+                const logoSrc = getCompanyLogo(emp.company);
+                const photoSrc = emp.photo ? emp.photo : getInitialsAvatar(emp.name);
 
                 const cardHtml = `
                     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col group relative text-slate-800">
@@ -548,14 +598,14 @@
                                 <img src="${logoSrc}" alt="Logo" class="h-5 object-contain max-w-[90px]" onerror="this.style.display='none'">
                                 <span class="text-xs font-bold text-slate-700 tracking-wide truncate">${emp.company}</span>
                             </div>
-                            <span class="text-[10px] font-mono text-slate-500 bg-slate-200/60 px-2 py-0.5 rounded-full flex-shrink-0">ID: ${emp.id.slice(-4)}</span>
+                            <span class="text-[10px] font-mono text-slate-500 bg-slate-200/60 px-2 py-0.5 rounded-full flex-shrink-0">ID: ${String(emp.id).slice(-4)}</span>
                         </div>
 
                         <!-- Card Profile Content -->
                         <div class="p-6 flex-grow flex flex-col items-center text-center">
                             <div class="relative mb-4">
-                                <img src="${emp.photo || getInitialsAvatar(emp.name)}" alt="${emp.name}" 
-                                     onerror="this.src='${getInitialsAvatar(emp.name)}'"
+                                <img src="${photoSrc}" alt="${emp.name}" 
+                                     onerror="this.onerror=null; this.src='${getInitialsAvatar(emp.name)}';"
                                      class="w-20 h-20 rounded-full object-cover border border-slate-200 shadow-sm ring-4 ring-slate-50">
                                 <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></span>
                             </div>
@@ -601,18 +651,19 @@
             tbody.innerHTML = '';
 
             data.forEach(emp => {
-                const logoSrc = companyLogos[emp.company] || '';
+                const logoSrc = getCompanyLogo(emp.company);
+                const photoSrc = emp.photo ? emp.photo : getInitialsAvatar(emp.name);
 
                 const trHtml = `
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="py-3.5 px-6">
                             <div class="flex items-center space-x-3">
-                                <img src="${emp.photo || getInitialsAvatar(emp.name)}" alt="${emp.name}" 
-                                     onerror="this.src='${getInitialsAvatar(emp.name)}'"
+                                <img src="${photoSrc}" alt="${emp.name}" 
+                                     onerror="this.onerror=null; this.src='${getInitialsAvatar(emp.name)}';"
                                      class="w-9 h-9 rounded-full object-cover border border-slate-200">
                                 <div>
                                     <p class="font-bold text-slate-900">${emp.name}</p>
-                                    <p class="text-[10px] text-slate-400 font-mono">ID: ${emp.id.slice(-4)}</p>
+                                    <p class="text-[10px] text-slate-400 font-mono">ID: ${String(emp.id).slice(-4)}</p>
                                 </div>
                             </div>
                         </td>
@@ -669,7 +720,7 @@
         }
 
         function getInitialsAvatar(name) {
-            const initials = name.replace(/[^a-zA-Z\s]/g, '').trim().split(' ').map(n => n[0]).join('').slice(0, 2) || 'HR';
+            const initials = name ? name.replace(/[^a-zA-Z\s]/g, '').trim().split(' ').map(n => n[0]).join('').slice(0, 2) : 'HR';
             return `https://placehold.co/200x200/e2e8f0/475569?text=${initials.toUpperCase()}`;
         }
 
@@ -685,7 +736,7 @@
             document.getElementById('photoPlaceholder').classList.remove('hidden');
 
             if (id) {
-                const emp = employees.find(e => e.id === id);
+                const emp = employees.find(e => String(e.id) === String(id));
                 if (emp) {
                     document.getElementById('empId').value = emp.id;
                     document.getElementById('empCompany').value = emp.company;
@@ -743,11 +794,11 @@
                 phone: document.getElementById('empPhone').value,
                 year: document.getElementById('empYear').value,
                 address: document.getElementById('empAddress').value,
-                photo: base64Photo || (id ? (employees.find(e => e.id === id)?.photo || '') : '')
+                photo: base64Photo || (id ? (employees.find(e => String(e.id) === String(id))?.photo || '') : '')
             };
 
             if (id) {
-                const index = employees.findIndex(e => e.id === id);
+                const index = employees.findIndex(e => String(e.id) === String(id));
                 if (index !== -1) employees[index] = newEmp;
                 showToast("Data karyawan berhasil diperbarui");
             } else {
@@ -763,9 +814,9 @@
 
         // DELETE EMPLOYEE
         async function deleteEmployee(id) {
-            const emp = employees.find(e => e.id === id);
+            const emp = employees.find(e => String(e.id) === String(id));
             if (emp && confirm(`Apakah Anda yakin ingin menghapus data karyawan "${emp.name}"?`)) {
-                employees = employees.filter(e => e.id !== id);
+                employees = employees.filter(e => String(e.id) !== String(id));
                 saveLocalBackup();
                 await deleteEmployeeFromSupabase(id);
                 renderData();
