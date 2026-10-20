@@ -133,7 +133,7 @@
 
     </main>
 
-    <!-- Modal Modal Detail JSON Perubahan -->
+    <!-- Modal Detail JSON Perubahan -->
     <div id="jsonModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm hidden">
         <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-2xl p-6 relative shadow-2xl flex flex-col max-h-[85vh]">
             <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-3">
@@ -158,13 +158,12 @@
     </div>
 
     <script>
-        // Gunakan kredensial Supabase Default bawaan Anda
         const SB_URL_DEFAULT = "https://yqdtgcjpfhiskywhowhu.supabase.co";
         const SB_KEY_DEFAULT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxZHRnY2pwZmhpc2t5d2hvd2h1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MDY0MTIsImV4cCI6MjA4NzA4MjQxMn0.Mlw3e8C4xKHcJPSMRkcsRXL5udtR9SeWk2GmqM1NyYc";
         const _supabase = supabase.createClient(SB_URL_DEFAULT, SB_KEY_DEFAULT);
 
-        let clientIp = 'Detecting...';
-        let clientLocation = 'Detecting...';
+        let clientIp = '182.8.131.110';
+        let clientLocation = 'Banjarmasin, Indonesia';
         let currentUser = {
             name: 'Noto',
             email: 'admin@energyholding.co.id',
@@ -172,35 +171,27 @@
         };
         let allLogs = [];
 
-        // 1. Ambil IP Address & Lokasi Pengguna
         async function fetchClientLocation() {
             try {
                 const res = await fetch('https://ipapi.co/json/');
                 if (res.ok) {
                     const data = await res.json();
-                    clientIp = data.ip || 'Unknown IP';
-                    clientLocation = `${data.city || ''}, ${data.region || ''} (${data.country_name || 'ID'})`.trim();
-                } else {
-                    clientIp = '182.253.xx.xx';
-                    clientLocation = 'Pangkalan Bun, Kalteng';
+                    clientIp = data.ip || clientIp;
+                    clientLocation = `${data.city || ''}, ${data.country_name || 'ID'}`.trim();
                 }
             } catch (err) {
-                clientIp = '182.253.xx.xx';
-                clientLocation = 'Pangkalan Bun, Kalteng';
+                console.log("Using default location IP");
             }
 
             document.getElementById('currentSessionUser').textContent = `${currentUser.name} (${currentUser.role})`;
             document.getElementById('currentSessionInfo').textContent = `IP: ${clientIp} | Lokasi: ${clientLocation}`;
             
-            // Lakukan Heartbeat
             sendHeartbeat();
         }
 
-        // 2. Fungsi Heartbeat untuk memperbarui status online di database
         async function sendHeartbeat() {
             try {
-                // Upsert data presence
-                await _supabase.from('user_presence').upsert({
+                const payload = {
                     user_email: currentUser.email,
                     user_name: currentUser.name,
                     user_role: currentUser.role,
@@ -209,24 +200,28 @@
                     user_agent: navigator.userAgent.substring(0, 50),
                     current_page: 'Pengaturan Sistem',
                     last_ping: new Date().toISOString()
-                }, { onConflict: 'user_email' });
+                };
+
+                const { error } = await _supabase.from('user_presence').upsert(payload, { onConflict: 'user_email' });
+                if (error) {
+                    console.error("Supabase Upsert Error:", error.message);
+                }
 
                 loadPresenceData();
             } catch (e) {
-                console.error("Presence error:", e);
+                console.error("Heartbeat exception:", e);
             }
         }
 
-        // 3. Load Daftar Pengguna Online
         async function loadPresenceData() {
             const container = document.getElementById('presenceTableBody');
             try {
-                // Ambil pengguna yang aktif dalam 5 menit terakhir
-                const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+                // Ambil data aktif 10 menit terakhir agar lebih fleksibel
+                const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
                 const { data, error } = await _supabase
                     .from('user_presence')
                     .select('*')
-                    .gte('last_ping', fiveMinutesAgo)
+                    .gte('last_ping', tenMinutesAgo)
                     .order('last_ping', { ascending: false });
 
                 if (error) throw error;
@@ -234,7 +229,7 @@
                 document.getElementById('onlineCountDisplay').textContent = data ? data.length : 0;
 
                 if (!data || data.length === 0) {
-                    container.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">Tidak ada pengguna aktif dalam 5 menit terakhir.</td></tr>`;
+                    container.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">Tidak ada pengguna aktif dalam 10 menit terakhir.</td></tr>`;
                     return;
                 }
 
@@ -260,7 +255,6 @@
             }
         }
 
-        // 4. Load Data Audit Log Perubahan
         async function loadAuditLogsData() {
             const container = document.getElementById('auditLogsTableBody');
             try {
@@ -272,7 +266,6 @@
 
                 if (error) throw error;
                 allLogs = data || [];
-
                 renderAuditLogsTable(allLogs);
             } catch (err) {
                 container.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-600">Gagal memuat log aktivitas: ${err.message}</td></tr>`;
@@ -357,8 +350,7 @@
 
         window.onload = function() {
             fetchClientLocation();
-            // Ping heartbeat setiap 30 detik
-            setInterval(sendHeartbeat, 30000);
+            setInterval(sendHeartbeat, 30000); // Ping setiap 30 detik
         };
     </script>
 </body>
