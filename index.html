@@ -755,6 +755,9 @@
 
                 let filterHtml = renderMonthFilterHTML('loadFakturPajakData');
 
+                let totalDppFaktur = filteredFaktur.reduce((sum, item) => sum + (Number(item.dpp) || 0), 0);
+                let totalPpnFaktur = filteredFaktur.reduce((sum, item) => sum + (Number(item.ppn) || 0), 0);
+
                 let rows = filteredFaktur.length > 0 ? filteredFaktur.map((item) => {
                     let noFakt = item.no_faktur || item.noFaktur || '-';
                     return `
@@ -802,6 +805,22 @@
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">${rows}</tbody>
                             </table>
+                        </div>
+                        <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-4 rounded-2xl border border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md text-white">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-lg bg-white/10 text-white flex items-center justify-center font-bold border border-white/20">
+                                    <i class="fa-solid fa-calculator"></i>
+                                </div>
+                                <span class="text-xs font-extrabold uppercase tracking-wider">Jumlah Total Keseluruhan Faktur Pajak:</span>
+                            </div>
+                            <div class="flex items-center gap-4 text-xs font-mono font-bold">
+                                <div class="bg-white/10 px-3 py-1.5 rounded-xl border border-white/20 shadow-inner">
+                                    <span>Jumlah DPP:</span> <span class="text-emerald-400">Rp ${totalDppFaktur.toLocaleString('id-ID')}</span>
+                                </div>
+                                <div class="bg-white/10 px-3 py-1.5 rounded-xl border border-white/20 shadow-inner">
+                                    <span>Jumlah PPN:</span> <span class="text-blue-400">Rp ${totalPpnFaktur.toLocaleString('id-ID')}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
