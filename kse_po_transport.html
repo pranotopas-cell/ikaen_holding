@@ -99,9 +99,9 @@
     <div class="d-flex gap-2">
         <button class="btn btn-dark btn-sm fw-bold" onclick="window.print()"><i class="bi bi-printer"></i> PRINT</button>
         <button class="btn btn-warning btn-sm fw-bold px-3" onclick="saveToSupabase()" id="btn-save-sb">
-            <i class="bi bi-cloud-arrow-up"></i> SIMPAN & AUTO UPLOAD
+            <i class="bi bi-cloud-arrow-up"></i> SIMPAN 
         </button>
-        <button class="btn btn-primary btn-sm fw-bold px-3" onclick="downloadPDF()"><i class="bi bi-download"></i> DOWNLOAD PDF</button>
+        <button class="btn btn-primary btn-sm fw-bold px-3" onclick="downloadPDF()"><i class="bi bi-download"></i> DOWNLOAD </button>
     </div>
 </div>
 
@@ -114,7 +114,7 @@
                 <div class="col-12">
                     <label class="small text-primary">Nomor Urut Surat</label>
                     <div class="input-group input-group-sm">
-                        <input type="number" id="in_no_urut" class="form-control fw-bold border-primary" value="3" oninput="formatFullNumber()">
+                        <input type="number" id="in_no_urut" class="form-control fw-bold border-primary" value="1" oninput="formatFullNumber()">
                         <span class="input-group-text">/PO-Transport/KSE/...</span>
                     </div>
                     <input type="hidden" id="in_no">
@@ -139,29 +139,29 @@
                 <hr class="my-2">
                 <div class="col-12">
                     <label class="small">No. PO (Di Tabel)</label>
-                    <input type="text" id="in_no_po_tabel" class="form-control form-control-sm" value="03/PO-Transport/KSE/X/2026" oninput="calculate()">
+                    <input type="text" id="in_no_po_tabel" class="form-control form-control-sm" placeholder="Masukkan No. PO" oninput="calculate()">
                 </div>
                 <div class="col-12">
                     <label class="small">Product</label>
                     <input list="list_barang" id="in_barang" class="form-control form-control-sm" value="Transport" oninput="calculate()">
                     <datalist id="list_barang">
-                        <option value="Transport">
+                        <option value="TRANSPORT">
                         <option value="BBM SOLAR INDUSTRI">
                         <option value="BIO SOLAR ( B50 )">
                     </datalist>
                 </div>
                 <div class="col-6">
                     <label class="small">QTY (LITER)</label>
-                    <input type="number" id="in_qty" class="form-control form-control-sm" value="50000" oninput="calculate()">
+                    <input type="number" id="in_qty" class="form-control form-control-sm" value="0" oninput="calculate()">
                 </div>
                 <div class="col-6">
                     <label class="small text-success">Total Harga (Rp / Ltr)</label>
-                    <input type="number" id="in_perltr" class="form-control form-control-sm border-success" value="1100" oninput="calculate()">
+                    <input type="number" id="in_perltr" class="form-control form-control-sm border-success" value="0" oninput="calculate()">
                 </div>
                 
                 <div class="col-6">
                     <label class="small">PPH 23 (%)</label>
-                    <input type="number" step="0.1" id="in_pph_pct" class="form-control form-control-sm" value="2 %" oninput="calculate()">
+                    <input type="number" step="0.1" id="in_pph_pct" class="form-control form-control-sm" value="2" oninput="calculate()">
                 </div>
                 <div class="col-6">
                     <label class="small">Losis Pengiriman (Rp)</label>
@@ -244,8 +244,8 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="text-center" style="vertical-align: top;">0</td>
-                            <td class="text-center" style="vertical-align: top;" id="out_tbl_nopo">0</td>
+                            <td class="text-center" style="vertical-align: top;">1</td>
+                            <td class="text-center" style="vertical-align: top;" id="out_tbl_nopo">-</td>
                             <td class="text-center" style="vertical-align: top;" id="out_tbl_product">Transport</td>
                             <td class="text-center" style="vertical-align: top;" id="out_tbl_qty">0</td>
                             <td class="text-center" style="vertical-align: top;" id="out_tbl_hargaltr">0</td>
@@ -265,7 +265,7 @@
                             <td class="p-1">
                                 <div class="d-flex justify-content-between">
                                     <span>Rp</span>
-                                    <span id="out_tbl_pph">0</span>
+                                    <span id="out_tbl_pph">-</span>
                                 </div>
                             </td>
                         </tr>
@@ -409,7 +409,7 @@
                 });
             }
 
-            const nextNum = maxNum + 1;
+            const nextNum = maxNum > 0 ? maxNum + 1 : 1;
             document.getElementById('in_no_urut').value = nextNum;
             formatFullNumber();
         } catch (err) { 
@@ -419,7 +419,7 @@
     }
 
     function formatFullNumber() {
-        const urut = document.getElementById('in_no_urut').value || "3";
+        const urut = document.getElementById('in_no_urut').value || "1";
         const tglVal = document.getElementById('in_tgl_raw').value;
         
         let m, y;
@@ -475,11 +475,11 @@
 
         document.getElementById('out_tbl_nopo').innerText = document.getElementById('in_no_po_tabel').value || "-";
         document.getElementById('out_tbl_product').innerText = document.getElementById('in_barang').value || "-";
-        document.getElementById('out_tbl_qty').innerText = qty.toLocaleString('id-ID');
-        document.getElementById('out_tbl_hargaltr').innerText = hargaLtr.toLocaleString('id-ID');
-        document.getElementById('out_tbl_totalbilling').innerText = totalBilling.toLocaleString('id-ID');
+        document.getElementById('out_tbl_qty').innerText = qty > 0 ? qty.toLocaleString('id-ID') : "0";
+        document.getElementById('out_tbl_hargaltr').innerText = hargaLtr > 0 ? hargaLtr.toLocaleString('id-ID') : "0";
+        document.getElementById('out_tbl_totalbilling').innerText = totalBilling > 0 ? totalBilling.toLocaleString('id-ID') : "0";
         
-        document.getElementById('out_lbl_pph').innerText = pphPct > 0 ? `PPH ${pphPct % 1 === 0 ? Math.round(pphPct) : pphPct}` : "PPH";
+        document.getElementById('out_lbl_pph').innerText = pphPct > 0 ? `PPH ${pphPct}` : "PPH 23";
         document.getElementById('out_tbl_pph').innerText = pphVal > 0 ? pphVal.toLocaleString('id-ID') : "-";
         document.getElementById('out_tbl_losis').innerText = losis > 0 ? losis.toLocaleString('id-ID') : "-";
         document.getElementById('out_tbl_franco').innerText = document.getElementById('in_franco').value || "-";
@@ -565,7 +565,6 @@
         
         document.getElementById('in_tgl_raw').value = `${yyyy}-${mm}-${dd}`;
         handleDateChange();
-        calculate();
     };
 </script>
 </body>
