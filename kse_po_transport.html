@@ -127,9 +127,9 @@
                     <label class="small">Supplier</label>
                     <input list="list_cust" id="in_cust" class="form-control form-control-sm" placeholder="Pilih atau ketik nama supplier..." oninput="handleCustChange()">
                     <datalist id="list_cust">
-                        <option value="PT. TELADAN MAKMUR JAYA">
-                        <option value="PT. OCEAN INDONESIA ENERGY">
-                        <option value="PT. GLOBAL BORNEO ENERGI">
+                        <option value="PT. BANUA PETRA PRIMA">
+                        <option value="PT. PALITO ENERGI NUSANTARA">
+                        <option value="PT. INDO DHARMA ENERGI">
                     </datalist>
                 </div>
                 <div class="col-12">
@@ -161,7 +161,7 @@
                 
                 <div class="col-6">
                     <label class="small">PPH 23 (%)</label>
-                    <input type="number" step="0.1" id="in_pph_pct" class="form-control form-control-sm" value="2" oninput="calculate()">
+                    <input type="number" step="0.1" id="in_pph_pct" class="form-control form-control-sm" value="2 %" oninput="calculate()">
                 </div>
                 <div class="col-6">
                     <label class="small">Losis Pengiriman (Rp)</label>
@@ -244,15 +244,15 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="text-center" style="vertical-align: top;">1</td>
-                            <td class="text-center" style="vertical-align: top;" id="out_tbl_nopo">03/PO-Transport/KSE/X/2026</td>
+                            <td class="text-center" style="vertical-align: top;">0</td>
+                            <td class="text-center" style="vertical-align: top;" id="out_tbl_nopo">0</td>
                             <td class="text-center" style="vertical-align: top;" id="out_tbl_product">Transport</td>
-                            <td class="text-center" style="vertical-align: top;" id="out_tbl_qty">50.000</td>
-                            <td class="text-center" style="vertical-align: top;" id="out_tbl_hargaltr">1.100</td>
+                            <td class="text-center" style="vertical-align: top;" id="out_tbl_qty">0</td>
+                            <td class="text-center" style="vertical-align: top;" id="out_tbl_hargaltr">0</td>
                             <td class="p-1" style="vertical-align: top;">
                                 <div class="d-flex justify-content-between">
                                     <span>Rp</span>
-                                    <span class="fw-bold" id="out_tbl_totalbilling">55.000.000</span>
+                                    <span class="fw-bold" id="out_tbl_totalbilling">0</span>
                                 </div>
                             </td>
                         </tr>
@@ -265,7 +265,7 @@
                             <td class="p-1">
                                 <div class="d-flex justify-content-between">
                                     <span>Rp</span>
-                                    <span id="out_tbl_pph">1.100.000</span>
+                                    <span id="out_tbl_pph">0</span>
                                 </div>
                             </td>
                         </tr>
@@ -288,7 +288,7 @@
                             <td class="p-1">
                                 <div class="d-flex justify-content-between">
                                     <span>Rp</span>
-                                    <span id="out_grandtotal">53.900.000</span>
+                                    <span id="out_grandtotal">0</span>
                                 </div>
                             </td>
                         </tr>
@@ -319,7 +319,7 @@
 
                 <div class="footer-kse">
                     <div class="footer-grid">
-                        <img id="qr_footer" width="65" height="65" style="border: 1px solid #eee; padding: 2px;">
+                        <img id="qr_footer" width="40" height="40" style="border: 1px solid #eee; padding: 2px;">
                         <div style="font-size: 9px; color: #555; line-height: 1.4; border-left: 1px solid #eee; padding-left: 10px;">
                             <b style="color: #000;">KSE - DIGITAL VERIFIED SYSTEM</b><br>
                             Dokumen ini sah dan diterbitkan secara elektronik.<br>
@@ -327,8 +327,8 @@
                         </div>
                         <div class="text-end" style="font-size: 9px; line-height: 1.5;">
                             <b style="color: var(--kse-primary); font-size: 10px;">PT. KHATULISTIWA SINAR ENERGI</b><br>
-                            Mitra Penyalur dan Transportir BBM Industri<br>
-                            Jl. H.M. Rafi'i rt.24 Pangkalan Bun, Kalimantan Tengah | 0815-884-1410
+                            Jl. H.M. Rafi'i rt.24 Pangkalan Bun, Kalimantan Tengah<br>
+                            pt.khatulistiwa.sinar.energi@gmail.com | 0815-884-1410
                         </div>
                     </div>
                 </div>
@@ -340,9 +340,9 @@
 <script>
     // --- KONFIGURASI ---
     const CUSTOMER_DATABASE = {
-        "PT. TELADAN MAKMUR JAYA": "Jl.Hksn no.23 Alalak Utara ,Banjarmasin - Kalimantan Selatan. \nUp: Ibu amel",
-        "PT. OCEAN INDONESIA ENERGY": "Jl. Alalak Utara RT.016 Kel.Alalak Utara , \nBanjarmasin - Kalimantan Selatan.\nUp.Ibu Yuliana",
-        "PT. GLOBAL BORNEO ENERGI": "Jl. Hasan Basri Komp.Ruko Kayu Tangi  ,\nBanjarmasin - Kalimantan Selatan.\nUp.Bpk.Abd.Muthalib"
+        "PT. PALITO ENERGI NUSANTARA": "Jl.Tjilik Riwut Km.06 No.132 ,Palangkaraya - Kalimantan Tengah. \nUp: Bpk Sanur",
+        "PT. BANUA PETRA PRIMA": "Jl. Alalak Utara RT.016 Kel.Alalak Utara , \nBanjarmasin - Kalimantan Selatan.\nUp.Ibu Raby",
+        "PT. INDO DHARMA ENERGI": "Jl. Ahmad Yani Km.07 Pangkalan Bun,\nKalimantan Tengah.\nUp.Ibu Nurhamida"
     };
 
     const SB_URL = "https://yqdtgcjpfhiskywhowhu.supabase.co"; 
