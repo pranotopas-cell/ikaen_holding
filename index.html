@@ -813,7 +813,7 @@
         async function handleUploadExcelSupabase() {
             const fileInput = document.getElementById('excelFileInput');
             if (!fileInput.files || fileInput.files.length === 0) {
-                alert('Silakan pilih file Excel (.xlsx / .xls) terlebih dahulu.');
+                alert('Silakan pilih file terlebih dahulu.');
                 return;
             }
 
@@ -824,10 +824,11 @@
             reader.onload = async function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
+                    // SheetJS membaca file .xlsx maupun .csv secara otomatis
                     const workbook = XLSX.read(data, { type: 'array' });
                     const firstSheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheetName];
-                    const jsonRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    const jsonRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false });
 
                     let batchData = [];
                     // Mulai dari baris index 1 (asumsi baris 0 adalah header)
@@ -835,12 +836,15 @@
                         let cols = jsonRows[i];
                         if (!cols || cols.length === 0) continue;
                         
-                        let tanggalVal = cols[0] ? String(cols[0]).trim() : '2026-10-15';
-                        let noFakturVal = cols[1] ? String(cols[1]).trim() : ('010.005-26.' + Math.floor(10000000 + Math.random() * 90000000));
-                        let npwpVal = cols[2] ? String(cols[2]).trim() : '01.000.000.0-000.000';
-                        let lawanVal = cols[3] ? String(cols[3]).trim() : 'Mitra Coretax';
-                        let dppVal = cols[4] ? parseFloat(String(cols[4]).replace(/[^0-9.]/g, '')) || 0 : 0;
-                        let ppnVal = cols[5] ? parseFloat(String(cols[5]).replace(/[^0-9.]/g, '')) || 0 : 0;
+                        // Konversi ke String untuk mencegah numeric field overflow pada nomor faktur & npwp
+                        let tanggalVal = cols[4] ? String(cols[4]).trim().substring(0, 10) : '2026-10-15';
+                        let noFakturVal = cols[3] ? String(cols[3]).trim() : ('010.005-26.' + Math.floor(10000000 + Math.random() * 90000000));
+                        let npwpVal = cols[1] ? String(cols[1]).trim() : '01.000.000.0-000.000';
+                        let lawanVal = cols[2] ? String(cols[2]).trim() : 'Mitra Coretax';
+                        
+                        // Bersihkan format angka nominal/DPP/PPN dari string/pemisah koma/titik
+                        let dppVal = cols[11] ? parseFloat(String(cols[11]).replace(/[^0-9.-]+/g, '')) || 0 : 0;
+                        let ppnVal = cols[12] ? parseFloat(String(cols[12]).replace(/[^0-9.-]+/g, '')) || 0 : 0;
 
                         batchData.push({
                             tanggal: tanggalVal,
@@ -855,16 +859,16 @@
                     if (batchData.length > 0) {
                         const { error } = await clientDb.from('faktur_pajak').insert(batchData);
                         if (error) {
-                            alert('Gagal mengimpor data Excel ke Supabase: ' + error.message);
+                            alert('Gagal mengimpor data ke Supabase: ' + error.message);
                         } else {
-                            alert(`Berhasil mengimpor dan menyimpan ${batchData.length} data faktur pajak dari file Excel ke Supabase!`);
+                            alert(`Berhasil mengimpor dan menyimpan ${batchData.length} data faktur pajak ke Supabase!`);
                             loadFakturPajakData();
                         }
                     } else {
-                        alert('Tidak ada baris data valid yang ditemukan pada file Excel.');
+                        alert('Tidak ada baris data valid yang ditemukan pada file.');
                     }
                 } catch (err) {
-                    alert('Terjadi kesalahan saat memproses file Excel: ' + err.message);
+                    alert('Terjadi kesalahan saat memproses file: ' + err.message);
                 }
             };
             reader.readAsArrayBuffer(file);
