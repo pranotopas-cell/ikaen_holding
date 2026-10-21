@@ -9,14 +9,15 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 15px;
+            margin: 10px;
+            padding-top: 50px; /* Memberikan ruang atas agar tabel tidak tertutup tombol melayang */
             background-color: #f4f4f9;
         }
         .table-container {
             max-width: 100%;
             overflow-x: auto;
             background: #fff;
-            padding: 15px;
+            padding: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             border-radius: 5px;
         }
@@ -26,45 +27,56 @@
             color: white;
             text-align: center;
             font-weight: bold;
-            font-size: 16px;
-            padding: 8px;
+            font-size: 15px;
+            padding: 6px;
             border: 1px solid #000;
             border-bottom: none;
             letter-spacing: 1px;
         }
+        
+        /* Tombol Aksi Melayang di Kiri Atas */
         .action-bar {
-            margin-bottom: 10px;
+            position: fixed;
+            top: 15px;
+            left: 15px;
             display: flex;
             gap: 8px;
-            flex-wrap: wrap;
+            z-index: 9999;
+            background: transparent;
+            padding: 0;
+            box-shadow: none;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
         }
         th, td {
             border: 1px solid #000;
-            padding: 4px 6px;
+            padding: 3px 4px;
             text-align: left;
-            font-size: 13px;
+            font-size: 11px;
+            word-wrap: break-word;
         }
         th {
             background-color: #d32f2f;
             color: white;
             text-align: center;
-            font-size: 13px;
+            font-size: 11px;
         }
         td input {
             width: 100%;
             border: none;
             background: transparent;
-            font-size: 13px;
+            font-size: 11px;
             outline: none;
             padding: 2px 0;
             box-sizing: border-box;
         }
         td input:focus {
             background: #fffde7;
+            box-shadow: inset 0 0 0 1px #2196F3; /* Garis fokus ala Excel */
         }
         .text-center {
             text-align: center;
@@ -77,35 +89,36 @@
             font-weight: bold;
             cursor: pointer;
             border: none;
-            border-radius: 3px;
-            font-size: 13px;
+            border-radius: 4px;
+            font-size: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            transition: transform 0.1s ease, opacity 0.2s ease;
+        }
+        .btn:active {
+            transform: scale(0.95);
+        }
+        .btn:hover {
+            opacity: 0.9;
         }
         .btn-add {
             background-color: #4CAF50;
             color: white;
         }
-        .btn-add:hover {
-            background-color: #45a049;
-        }
         .btn-save {
             background-color: #2196F3;
             color: white;
-        }
-        .btn-save:hover {
-            background-color: #0b7dda;
         }
         .btn-print {
             background-color: #ff9800;
             color: white;
         }
-        .btn-print:hover {
-            background-color: #e68a00;
-        }
         .btn-delete {
             background-color: #f44336;
             color: white;
-            padding: 2px 6px;
-            font-size: 12px;
+            padding: 2px 4px;
+            font-size: 11px;
+            border-radius: 3px;
+            box-shadow: none;
         }
         .btn-delete:hover {
             background-color: #da190b;
@@ -116,6 +129,7 @@
             body {
                 background-color: white;
                 margin: 0;
+                padding-top: 0;
             }
             .action-bar, .btn-add, .btn-delete, th:last-child, td:last-child {
                 display: none !important;
@@ -133,14 +147,14 @@
 </head>
 <body>
 
-    <div class="table-container">
-        <!-- Tombol Aksi -->
-        <div class="action-bar">
-            <button class="btn btn-add" onclick="tambahBaris()">&#43; Tambah </button>
-            <button class="btn btn-save" onclick="saveKeSupabase()">💾 Save </button>
-            <button class="btn btn-print" onclick="window.print()">🖨️ Print</button>
-        </div>
+    <!-- Tombol Aksi Melayang di Kiri Atas -->
+    <div class="action-bar">
+        <button class="btn btn-add" onclick="tambahBarisDiAtas()">&#43; Tambah </button>
+        <button class="btn btn-save" onclick="saveKeSupabase()">💾 Save </button>
+        <button class="btn btn-print" onclick="window.print()">🖨️ Print</button>
+    </div>
 
+    <div class="table-container">
         <!-- Judul Tabel -->
         <div class="table-title">DATA LIST CUSTOMER </div>
 
@@ -148,15 +162,17 @@
             <thead>
                 <tr>
                     <th style="width: 3%;">NO</th>
-                    <th style="width: 12%;">NPWP</th>
-                    <th style="width: 16%;">NAMA PERUSAHAAN</th>
-                    <th style="width: 12%;">LOKASI</th>
-                    <th style="width: 11%;">KONTAK PERSON</th>
-                    <th style="width: 10%;">NO HANDPHONE</th>
-                    <th style="width: 6%;">VOLUME/KL</th>
-                    <th style="width: 10%;">KETERANGAN</th>
-                    <th style="width: 11%;">NAMA BAGIAN SITE</th>
-                    <th style="width: 10%;">NO HP SITE</th>
+                    <th style="width: 10%;">NPWP</th>
+                    <th style="width: 20%;">NAMA PERUSAHAAN</th>
+                    <th style="width: 8%;">LOKASI 1</th>
+                    <th style="width: 8%;">LOKASI 2</th>
+                    <th style="width: 8%;">LOKASI 3</th>
+                    <th style="width: 8%;">KONTAK PERSON</th>
+                    <th style="width: 8%;">NO HP</th>
+                    <th style="width: 5%;">VOL/KL</th>
+                    <th style="width: 6%;">KET</th>
+                    <th style="width: 8%;">BAG. SITE</th>
+                    <th style="width: 8%;">HP SITE</th>
                     <th style="width: 4%;" class="text-center">AKSI</th>
                 </tr>
             </thead>
@@ -179,38 +195,134 @@
             });
         }
 
-        // Fungsi tambah baris (bisa diisi data awal jika dari database)
-        function tambahBaris(data = {}) {
+        // Fungsi tambah baris baru (di atas atau di bawah)
+        function tambahBaris(data = {}, prepend = false) {
             const tbody = document.getElementById("tableBody");
             const newRow = document.createElement("tr");
             
             newRow.innerHTML = `
                 <td class="text-center"></td>
-                <td><input type="text" placeholder="NPWP" value="${data.npwp || ''}"></td>
-                <td><input type="text" placeholder="Nama Perusahaan" value="${data.nama_perusahaan || ''}"></td>
-                <td><input type="text" placeholder="Lokasi" value="${data.lokasi || ''}"></td>
-                <td><input type="text" placeholder="Kontak Person" value="${data.kontak_person || ''}"></td>
-                <td><input type="text" placeholder="No Handphone" value="${data.no_handphone || ''}"></td>
-                <td><input type="number" value="${data.volume || 0}" class="text-right"></td>
-                <td><input type="text" placeholder="Keterangan" value="${data.keterangan || ''}"></td>
-                <td><input type="text" placeholder="Nama Bagian Site" value="${data.nama_bagian_site || ''}"></td>
-                <td><input type="text" placeholder="No HP Site" value="${data.no_hp_site || ''}"></td>
-                <td class="text-center"><button class="btn btn-delete" onclick="hapusBaris(this)">&#8722;</button></td>
+                <td><input type="text" class="npwp-val grid-input" placeholder="NPWP" value="${data.npwp || ''}"></td>
+                <td><input type="text" class="grid-input" placeholder="Nama Perusahaan" value="${data.nama_perusahaan || ''}"></td>
+                <td><input type="text" class="grid-input" placeholder="Lokasi 1" value="${data.lokasi || ''}"></td>
+                <td><input type="text" class="grid-input" placeholder="Lokasi 2" value="${data.lokasi_2 || ''}"></td>
+                <td><input type="text" class="grid-input" placeholder="Lokasi 3" value="${data.lokasi_3 || ''}"></td>
+                <td><input type="text" class="grid-input" placeholder="Kontak Person" value="${data.kontak_person || ''}"></td>
+                <td><input type="text" class="grid-input" placeholder="No Handphone" value="${data.no_handphone || ''}"></td>
+                <td><input type="number" class="grid-input text-right" value="${data.volume || 0}" onfocus="this.select()"></td>
+                <td><input type="text" class="grid-input" placeholder="Keterangan" value="${data.keterangan || ''}"></td>
+                <td><input type="text" class="grid-input" placeholder="Nama Bagian Site" value="${data.nama_bagian_site || ''}"></td>
+                <td><input type="text" class="grid-input" placeholder="No HP Site" value="${data.no_hp_site || ''}"></td>
+                <td class="text-center"><button class="btn btn-delete" tabindex="-1" onclick="hapusBaris(this)">&#8722;</button></td>
             `;
             
-            tbody.appendChild(newRow);
+            if (prepend && tbody.firstChild) {
+                tbody.insertBefore(newRow, tbody.firstChild);
+            } else {
+                tbody.appendChild(newRow);
+            }
             updateNomor();
+            return newRow;
         }
 
-        function hapusBaris(button) {
-            const row = button.closest("tr");
+        // Fungsi khusus tombol Tambah (menambahkan ke baris paling atas dan langsung fokus)
+        function tambahBarisDiAtas() {
+            const newRow = tambahBaris({}, true);
+            const firstInput = newRow.children[1].querySelector("input");
+            if (firstInput) {
+                firstInput.focus();
+                firstInput.select();
+            }
+        }
+
+        // Navigasi Keyboard ala Excel (Panah Atas/Bawah/Kiri/Kanan & Enter)
+        document.getElementById("customerTable").addEventListener("keydown", function(e) {
+            const target = e.target;
+            if (target.tagName !== "INPUT") return;
+
+            const td = target.closest("td");
+            const tr = td.closest("tr");
             const tbody = document.getElementById("tableBody");
             
-            if (tbody.rows.length > 1) {
-                row.remove();
-                updateNomor();
-            } else {
+            const cellIndex = Array.from(tr.children).indexOf(td);
+            const rowIndex = Array.from(tbody.children).indexOf(tr);
+
+            let nextInput = null;
+
+            if (e.key === "ArrowRight" || e.key === "Enter") {
+                if (e.key === "ArrowRight" && target.selectionEnd < target.value.length) return;
+
+                e.preventDefault();
+                if (cellIndex < tr.children.length - 2) {
+                    nextInput = tr.children[cellIndex + 1].querySelector("input");
+                } else if (rowIndex < tbody.children.length - 1) {
+                    nextInput = tbody.children[rowIndex + 1].children[1].querySelector("input");
+                } else {
+                    // Jika di baris paling bawah, buat baris baru di bawah
+                    const newRow = tambahBaris();
+                    nextInput = newRow.children[1].querySelector("input");
+                }
+            } else if (e.key === "ArrowLeft") {
+                if (target.selectionStart > 0) return;
+                e.preventDefault();
+                if (cellIndex > 1) {
+                    nextInput = tr.children[cellIndex - 1].querySelector("input");
+                } else if (rowIndex > 0) {
+                    const prevRow = tbody.children[rowIndex - 1];
+                    nextInput = prevRow.children[prevRow.children.length - 2].querySelector("input");
+                }
+            } else if (e.key === "ArrowDown") {
+                e.preventDefault();
+                if (rowIndex < tbody.children.length - 1) {
+                    nextInput = tbody.children[rowIndex + 1].children[cellIndex].querySelector("input");
+                } else {
+                    const newRow = tambahBaris();
+                    nextInput = newRow.children[cellIndex].querySelector("input");
+                }
+            } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                if (rowIndex > 0) {
+                    nextInput = tbody.children[rowIndex - 1].children[cellIndex].querySelector("input");
+                }
+            }
+
+            if (nextInput) {
+                nextInput.focus();
+                if (nextInput.type === "text" || nextInput.type === "number") {
+                    nextInput.select();
+                }
+            }
+        });
+
+        // Fungsi Hapus Baris & Data dari Supabase
+        async function hapusBaris(button) {
+            const row = button.closest("tr");
+            const npwpInput = row.querySelector(".npwp-val");
+            const npwpValue = npwpInput ? npwpInput.value.trim() : "";
+            const tbody = document.getElementById("tableBody");
+
+            if (tbody.rows.length <= 1) {
                 alert("Tabel harus menyisakan setidaknya satu baris!");
+                return;
+            }
+
+            if (confirm("Apakah Anda yakin ingin menghapus perusahaan ini (tidak aktif) dari sistem dan database?")) {
+                try {
+                    if (npwpValue) {
+                        const { error } = await supabaseClient
+                            .from('customers')
+                            .delete()
+                            .eq('npwp', npwpValue);
+
+                        if (error) throw error;
+                    }
+
+                    row.remove();
+                    updateNomor();
+                } catch (err) {
+                    console.error(err);
+                    alert("Gagal menghapus data dari database Supabase.");
+                }
             }
         }
 
@@ -225,15 +337,42 @@
                 if (error) throw error;
 
                 const tbody = document.getElementById("tableBody");
-                tbody.innerHTML = ""; // Bersihkan tabel terlebih dahulu
+                tbody.innerHTML = ""; 
 
                 if (data && data.length > 0) {
                     data.forEach(item => {
                         tambahBaris(item);
                     });
                 } else {
-                    // Jika database kosong, tampilkan 1 baris kosong
-                    tambahBaris();
+                    const dataAwalDefault = [
+                        { npwp: "01.137.575.5-713.000", nama_perusahaan: "CV. IZAKA KARYA", lokasi: "PANGKALAN LIMA", volume: 10 },
+                        { npwp: "00.168.198.0-713.000", nama_perusahaan: "BANDARA KOTAWARINGIN BARAT", lokasi: "BANDARA ISKANDAR", volume: 5 },
+                        { npwp: "86.367.526.0-713.000", nama_perusahaan: "CV. AGRO MULYA LESTARI", lokasi: "JL. Matnoor, Kel. Baru", volume: 5 },
+                        { npwp: "41.480.367.6-452.000", nama_perusahaan: "CV. ANUGERAH BERSAMA MAJU", lokasi: "SIMPANG KETE", volume: 5 },
+                        { npwp: "41.480.367.6-452.000", nama_perusahaan: "CV. ANUGERAH BERSAMA MAJU", lokasi: "PT. SML", volume: 5 },
+                        { npwp: "41.480.367.6-452.000", nama_perusahaan: "CV. ANUGERAH BERSAMA MAJU", lokasi: "DESA MELATA", volume: 5 },
+                        { npwp: "02.224.899.1-713.000", nama_perusahaan: "CV. BORNEO ARMADA PERKASA", lokasi: "SEMANGGANG", volume: 200 },
+                        { npwp: "83.895.125.9-503.000", nama_perusahaan: "CV. BORNEO TRENGGINAS MANDIRI", lokasi: "CAMP. INDOKAYU", volume: 100 },
+                        { npwp: "81.862.216.9-713.000", nama_perusahaan: "KUD. JORONG RAYO", lokasi: "DESA KENAWAN", volume: 5 },
+                        { npwp: "75.113.756.3-712.000", nama_perusahaan: "KUD. SAWIT JAYA", lokasi: "SUKAMANDANG", volume: 5 },
+                        { npwp: "02.114.858.0-201.000", nama_perusahaan: "PT. ANGKASA MITRA SEJATI", lokasi: "SEMANGGANG KM. 24", volume: 30 },
+                        { npwp: "01.901.192.3-713.000", nama_perusahaan: "PT. EXPLOITASI ENERGI INDONESIA", lokasi: "PLTU KEC. KUMAI", volume: 5 },
+                        { npwp: "01.654.305.0-073.000", nama_perusahaan: "PT. GEMAREKSA MEKARSARI", lokasi: "PABRIK/BRUTA", volume: 50 },
+                        { npwp: "01.654.305.0-073.000", nama_perusahaan: "PT. GEMAREKSA MEKARSARI", lokasi: "LOKASI PT. SHS", volume: 25 },
+                        { npwp: "31.531.443.5-604.000", nama_perusahaan: "PT. GERBANG PERKASA PRATAMA", lokasi: "SEMANGGANG", volume: 15 },
+                        { npwp: "31.531.443.5-604.000", nama_perusahaan: "PT. GERBANG PERKASA PRATAMA", lokasi: "CAMP. ATAS", volume: 50 },
+                        { npwp: "02.459.360.0-713.000", nama_perusahaan: "PT. HATACO KHARISMA ABADI", lokasi: "JATIM KALAP", volume: 5 },
+                        { npwp: "01.124.281.5-713.000", nama_perusahaan: "PT. HATACO KHARISMA ABADI", lokasi: "PT. WSSL II", volume: 5 },
+                        { npwp: "01.124.281.5-713.000", nama_perusahaan: "PT. HATACO KHARISMA ABADI", lokasi: "PT. BJAP II", volume: 5 },
+                        { npwp: "01.354.138.8-085.000", nama_perusahaan: "PT. INDATA PLASTISINDO INDUSTRY", lokasi: "SIMPANG KETE", volume: 5 },
+                        { npwp: "01.354.138.8-085.000", nama_perusahaan: "PT. INDATA PLASTISINDO INDUSTRY", lokasi: "DESA MELATA", volume: 5 },
+                        { npwp: "01.354.138.8-085.000", nama_perusahaan: "PT. INDATA PLASTISINDO INDUSTRY", lokasi: "PT. SML", volume: 5 },
+                        { npwp: "94.714.944.9-713.000", nama_perusahaan: "PT. INTI SAWIT PERKASA", lokasi: "MINAMAS", volume: 5 },
+                        { npwp: "01.505.964.5-713.000", nama_perusahaan: "PT. INTIDAYA MANDIRI SERVITAMA", lokasi: "DESA SEBUAI", volume: 5 },
+                        { npwp: "21.058.281.3-701.000", nama_perusahaan: "PT. KHARISMA ASIA MAKMUR", lokasi: "KM. 50 ASPEK KTH, DESA PANGKUT", volume: 20 }
+                    ];
+
+                    dataAwalDefault.forEach(item => tambahBaris(item));
                 }
             } catch (err) {
                 console.error(err);
@@ -242,7 +381,7 @@
             }
         }
 
-        // Fungsi Save / Upsert (Simpan baru atau Update jika NPWP sudah ada)
+        // Fungsi Save / Upsert
         async function saveKeSupabase() {
             const rows = document.querySelectorAll("#tableBody tr");
             const dataToUpsert = [];
@@ -253,27 +392,28 @@
                     npwp: inputs[0].value,
                     nama_perusahaan: inputs[1].value,
                     lokasi: inputs[2].value,
-                    kontak_person: inputs[3].value,
-                    no_handphone: inputs[4].value,
-                    volume: parseFloat(inputs[5].value) || 0,
-                    keterangan: inputs[6].value,
-                    nama_bagian_site: inputs[7].value,
-                    no_hp_site: inputs[8].value
+                    lokasi_2: inputs[3].value,
+                    lokasi_3: inputs[4].value,
+                    kontak_person: inputs[5].value,
+                    no_handphone: inputs[6].value,
+                    volume: parseFloat(inputs[7].value) || 0,
+                    keterangan: inputs[8].value,
+                    nama_bagian_site: inputs[9].value,
+                    no_hp_site: inputs[10].value
                 });
             });
 
             try {
-                // Menggunakan fungsi upsert berdasarkan kolom 'npwp'
                 const { data, error } = await supabaseClient
                     .from('customers')
                     .upsert(dataToUpsert, { onConflict: 'npwp' });
 
                 if (error) throw error;
                 alert("Data berhasil disimpan / diperbarui di Supabase!");
-                loadDataDariSupabase(); // Refresh tabel setelah simpan
+                loadDataDariSupabase(); 
             } catch (err) {
                 console.error(err);
-                alert("Gagal menyimpan ke Supabase. Pastikan kolom 'npwp' di tabel Supabase sudah diatur sebagai Primary Key atau Unique Constraint.");
+                alert("Gagal menyimpan ke Supabase.");
             }
         }
 
