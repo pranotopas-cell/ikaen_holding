@@ -153,7 +153,7 @@
 
     <script>
         const SB_PENJUALAN_URL = 'https://ntaECTphgoelmhzrkatp.supabase.co';
-        const SB_PENJUALAN_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YWVjdHBoZ29lbG1oenJrYXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzExNDYsImV4cCI6MjA4ODE0NzE0Nn0.-8E98wpkzHBARRhW6PKhBtf2XKhWFjq7idAzw9jlcKg';
+        const SB_PENJUALAN_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YWVjdHBoZ29elmhzcmthdHAiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc3MjU3MTE0NiwiZXhwIjoyMDg4MTQ3MTQ2fQ.-8E98wpkzHBARRhW6PKhBtf2XKhWFjq7idAzw9jlcKg';
         const _supabasePenjualan = supabase.createClient(SB_PENJUALAN_URL, SB_PENJUALAN_KEY);
 
         const SB_URL_DEFAULT = "https://yqdtgcjpfhiskywhowhu.supabase.co";
@@ -168,6 +168,14 @@
         const SB_URL = "https://qlsvvxfykteqxzcppnfv.supabase.co"; 
         const SB_KEY = "sb_publishable_YlFIMi2XTpX77USP0qxAzw_SatAvLT6";
         const _supabaseIde = supabase.createClient(SB_URL, SB_KEY);
+
+        // Pemetaan Informasi PKP (Nama PT & NPWP) masing-masing PT
+        const companyPkpInfo = {
+            kse: { name: 'PT. KHATULISTIWA SINAR ENERGI', npwp: '1000-0000-0773-4310' },
+            ikaen: { name: 'PT. INVESTAMA KALIMANTAN ENERGI', npwp: '0603-9987-0971-3000' },
+            ide: { name: 'PT. INDO DHARMA ENERGI', npwp: '0405-3267-1171-3000' },
+            holding: { name: 'ENERGY HOLDING GROUP', npwp: '01.999.888.7-501.000' }
+        };
 
         function getActiveSupabaseClient() {
             if (activeTab === 'ikaen') {
@@ -780,26 +788,31 @@
 
                 let filterHtml = renderMonthFilterHTML('loadFakturPajakData');
 
+                let totalHargaJualFaktur = filteredFaktur.reduce((sum, item) => sum + (Number(item.harga_jual) || 0), 0);
                 let totalDppFaktur = filteredFaktur.reduce((sum, item) => sum + (Number(item.dpp) || 0), 0);
                 let totalPpnFaktur = filteredFaktur.reduce((sum, item) => sum + (Number(item.ppn) || 0), 0);
 
                 let rows = filteredFaktur.length > 0 ? filteredFaktur.map((item) => {
                     let noFakt = item.no_faktur || item.noFaktur || '-';
+                    let hargaJualVal = Number(item.harga_jual) || 0;
+                    let dppVal = Number(item.dpp) || 0;
+                    let ppnVal = Number(item.ppn) || 0;
                     return `
                         <tr class="hover:bg-slate-50 transition">
                             <td class="p-3 text-slate-600">${item.tanggal}</td>
                             <td class="p-3 font-mono text-slate-900 font-bold">${noFakt}</td>
                             <td class="p-3 font-mono text-slate-600">${item.npwp}</td>
                             <td class="p-3 text-slate-900 font-semibold">${item.lawan}</td>
-                            <td class="p-3 text-slate-700 font-mono">Rp ${Number(item.dpp).toLocaleString('id-ID')}</td>
-                            <td class="p-3 text-slate-700 font-mono">Rp ${Number(item.ppn).toLocaleString('id-ID')}</td>
+                            <td class="p-3 text-amber-700 font-mono font-semibold">Rp ${hargaJualVal.toLocaleString('id-ID')}</td>
+                            <td class="p-3 text-slate-700 font-mono">Rp ${dppVal.toLocaleString('id-ID')}</td>
+                            <td class="p-3 text-slate-700 font-mono">Rp ${ppnVal.toLocaleString('id-ID')}</td>
                             <td class="p-3 space-x-1 flex items-center">
-                                <button onclick="previewFakturPdf('${noFakt}', '${item.tanggal}', '${item.lawan}', '${item.npwp}', ${item.dpp}, ${item.ppn})" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[10px] font-bold border border-slate-300 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> Lihat PDF</button>
+                                <button onclick="previewFakturPdf('${noFakt}', '${item.tanggal}', '${item.lawan}', '${item.npwp}', ${hargaJualVal}, ${dppVal}, ${ppnVal})" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[10px] font-bold border border-slate-300 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> Lihat PDF</button>
                                 <button onclick="hapusFakturSupabase('${noFakt}')" class="text-red-600 hover:text-red-700 text-xs px-2 py-1 bg-red-50 rounded border border-red-200"><i class="fa-solid fa-trash"></i></button>
                             </td>
                         </tr>
                     `;
-                }).join('') : `<tr><td colspan="7" class="p-4 text-center text-slate-500">Belum ada data Faktur Pajak di Supabase untuk bulan terpilih.</td></tr>`;
+                }).join('') : `<tr><td colspan="8" class="p-4 text-center text-slate-500">Belum ada data Faktur Pajak di Supabase untuk bulan terpilih.</td></tr>`;
 
                 container.innerHTML = `
                     <div class="space-y-4">
@@ -823,6 +836,7 @@
                                         <th class="p-3">Nomor Faktur</th>
                                         <th class="p-3">NPWP</th>
                                         <th class="p-3">Lawan Transaksi</th>
+                                        <th class="p-3">Harga Jual</th>
                                         <th class="p-3">DPP</th>
                                         <th class="p-3">PPN</th>
                                         <th class="p-3">Aksi</th>
@@ -838,7 +852,10 @@
                                 </div>
                                 <span class="text-xs font-extrabold uppercase tracking-wider">Jumlah Total Keseluruhan Faktur Pajak:</span>
                             </div>
-                            <div class="flex items-center gap-4 text-xs font-mono font-bold">
+                            <div class="flex flex-wrap items-center gap-3 text-xs font-mono font-bold">
+                                <div class="bg-white/10 px-3 py-1.5 rounded-xl border border-white/20 shadow-inner">
+                                    <span>Jumlah Harga Jual:</span> <span class="text-amber-400">Rp ${totalHargaJualFaktur.toLocaleString('id-ID')}</span>
+                                </div>
                                 <div class="bg-white/10 px-3 py-1.5 rounded-xl border border-white/20 shadow-inner">
                                     <span>Jumlah DPP:</span> <span class="text-emerald-400">Rp ${totalDppFaktur.toLocaleString('id-ID')}</span>
                                 </div>
@@ -886,7 +903,8 @@
                         let npwpVal = cols[1] ? String(cols[1]).trim() : '01.000.000.0-000.000';
                         let lawanVal = cols[2] ? String(cols[2]).trim() : 'Mitra Coretax';
                         
-                        // Bersihkan format angka nominal/DPP/PPN dari string/pemisah koma/titik
+                        // Bersihkan format angka nominal/Harga Jual/DPP/PPN dari string/pemisah koma/titik
+                        let hargaJualVal = cols[10] ? parseFloat(String(cols[10]).replace(/[^0-9.-]+/g, '')) || 0 : 0;
                         let dppVal = cols[11] ? parseFloat(String(cols[11]).replace(/[^0-9.-]+/g, '')) || 0 : 0;
                         let ppnVal = cols[12] ? parseFloat(String(cols[12]).replace(/[^0-9.-]+/g, '')) || 0 : 0;
 
@@ -895,6 +913,7 @@
                             no_faktur: noFakturVal,
                             npwp: npwpVal,
                             lawan: lawanVal,
+                            harga_jual: hargaJualVal,
                             dpp: dppVal,
                             ppn: ppnVal
                         });
@@ -929,10 +948,17 @@
             }
         }
 
-        function previewFakturPdf(noFaktur, tanggal, lawan, npwp, dpp, ppn) {
+        function previewFakturPdf(noFaktur, tanggal, lawan, npwp, hargaJual, dpp, ppn) {
             const modal = document.getElementById('pdfModal');
             const area = document.getElementById('pdfContentArea');
-            let total = dpp + ppn;
+            
+            // Mengambil informasi PKP sesuai PT yang sedang aktif
+            const currentPkp = companyPkpInfo[activeTab] || companyPkpInfo.holding;
+            
+            // Jika hargaJual tidak terdefinisi (panggilan lama), default ke DPP
+            let hargaJualVal = (hargaJual !== undefined && hargaJual !== null) ? Number(hargaJual) : Number(dpp);
+            let total = Number(dpp) + Number(ppn);
+
             area.innerHTML = `
                 <div class="border-b border-slate-200 pb-3 text-center">
                     <h2 class="text-sm font-bold text-slate-900 uppercase">KEMENTERIAN KEUANGAN REPUBLIK INDONESIA</h2>
@@ -943,15 +969,16 @@
                     <div><strong>Tanggal:</strong> ${tanggal}</div>
                 </div>
                 <div class="pt-2 border-t border-slate-200">
-                    <p class="text-slate-500 font-bold mb-1">Pengusaha Kena Pajak (PKP):</p>
-                    <p>ENERGY HOLDING GROUP (NPWP: 01.999.888.7-501.000)</p>
+                    <p class="text-slate-500 font-bold mb-1">Pembeli Barang Kena Pajak/Penerima jasa Kena Pajak:</p>
+                    <p><strong>${currentPkp.name}</strong> (NPWP: ${currentPkp.npwp})</p>
                 </div>
                 <div class="pt-2 border-t border-slate-200">
-                    <p class="text-slate-500 font-bold mb-1">Pembeli Barang Kena Pajak / Penerima Jasa Kena Pajak:</p>
+                    <p class="text-slate-500 font-bold mb-1">Pengusaha Kena Pajak ( PKP ):</p>
                     <p><strong>Nama:</strong> ${lawan}</p>
                     <p><strong>NPWP:</strong> ${npwp}</p>
                 </div>
                 <div class="pt-3 border-t border-slate-200 space-y-1">
+                    <div class="flex justify-between"><span>Harga Jual:</span> <span class="font-bold text-slate-900">Rp ${hargaJualVal.toLocaleString('id-ID')}</span></div>
                     <div class="flex justify-between"><span>Dasar Pengenaan Pajak (DPP):</span> <span class="font-bold text-slate-900">Rp ${Number(dpp).toLocaleString('id-ID')}</span></div>
                     <div class="flex justify-between"><span>PPN (11%):</span> <span class="font-bold text-slate-900">Rp ${Number(ppn).toLocaleString('id-ID')}</span></div>
                     <div class="flex justify-between border-t border-slate-200 pt-1 font-bold text-slate-900"><span>Total Faktur:</span> <span class="text-slate-900">Rp ${Number(total).toLocaleString('id-ID')}</span></div>
