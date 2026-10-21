@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List Customer</title>
+    <!-- Memuat Supabase JS Client dari CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 15px;
+            background-color: #f4f4f9;
+        }
+        .table-container {
+            max-width: 100%;
+            overflow-x: auto;
+            background: #fff;
+            padding: 15px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+        }
+        /* Desain Judul Tabel seperti gambar asli */
+        .table-title {
+            background-color: #d32f2f;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            padding: 8px;
+            border: 1px solid #000;
+            border-bottom: none;
+            letter-spacing: 1px;
+        }
+        .action-bar {
+            margin-bottom: 10px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 4px 6px; /* Padding diperkecil agar rapat dan rapi */
+            text-align: left;
+            font-size: 13px;
+        }
+        th {
+            background-color: #d32f2f;
+            color: white;
+            text-align: center;
+            font-size: 13px;
+        }
+        td input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            outline: none;
+            padding: 2px 0;
+        }
+        td input:focus {
+            background: #fffde7;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .btn {
+            padding: 6px 12px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+        .btn-add {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn-add:hover {
+            background-color: #45a049;
+        }
+        .btn-save {
+            background-color: #2196F3;
+            color: white;
+        }
+        .btn-save:hover {
+            background-color: #0b7dda;
+        }
+        .btn-print {
+            background-color: #ff9800;
+            color: white;
+        }
+        .btn-print:hover {
+            background-color: #e68a00;
+        }
+        .btn-delete {
+            background-color: #f44336;
+            color: white;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
+        .btn-delete:hover {
+            background-color: #da190b;
+        }
+
+        /* Pengaturan khusus saat dicetak (Print) */
+        @media print {
+            body {
+                background-color: white;
+                margin: 0;
+            }
+            .action-bar, .btn-add, .btn-delete, th:last-child, td:last-child {
+                display: none !important;
+            }
+            .table-container {
+                box-shadow: none;
+                padding: 0;
+            }
+            td input {
+                border: none;
+                background: transparent;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="table-container">
+        <!-- Tombol Aksi (Tambah, Save Supabase, Print) -->
+        <div class="action-bar">
+            <button class="btn btn-add" onclick="tambahBaris()">&#43; Tambah Baris</button>
+            <button class="btn btn-save" onclick="saveKeSupabase()">💾 Save ke Supabase</button>
+            <button class="btn btn-print" onclick="window.print()">🖨️ Print</button>
+        </div>
+
+        <!-- Judul Tabel -->
+        <div class="table-title">LIST CUSTOMER</div>
+
+        <table id="customerTable">
+            <thead>
+                <tr>
+                    <th style="width: 4%;">NO</th>
+                    <th style="width: 16%;">NPWP</th>
+                    <th style="width: 22%;">NAMA PERUSAHAAN</th>
+                    <th style="width: 16%;">LOKASI</th>
+                    <th style="width: 13%;">KONTAK PERSON</th>
+                    <th style="width: 8%;">VOLUME/KL</th>
+                    <th style="width: 13%;">KETERANGAN</th>
+                    <th style="width: 8%;" class="text-center">AKSI</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Data awal contoh -->
+                <tr>
+                    <td class="text-center">1</td>
+                    <td><input type="text" value="01.137.575.5-713.000"></td>
+                    <td><input type="text" value="CV. IZAKA KARYA"></td>
+                    <td><input type="text" value="PANGKALAN LIMA"></td>
+                    <td><input type="text" value="Bapak Budi"></td>
+                    <td><input type="number" value="10" class="text-right"></td>
+                    <td><input type="text" value="Aktif"></td>
+                    <td class="text-center"><button class="btn btn-delete" onclick="hapusBaris(this)">&#8722;</button></td>
+                </tr>
+                <tr>
+                    <td class="text-center">2</td>
+                    <td><input type="text" value="00.168.198.0-713.000"></td>
+                    <td><input type="text" value="BANDARA KOTAWARINGIN BARAT"></td>
+                    <td><input type="text" value="BANDARA ISKANDAR"></td>
+                    <td><input type="text" value="Ibu Siska"></td>
+                    <td><input type="number" value="5" class="text-right"></td>
+                    <td><input type="text" value="Reguler"></td>
+                    <td class="text-center"><button class="btn btn-delete" onclick="hapusBaris(this)">&#8722;</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Konfigurasi Supabase dengan API Key yang baru
+        const SB_URL = "https://qlsvvxfykteqxzcppnfv.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsc3Z2eGZ5a3RlcXh6Y3BwbmZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0MDc5OTMsImV4cCI6MjEwNzk4Mzk5M30.jpxErPZSL0sJ4PakUSt8tCxHKHXpmA6CFL9sirbLV2I";
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+
+        function updateNomor() {
+            const rows = document.querySelectorAll("#tableBody tr");
+            rows.forEach((row, index) => {
+                row.cells[0].innerText = index + 1;
+            });
+        }
+
+        function tambahBaris() {
+            const tbody = document.getElementById("tableBody");
+            const newRow = document.createElement("tr");
+            
+            newRow.innerHTML = `
+                <td class="text-center"></td>
+                <td><input type="text" placeholder="NPWP"></td>
+                <td><input type="text" placeholder="Nama Perusahaan"></td>
+                <td><input type="text" placeholder="Lokasi"></td>
+                <td><input type="text" placeholder="Kontak Person"></td>
+                <td><input type="number" value="0" class="text-right"></td>
+                <td><input type="text" placeholder="Keterangan"></td>
+                <td class="text-center"><button class="btn btn-delete" onclick="hapusBaris(this)">&#8722;</button></td>
+            `;
+            
+            tbody.appendChild(newRow);
+            updateNomor();
+        }
+
+        function hapusBaris(button) {
+            const row = button.closest("tr");
+            const tbody = document.getElementById("tableBody");
+            
+            if (tbody.rows.length > 1) {
+                row.remove();
+                updateNomor();
+            } else {
+                alert("Tabel harus menyisakan setidaknya satu baris!");
+            }
+        }
+
+        async function saveKeSupabase() {
+            const rows = document.querySelectorAll("#tableBody tr");
+            const dataToInsert = [];
+
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll("input");
+                dataToInsert.push({
+                    npwp: inputs[0].value,
+                    nama_perusahaan: inputs[1].value,
+                    lokasi: inputs[2].value,
+                    kontak_person: inputs[3].value,
+                    volume: parseFloat(inputs[4].value) || 0,
+                    keterangan: inputs[5].value
+                });
+            });
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('customers')
+                    .insert(dataToInsert);
+
+                if (error) throw error;
+                alert("Data berhasil disimpan ke Supabase!");
+            } catch (err) {
+                console.error(err);
+                alert("Gagal menyimpan ke Supabase. Pastikan RLS pada tabel 'customers' sudah dimatikan atau policy insert sudah diatur.");
+            }
+        }
+    </script>
+
+</body>
+</html>
