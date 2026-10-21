@@ -331,10 +331,11 @@
 
                 <div class="footer-ike">
                     <div class="footer-grid">
-                        <img id="qr_footer" width="50" height="50" style="border: 1px solid #eee; padding: 2px;">
-                        <div style="font-size: 9px; color: #555; line-height: 1.4; border-left: 1px solid #eee; padding-left: 10px;">
+                        <img id="qr_footer" width="40" height="40" style="border: 1px solid #eee; padding: 2px;">
+                        <div style="font-size: 8px; color: #555; line-height: 1.2; border-left: 1px solid #eee; padding-left: 10px;">
                             <b style="color: #000;">IKAEN - DIGITAL VERIFIED SYSTEM</b><br>
-                            Dokumen ini sah dan diterbitkan secara elektronik.<br>
+                            Scan QR Untuk Validasi PO<br>
+                            <span>Issued By: <strong id="footer_issued_by" style="color: #000;">-</strong></span><br>
                             <span id="qr_timestamp" style="font-size: 8px; color: #999;"></span>
                         </div>
                         <div class="text-end" style="font-size: 9px;">
@@ -363,6 +364,25 @@
     const monthsIndo = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
 
     // --- FUNGSI LOGIKA ---
+
+    // Membaca informasi user aktif dari localStorage
+    function loadIssuerInfo() {
+        let issuerName = localStorage.getItem('holding_user_name');
+        let issuerRole = localStorage.getItem('holding_user_role');
+        let isLoggedIn = localStorage.getItem('holding_is_logged_in');
+
+        if (!isLoggedIn || !issuerName) {
+            issuerName = "Yayuk Wijayanti";
+            issuerRole = "Direktur";
+        }
+
+        const fullIssuerText = `${issuerName} (${issuerRole})`;
+        const issuerEl = document.getElementById('footer_issued_by');
+        if (issuerEl) {
+            issuerEl.innerText = fullIssuerText;
+        }
+        return fullIssuerText;
+    }
 
     function terbilang(angka) {
         angka = Math.floor(Math.abs(angka));
@@ -530,6 +550,8 @@
     async function saveToSupabase() {
         const btn = document.getElementById('btn-save-sb');
         const noPo = document.getElementById('in_no').value;
+        const activeIssuer = loadIssuerInfo();
+
         if(!noPo || noPo.includes('undefined')) return alert("Nomor PO tidak valid!");
 
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> UPLOADING...'; btn.disabled = true;
@@ -557,7 +579,8 @@
                 tujuan_pengiriman: document.getElementById('in_destination').value,
                 nominal: parseFloat(document.getElementById('out_grandtotal').innerText.replace(/\./g, '').replace(',', '.')),
                 pdf_url: urlData.publicUrl,
-                client_email: "system@ike.co.id"
+                client_email: "system@ike.co.id",
+                issued_by: activeIssuer
             };
             const { error: dbErr } = await _supabase.from('eforms').insert([payload]);
             if (dbErr) throw dbErr;
@@ -586,6 +609,7 @@
         const dd = String(now.getDate()).padStart(2, '0');
         
         document.getElementById('in_tgl_raw').value = `${yyyy}-${mm}-${dd}`;
+        loadIssuerInfo();
         handleDateChange();
         calculate();
     };
