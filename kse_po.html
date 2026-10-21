@@ -302,6 +302,7 @@
                         <div style="font-size: 9px; color: #555; line-height: 1.4; border-left: 1px solid #eee; padding-left: 10px;">
                             <b style="color: #000;">KSE - DIGITAL VERIFIED SYSTEM</b><br>
                             Dokumen ini sah dan diterbitkan secara elektronik.<br>
+                            <span>Issued By: <strong id="footer_issued_by" style="color: #000;">-</strong></span><br>
                             <span id="qr_timestamp" style="font-size: 8px; color: #999;"></span>
                         </div>
                         <div class="text-end" style="font-size: 9px; line-height: 1.5;">
@@ -329,6 +330,29 @@
 
     const monthRomawi = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
     const monthsIndo = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
+
+    // Fungsi otomatis membaca siapa admin yang sedang login dari Dashboard Utama
+    function loadIssuerInfo() {
+        const savedUser = localStorage.getItem('holding_active_user');
+        let issuerName = "Administrator System";
+        
+        if (savedUser) {
+            try {
+                const userData = JSON.parse(savedUser);
+                if (userData && userData.name) {
+                    issuerName = userData.name; 
+                }
+            } catch (e) {
+                console.error("Gagal membaca data user login:", e);
+            }
+        }
+        
+        const issuerEl = document.getElementById('footer_issued_by');
+        if (issuerEl) {
+            issuerEl.innerText = issuerName;
+        }
+        return issuerName;
+    }
 
     function terbilang(angka) {
         angka = Math.floor(Math.abs(angka));
@@ -498,6 +522,8 @@
         const noPo = document.getElementById('in_no').value;
         if(!noPo || noPo.includes('undefined')) return alert("Nomor PO tidak valid!");
 
+        const activeIssuer = loadIssuerInfo();
+
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> UPLOADING...'; btn.disabled = true;
         try {
             const element = document.getElementById('main-doc');
@@ -520,7 +546,8 @@
                 tujuan: document.getElementById('in_cust').value,
                 nominal: parseFloat(document.getElementById('out_grandtotal').innerText.replace(/\./g, '').replace(',', '.')),
                 pdf_url: urlData.publicUrl,
-                client_email: "system@kse.co.id"
+                client_email: "system@kse.co.id",
+                issued_by: activeIssuer
             };
             const { error: dbErr } = await _supabase.from('eforms').insert([payload]);
             if (dbErr) throw dbErr;
@@ -528,7 +555,7 @@
             alert("Berhasil! PO & PDF telah tersimpan di Cloud.");
             syncAutoNumber(); 
         } catch (e) { alert("Error: " + e.message); }
-        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN & AUTO UPLOAD'; btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN'; btn.disabled = false;
     }
 
     function downloadPDF() {
@@ -549,6 +576,7 @@
         const dd = String(now.getDate()).padStart(2, '0');
         
         document.getElementById('in_tgl_raw').value = `${yyyy}-${mm}-${dd}`;
+        loadIssuerInfo();
         handleDateChange();
         calculate();
     };
