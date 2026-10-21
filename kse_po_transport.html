@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KSE - Purchase Order </title>
+    <title>KSE - Purchase Order Transport</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -321,8 +321,9 @@
                     <div class="footer-grid">
                         <img id="qr_footer" width="40" height="40" style="border: 1px solid #eee; padding: 2px;">
                         <div style="font-size: 9px; color: #555; line-height: 1.4; border-left: 1px solid #eee; padding-left: 10px;">
-                            <b style="color: #000;">KSE - DIGITAL VERIFIED SYSTEM</b><br>
-                            Dokumen ini sah dan diterbitkan secara elektronik.<br>
+                            <b style="color: #000;">Digital E-Form KSE System</b><br>
+                            Scan Qr untuk Validasi PO<br>
+                            <span>Issued By: <strong id="footer_issued_by" style="color: #000;">-</strong></span><br>
                             <span id="qr_timestamp" style="font-size: 8px; color: #999;"></span>
                         </div>
                         <div class="text-end" style="font-size: 9px; line-height: 1.5;">
@@ -353,6 +354,25 @@
     const monthsIndo = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
 
     // --- FUNGSI LOGIKA ---
+
+    // Membaca informasi user aktif dari localStorage dashboard utama
+    function loadIssuerInfo() {
+        let issuerName = localStorage.getItem('holding_user_name');
+        let issuerRole = localStorage.getItem('holding_user_role');
+        let isLoggedIn = localStorage.getItem('holding_is_logged_in');
+
+        if (!isLoggedIn || !issuerName) {
+            issuerName = "Supranoto";
+           }
+
+        const fullIssuerText = `${issuerName}`;
+        
+        const issuerEl = document.getElementById('footer_issued_by');
+        if (issuerEl) {
+            issuerEl.innerText = fullIssuerText;
+        }
+        return fullIssuerText;
+    }
 
     function terbilang(angka) {
         angka = Math.floor(Math.abs(angka));
@@ -513,6 +533,8 @@
         const noPo = document.getElementById('in_no').value;
         if(!noPo || noPo.includes('undefined')) return alert("Nomor PO tidak valid!");
 
+        const activeIssuer = loadIssuerInfo();
+
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> UPLOADING...'; btn.disabled = true;
         try {
             const element = document.getElementById('main-doc');
@@ -535,7 +557,8 @@
                 tujuan: document.getElementById('in_cust').value,
                 nominal: parseFloat(document.getElementById('out_grandtotal').innerText.replace(/\./g, '').replace(',', '.')),
                 pdf_url: urlData.publicUrl,
-                client_email: "system@kse.co.id"
+                client_email: "system@kse.co.id",
+                issued_by: activeIssuer
             };
             const { error: dbErr } = await _supabase.from('eforms').insert([payload]);
             if (dbErr) throw dbErr;
@@ -543,7 +566,7 @@
             alert("Berhasil! PO & PDF telah tersimpan di Cloud.");
             syncAutoNumber(); 
         } catch (e) { alert("Error: " + e.message); }
-        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN & AUTO UPLOAD'; btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN'; btn.disabled = false;
     }
 
     function downloadPDF() {
@@ -564,6 +587,7 @@
         const dd = String(now.getDate()).padStart(2, '0');
         
         document.getElementById('in_tgl_raw').value = `${yyyy}-${mm}-${dd}`;
+        loadIssuerInfo();
         handleDateChange();
     };
 </script>
