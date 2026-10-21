@@ -40,7 +40,7 @@
         .meta-table td.value-col { font-weight: bold; word-break: break-word; }
 
         .lang-en { font-style: italic; font-size: 9px; color: #666; display: block; margin-top: -1px; }
-        .footer-kse { margin-top: auto; padding-top: 20px; border-top: 2px solid var(--kse-primary); }
+        .footer-kse { margin-top: auto; padding-top: 15px; border-top: 2px solid var(--kse-primary); }
 
         @media print {
             .control-nav, .input-sidebar { display: none !important; }
@@ -227,15 +227,18 @@
                 </div>
 
                 <div class="footer-kse">
-                    <div class="footer-grid">
-                        <img id="qr_footer" width="45" height="45" style="border: 1px solid #eee; padding: 2px;">
-                            <div style="font-size: 8px; color: #555; line-height: 1.2; border-left: 1px solid #eee; padding-left: 10px;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <!-- Bagian Kiri: QR dan Teks di Sampingnya (Termasuk Timestamp) -->
+                        <div class="d-flex align-items-center gap-2">
+                            <img id="qr_footer" width="45" height="45" style="border: 1px solid #eee; padding: 2px; flex-shrink: 0;">
+                            <div style="font-size: 8px; color: #555; line-height: 1.2; border-left: 1px solid #eee; padding-left: 8px;">
                                 <b style="color: #000;">Digital E-Form KSE System</b><br>
-                                Scan QR Untuk Validasi PO</b><br>
+                                Scan QR Untuk Validasi PO<br>
                                 <span>Issued By: <strong id="footer_issued_by" style="color: #000;">-</strong></span><br>
-                                <span id="qr_timestamp" style="font-size: 8px; color: #999;"></span>
+                                <span id="qr_timestamp" style="font-size: 8px; color: #888;"></span>
                             </div>
                         </div>
+                        <!-- Bagian Kanan: Alamat Perusahaan -->
                         <div class="text-end" style="font-size: 9px;">
                             <b style="color: var(--kse-primary);">PT. KHATULISTIWA SINAR ENERGI</b><br>
                             Jl. H.M. Rafi'i RT.24 Pangkalan Bun, Kalimantan Tengah<br>
@@ -280,18 +283,15 @@
         "PT. JAYA ABADI": "Jl. Merdeka No. 45"
     };
 
-    // Fungsi membaca informasi user aktif dari localStorage dashboard utama
     function loadIssuerInfo() {
         let issuerName = localStorage.getItem('holding_user_name');
-        let issuerRole = localStorage.getItem('holding_user_role');
         let isLoggedIn = localStorage.getItem('holding_is_logged_in');
 
         if (!isLoggedIn || !issuerName) {
             issuerName = "Supranoto";
-           }
+        }
 
         const fullIssuerText = `${issuerName}`;
-        
         const issuerEl = document.getElementById('footer_issued_by');
         if (issuerEl) {
             issuerEl.innerText = fullIssuerText;
@@ -412,7 +412,12 @@
         document.getElementById('out_ppn').innerText = formatIDR(ppn);
         document.getElementById('out_total').innerText = formatIDR(total);
 
-        const qrContent = `VALID-KSE|NO:${noSurat}|CUST:${customer}|IDR:${formatIDR(total)}`;
+        // Update Timestamp
+        const now = new Date();
+        const timeStr = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth()+1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')} WIB`;
+        document.getElementById('qr_timestamp').innerText = `Generated: ${timeStr}`;
+
+        const qrContent = `VALID-KSE|NO:${noSurat}|CUST:${customer}|IDR:${formatIDR(total)}|TIME:${timeStr}`;
         document.getElementById('qr_footer').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrContent)}`;
     }
 
@@ -425,7 +430,7 @@
             const noSurat = document.getElementById('in_no').value;
             const element = document.getElementById('main-doc');
             const opt = { margin: 0, filename: `SPH-${noSurat}.pdf`, image: { type: 'jpeg', quality: 0.98 }, 
-                          html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+                        html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
 
             const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
             const fileName = `penawaran/SPH_${Date.now()}_${noSurat.replace(/\//g, '_')}.pdf`;
@@ -447,7 +452,7 @@
     function downloadPDF() {
         const element = document.getElementById('main-doc');
         html2pdf().set({ margin: 0, filename: `SPH-${document.getElementById('in_no').value}.pdf`, 
-                          html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } }).from(element).save();
+                        html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } }).from(element).save();
     }
 
     window.onload = () => {
