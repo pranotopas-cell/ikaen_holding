@@ -135,25 +135,26 @@
     <div class="table-container">
         <!-- Tombol Aksi (Tambah, Save Supabase, Print) -->
         <div class="action-bar">
-            <button class="btn btn-add" onclick="tambahBaris()">&#43; Tambah Baris</button>
-            <button class="btn btn-save" onclick="saveKeSupabase()">💾 Save ke Supabase</button>
+            <button class="btn btn-add" onclick="tambahBaris()">&#43; Tambah </button>
+            <button class="btn btn-save" onclick="saveKeSupabase()">💾 Save </button>
             <button class="btn btn-print" onclick="window.print()">🖨️ Print</button>
         </div>
 
         <!-- Judul Tabel -->
-        <div class="table-title">LIST CUSTOMER</div>
+        <div class="table-title">DATA LIST CUSTOMER </div>
 
         <table id="customerTable">
             <thead>
                 <tr>
                     <th style="width: 4%;">NO</th>
-                    <th style="width: 16%;">NPWP</th>
-                    <th style="width: 22%;">NAMA PERUSAHAAN</th>
-                    <th style="width: 16%;">LOKASI</th>
-                    <th style="width: 13%;">KONTAK PERSON</th>
-                    <th style="width: 8%;">VOLUME/KL</th>
-                    <th style="width: 13%;">KETERANGAN</th>
-                    <th style="width: 8%;" class="text-center">AKSI</th>
+                    <th style="width: 15%;">NPWP</th>
+                    <th style="width: 20%;">NAMA PERUSAHAAN</th>
+                    <th style="width: 15%;">LOKASI</th>
+                    <th style="width: 12%;">KONTAK PERSON</th>
+                    <th style="width: 12%;">NO HANDPHONE</th>
+                    <th style="width: 7%;">VOLUME/KL</th>
+                    <th style="width: 11%;">KETERANGAN</th>
+                    <th style="width: 4%;" class="text-center">AKSI</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -164,6 +165,7 @@
                     <td><input type="text" value="CV. IZAKA KARYA"></td>
                     <td><input type="text" value="PANGKALAN LIMA"></td>
                     <td><input type="text" value="Bapak Budi"></td>
+                    <td><input type="text" value="081234567890"></td>
                     <td><input type="number" value="10" class="text-right"></td>
                     <td><input type="text" value="Aktif"></td>
                     <td class="text-center"><button class="btn btn-delete" onclick="hapusBaris(this)">&#8722;</button></td>
@@ -174,6 +176,7 @@
                     <td><input type="text" value="BANDARA KOTAWARINGIN BARAT"></td>
                     <td><input type="text" value="BANDARA ISKANDAR"></td>
                     <td><input type="text" value="Ibu Siska"></td>
+                    <td><input type="text" value="089876543210"></td>
                     <td><input type="number" value="5" class="text-right"></td>
                     <td><input type="text" value="Reguler"></td>
                     <td class="text-center"><button class="btn btn-delete" onclick="hapusBaris(this)">&#8722;</button></td>
@@ -205,6 +208,7 @@
                 <td><input type="text" placeholder="Nama Perusahaan"></td>
                 <td><input type="text" placeholder="Lokasi"></td>
                 <td><input type="text" placeholder="Kontak Person"></td>
+                <td><input type="text" placeholder="No Handphone"></td>
                 <td><input type="number" value="0" class="text-right"></td>
                 <td><input type="text" placeholder="Keterangan"></td>
                 <td class="text-center"><button class="btn btn-delete" onclick="hapusBaris(this)">&#8722;</button></td>
@@ -237,8 +241,9 @@
                     nama_perusahaan: inputs[1].value,
                     lokasi: inputs[2].value,
                     kontak_person: inputs[3].value,
-                    volume: parseFloat(inputs[4].value) || 0,
-                    keterangan: inputs[5].value
+                    no_handphone: inputs[4].value, // Kolom baru ditambahkan di sini
+                    volume: parseFloat(inputs[5].value) || 0,
+                    keterangan: inputs[6].value
                 });
             });
 
@@ -251,7 +256,7 @@
                 alert("Data berhasil disimpan ke Supabase!");
             } catch (err) {
                 console.error(err);
-                alert("Gagal menyimpan ke Supabase. Pastikan RLS pada tabel 'customers' sudah dimatikan atau policy insert sudah diatur.");
+                alert("Gagal menyimpan ke Supabase. Pastikan RLS pada tabel 'customers' sudah dimatikan atau policy insert sudah diatur, serta kolom 'no_handphone' sudah dibuat di tabel database Supabase.");
             }
         }
     </script>
