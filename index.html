@@ -333,7 +333,7 @@
         function renderAuthUI() {
             const authArea = document.getElementById('authArea');
             if (isLoggedIn) {
-                authArea.innerHTML = `<div class="flex items-center space-x-3"><div class="hidden sm:block text-right"><div class="text-xs font-bold text-slate-900">${currentAdmin.name}</div></div><button onclick="handleLogout()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition shadow-sm">Logout</button></div>`;
+                authArea.innerHTML = `authArea.innerHTML = `<div class="flex items-center space-x-3"><div class="hidden sm:block text-right"><div class="text-xs font-bold text-slate-900">${currentAdmin.name}</div><div class="text-[10px] text-emerald-600 font-semibold">${currentAdmin.role})</div></div><button onclick="handleLogout()"class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition shadow-sm">Logout</button></div>`;
             } else {
                 authArea.innerHTML = `<button onclick="openGeneralLogin()" class="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-slate-900 to-blue-800 hover:from-slate-800 hover:to-blue-700 text-white shadow-md transition border border-blue-500/30">Login</button>`;
             }
