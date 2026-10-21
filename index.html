@@ -957,7 +957,7 @@
             
             // Jika hargaJual tidak terdefinisi (panggilan lama), default ke DPP
             let hargaJualVal = (hargaJual !== undefined && hargaJual !== null) ? Number(hargaJual) : Number(dpp);
-            let total = Number(dpp) + Number(ppn);
+           let total = Number(hargaJualVal) + Number(ppn);
 
             area.innerHTML = `
                 <div class="border-b border-slate-200 pb-3 text-center">
