@@ -20,7 +20,7 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             border-radius: 5px;
         }
-        /* Desain Judul Tabel seperti gambar asli */
+        /* Desain Judul Tabel */
         .table-title {
             background-color: #d32f2f;
             color: white;
@@ -44,7 +44,7 @@
         }
         th, td {
             border: 1px solid #000;
-            padding: 4px 6px; /* Padding diperkecil agar rapat dan rapi */
+            padding: 4px 6px;
             text-align: left;
             font-size: 13px;
         }
@@ -61,6 +61,7 @@
             font-size: 13px;
             outline: none;
             padding: 2px 0;
+            box-sizing: border-box;
         }
         td input:focus {
             background: #fffde7;
@@ -133,7 +134,7 @@
 <body>
 
     <div class="table-container">
-        <!-- Tombol Aksi (Tambah, Save Supabase, Print) -->
+        <!-- Tombol Aksi -->
         <div class="action-bar">
             <button class="btn btn-add" onclick="tambahBaris()">&#43; Tambah </button>
             <button class="btn btn-save" onclick="saveKeSupabase()">💾 Save </button>
@@ -146,47 +147,27 @@
         <table id="customerTable">
             <thead>
                 <tr>
-                    <th style="width: 4%;">NO</th>
-                    <th style="width: 15%;">NPWP</th>
-                    <th style="width: 20%;">NAMA PERUSAHAAN</th>
-                    <th style="width: 15%;">LOKASI</th>
-                    <th style="width: 12%;">KONTAK PERSON</th>
-                    <th style="width: 12%;">NO HANDPHONE</th>
-                    <th style="width: 7%;">VOLUME/KL</th>
-                    <th style="width: 11%;">KETERANGAN</th>
+                    <th style="width: 3%;">NO</th>
+                    <th style="width: 12%;">NPWP</th>
+                    <th style="width: 16%;">NAMA PERUSAHAAN</th>
+                    <th style="width: 12%;">LOKASI</th>
+                    <th style="width: 11%;">KONTAK PERSON</th>
+                    <th style="width: 10%;">NO HANDPHONE</th>
+                    <th style="width: 6%;">VOLUME/KL</th>
+                    <th style="width: 10%;">KETERANGAN</th>
+                    <th style="width: 11%;">NAMA BAGIAN SITE</th>
+                    <th style="width: 10%;">NO HP SITE</th>
                     <th style="width: 4%;" class="text-center">AKSI</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
-                <!-- Data awal contoh -->
-                <tr>
-                    <td class="text-center">1</td>
-                    <td><input type="text" value="01.137.575.5-713.000"></td>
-                    <td><input type="text" value="CV. IZAKA KARYA"></td>
-                    <td><input type="text" value="PANGKALAN LIMA"></td>
-                    <td><input type="text" value="Bapak Budi"></td>
-                    <td><input type="text" value="081234567890"></td>
-                    <td><input type="number" value="10" class="text-right"></td>
-                    <td><input type="text" value="Aktif"></td>
-                    <td class="text-center"><button class="btn btn-delete" onclick="hapusBaris(this)">&#8722;</button></td>
-                </tr>
-                <tr>
-                    <td class="text-center">2</td>
-                    <td><input type="text" value="00.168.198.0-713.000"></td>
-                    <td><input type="text" value="BANDARA KOTAWARINGIN BARAT"></td>
-                    <td><input type="text" value="BANDARA ISKANDAR"></td>
-                    <td><input type="text" value="Ibu Siska"></td>
-                    <td><input type="text" value="089876543210"></td>
-                    <td><input type="number" value="5" class="text-right"></td>
-                    <td><input type="text" value="Reguler"></td>
-                    <td class="text-center"><button class="btn btn-delete" onclick="hapusBaris(this)">&#8722;</button></td>
-                </tr>
+                <!-- Data akan dimuat otomatis dari Supabase -->
             </tbody>
         </table>
     </div>
 
     <script>
-        // Konfigurasi Supabase dengan API Key yang baru
+        // Konfigurasi Supabase
         const SB_URL = "https://qlsvvxfykteqxzcppnfv.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsc3Z2eGZ5a3RlcXh6Y3BwbmZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0MDc5OTMsImV4cCI6MjEwNzk4Mzk5M30.jpxErPZSL0sJ4PakUSt8tCxHKHXpmA6CFL9sirbLV2I";
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
@@ -198,19 +179,22 @@
             });
         }
 
-        function tambahBaris() {
+        // Fungsi tambah baris (bisa diisi data awal jika dari database)
+        function tambahBaris(data = {}) {
             const tbody = document.getElementById("tableBody");
             const newRow = document.createElement("tr");
             
             newRow.innerHTML = `
                 <td class="text-center"></td>
-                <td><input type="text" placeholder="NPWP"></td>
-                <td><input type="text" placeholder="Nama Perusahaan"></td>
-                <td><input type="text" placeholder="Lokasi"></td>
-                <td><input type="text" placeholder="Kontak Person"></td>
-                <td><input type="text" placeholder="No Handphone"></td>
-                <td><input type="number" value="0" class="text-right"></td>
-                <td><input type="text" placeholder="Keterangan"></td>
+                <td><input type="text" placeholder="NPWP" value="${data.npwp || ''}"></td>
+                <td><input type="text" placeholder="Nama Perusahaan" value="${data.nama_perusahaan || ''}"></td>
+                <td><input type="text" placeholder="Lokasi" value="${data.lokasi || ''}"></td>
+                <td><input type="text" placeholder="Kontak Person" value="${data.kontak_person || ''}"></td>
+                <td><input type="text" placeholder="No Handphone" value="${data.no_handphone || ''}"></td>
+                <td><input type="number" value="${data.volume || 0}" class="text-right"></td>
+                <td><input type="text" placeholder="Keterangan" value="${data.keterangan || ''}"></td>
+                <td><input type="text" placeholder="Nama Bagian Site" value="${data.nama_bagian_site || ''}"></td>
+                <td><input type="text" placeholder="No HP Site" value="${data.no_hp_site || ''}"></td>
                 <td class="text-center"><button class="btn btn-delete" onclick="hapusBaris(this)">&#8722;</button></td>
             `;
             
@@ -230,35 +214,73 @@
             }
         }
 
+        // Fungsi Tarik Data (Load) dari Supabase saat halaman dibuka
+        async function loadDataDariSupabase() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('customers')
+                    .select('*')
+                    .order('nama_perusahaan', { ascending: true });
+
+                if (error) throw error;
+
+                const tbody = document.getElementById("tableBody");
+                tbody.innerHTML = ""; // Bersihkan tabel terlebih dahulu
+
+                if (data && data.length > 0) {
+                    data.forEach(item => {
+                        tambahBaris(item);
+                    });
+                } else {
+                    // Jika database kosong, tampilkan 1 baris kosong
+                    tambahBaris();
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Gagal memuat data dari Supabase.");
+                tambahBaris();
+            }
+        }
+
+        // Fungsi Save / Upsert (Simpan baru atau Update jika NPWP sudah ada)
         async function saveKeSupabase() {
             const rows = document.querySelectorAll("#tableBody tr");
-            const dataToInsert = [];
+            const dataToUpsert = [];
 
             rows.forEach(row => {
                 const inputs = row.querySelectorAll("input");
-                dataToInsert.push({
+                dataToUpsert.push({
                     npwp: inputs[0].value,
                     nama_perusahaan: inputs[1].value,
                     lokasi: inputs[2].value,
                     kontak_person: inputs[3].value,
-                    no_handphone: inputs[4].value, // Kolom baru ditambahkan di sini
+                    no_handphone: inputs[4].value,
                     volume: parseFloat(inputs[5].value) || 0,
-                    keterangan: inputs[6].value
+                    keterangan: inputs[6].value,
+                    nama_bagian_site: inputs[7].value,
+                    no_hp_site: inputs[8].value
                 });
             });
 
             try {
+                // Menggunakan fungsi upsert berdasarkan kolom 'npwp'
                 const { data, error } = await supabaseClient
                     .from('customers')
-                    .insert(dataToInsert);
+                    .upsert(dataToUpsert, { onConflict: 'npwp' });
 
                 if (error) throw error;
-                alert("Data berhasil disimpan ke Supabase!");
+                alert("Data berhasil disimpan / diperbarui di Supabase!");
+                loadDataDariSupabase(); // Refresh tabel setelah simpan
             } catch (err) {
                 console.error(err);
-                alert("Gagal menyimpan ke Supabase. Pastikan RLS pada tabel 'customers' sudah dimatikan atau policy insert sudah diatur, serta kolom 'no_handphone' sudah dibuat di tabel database Supabase.");
+                alert("Gagal menyimpan ke Supabase. Pastikan kolom 'npwp' di tabel Supabase sudah diatur sebagai Primary Key atau Unique Constraint.");
             }
         }
+
+        // Jalankan saat halaman selesai dimuat untuk menarik data dari Supabase
+        window.onload = function() {
+            loadDataDariSupabase();
+        };
     </script>
 
 </body>
