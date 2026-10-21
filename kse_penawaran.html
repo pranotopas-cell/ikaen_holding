@@ -227,13 +227,13 @@
                 </div>
 
                 <div class="footer-kse">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center gap-2">
-                            <img id="qr_footer" src="" width="40" style="border: 1px solid #eee; padding: 2px;">
-                            <div style="font-size: 8px; line-height: 1.2;">
-                                <strong style="color: var(--kse-primary); font-size: 9px; display: block;">KSE SYSTEM DOCS</strong>
-                                <span class="text-muted">Scan QR untuk validasi<br>penawaran ini secara sistem.</span><br>
-                                <span>Issued By: <strong id="footer_issued_by" style="color: #000;">-</strong></span>
+                    <div class="footer-grid">
+                        <img id="qr_footer" width="45" height="45" style="border: 1px solid #eee; padding: 2px;">
+                            <div style="font-size: 8px; color: #555; line-height: 1.2; border-left: 1px solid #eee; padding-left: 10px;">
+                                <b style="color: #000;">Digital E-Form KSE System</b><br>
+                                Scan QR Untuk Validasi PO</b><br>
+                                <span>Issued By: <strong id="footer_issued_by" style="color: #000;">-</strong></span><br>
+                                <span id="qr_timestamp" style="font-size: 8px; color: #999;"></span>
                             </div>
                         </div>
                         <div class="text-end" style="font-size: 9px;">
@@ -288,10 +288,9 @@
 
         if (!isLoggedIn || !issuerName) {
             issuerName = "Supranoto";
-            issuerRole = "Director / Administrator";
-        }
+           }
 
-        const fullIssuerText = `${issuerName} (${issuerRole})`;
+        const fullIssuerText = `${issuerName}`;
         
         const issuerEl = document.getElementById('footer_issued_by');
         if (issuerEl) {
