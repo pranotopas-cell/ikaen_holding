@@ -232,7 +232,8 @@
                             <img id="qr_footer" src="" width="40" style="border: 1px solid #eee; padding: 2px;">
                             <div style="font-size: 8px; line-height: 1.2;">
                                 <strong style="color: var(--kse-primary); font-size: 9px; display: block;">KSE SYSTEM DOCS</strong>
-                                <span class="text-muted">Scan QR untuk validasi<br>penawaran ini secara sistem.</span>
+                                <span class="text-muted">Scan QR untuk validasi<br>penawaran ini secara sistem.</span><br>
+                                <span>Issued By: <strong id="footer_issued_by" style="color: #000;">-</strong></span>
                             </div>
                         </div>
                         <div class="text-end" style="font-size: 9px;">
@@ -279,26 +280,41 @@
         "PT. JAYA ABADI": "Jl. Merdeka No. 45"
     };
 
+    // Fungsi membaca informasi user aktif dari localStorage dashboard utama
+    function loadIssuerInfo() {
+        let issuerName = localStorage.getItem('holding_user_name');
+        let issuerRole = localStorage.getItem('holding_user_role');
+        let isLoggedIn = localStorage.getItem('holding_is_logged_in');
+
+        if (!isLoggedIn || !issuerName) {
+            issuerName = "Supranoto";
+            issuerRole = "Director / Administrator";
+        }
+
+        const fullIssuerText = `${issuerName} (${issuerRole})`;
+        
+        const issuerEl = document.getElementById('footer_issued_by');
+        if (issuerEl) {
+            issuerEl.innerText = fullIssuerText;
+        }
+        return fullIssuerText;
+    }
+
     function formatIDR(val) {
         return parseFloat(val).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    // --- LOGIKA PENOMORAN SEKUENSAL ---
-    // --- LOGIKA PENOMORAN SEKUENSAL PER BULAN ---
     async function syncAutoNumber() {
         try {
             const tglVal = document.getElementById('in_tgl_raw').value;
             const refDate = tglVal ? new Date(tglVal) : new Date();
             
-            // 1. Ambil tanggal awal dan tanggal akhir dari bulan yang dipilih
             const year = refDate.getFullYear();
-            const month = refDate.getMonth(); // 0 - 11
+            const month = refDate.getMonth(); 
             
-            // Format YYYY-MM-DD local time
             const firstDay = new Date(year, month, 1).toLocaleDateString('en-CA');
             const lastDay = new Date(year, month + 1, 0).toLocaleDateString('en-CA');
 
-            // 2. Tarik SEMUA nomor SPH pada rentang bulan & tahun tersebut
             const { data, error } = await _supabase
                 .from('eforms')
                 .select('nomor')
@@ -311,7 +327,6 @@
             let nextNum = 1;
 
             if (data && data.length > 0) {
-                // 3. Ekstrak nomor urut terdekat (3 digit depan) dan cari angka tertinggi
                 const numbers = data.map(item => {
                     if (item.nomor) {
                         const parts = item.nomor.split('/');
@@ -324,7 +339,6 @@
                 nextNum = maxNum + 1;
             }
 
-            // 4. Set nomor urut ke input
             document.getElementById('in_no_urut').value = nextNum;
             formatFullNumber();
             updatePeriode(refDate);
@@ -405,6 +419,8 @@
 
     async function saveToSupabase() {
         const btn = document.getElementById('btn-save-sb');
+        const activeIssuer = loadIssuerInfo();
+
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> SAVING...'; btn.disabled = true;
         try {
             const noSurat = document.getElementById('in_no').value;
@@ -420,7 +436,8 @@
             await _supabase.from('eforms').insert([{
                 jenis: "SPH", nomor: noSurat, tanggal: document.getElementById('in_tgl_raw').value,
                 tujuan: document.getElementById('in_cust').value, pdf_url: urlData.publicUrl,
-                nominal: Math.round(parseFloat(document.getElementById('in_total_input').value) || 0)
+                nominal: Math.round(parseFloat(document.getElementById('in_total_input').value) || 0),
+                issued_by: activeIssuer
             }]);
             alert("Penawaran Berhasil Tersimpan!");
             syncAutoNumber();
@@ -431,7 +448,7 @@
     function downloadPDF() {
         const element = document.getElementById('main-doc');
         html2pdf().set({ margin: 0, filename: `SPH-${document.getElementById('in_no').value}.pdf`, 
-                         html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } }).from(element).save();
+                          html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } }).from(element).save();
     }
 
     window.onload = () => {
@@ -443,6 +460,7 @@
         });
 
         document.getElementById('in_tgl_raw').value = new Date().toISOString().split('T')[0];
+        loadIssuerInfo();
         handleDateChange();
         
         // Defaults
