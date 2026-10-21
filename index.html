@@ -379,6 +379,25 @@
             `;
         }
 
+        // Fungsi bantuan untuk menghapus dokumen eforms langsung ke Supabase
+        async function hapusEformSupabase(id, documentType, refreshCallback) {
+            if (!confirm(`Apakah Anda yakin ingin menghapus dokumen ${documentType} ini dari database Supabase?`)) return;
+            const clientDb = getActiveSupabaseClient();
+            try {
+                const { error } = await clientDb.from('eforms').delete().eq('id', id);
+                if (error) {
+                    alert('Gagal menghapus dokumen: ' + error.message);
+                } else {
+                    alert('Dokumen berhasil dihapus dari Supabase.');
+                    if (typeof window[refreshCallback] === 'function') {
+                        window[refreshCallback]();
+                    }
+                }
+            } catch (err) {
+                alert('Terjadi kesalahan saat menghapus: ' + err.message);
+            }
+        }
+
         async function loadPenjualanData() {
             const container = document.getElementById('supabaseLiveContainer');
             if (!container) return;
@@ -488,6 +507,7 @@
 
                     let rows = filteredData.map(item => {
                         let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-bold border border-slate-300 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View PDF</a>` : `<span class="text-slate-400 text-[10px]">No PDF</span>`;
+                        let deleteBtn = item.id ? `<button onclick="hapusEformSupabase('${item.id}', 'PO', 'loadPurchaseOrdersData')" class="text-red-600 hover:text-red-700 text-xs px-2 py-1 bg-red-50 rounded border border-red-200 transition" title="Hapus Dokumen Dari Supabase"><i class="fa-solid fa-trash"></i></button>` : '';
                         let nomorVal = item.nomor || item.nomor_po || item.no_po || '-';
                         let nominalNum = Number(item.nominal) || (Number(item.qty || 50) * 14500000);
                         let nominalVal = item.nominal ? (isNaN(item.nominal) ? item.nominal : 'Rp ' + Number(item.nominal).toLocaleString('id-ID')) : ('Rp ' + nominalNum.toLocaleString('id-ID'));
@@ -498,7 +518,7 @@
                                 <td class="p-3 font-mono ${accentClass} font-bold">${nomorVal}</td>
                                 <td class="p-3 text-slate-900 font-semibold">${tujuanVal}</td>
                                 <td class="p-3 text-slate-700 font-mono">${nominalVal}</td>
-                                <td class="p-3">${viewPdfBtn}</td>
+                                <td class="p-3 space-x-1 flex items-center">${viewPdfBtn} ${deleteBtn}</td>
                             </tr>
                         `;
                     }).join('');
@@ -578,6 +598,7 @@
                 if (filteredData.length > 0) {
                     let rows = filteredData.map((item, idx) => {
                         let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-bold border border-slate-300 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View SPH</a>` : `<span class="text-slate-400 text-[10px]">No PDF</span>`;
+                        let deleteBtn = item.id ? `<button onclick="hapusEformSupabase('${item.id}', 'SPH', 'loadPenawaranData')" class="text-red-600 hover:text-red-700 text-xs px-2 py-1 bg-red-50 rounded border border-red-200 transition" title="Hapus Dokumen Dari Supabase"><i class="fa-solid fa-trash"></i></button>` : '';
                         let nomorVal = item.nomor || item.nomor_dokumen || item.no_po || ('SPH-0' + (idx+1));
                         let nominalVal = item.nominal ? (isNaN(item.nominal) ? item.nominal : 'Rp ' + Number(item.nominal).toLocaleString('id-ID')) : '-';
                         let tujuanVal = item.tujuan || item.client_name || 'Mitra Industri';
@@ -587,7 +608,7 @@
                                 <td class="p-3 font-mono ${accentClass} font-bold">${nomorVal}</td>
                                 <td class="p-3 text-slate-900 font-semibold">${tujuanVal}</td>
                                 <td class="p-3 text-slate-700 font-mono">${nominalVal}</td>
-                                <td class="p-3">${viewPdfBtn}</td>
+                                <td class="p-3 space-x-1 flex items-center">${viewPdfBtn} ${deleteBtn}</td>
                             </tr>
                         `;
                     }).join('');
@@ -684,6 +705,7 @@
 
                     let rows = filteredData.map((item, idx) => {
                         let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-[10px] font-bold border border-red-200 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View Invoice</a>` : `<span class="text-slate-400 text-[10px]">No PDF</span>`;
+                        let deleteBtn = item.id ? `<button onclick="hapusEformSupabase('${item.id}', 'Invoice', 'loadInvoiceData')" class="text-red-600 hover:text-red-700 text-xs px-2 py-1 bg-red-50 rounded border border-red-200 transition" title="Hapus Dokumen Dari Supabase"><i class="fa-solid fa-trash"></i></button>` : '';
                         let nomorVal = item.nomor || item.nomor_dokumen || item.no_po || ('INV-0' + (idx+1));
                         let pembeliVal = item.tujuan || item.client_name || 'Perusahaan Klien';
                         let nominalNum = Number(item.nominal) || (Number(item.qty || 50) * 14500000);
@@ -694,7 +716,7 @@
                                 <td class="p-3 font-mono text-red-600 font-bold">${nomorVal}</td>
                                 <td class="p-3 text-slate-900 font-semibold">${pembeliVal}</td>
                                 <td class="p-3 text-slate-700 font-mono">${nominalVal}</td>
-                                <td class="p-3">${viewPdfBtn}</td>
+                                <td class="p-3 space-x-1 flex items-center">${viewPdfBtn} ${deleteBtn}</td>
                             </tr>
                         `;
                     }).join('');
