@@ -256,9 +256,11 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center gap-2">
                             <img id="qr_footer" src="" width="40">
-                            <div style="font-size: 7px; line-height: 1.2;">
-                                <strong style="color: var(--kse-primary);">KSE SYSTEM DOCS</strong><br>
-                                <span class="text-muted">Scan QR untuk validasi sistem.</span>
+                            <div style="font-size: 8px; line-height: 1.2;">
+                                <strong style="color: var(--kse-primary);">Digital E-Forms KSE System</strong><br>
+                                <span class="text-muted">Scan QR untuk validasi Quatation</span><br>
+                                <span>Issued By: <strong id="footer_issued_by" style="color: #000;">-</strong></span><br>
+                                <span id="qr_timestamp" style="font-size: 7px; color: #888;"></span>
                             </div>
                         </div>
                         <div class="text-end" style="font-size: 8px;">
@@ -285,6 +287,25 @@
     const dbCustomer = {
         "PT. KORINDO ARIA BIMA SARI": " Wisma Korindo Jl.  MT.Haryono Kav.62 Pancoran, \nPancoran - Kota Adm. DKI Jakarta 12780",
     };
+
+    // Fungsi membaca informasi user aktif dari localStorage dashboard utama
+    function loadIssuerInfo() {
+        let issuerName = localStorage.getItem('holding_user_name');
+        let issuerRole = localStorage.getItem('holding_user_role');
+        let isLoggedIn = localStorage.getItem('holding_is_logged_in');
+
+        if (!isLoggedIn || !issuerName) {
+            issuerName = "Supranoto";
+        }
+
+        const fullIssuerText = `${issuerName}`;
+        
+        const issuerEl = document.getElementById('footer_issued_by');
+        if (issuerEl) {
+            issuerEl.innerText = fullIssuerText;
+        }
+        return fullIssuerText;
+    }
 
     function handleCustomerSelect(val) {
         if(dbCustomer[val]) {
@@ -341,9 +362,10 @@
         document.getElementById('out_contact').innerText = document.getElementById('in_contact').value;
         document.getElementById('out_prd').innerText = document.getElementById('in_prd').value;
 
-        // QR Update
+        // QR Update & Timestamp
         const qrContent = `KSE-DOC|NO:${document.getElementById('in_no').value}|CUST:${document.getElementById('in_cust').value}`;
         document.getElementById('qr_footer').src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(qrContent)}`;
+        document.getElementById('qr_timestamp').innerText = `Generated: ${new Date().toLocaleString('id-ID')}`;
     }
 
     // LOGIKA AUTO NUMBER: MENYAMBUNG DAN RESET BULANAN
@@ -354,7 +376,6 @@
         const currentRomawi = monthRomawi[m];
 
         try {
-            // Ambil data terakhir khusus SPH dari database
             const { data, error } = await _supabase
                 .from('eforms')
                 .select('nomor')
@@ -365,22 +386,20 @@
             let nextNum = 1;
 
             if (data && data.length > 0) {
-                const lastNo = data[0].nomor; // Format: "001/SPH-KSE/IV/2026"
+                const lastNo = data[0].nomor; 
                 const parts = lastNo.split('/');
                 const lastRomawi = parts[2]; 
 
-                // CEK: Jika bulan romawi terakhir sama dengan bulan romawi saat ini
                 if (lastRomawi === currentRomawi) {
                     const lastNumeric = parseInt(parts[0]);
                     nextNum = isNaN(lastNumeric) ? 1 : lastNumeric + 1;
                 } else {
-                    nextNum = 1; // Reset ke 001 karena ganti bulan
+                    nextNum = 1; 
                 }
             }
 
             document.getElementById('in_no').value = `${nextNum.toString().padStart(3, '0')}/SPH-KSE/${currentRomawi}/${y}`;
             
-            // Setting Periode Harga (1-14 atau 15-akhir)
             let sD, eD;
             if (d <= 14) { sD = 1; eD = 14; } 
             else { sD = 15; eD = new Date(y, m + 1, 0).getDate(); }
@@ -404,6 +423,8 @@
 
     async function saveToSupabase() {
         const btn = document.getElementById('btn-save-sb');
+        const activeIssuer = loadIssuerInfo();
+
         btn.innerHTML = 'SAVING...'; btn.disabled = true;
         try {
             const noSurat = document.getElementById('in_no').value;
@@ -431,20 +452,20 @@
                 tanggal: document.getElementById('in_tgl_raw').value,
                 tujuan: document.getElementById('in_cust').value,
                 pdf_url: urlData.publicUrl,
-                nominal: Math.round(parseFloat(document.getElementById('out_total_a').innerText.replace(/\./g,'').replace(',','.')))
+                nominal: Math.round(parseFloat(document.getElementById('out_total_a').innerText.replace(/\./g,'').replace(',','.'))),
+                issued_by: activeIssuer
             }]);
 
             if (insertError) throw insertError;
             alert("Berhasil disimpan ke Database & Cloud Storage!");
             
-            // Refresh nomor untuk input selanjutnya
             initAutoNumber(new Date(document.getElementById('in_tgl_raw').value));
             
         } catch (e) { 
             console.error(e);
             alert("Gagal: " + e.message); 
         }
-        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN & UPLOAD'; btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN'; btn.disabled = false;
     }
 
     function downloadPDF() {
@@ -458,11 +479,10 @@
     }
 
     window.onload = () => {
-        // Init Tanggal Hari Ini
         document.getElementById('in_tgl_raw').value = new Date().toISOString().split('T')[0];
+        loadIssuerInfo();
         handleDateChange();
         
-        // Default Value
         document.getElementById('in_produk').value = "BBM SOLAR B50";
         document.getElementById('in_dest').value = " ";
         document.getElementById('in_qty').value = "5.000 liter , 8.000 liter , 10.000 Liter";
