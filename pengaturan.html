@@ -28,7 +28,7 @@
                             PENGATURAN SISTEM & KEAMANAN
                             <span class="text-[9px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full border border-slate-300 font-bold">SYSTEM AUDIT</span>
                         </h1>
-                        <p class="text-[10px] text-slate-500">Monitoring User Online, IP Address, Lokasi, & Audit Log Perubahan</p>
+                        <p class="text-[10px] text-slate-500">Monitoring User Online, IP Address, Lokasi, Riwayat Login & Audit Log</p>
                     </div>
                 </div>
                 <button onclick="window.location.href='index_holding.html'" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition border border-slate-300 flex items-center gap-1.5 shadow-sm">
@@ -57,11 +57,14 @@
         </div>
 
         <!-- Navigation Tabs -->
-        <div class="flex items-center space-x-2 border-b border-slate-200 pb-2">
-            <button id="tabPresenceBtn" onclick="switchSubTab('presence')" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-900 text-white shadow-sm">
+        <div class="flex items-center space-x-2 border-b border-slate-200 pb-2 overflow-x-auto">
+            <button id="tabPresenceBtn" onclick="switchSubTab('presence')" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-900 text-white shadow-sm shrink-0">
                 <i class="fa-solid fa-users-viewfinder mr-1.5"></i> Pengguna Online Saat Ini
             </button>
-            <button id="tabLogsBtn" onclick="switchSubTab('logs')" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 hover:text-slate-900 border border-slate-200">
+            <button id="tabLoginHistoryBtn" onclick="switchSubTab('loginHistory')" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 hover:text-slate-900 border border-slate-200 shrink-0">
+                <i class="fa-solid fa-right-to-bracket mr-1.5"></i> Riwayat Login Admin
+            </button>
+            <button id="tabLogsBtn" onclick="switchSubTab('logs')" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 hover:text-slate-900 border border-slate-200 shrink-0">
                 <i class="fa-solid fa-clock-rotate-left mr-1.5"></i> Riwayat Perubahan Data (Audit Log)
             </button>
         </div>
@@ -71,7 +74,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                     <h3 class="text-sm font-extrabold text-slate-900">Daftar Pengguna Aktif/Online</h3>
-                    <p class="text-xs text-slate-500">Mencatat siapapun yang membuka web holding dalam 5 menit terakhir beserta IP dan lokasinya.</p>
+                    <p class="text-xs text-slate-500">Mencatat siapapun yang membuka web holding dalam 10 menit terakhir beserta IP dan lokasinya.</p>
                 </div>
                 <button onclick="loadPresenceData()" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl border border-slate-300 transition shadow-sm flex items-center gap-1.5 self-start">
                     <i class="fa-solid fa-rotate text-blue-600"></i> Refresh Data Online
@@ -97,7 +100,40 @@
             </div>
         </div>
 
-        <!-- TAB 2: AUDIT LOGS / RIWAYAT PERUBAHAN DATA -->
+        <!-- TAB 2: RIWAYAT LOGIN ADMIN -->
+        <div id="sectionLoginHistory" class="space-y-4 hidden">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                    <h3 class="text-sm font-extrabold text-slate-900">Riwayat Sesi Masuk (Login History) Admin</h3>
+                    <p class="text-xs text-slate-500">Mencatat jam berapa saja masing-masing admin melakukan login ke dalam sistem.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="text" id="loginHistorySearchInput" onkeyup="filterLoginHistory()" placeholder="Cari nama admin, IP..." class="bg-white border border-slate-300 text-xs text-slate-800 rounded-xl px-3 py-1.5 focus:outline-none focus:border-slate-800 shadow-sm w-48 sm:w-64">
+                    <button onclick="loadLoginHistoryData()" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl border border-slate-300 transition shadow-sm">
+                        <i class="fa-solid fa-rotate text-blue-600"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-200 rounded-2xl bg-white shadow-sm">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-100 text-slate-700 uppercase font-semibold border-b border-slate-200">
+                        <tr>
+                            <th class="p-3.5">Waktu Login</th>
+                            <th class="p-3.5">Nama Admin & Username</th>
+                            <th class="p-3.5">Role / Jabatan</th>
+                            <th class="p-3.5">IP Address</th>
+                            <th class="p-3.5">Lokasi Akses</th>
+                        </tr>
+                    </thead>
+                    <tbody id="loginHistoryTableBody" class="divide-y divide-slate-100">
+                        <tr><td colspan="5" class="p-4 text-center text-slate-400">Memuat riwayat login...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 3: AUDIT LOGS / RIWAYAT PERUBAHAN DATA -->
         <div id="sectionLogs" class="space-y-4 hidden">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
@@ -158,18 +194,20 @@
     </div>
 
     <script>
-        const SB_URL_DEFAULT = "https://yqdtgcjpfhiskywhowhu.supabase.co";
-        const SB_KEY_DEFAULT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxZHRnY2pwZmhpc2t5d2hvd2h1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MDY0MTIsImV4cCI6MjA4NzA4MjQxMn0.Mlw3e8C4xKHcJPSMRkcsRXL5udtR9SeWk2GmqM1NyYc";
-        const _supabase = supabase.createClient(SB_URL_DEFAULT, SB_KEY_DEFAULT);
+        // Konfigurasi Supabase Baru
+        const SB_URL = "https://qlsvvxfykteqxzcppnfv.supabase.co"; 
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsc3Z2eGZ5a3RlcXh6Y3BwbmZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0MDc5OTMsImV4cCI6MjEwNzk4Mzk5M30.jpxErPZSL0sJ4PakUSt8tCxHKHXpmA6CFL9sirbLV2I";
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
         let clientIp = '182.8.131.110';
         let clientLocation = 'Banjarmasin, Indonesia';
         let currentUser = {
-            name: 'Noto',
+            name: localStorage.getItem('holding_user_name') || 'Noto',
             email: 'admin@energyholding.co.id',
-            role: 'Administrator'
+            role: localStorage.getItem('holding_user_role') || 'Administrator'
         };
         let allLogs = [];
+        let allLoginHistory = [];
 
         async function fetchClientLocation() {
             try {
@@ -213,10 +251,27 @@
             }
         }
 
+        // Fungsi otomatis untuk mencatat history login ke database Supabase
+        async function recordAdminLogin(matchedUser) {
+            try {
+                const payload = {
+                    username: matchedUser.username,
+                    user_name: matchedUser.name,
+                    user_role: matchedUser.role,
+                    user_email: `${matchedUser.username}@energyholding.co.id`,
+                    ip_address: clientIp,
+                    location: clientLocation,
+                    logged_in_at: new Date().toISOString()
+                };
+                await _supabase.from('login_history').insert([payload]);
+            } catch (e) {
+                console.error("Gagal mencatat log login:", e);
+            }
+        }
+
         async function loadPresenceData() {
             const container = document.getElementById('presenceTableBody');
             try {
-                // Ambil data aktif 10 menit terakhir agar lebih fleksibel
                 const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
                 const { data, error } = await _supabase
                     .from('user_presence')
@@ -253,6 +308,61 @@
             } catch (err) {
                 container.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-600">Gagal memuat pengguna online: ${err.message}</td></tr>`;
             }
+        }
+
+        async function loadLoginHistoryData() {
+            const container = document.getElementById('loginHistoryTableBody');
+            try {
+                const { data, error } = await _supabase
+                    .from('login_history')
+                    .select('*')
+                    .order('logged_in_at', { ascending: false })
+                    .limit(50);
+
+                if (error) throw error;
+                allLoginHistory = data || [];
+                renderLoginHistoryTable(allLoginHistory);
+            } catch (err) {
+                container.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-600">Gagal memuat riwayat login: ${err.message}</td></tr>`;
+            }
+        }
+
+        function renderLoginHistoryTable(historyList) {
+            const container = document.getElementById('loginHistoryTableBody');
+            if (!historyList || historyList.length === 0) {
+                container.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500">Belum ada riwayat login tercatat.</td></tr>`;
+                return;
+            }
+
+            container.innerHTML = historyList.map(item => `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="p-3.5 text-slate-600 font-mono text-[11px] font-bold">
+                        <i class="fa-regular fa-clock text-blue-600 mr-1"></i>${new Date(item.logged_in_at).toLocaleString('id-ID')} WIB
+                    </td>
+                    <td class="p-3.5">
+                        <div class="font-bold text-slate-900">${item.user_name || '-'}</div>
+                        <div class="text-[10px] text-slate-400 font-mono">@${item.username || '-'}</div>
+                    </td>
+                    <td class="p-3.5">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                            ${item.user_role || 'Staff'}
+                        </span>
+                    </td>
+                    <td class="p-3.5 font-mono text-slate-700 font-bold">${item.ip_address || '-'}</td>
+                    <td class="p-3.5 text-slate-600"><i class="fa-solid fa-location-dot text-red-500 mr-1"></i>${item.location || 'Indonesia'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function filterLoginHistory() {
+            const query = document.getElementById('loginHistorySearchInput').value.toLowerCase();
+            const filtered = allLoginHistory.filter(h => 
+                (h.user_name && h.user_name.toLowerCase().includes(query)) ||
+                (h.username && h.username.toLowerCase().includes(query)) ||
+                (h.user_role && h.user_role.toLowerCase().includes(query)) ||
+                (h.ip_address && h.ip_address.toLowerCase().includes(query))
+            );
+            renderLoginHistoryTable(filtered);
         }
 
         async function loadAuditLogsData() {
@@ -334,16 +444,24 @@
         }
 
         function switchSubTab(tab) {
+            document.getElementById('sectionPresence').classList.add('hidden');
+            document.getElementById('sectionLoginHistory').classList.add('hidden');
+            document.getElementById('sectionLogs').classList.add('hidden');
+
+            document.getElementById('tabPresenceBtn').className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 hover:text-slate-900 border border-slate-200 shrink-0';
+            document.getElementById('tabLoginHistoryBtn').className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 hover:text-slate-900 border border-slate-200 shrink-0';
+            document.getElementById('tabLogsBtn').className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 hover:text-slate-900 border border-slate-200 shrink-0';
+
             if (tab === 'presence') {
                 document.getElementById('sectionPresence').classList.remove('hidden');
-                document.getElementById('sectionLogs').classList.add('hidden');
-                document.getElementById('tabPresenceBtn').className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-900 text-white shadow-sm';
-                document.getElementById('tabLogsBtn').className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 hover:text-slate-900 border border-slate-200';
-            } else {
-                document.getElementById('sectionPresence').classList.add('hidden');
+                document.getElementById('tabPresenceBtn').className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-900 text-white shadow-sm shrink-0';
+            } else if (tab === 'loginHistory') {
+                document.getElementById('sectionLoginHistory').classList.remove('hidden');
+                document.getElementById('tabLoginHistoryBtn').className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-900 text-white shadow-sm shrink-0';
+                loadLoginHistoryData();
+            } else if (tab === 'logs') {
                 document.getElementById('sectionLogs').classList.remove('hidden');
-                document.getElementById('tabPresenceBtn').className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 hover:text-slate-900 border border-slate-200';
-                document.getElementById('tabLogsBtn').className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-900 text-white shadow-sm';
+                document.getElementById('tabLogsBtn').className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-900 text-white shadow-sm shrink-0';
                 loadAuditLogsData();
             }
         }
