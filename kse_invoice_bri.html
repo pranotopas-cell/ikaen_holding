@@ -270,7 +270,7 @@
                         <div class="d-flex align-items-center gap-2">
                             <img id="qr_footer" src="" width="40">
                             <div style="font-size: 8px; line-height: 1.2;">
-                                <b>Digital E-Form KSE System</b><br>Scan QR untuk validasi Invoice.<br><span id="qr_timestamp" style="color: #888; font-size: 7px;"></span>
+                                <b>Digital E-Form KSE System</b><br>Scan QR untuk validasi Invoice.<br><span>Issued By: <strong id="footer_issued_by" style="color: #000;">-</strong></span><br><span id="qr_timestamp" style="color: #888; font-size: 7px;"></span>
                             </div>
                         </div>
                         <div class="text-end" style="font-size: 9px;">
@@ -289,6 +289,25 @@
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
     const monthRomawi = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
     const monthsIndo = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+    // Fungsi otomatis membaca data admin aktif yang sedang login di dashboard utama
+    function loadIssuerInfo() {
+        let issuerName = localStorage.getItem('holding_user_name');
+        let issuerRole = localStorage.getItem('holding_user_role');
+        let isLoggedIn = localStorage.getItem('holding_is_logged_in');
+
+        if (!isLoggedIn || !issuerName) {
+            issuerName = "Supranoto";
+            }
+
+        const fullIssuerText = `${issuerName}`;
+        
+        const issuerEl = document.getElementById('footer_issued_by');
+        if (issuerEl) {
+            issuerEl.innerText = fullIssuerText;
+        }
+        return fullIssuerText;
+    }
 
     function formatIDR(val) {
         return parseFloat(val).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -470,6 +489,8 @@
     async function saveToSupabase() {
         const btn = document.getElementById('btn-save-sb');
         const noInv = document.getElementById('out_no').innerText;
+        const activeIssuer = loadIssuerInfo();
+
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> UPLOADING...'; btn.disabled = true;
         
         try {
@@ -497,7 +518,8 @@
                 tujuan: document.getElementById('in_cust').value,
                 nominal: roundKSE(parseFloat(document.getElementById('out_grand_val').innerText.replace(/\./g, '').replace(',', '.'))),
                 pdf_url: publicUrl,
-                client_email: "system@kse.co.id"
+                client_email: "system@kse.co.id",
+                issued_by: activeIssuer
             };
             const { error: dbErr } = await _supabase.from('eforms').insert([payload]);
             if (dbErr) throw dbErr;
@@ -505,7 +527,7 @@
             alert("Berhasil! Data & PDF tersimpan di Cloud.");
             initAutoNumber(); 
         } catch (e) { alert("Error: " + e.message); }
-        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN DATA & AUTO UPLOAD'; btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN'; btn.disabled = false;
     }
 
     function downloadPDF() {
@@ -539,6 +561,7 @@
     window.onload = () => {
         const now = new Date();
         document.getElementById('in_tgl_raw').value = now.toISOString().split('T')[0];
+        loadIssuerInfo();
         handleDateChange();
         document.getElementById('in_produk').value = "BIO SOLAR (B50)";
         document.getElementById('in_qty_text').value = "";
