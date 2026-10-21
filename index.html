@@ -645,6 +645,22 @@
                     filteredData = filteredData.filter(item => item.created_at && item.created_at.includes(selectedMonth));
                 }
 
+                // Ambil data Pajak Masukan dari tabel faktur_pajak untuk PT terpilih & bulan terpilih
+                let totalPpnMasukan = 0;
+                try {
+                    let fpQuery = clientDb.from('faktur_pajak').select('tanggal, ppn');
+                    const { data: fpData, error: fpErr } = await fpQuery;
+                    if (!fpErr && fpData) {
+                        let filteredFp = fpData;
+                        if (selectedMonth !== '') {
+                            filteredFp = filteredFp.filter(f => f.tanggal && f.tanggal.includes(selectedMonth));
+                        }
+                        totalPpnMasukan = filteredFp.reduce((sum, f) => sum + (Number(f.ppn) || 0), 0);
+                    }
+                } catch (e) {
+                    console.log("Faktur pajak error/tidak ditemukan:", e);
+                }
+
                 let filterHtml = renderMonthFilterHTML('loadInvoiceData');
 
                 if (filteredData.length > 0) {
@@ -656,6 +672,7 @@
                     let calcDpp = totalNominalInvoice * (100 / 111);
                     let calcDppNilaiLain = calcDpp * (11 / 12);
                     let calcPpnKeluaran = calcDppNilaiLain * 0.12;
+                    let calcKurangBayar = calcPpnKeluaran - totalPpnMasukan;
 
                     let rows = filteredData.map((item, idx) => {
                         let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-[10px] font-bold border border-red-200 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View Invoice</a>` : `<span class="text-slate-400 text-[10px]">No PDF</span>`;
@@ -677,7 +694,7 @@
                     container.innerHTML = `
                         <div class="space-y-4">
                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                <span class="text-xs font-bold text-red-600"><i class="fa-solid fa-receipt mr-1"></i> Data ${subType} (Jenis INVOICE dari tabel eforms)</span>
+                                <span class="text-xs font-bold text-red-600"><i class="fa-solid fa-receipt mr-1"></i> Data ${subType} (${compId.toUpperCase()})</span>
                                 ${filterHtml}
                             </div>
                             <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm bg-white">
@@ -700,7 +717,7 @@
                                         <div class="w-8 h-8 rounded-lg bg-white/10 text-white flex items-center justify-center font-bold border border-white/20">
                                             <i class="fa-solid fa-file-invoice-dollar"></i>
                                         </div>
-                                        <span class="text-xs font-extrabold uppercase tracking-wider">Total Keseluruhan Nominal Invoice:</span>
+                                        <span class="text-xs font-extrabold uppercase tracking-wider">Total Keseluruhan Nominal Invoice (${compId.toUpperCase()}):</span>
                                     </div>
                                     <div class="text-sm font-black font-mono bg-white/10 px-4 py-2 rounded-xl border border-white/20 shadow-inner">
                                         Rp ${totalNominalInvoice.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}
@@ -718,6 +735,14 @@
                                     <div class="flex justify-between items-center bg-white/5 p-2.5 rounded-xl border border-white/10 text-emerald-400 font-bold">
                                         <span><i class="fa-solid fa-calculator mr-1"></i> Jumlah PPN Keluaran (DPP Nilai Lain &times; 12%):</span>
                                         <span class="font-mono text-sm">Rp ${calcPpnKeluaran.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center bg-white/5 p-2.5 rounded-xl border border-white/10 text-sky-300 font-bold">
+                                        <span><i class="fa-solid fa-file-invoice mr-1"></i> Pajak Masukan (${compId.toUpperCase()} - faktur_pajak):</span>
+                                        <span class="font-mono text-sm">Rp ${totalPpnMasukan.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center bg-amber-500/10 p-3 rounded-xl border border-amber-500/30 text-amber-300 font-extrabold text-sm shadow-inner">
+                                        <span><i class="fa-solid fa-triangle-exclamation mr-1.5 text-amber-400"></i> Kurang Bayar PPN Per Bulan (${compId.toUpperCase()}):</span>
+                                        <span class="font-mono text-base ${calcKurangBayar < 0 ? 'text-emerald-400' : 'text-amber-300'}">Rp ${calcKurangBayar.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
                                     </div>
                                 </div>
                             </div>
@@ -779,7 +804,7 @@
                 container.innerHTML = `
                     <div class="space-y-4">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                            <span class="text-xs font-bold text-slate-800"><i class="fa-solid fa-file-invoice-dollar mr-1"></i> Rekapitulasi Faktur Pajak (Supabase & Coretax Integration)</span>
+                            <span class="text-xs font-bold text-slate-800"><i class="fa-solid fa-file-invoice-dollar mr-1"></i> Rekapitulasi Faktur Pajak (${activeTab.toUpperCase()} - Supabase & Coretax Integration)</span>
                             ${filterHtml}
                         </div>
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 space-y-3 shadow-sm max-w-xl">
@@ -977,7 +1002,7 @@
                                 <div class="relative z-10">
                                     <h2 class="text-2xl font-extrabold mb-1 flex items-center gap-2">
                                         Selamat Datang, ${currentAdmin.name} 
-                                        <span class="text-xs bg-blue-500/20 text-blue-300 px-2.5 py-0.5 rounded-full border border-blue-500/40 shadow-sm font-bold"></i>Access</span>
+                                        <span class="text-xs bg-blue-500/20 text-blue-300 px-2.5 py-0.5 rounded-full border border-blue-500/40 shadow-sm font-bold">Access</span>
                                     </h2>
                                     <p class="text-slate-300 text-xs">Sistem Otorisasi Aktif (${currentAdmin.role}). Silakan pilih entitas perusahaan di atas untuk mengelola transaksi.</p>
                                 </div>
