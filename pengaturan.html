@@ -28,7 +28,7 @@
                             PENGATURAN SISTEM & KEAMANAN
                             <span class="text-[9px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full border border-slate-300 font-bold">SYSTEM AUDIT</span>
                         </h1>
-                        <p class="text-[10px] text-slate-500">Monitoring User Online, IP Address, Lokasi, Riwayat Login & Audit Log</p>
+                        <p class="text-[10px] text-slate-500">Monitoring User Online, IP Address, Lokasi Presisi, Riwayat Login & Audit Log</p>
                     </div>
                 </div>
                 <button onclick="window.location.href='index_holding.html'" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition border border-slate-300 flex items-center gap-1.5 shadow-sm">
@@ -45,14 +45,14 @@
         <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-blue-900 rounded-3xl p-6 text-white border border-slate-700 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="space-y-1">
                 <span class="text-[10px] uppercase font-bold tracking-widest bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full border border-blue-500/30 inline-block">
-                    <i class="fa-solid fa-shield-halved mr-1"></i> Sesi Aktif
+                    <i class="fa-solid fa-shield-halved mr-1"></i> Sesi Anda Sekarang
                 </span>
-                <h2 class="text-xl font-extrabold" id="currentSessionUser">Admin</h2>
-                <p class="text-xs text-slate-300" id="currentSessionInfo">Memuat deteksi IP & Lokasi...</p>
+                <h2 class="text-xl font-extrabold" id="currentSessionUser">Memuat Profil...</h2>
+                <p class="text-xs text-slate-300" id="currentSessionInfo">Mendeteksi IP & Lokasi Presisi...</p>
             </div>
-            <div class="bg-white/10 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/20 text-center shrink-0">
-                <span class="text-[10px] uppercase text-emerald-400 font-extrabold tracking-wider block">Pengguna Online</span>
-                <span class="text-2xl font-black font-mono text-white" id="onlineCountDisplay">0</span>
+            <div class="bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/20 text-center shrink-0">
+                <span class="text-[10px] uppercase text-emerald-400 font-extrabold tracking-wider block">Pengguna Online (Holding)</span>
+                <span class="text-3xl font-black font-mono text-white" id="onlineCountDisplay">0</span>
             </div>
         </div>
 
@@ -73,8 +73,8 @@
         <div id="sectionPresence" class="space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                    <h3 class="text-sm font-extrabold text-slate-900">Daftar Pengguna Aktif/Online</h3>
-                    <p class="text-xs text-slate-500">Mencatat siapapun yang membuka web holding dalam 10 menit terakhir beserta IP dan lokasinya.</p>
+                    <h3 class="text-sm font-extrabold text-slate-900">Daftar Pengguna Aktif/Online di Vercel</h3>
+                    <p class="text-xs text-slate-500">Mencatat user yang sedang membuka portal corporateintegrated.vercel.app dalam 5 menit terakhir.</p>
                 </div>
                 <button onclick="loadPresenceData()" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl border border-slate-300 transition shadow-sm flex items-center gap-1.5 self-start">
                     <i class="fa-solid fa-rotate text-blue-600"></i> Refresh Data Online
@@ -88,9 +88,9 @@
                             <th class="p-3.5">Status</th>
                             <th class="p-3.5">Nama & Role User</th>
                             <th class="p-3.5">IP Address</th>
-                            <th class="p-3.5">Perkiraan Lokasi</th>
+                            <th class="p-3.5">Lokasi Akses</th>
                             <th class="p-3.5">Halaman Aktif</th>
-                            <th class="p-3.5">Terakhir Aktif</th>
+                            <th class="p-3.5">Ping Terakhir</th>
                         </tr>
                     </thead>
                     <tbody id="presenceTableBody" class="divide-y divide-slate-100">
@@ -105,10 +105,10 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                     <h3 class="text-sm font-extrabold text-slate-900">Riwayat Sesi Masuk (Login History) Admin</h3>
-                    <p class="text-xs text-slate-500">Mencatat jam berapa saja masing-masing admin melakukan login ke dalam sistem.</p>
+                    <p class="text-xs text-slate-500">Rekaman login seluruh staff & admin ke sistem.</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <input type="text" id="loginHistorySearchInput" onkeyup="filterLoginHistory()" placeholder="Cari nama admin, IP..." class="bg-white border border-slate-300 text-xs text-slate-800 rounded-xl px-3 py-1.5 focus:outline-none focus:border-slate-800 shadow-sm w-48 sm:w-64">
+                    <input type="text" id="loginHistorySearchInput" onkeyup="filterLoginHistory()" placeholder="Cari nama admin, IP, lokasi..." class="bg-white border border-slate-300 text-xs text-slate-800 rounded-xl px-3 py-1.5 focus:outline-none focus:border-slate-800 shadow-sm w-48 sm:w-64">
                     <button onclick="loadLoginHistoryData()" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl border border-slate-300 transition shadow-sm">
                         <i class="fa-solid fa-rotate text-blue-600"></i>
                     </button>
@@ -120,7 +120,7 @@
                     <thead class="bg-slate-100 text-slate-700 uppercase font-semibold border-b border-slate-200">
                         <tr>
                             <th class="p-3.5">Waktu Login</th>
-                            <th class="p-3.5">Nama Admin & Username</th>
+                            <th class="p-3.5">Nama Admin & Email</th>
                             <th class="p-3.5">Role / Jabatan</th>
                             <th class="p-3.5">IP Address</th>
                             <th class="p-3.5">Lokasi Akses</th>
@@ -133,12 +133,12 @@
             </div>
         </div>
 
-        <!-- TAB 3: AUDIT LOGS / RIWAYAT PERUBAHAN DATA -->
+        <!-- TAB 3: AUDIT LOGS -->
         <div id="sectionLogs" class="space-y-4 hidden">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                     <h3 class="text-sm font-extrabold text-slate-900">Log Aktivitas & Audit Perubahan</h3>
-                    <p class="text-xs text-slate-500">Rekaman rinci tindakan `CREATE`, `UPDATE`, atau `DELETE` yang dilakukan pengguna.</p>
+                    <p class="text-xs text-slate-500">Rekaman tindakan `CREATE`, `UPDATE`, atau `DELETE` pada database.</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <input type="text" id="logSearchInput" onkeyup="filterLogs()" placeholder="Cari nama, modul, aksi..." class="bg-white border border-slate-300 text-xs text-slate-800 rounded-xl px-3 py-1.5 focus:outline-none focus:border-slate-800 shadow-sm w-48 sm:w-64">
@@ -157,7 +157,7 @@
                             <th class="p-3.5">Tipe Aksi</th>
                             <th class="p-3.5">Modul</th>
                             <th class="p-3.5">Keterangan Aktivitas</th>
-                            <th class="p-3.5">Rincian Perubahan (Sebelum vs Sesudah)</th>
+                            <th class="p-3.5">Rincian Perubahan</th>
                         </tr>
                     </thead>
                     <tbody id="auditLogsTableBody" class="divide-y divide-slate-100">
@@ -182,11 +182,11 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 overflow-y-auto p-1 font-mono text-xs">
                 <div class="bg-red-50/70 border border-red-200 p-3 rounded-xl space-y-1">
-                    <span class="block text-[10px] uppercase font-bold text-red-700"><i class="fa-solid fa-minus-circle"></i> Data Sebelum (Before)</span>
+                    <span class="block text-[10px] uppercase font-bold text-red-700"><i class="fa-solid fa-minus-circle"></i> Sebelum (Before)</span>
                     <pre id="jsonBefore" class="text-slate-800 whitespace-pre-wrap break-all text-[11px]"></pre>
                 </div>
                 <div class="bg-emerald-50/70 border border-emerald-200 p-3 rounded-xl space-y-1">
-                    <span class="block text-[10px] uppercase font-bold text-emerald-700"><i class="fa-solid fa-plus-circle"></i> Data Sesudah (After)</span>
+                    <span class="block text-[10px] uppercase font-bold text-emerald-700"><i class="fa-solid fa-plus-circle"></i> Sesudah (After)</span>
                     <pre id="jsonAfter" class="text-slate-800 whitespace-pre-wrap break-all text-[11px]"></pre>
                 </div>
             </div>
@@ -194,39 +194,69 @@
     </div>
 
     <script>
-        // Konfigurasi Supabase Baru
+        // Supabase Client Config
         const SB_URL = "https://qlsvvxfykteqxzcppnfv.supabase.co"; 
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsc3Z2eGZ5a3RlcXh6Y3BwbmZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0MDc5OTMsImV4cCI6MjEwNzk4Mzk5M30.jpxErPZSL0sJ4PakUSt8tCxHKHXpmA6CFL9sirbLV2I";
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-        let clientIp = '182.8.131.110';
-        let clientLocation = 'Banjarmasin, Indonesia';
+        let clientIp = 'Mendeteksi...';
+        let clientLocation = 'Mendeteksi...';
+        
+        // Membaca identitas user login secara dinamis dari LocalStorage/SessionStorage
         let currentUser = {
-            name: localStorage.getItem('holding_user_name') || 'Noto',
-            email: 'admin@energyholding.co.id',
-            role: localStorage.getItem('holding_user_role') || 'Administrator'
+            name: localStorage.getItem('holding_user_name') || localStorage.getItem('user_name') || 'Noto',
+            email: localStorage.getItem('holding_user_email') || localStorage.getItem('user_email') || 'noto@energyholding.co.id',
+            role: localStorage.getItem('holding_user_role') || localStorage.getItem('user_role') || 'Administrator'
         };
+
         let allLogs = [];
         let allLoginHistory = [];
 
+        // 1. Deteksi IP dan Lokasi Presisi (Multi-Fallback & HTML5 Geolocation)
         async function fetchClientLocation() {
             try {
-                const res = await fetch('https://ipapi.co/json/');
-                if (res.ok) {
-                    const data = await res.json();
-                    clientIp = data.ip || clientIp;
-                    clientLocation = `${data.city || ''}, ${data.country_name || 'ID'}`.trim();
+                // Method A: Ambil IP Publik dari ipify API (Cepat & Reliabel)
+                const ipRes = await fetch('https://api.ipify.org?format=json');
+                if (ipRes.ok) {
+                    const ipData = await ipRes.json();
+                    clientIp = ipData.ip;
+                }
+
+                // Method B: Geolocation ISP / Kota
+                const locRes = await fetch(`https://ipapi.co/${clientIp}/json/`);
+                if (locRes.ok) {
+                    const locData = await locRes.json();
+                    if (locData.city && locData.country_name) {
+                        clientLocation = `${locData.city}, ${locData.region || ''}, ${locData.country_name}`;
+                    }
                 }
             } catch (err) {
-                console.log("Using default location IP");
+                // Fallback jika API terblokir AdBlocker
+                clientLocation = 'Banjarmasin, Kalimantan Selatan, ID';
             }
 
+            // Method C: Jika Browser Mengizinkan GPS / Precise Location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    const lat = pos.coords.latitude.toFixed(4);
+                    const lng = pos.coords.longitude.toFixed(4);
+                    clientLocation += ` (GPS: ${lat}, ${lng})`;
+                    updateHeaderInfo();
+                }, () => {
+                    updateHeaderInfo();
+                }, { timeout: 5000 });
+            } else {
+                updateHeaderInfo();
+            }
+        }
+
+        function updateHeaderInfo() {
             document.getElementById('currentSessionUser').textContent = `${currentUser.name} (${currentUser.role})`;
             document.getElementById('currentSessionInfo').textContent = `IP: ${clientIp} | Lokasi: ${clientLocation}`;
-            
             sendHeartbeat();
         }
 
+        // 2. Fungsi Heartbeat untuk Mengabarkan User Sedang Online
         async function sendHeartbeat() {
             try {
                 const payload = {
@@ -235,48 +265,30 @@
                     user_role: currentUser.role,
                     ip_address: clientIp,
                     location: clientLocation,
-                    user_agent: navigator.userAgent.substring(0, 50),
-                    current_page: 'Pengaturan Sistem',
+                    user_agent: navigator.userAgent.substring(0, 80),
+                    current_page: 'Pengaturan Sistem & Security',
                     last_ping: new Date().toISOString()
                 };
 
                 const { error } = await _supabase.from('user_presence').upsert(payload, { onConflict: 'user_email' });
-                if (error) {
-                    console.error("Supabase Upsert Error:", error.message);
-                }
+                if (error) console.error("Heartbeat Upsert Error:", error.message);
 
                 loadPresenceData();
             } catch (e) {
-                console.error("Heartbeat exception:", e);
+                console.error("Heartbeat Error:", e);
             }
         }
 
-        // Fungsi otomatis untuk mencatat history login ke database Supabase
-        async function recordAdminLogin(matchedUser) {
-            try {
-                const payload = {
-                    username: matchedUser.username,
-                    user_name: matchedUser.name,
-                    user_role: matchedUser.role,
-                    user_email: `${matchedUser.username}@energyholding.co.id`,
-                    ip_address: clientIp,
-                    location: clientLocation,
-                    logged_in_at: new Date().toISOString()
-                };
-                await _supabase.from('login_history').insert([payload]);
-            } catch (e) {
-                console.error("Gagal mencatat log login:", e);
-            }
-        }
-
+        // 3. Load Real-time User Online (Aktif dalam 5 Menit Terakhir)
         async function loadPresenceData() {
             const container = document.getElementById('presenceTableBody');
             try {
-                const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+                // Filter user aktif dalam 5 menit terakhir
+                const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
                 const { data, error } = await _supabase
                     .from('user_presence')
                     .select('*')
-                    .gte('last_ping', tenMinutesAgo)
+                    .gte('last_ping', fiveMinutesAgo)
                     .order('last_ping', { ascending: false });
 
                 if (error) throw error;
@@ -284,7 +296,7 @@
                 document.getElementById('onlineCountDisplay').textContent = data ? data.length : 0;
 
                 if (!data || data.length === 0) {
-                    container.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">Tidak ada pengguna aktif dalam 10 menit terakhir.</td></tr>`;
+                    container.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">Tidak ada pengguna aktif dalam 5 menit terakhir.</td></tr>`;
                     return;
                 }
 
@@ -310,6 +322,7 @@
             }
         }
 
+        // 4. Load Riwayat Login Seluruh Admin
         async function loadLoginHistoryData() {
             const container = document.getElementById('loginHistoryTableBody');
             try {
@@ -317,7 +330,7 @@
                     .from('login_history')
                     .select('*')
                     .order('logged_in_at', { ascending: false })
-                    .limit(50);
+                    .limit(100);
 
                 if (error) throw error;
                 allLoginHistory = data || [];
@@ -337,11 +350,11 @@
             container.innerHTML = historyList.map(item => `
                 <tr class="hover:bg-slate-50 transition">
                     <td class="p-3.5 text-slate-600 font-mono text-[11px] font-bold">
-                        <i class="fa-regular fa-clock text-blue-600 mr-1"></i>${new Date(item.logged_in_at).toLocaleString('id-ID')} WIB
+                        <i class="fa-regular fa-clock text-blue-600 mr-1"></i>${new Date(item.logged_in_at || item.created_at).toLocaleString('id-ID')} WIB
                     </td>
                     <td class="p-3.5">
-                        <div class="font-bold text-slate-900">${item.user_name || '-'}</div>
-                        <div class="text-[10px] text-slate-400 font-mono">@${item.username || '-'}</div>
+                        <div class="font-bold text-slate-900">${item.user_name || item.username || '-'}</div>
+                        <div class="text-[10px] text-slate-400 font-mono">${item.user_email || '-'}</div>
                     </td>
                     <td class="p-3.5">
                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
@@ -358,13 +371,15 @@
             const query = document.getElementById('loginHistorySearchInput').value.toLowerCase();
             const filtered = allLoginHistory.filter(h => 
                 (h.user_name && h.user_name.toLowerCase().includes(query)) ||
-                (h.username && h.username.toLowerCase().includes(query)) ||
+                (h.user_email && h.user_email.toLowerCase().includes(query)) ||
                 (h.user_role && h.user_role.toLowerCase().includes(query)) ||
-                (h.ip_address && h.ip_address.toLowerCase().includes(query))
+                (h.ip_address && h.ip_address.toLowerCase().includes(query)) ||
+                (h.location && h.location.toLowerCase().includes(query))
             );
             renderLoginHistoryTable(filtered);
         }
 
+        // 5. Load Audit Logs (Riwayat Perubahan Data)
         async function loadAuditLogsData() {
             const container = document.getElementById('auditLogsTableBody');
             try {
@@ -372,7 +387,7 @@
                     .from('audit_logs')
                     .select('*')
                     .order('created_at', { ascending: false })
-                    .limit(50);
+                    .limit(100);
 
                 if (error) throw error;
                 allLogs = data || [];
@@ -399,7 +414,7 @@
                 if (item.data_before || item.data_after) {
                     viewDetailsBtn = `
                         <button onclick='openJsonModal(${JSON.stringify(item.data_before || {})}, ${JSON.stringify(item.data_after || {})})' class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-bold border border-slate-300 inline-flex items-center gap-1 transition">
-                            <i class="fa-solid fa-code"></i> Perubahan
+                            <i class="fa-solid fa-code"></i> Detail
                         </button>
                     `;
                 }
@@ -455,6 +470,7 @@
             if (tab === 'presence') {
                 document.getElementById('sectionPresence').classList.remove('hidden');
                 document.getElementById('tabPresenceBtn').className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-900 text-white shadow-sm shrink-0';
+                loadPresenceData();
             } else if (tab === 'loginHistory') {
                 document.getElementById('sectionLoginHistory').classList.remove('hidden');
                 document.getElementById('tabLoginHistoryBtn').className = 'px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-900 text-white shadow-sm shrink-0';
@@ -468,7 +484,7 @@
 
         window.onload = function() {
             fetchClientLocation();
-            setInterval(sendHeartbeat, 30000); // Ping setiap 30 detik
+            setInterval(sendHeartbeat, 15000); // Ping heartbeat setiap 15 detik untuk akurasi online
         };
     </script>
 </body>
