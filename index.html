@@ -638,11 +638,14 @@
                         let nomorVal = item.nomor || item.nomor_dokumen || item.no_po || ('SPH-0' + (idx+1));
                         let nominalVal = item.nominal ? (isNaN(item.nominal) ? item.nominal : 'Rp ' + Number(item.nominal).toLocaleString('id-ID')) : '-';
                         let tujuanVal = item.tujuan || item.client_name || 'Mitra Industri';
+                        let lokasiVal = item.tujuan_pengiriman || item.lokasi || '-';
+                        
                         return `
                             <tr class="hover:bg-slate-50 transition">
                                 <td class="p-3 text-slate-600">${item.created_at ? item.created_at.substring(0, 10) : '-'}</td>
                                 <td class="p-3 font-mono ${accentClass} font-bold">${nomorVal}</td>
                                 <td class="p-3 text-slate-900 font-semibold">${tujuanVal}</td>
+                                <td class="p-3 text-slate-600">${lokasiVal}</td>
                                 <td class="p-3 text-slate-700 font-mono">${nominalVal}</td>
                                 <td class="p-3 space-x-1 flex items-center">${viewPdfBtn} ${deleteBtn}</td>
                             </tr>
@@ -667,6 +670,7 @@
                                             <th class="p-3">Tanggal</th>
                                             <th class="p-3">Nomor SPH</th>
                                             <th class="p-3">Klien / Tujuan</th>
+                                            <th class="p-3">Lokasi</th>
                                             <th class="p-3">Nominal</th>
                                             <th class="p-3">Aksi PDF</th>
                                         </tr>
@@ -687,7 +691,6 @@
                 container.innerHTML = `<div class="p-4 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-600">Gagal memuat data SPH dari Supabase: ${err.message}</div>`;
             }
         }
-
         async function loadInvoiceData(subType = 'Invoice BRI') {
             const container = document.getElementById('supabaseLiveContainer');
             if (!container) return;
