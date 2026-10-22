@@ -334,15 +334,16 @@
                 <div class="footer-ide">
                     <div class="footer-grid">
                         <img id="qr_footer" width="40" height="40" style="border: 1px solid #eee; padding: 2px;">
-                        <div style="font-size: 9px; color: #555; line-height: 1.4; border-left: 1px solid #eee; padding-left: 10px;">
+                        <div style="font-size: 8px; color: #555; line-height: 1.2; border-left: 1px solid #eee; padding-left: 10px;">
                             <b style="color: #000;">IDE - DIGITAL VERIFIED SYSTEM</b><br>
-                            Dokumen ini sah dan diterbitkan secara elektronik.<br>
+                            Scan QR untuk Verifikasi PO<br>
+                            <span>Issued By: <strong id="footer_issued_by" style="color: #000;">-</strong></span><br>
                             <span id="qr_timestamp" style="font-size: 8px; color: #999;"></span>
                         </div>
                         <div class="text-end" style="font-size: 9px;">
                             <b style="color: var(--ide-accent);">PT. INDO DHARMA ENERGI</b><br>
-                            Jl. Ahmad Yani KM 7 Pangkalan Bun<br>
-                            0852-5276-1578 | indodharmaenergi@gmail.com
+                            Jl. Ahmad Yani KM 7 Kel.Baru Pangkalan Bun<br>
+                            0852-2586-2649 | indodharmaenergi@gmail.com
                         </div>
                     </div>
                 </div>
@@ -364,6 +365,25 @@
 
     const monthRomawi = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
     const monthsIndo = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
+
+    // Fungsi membaca informasi user aktif dari localStorage
+    function loadIssuerInfo() {
+        let issuerName = localStorage.getItem('holding_user_name');
+        let issuerRole = localStorage.getItem('holding_user_role');
+        let isLoggedIn = localStorage.getItem('holding_is_logged_in');
+
+        if (!isLoggedIn || !issuerName) {
+            issuerName = "Nurhamida";
+            issuerRole = "Direktur";
+        }
+
+        const fullIssuerText = `${issuerName}`;
+        const issuerEl = document.getElementById('footer_issued_by');
+        if (issuerEl) {
+            issuerEl.innerText = fullIssuerText;
+        }
+        return fullIssuerText;
+    }
 
     // --- FUNGSI LOGIKA ---
 
@@ -539,6 +559,8 @@
         const noPo = document.getElementById('in_no').value;
         if(!noPo || noPo.includes('undefined')) return alert("Nomor PO tidak valid!");
 
+        const activeIssuer = loadIssuerInfo();
+
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> UPLOADING...'; btn.disabled = true;
         try {
             const element = document.getElementById('main-doc');
@@ -564,7 +586,8 @@
                 tujuan_pengiriman: document.getElementById('in_destination').value,
                 nominal: parseFloat(document.getElementById('out_grandtotal').innerText.replace(/\./g, '').replace(',', '.')),
                 pdf_url: urlData.publicUrl,
-                client_email: "system@ide.co.id"
+                client_email: "system@ide.co.id",
+                issued_by: activeIssuer
             };
             const { error: dbErr } = await _supabase.from('eforms').insert([payload]);
             if (dbErr) throw dbErr;
@@ -593,6 +616,7 @@
         const dd = String(now.getDate()).padStart(2, '0');
         
         document.getElementById('in_tgl_raw').value = `${yyyy}-${mm}-${dd}`;
+        loadIssuerInfo();
         handleDateChange();
         calculate();
     };
