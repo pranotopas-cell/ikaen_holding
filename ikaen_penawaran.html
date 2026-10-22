@@ -539,7 +539,7 @@
 
         if (insertError) throw insertError;
         
-        alert("Penawaran & Tujuan Pengiriman Berhasil Tersimpan!");
+        alert("Sukses Tersimpan!");
         syncAutoNumber();
     } catch (e) { 
         alert("Gagal: " + e.message); 
@@ -549,6 +549,7 @@
     btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN & UPLOAD'; 
     btn.disabled = false;
 }
+    
     function downloadPDF() {
         const element = document.getElementById('main-doc');
         html2pdf().set({ margin: 0, filename: `SPH-${document.getElementById('in_no').value}.pdf`, 
