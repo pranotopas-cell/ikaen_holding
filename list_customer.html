@@ -73,11 +73,26 @@
             outline: none;
             padding: 2px 0;
             box-sizing: border-box;
+            text-align: left; /* Rata kiri untuk teks secara umum */
         }
-        /* Membuat Nama Perusahaan menjadi Bold */
+        
+        /* Membuat Nama Perusahaan menjadi Bold dan Rata Kiri */
         .nama-perusahaan-input {
             font-weight: bold !important;
+            text-align: left !important;
         }
+
+        /* Memberikan warna khusus pada teks Kontak Person & Bagian Site */
+        .kontak-input {
+            color: #0277bd !important; /* Biru terang */
+            font-weight: 500;
+        }
+
+        .site-input {
+            color: #00838f !important; /* Toska gelap */
+            font-weight: 500;
+        }
+
         td input:focus {
             background: #fffde7;
             box-shadow: inset 0 0 0 1px #2196F3; /* Garis fokus ala Excel */
@@ -199,14 +214,31 @@
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsc3Z2eGZ5a3RlcXh6Y3BwbmZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0MDc5OTMsImV4cCI6MjEwNzk4Mzk5M30.jpxErPZSL0sJ4PakUSt8tCxHKHXpmA6CFL9sirbLV2I";
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-        // Fungsi Memperbarui Nomor Urut & Hitung Total Volume
+        // Fungsi Memperbarui Nomor Urut, Mengurutkan A-Z, & Hitung Total Volume
         function updateNomor() {
-            const rows = document.querySelectorAll("#tableBody tr");
-            let totalVol = 0;
+            const tbody = document.getElementById("tableBody");
+            const rows = Array.from(tbody.querySelectorAll("tr"));
 
+            // Urutkan baris berdasarkan Nama Perusahaan (A-Z)
+            rows.sort((a, b) => {
+                const inputA = a.cells[2] ? a.cells[2].querySelector("input") : null;
+                const inputB = b.cells[2] ? b.cells[2].querySelector("input") : null;
+                
+                const nameA = inputA ? inputA.value.trim().toUpperCase() : "";
+                const nameB = inputB ? inputB.value.trim().toUpperCase() : "";
+
+                if (nameA === "" && nameB !== "") return 1;
+                if (nameA !== "" && nameB === "") return -1;
+
+                return nameA.localeCompare(nameB, 'id', { sensitivity: 'base' });
+            });
+
+            let totalVol = 0;
             rows.forEach((row, index) => {
-                row.cells[0].innerText = index + 1;
-                const volInput = row.querySelectorAll("input")[7]; // Input volume berada di indeks ke-7
+                tbody.appendChild(row); // Terapkan urutan abjad ke DOM
+                row.cells[0].innerText = index + 1; // Perbarui nomor urut
+                
+                const volInput = row.querySelectorAll("input")[7]; 
                 if (volInput) {
                     totalVol += parseFloat(volInput.value) || 0;
                 }
@@ -228,11 +260,11 @@
                 <td><input type="text" class="grid-input" placeholder="Lokasi 1" value="${data.lokasi || ''}"></td>
                 <td><input type="text" class="grid-input" placeholder="Lokasi 2" value="${data.lokasi_2 || ''}"></td>
                 <td><input type="text" class="grid-input" placeholder="Lokasi 3" value="${data.lokasi_3 || ''}"></td>
-                <td><input type="text" class="grid-input" placeholder="Kontak Person" value="${data.kontak_person || ''}"></td>
+                <td><input type="text" class="grid-input kontak-input" placeholder="Kontak Person" value="${data.kontak_person || ''}"></td>
                 <td><input type="text" class="grid-input" placeholder="No Handphone" value="${data.no_handphone || ''}"></td>
                 <td><input type="number" class="grid-input text-right volume-input" value="${data.volume || 0}" onfocus="this.select()" oninput="updateNomor()"></td>
                 <td><input type="text" class="grid-input" placeholder="Keterangan" value="${data.keterangan || ''}"></td>
-                <td><input type="text" class="grid-input" placeholder="Nama Bagian Site" value="${data.nama_bagian_site || ''}"></td>
+                <td><input type="text" class="grid-input site-input" placeholder="Nama Bagian Site" value="${data.nama_bagian_site || ''}"></td>
                 <td><input type="text" class="grid-input" placeholder="No HP Site" value="${data.no_hp_site || ''}"></td>
                 <td class="text-center"><button class="btn btn-delete" tabindex="-1" onclick="hapusBaris(this)">&#8722;</button></td>
             `;
@@ -347,7 +379,7 @@
             }
         }
 
-        // Fungsi Tarik Data (Load) dari Supabase saat halaman dibuka (disort A-Z otomatis saat diload)
+        // Fungsi Tarik Data (Load) dari Supabase saat halaman dibuka (disort A-Z otomatis saat diload & disave)
         async function loadDataDariSupabase() {
             try {
                 const { data, error } = await supabaseClient
