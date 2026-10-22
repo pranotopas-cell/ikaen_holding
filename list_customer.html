@@ -216,6 +216,22 @@
             document.getElementById("totalVolume").innerText = totalVol;
         }
 
+        // Fungsi Mengurutkan Baris Berdasarkan Nama Perusahaan (A-Z)
+        function sortRows() {
+            const tbody = document.getElementById("tableBody");
+            const rows = Array.from(tbody.querySelectorAll("tr"));
+
+            rows.sort((a, b) => {
+                const nameA = a.querySelectorAll("input")[1].value.trim().toUpperCase();
+                const nameB = b.querySelectorAll("input")[1].value.trim().toUpperCase();
+                return nameA.localeCompare(nameB);
+            });
+
+            // Masukkan kembali baris yang sudah disortir ke dalam tbody
+            rows.forEach(row => tbody.appendChild(row));
+            updateNomor();
+        }
+
         // Fungsi tambah baris baru (di atas atau di bawah)
         function tambahBaris(data = {}, prepend = false) {
             const tbody = document.getElementById("tableBody");
@@ -395,6 +411,7 @@
 
                     dataAwalDefault.forEach(item => tambahBaris(item));
                 }
+                sortRows(); // Urutkan saat awal dimuat
             } catch (err) {
                 console.error(err);
                 alert("Gagal memuat data dari Supabase.");
@@ -402,7 +419,7 @@
             }
         }
 
-        // Fungsi Save / Upsert
+        // Fungsi Save / Upsert + Otomatis Sortir A-Z Berdasarkan Nama Perusahaan
         async function saveKeSupabase() {
             const rows = document.querySelectorAll("#tableBody tr");
             const dataToUpsert = [];
@@ -430,8 +447,11 @@
                     .upsert(dataToUpsert, { onConflict: 'npwp' });
 
                 if (error) throw error;
-                alert("Data berhasil disimpan / diperbarui di Supabase!");
-                loadDataDariSupabase(); 
+                
+                // Urutkan kembali baris tabel secara abjad setelah disimpan
+                sortRows();
+                
+                alert("Data berhasil disimpan / diperbarui dan diurutkan sesuai abjad di Supabase!");
             } catch (err) {
                 console.error(err);
                 alert("Gagal menyimpan ke Supabase.");
@@ -440,7 +460,7 @@
 
         // Jalankan saat halaman selesai dimuat untuk menarik data dari Supabase
         window.onload = function() {
-            loadDataDariSupabase();
+            loadDataDitarget = loadDataDariSupabase();
         };
     </script>
 </body>
