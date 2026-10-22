@@ -285,7 +285,7 @@
                     <div class="signature-box">
                         <p class="mb-0">Regard,</p>
                         <p class="fw-bold mb-0">PT. INDO DHARMA ENERGI</p>
-                        <div class="signature-space"></div>
+                        <div class="signature-space"></div><br>
                         <p class="fw-bold text-decoration-underline mb-0 text-uppercase" style="font-size: 14px;">NURHAMIDA</p>
                         <p class="mb-0 small">Direktur</p>
                     </div>
@@ -296,13 +296,15 @@
                         <div class="d-flex align-items-center gap-2">
                             <img id="qr_footer" src="" width="40">
                             <div style="font-size: 8px; line-height: 1.2;">
-                                <b>Digital E-Form IDE System</b><br>Scan QR untuk validasi Invoice.<br><span id="qr_timestamp" style="color: #888; font-size: 7px;"></span>
+                                <b>IDE-DIGITAL VERIFIED SYSTEM</b><br>Scan QR untuk validasi Invoice.<br>
+                                <span>Issued By: <strong id="footer_issued_by" style="color: #000;">-</strong></span><br>
+                                <span id="qr_timestamp" style="color: #888; font-size: 7px;"></span>
                             </div>
                         </div>
                         <div class="text-end" style="font-size: 9px;">
                             <b style="color: var(--ide-accent);">PT. INDO DHARMA ENERGI</b><br>
-                            Jl. Ahmad Yani KM 7 Pangkalan Bun<br>
-                            0852-5276-1578 | indodharmaenergi@gmail.com
+                            Jl. Ahmad Yani KM 7 Kel.Baru Pangkalan Bun<br>
+                            0852-2586-2649 || indodharmaenergi@gmail.com
                         </div>
                     </div>
                 </div>
@@ -317,6 +319,25 @@
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
     const monthRomawi = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
     const monthsIndo = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+    // Fungsi membaca informasi user aktif dari localStorage
+    function loadIssuerInfo() {
+        let issuerName = localStorage.getItem('holding_user_name');
+        let issuerRole = localStorage.getItem('holding_user_role');
+        let isLoggedIn = localStorage.getItem('holding_is_logged_in');
+
+        if (!isLoggedIn || !issuerName) {
+            issuerName = "Nurhamida";
+            issuerRole = "Direktur";
+        }
+
+        const fullIssuerText = `${issuerName} `;
+        const issuerEl = document.getElementById('footer_issued_by');
+        if (issuerEl) {
+            issuerEl.innerText = fullIssuerText;
+        }
+        return fullIssuerText;
+    }
 
     function formatRP(num, isBracket = false) {
         let val = Math.abs(Math.round(num)).toLocaleString('id-ID');
@@ -520,6 +541,8 @@
     async function saveToSupabase() {
         const btn = document.getElementById('btn-save-sb');
         const noInv = document.getElementById('out_no').innerText;
+        const activeIssuer = loadIssuerInfo();
+
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> UPLOADING...'; btn.disabled = true;
         
         try {
@@ -547,7 +570,8 @@
                 tujuan: document.getElementById('in_cust').value,
                 nominal: Math.round(parseFloat(document.getElementById('out_grand_val').innerText.replace(/[^\d]/g, ''))),
                 pdf_url: publicUrl,
-                client_email: "system@indodharmaenergi.co.id"
+                client_email: "system@indodharmaenergi.co.id",
+                issued_by: activeIssuer
             };
             const { error: dbErr } = await _supabase.from('eforms').insert([payload]);
             if (dbErr) throw dbErr;
@@ -589,6 +613,7 @@
     window.onload = () => {
         const now = new Date();
         document.getElementById('in_tgl_raw').value = now.toISOString().split('T')[0];
+        loadIssuerInfo();
         handleDateChange();
         renderItemInputs();
     };
