@@ -112,8 +112,8 @@
                 <div class="w-14 h-14 bg-gradient-to-tr from-blue-700 to-slate-900 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-lg border border-blue-500/30">
                     <i class="fa-solid fa-users-gear"></i>
                 </div>
-                <h3 class="text-xl font-extrabold text-slate-900">Login Akses Transaksi</h3>
-                <p class="text-xs text-slate-500 mt-1">Masukkan Username dan Nomor Telepon (sebagai kata sandi) untuk mengakses sistem dan mencetak dokumen.</p>
+                <h3 class="text-xl font-extrabold text-slate-900">Login Akses </h3>
+                <p class="text-xs text-slate-500 mt-1">Masukkan Username dan sebagai kata sandi untuk mengakses sistem dan mencetak dokumen.</p>
             </div>
             <form onsubmit="handleLogin(event)" class="space-y-4 relative z-10">
                 <div>
@@ -375,7 +375,7 @@
                 renderAuthUI(); 
                 renderContent();
             } else {
-                alert('Username atau Nomor Telepon (Password) salah! Silakan periksa kembali.');
+                alert('Username atau Password salah! Silakan periksa kembali.');
             }
         }
 
@@ -408,7 +408,7 @@
             let options = months.map(m => `<option value="${m.val}" ${currentMonthFilter === m.val ? 'selected' : ''}>${m.label}</option>`).join('');
             return `
                 <div class="flex items-center gap-2 mb-3">
-                    <label class="text-xs text-slate-600 font-semibold"><i class="fa-solid fa-filter text-slate-400 mr-1"></i> Filter Bulan:</label>
+                    <label class="text-xs text-slate-600 font-semibold"><i class="fa-solid fa-filter text-slate-400 mr-1"></i> Pilih Bulan:</label>
                     <select id="monthFilterSelect" onchange="window.selectedMonthFilter = this.value; window['${callbackName}']();" class="bg-white border border-slate-300 text-xs text-slate-800 rounded-lg px-3 py-1.5 focus:outline-none focus:border-slate-800 shadow-sm">
                         ${options}
                     </select>
@@ -417,7 +417,7 @@
         }
 
         async function hapusEformSupabase(id, documentType, refreshCallback) {
-            if (!confirm(`Apakah Anda yakin ingin menghapus dokumen ${documentType} ini dari database Supabase?`)) return;
+            if (!confirm(`Apakah Anda yakin ingin menghapus dokumen ${documentType} `)) return;
             const clientDb = getActiveSupabaseClient();
             try {
                 const { error } = await clientDb.from('eforms').delete().eq('id', id);
@@ -468,7 +468,7 @@
                     container.innerHTML = `
                         <div class="space-y-3">
                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                <span class="text-xs font-bold ${accentClass}"><i class="fa-solid fa-cash-register mr-1"></i> Data Penjualan ${compId.toUpperCase()} (Tabel data_pengiriman)</span>
+                                <span class="text-xs font-bold ${accentClass}"><i class="fa-solid fa-cash-register mr-1"></i> Data Penjualan ${compId.toUpperCase()} </span>
                                 ${filterHtml}
                             </div>
                             <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm bg-white">
@@ -489,7 +489,7 @@
                                     <div class="w-8 h-8 rounded-lg bg-white/10 text-white flex items-center justify-center font-bold border border-white/20">
                                         <i class="fa-solid fa-calculator"></i>
                                     </div>
-                                    <span class="text-xs font-extrabold uppercase tracking-wider">Total Keseluruhan Volume Pengiriman:</span>
+                                    <span class="text-xs font-extrabold uppercase tracking-wider">Total Volume Pengiriman:</span>
                                 </div>
                                 <div class="text-sm font-black font-mono bg-white/10 px-4 py-2 rounded-xl border border-white/20 shadow-inner">
                                     ${totalKL.toLocaleString('id-ID')} KL
@@ -600,7 +600,7 @@
                         </div>`;
                 }
             } catch (err) {
-                container.innerHTML = `<div class="p-4 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-600">Gagal memuat data PO dari Supabase: ${err.message}</div>`;
+                container.innerHTML = `<div class="p-4 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-600">Gagal memuat data Purchase Order: ${err.message}</div>`;
             }
         }
 
@@ -660,7 +660,7 @@
                             </div>
                             <div class="flex justify-end mb-2">
                                 <button onclick="handleActionRedirect('penawaran')" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-md">
-                                    <i class="fa-solid fa-plus"></i> Buat Penawaran
+                                    <i class="fa-solid fa-plus"></i> Buat Quotation
                                 </button>
                             </div>
                             <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm bg-white">
@@ -688,7 +688,7 @@
                         </div>`;
                 }
             } catch (err) {
-                container.innerHTML = `<div class="p-4 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-600">Gagal memuat data SPH dari Supabase: ${err.message}</div>`;
+                container.innerHTML = `<div class="p-4 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-600">Gagal memuat data SPH: ${err.message}</div>`;
             }
         }
         async function loadInvoiceData(subType = 'Invoice BRI') {
@@ -696,7 +696,7 @@
             if (!container) return;
             const compId = activeTab;
             const clientDb = getActiveSupabaseClient();
-            container.innerHTML = `<div class="text-center py-6 text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2 text-red-600"></i> Mengambil data INVOICE (${subType}) dari tabel eforms...</div>`;
+            container.innerHTML = `<div class="text-center py-6 text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2 text-red-600"></i> Mengambil data INVOICE (${subType})......</div>`;
             try {
                 let query = clientDb.from('eforms').select('*').ilike('jenis', '%INVOICE%').order('created_at', { ascending: false });
                 const { data, error } = await query;
@@ -725,7 +725,7 @@
                         totalPpnMasukan = filteredFp.reduce((sum, f) => sum + (Number(f.ppn) || 0), 0);
                     }
                 } catch (e) {
-                    console.log("Faktur pajak error/tidak ditemukan:", e);
+                    console.log("Faktur pajak tidak ditemukan:", e);
                 }
 
                 let filterHtml = renderMonthFilterHTML('loadInvoiceData');
@@ -880,14 +880,6 @@
                             <span class="text-xs font-bold text-slate-800"><i class="fa-solid fa-file-invoice-dollar mr-1"></i> Rekapitulasi Faktur Pajak (${activeTab.toUpperCase()} - Supabase & Coretax Integration)</span>
                             ${filterHtml}
                         </div>
-                        <div class="bg-white p-5 rounded-2xl border border-slate-200 space-y-3 shadow-sm max-w-xl">
-                            <h4 class="text-xs font-bold text-slate-900"><i class="fa-solid fa-file-excel text-emerald-600 mr-1"></i> Upload Rekap Excel (.xlsx / .xls) ke Supabase</h4>
-                            <p class="text-[11px] text-slate-500">Pilih file Excel rekapitulasi Coretax DJP untuk diunggah dan disimpan langsung ke server database Supabase.</p>
-                            <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-700 file:text-white hover:file:bg-emerald-800 cursor-pointer">
-                            <button onclick="handleUploadExcelSupabase()" class="w-full py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs transition shadow-md flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-cloud-arrow-up"></i> Proses & Unggah Excel ke Supabase
-                            </button>
-                        </div>
                         <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm bg-white">
                             <table class="w-full text-left text-xs">
                                 <thead class="bg-slate-100 text-slate-700 uppercase font-semibold border-b border-slate-200">
@@ -931,10 +923,40 @@
             }
         }
 
+        function renderUploadFakturForm() {
+            const container = document.getElementById('supabaseLiveContainer');
+            if (!container) return;
+            const dataObj = companiesData[activeTab];
+            const accentClass = dataObj ? dataObj.textAccent : 'text-slate-800';
+
+            container.innerHTML = `
+                <div class="space-y-4 max-w-2xl">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold ${accentClass}"><i class="fa-solid fa-file-excel text-emerald-600 mr-1"></i> Upload Rekap Excel Faktur Pajak (${activeTab.toUpperCase()} - Supabase)</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-sm">
+                        <div class="space-y-1">
+                            <h4 class="text-sm font-bold text-slate-900"><i class="fa-solid fa-cloud-arrow-up text-emerald-600 mr-1.5"></i> Upload Rekap Excel (.xlsx / .xls) </h4>
+                            <p class="text-xs text-slate-500">Pilih file Excel rekapitulasi Pajak Masukan Coretax DJP untuk diunggah dan disimpan langsung ke server database</p>
+                        </div>
+                        <div class="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center space-y-3 bg-slate-50/50 hover:bg-slate-50 transition">
+                            <i class="fa-solid fa-file-excel text-3xl text-emerald-600"></i>
+                            <div>
+                                <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-700 file:text-white hover:file:bg-emerald-800 cursor-pointer">
+                            </div>
+                        </div>
+                        <button onclick="handleUploadExcelSupabase()" class="w-full py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs transition shadow-md flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Proses & Unggah Excel
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
         async function handleUploadExcelSupabase() {
             const fileInput = document.getElementById('excelFileInput');
-            if (!fileInput.files || fileInput.files.length === 0) {
-                alert('Silakan pilih file terlebih dahulu.');
+            if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                alert('Pilih file');
                 return;
             }
 
@@ -980,7 +1002,7 @@
                         if (error) {
                             alert('Gagal mengimpor data ke Supabase: ' + error.message);
                         } else {
-                            alert(`Berhasil mengimpor dan menyimpan ${batchData.length} data faktur pajak ke Supabase!`);
+                            alert(`Berhasil mengimpor dan menyimpan ${batchData.length} `);
                             loadFakturPajakData();
                         }
                     } else {
@@ -1316,7 +1338,7 @@
                                     <i class="fa-solid fa-shield-halved"></i>
                                 </div>
                                 <div>
-                                    <h3 class="text-sm font-extrabold text-slate-900">PANEL DATA TRANSAKSI OPERASIONAL&bull; ${data.shortName}</h3>
+                                    <h3 class="text-sm font-extrabold text-slate-900">PANEL DATA  OPERASIONAL&bull; ${data.shortName}</h3>
                                     <p class="text-[10px] text-slate-500">User Aktif: <strong class="${accentClass}">${currentAdmin.name} (${currentAdmin.role})</strong></p>
                                 </div>
                             </div>
@@ -1326,21 +1348,21 @@
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                             <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-sm">
-                                <div class="${accentClass} font-bold text-xs"><i class="fa-solid fa-cash-register mr-1"></i> DATA PENJUALAN & P.O</div>
+                                <div class="${accentClass} font-bold text-xs"><i class="fa-solid fa-cash-register mr-1"></i> DATA PENJUALAN & PURCHASE ORDER</div>
                                 <div class="space-y-1.5 pt-1 text-[11px]">
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenjualanData();" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Buka Data Penjualan</button>
+                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenjualanData();" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Buka All Delivery</button>
                                     <button onclick="window.selectedMonthFilter='-10-'; loadPurchaseOrdersData();" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Buka Semua Purchase Order</button>
                                     <button onclick="handleActionRedirect('po')" class="w-full text-left font-semibold ${accentClass} hover:underline">&bull; Buat Purchase Order BBM</button>
                                     <button onclick="handleActionRedirect('po_transport')" class="w-full text-left font-semibold ${accentClass} hover:underline">&bull; Buat Purchase Order Transport</button>
                                 </div>
                             </div>
                             <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-sm">
-                                <div class="${accentClass} font-bold text-xs"><i class="fa-solid fa-file-lines mr-1"></i> PENAWARAN (SPH)</div>
+                                <div class="${accentClass} font-bold text-xs"><i class="fa-solid fa-file-lines mr-1"></i> PENAWARAN - QUOTATION </div>
                                 <div class="space-y-1.5 pt-1 text-[11px]">
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenawaranData('Penawaran Biasa');" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Buka Semua penawaran</button>
-                                    <button onclick="handleActionRedirect('penawaran')" class="w-full text-left font-semibold ${accentClass} hover:underline">&bull; Buat penawaran</button>
-                                    <button onclick="handleActionRedirect('penawaran_multi')" class="w-full text-left font-semibold ${accentClass} hover:underline">&bull; Buat penawaran multi</button>
-                                    <button onclick="handleActionRedirect('penawaran_diskon')" class="w-full text-left font-semibold ${accentClass} hover:underline">&bull; Buat penawaran diskon</button>
+                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenawaranData('Penawaran Biasa');" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Buka All Quotation</button>
+                                    <button onclick="handleActionRedirect('penawaran')" class="w-full text-left font-semibold ${accentClass} hover:underline">&bull; Buat Quotation</button>
+                                    <button onclick="handleActionRedirect('penawaran_multi')" class="w-full text-left font-semibold ${accentClass} hover:underline">&bull; Buat Quotation mMlti</button>
+                                    <button onclick="handleActionRedirect('penawaran_diskon')" class="w-full text-left font-semibold ${accentClass} hover:underline">&bull; Buat Quotation Discond</button>
                                 </div>
                             </div>
                             <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-sm">
@@ -1356,6 +1378,7 @@
                                 <div class="${accentClass} font-bold text-xs"><i class="fa-solid fa-file-invoice-dollar mr-1"></i> DATA FAKTUR PAJAK MASUKAN</div>
                                 <div class="space-y-1.5 pt-1 text-[11px]">
                                     <button onclick="window.selectedMonthFilter='-10-'; loadFakturPajakData();" class="w-full text-left text-slate-600 hover:${accentClass} transition">&bull; Rekap & Supabase Sync</button>
+                                    <button onclick="renderUploadFakturForm();" class="w-full text-left font-semibold ${accentClass} hover:underline">&bull; Upload Faktur Pajak</button>
                                     <span class="block text-[10px] text-slate-400 italic mt-2">Sinkronisasi pajak & pratinjau PDF.</span>
                                 </div>
                             </div>
