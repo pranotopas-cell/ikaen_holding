@@ -81,7 +81,7 @@
         .meta-table td.value-col { font-weight: bold; word-break: break-word; }
 
         .lang-en { font-style: italic; font-size: 9px; color: #666; display: block; margin-top: -1px; }
-        .footer-ikaen { margin-top: auto; padding-top: 20px; border-top: 2px solid  #0d6efd; }
+        .footer-ikaen { margin-top: auto; padding-top: 15px; border-top: 2px solid  #0d6efd; }
 
         @media print {
             .control-nav, .input-sidebar { display: none !important; }
@@ -280,14 +280,17 @@
                         <div class="d-flex align-items-center gap-2">
                             <img id="qr_footer" src="" width="40" style="border: 1px solid #eee; padding: 2px;">
                             <div style="font-size: 8px; line-height: 1.2;">
-                                <strong style="color: var(--ikaen-primary); font-size: 9px; display: block;">IDE SYSTEM DOCS</strong>
-                                <span class="text-muted">Scan QR untuk validasi<br>penawaran ini secara sistem.</span>
+                                <strong style="color: var(--ikaen-primary); font-size: 9px; display: block;">IDE-DIGITAL VERIFIED SYSTEM</strong>
+                                <span class="text-muted">Scan QR untuk validasi Quotation<br></span>
+                                <span>Issued By: <strong id="footer_issued_by" style="color: #000;">-</strong></span><br>
+                                <span id="qr_timestamp" style="font-size: 7px; color: #888;"></span>
                             </div>
                         </div>
-                       <div class="text-end" style="font-size: 9px;">
+                        <div class="text-end" style="font-size: 9px;">
                             <b style="color: var(--ide-accent);">PT. INDO DHARMA ENERGI</b><br>
-                            Jl. Ahmad Yani KM 7 Pangkalan Bun<br>
-                            0852-5276-1578 | indodharmaenergi@gmail.com 
+                            Jl. Ahmad Yani KM 7 Kel.Baru Pangkalan Bun<br>
+                            0852-2586-2649 | indodharmaenergi@gmail.com 
+                        </div>
                     </div>
                 </div>
             </div>
@@ -303,6 +306,25 @@
     const monthRomawi = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
     const monthsIndo = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
+    // Fungsi membaca informasi user aktif dari localStorage
+    function loadIssuerInfo() {
+        let issuerName = localStorage.getItem('holding_user_name');
+        let issuerRole = localStorage.getItem('holding_user_role');
+        let isLoggedIn = localStorage.getItem('holding_is_logged_in');
+
+        if (!isLoggedIn || !issuerName) {
+            issuerName = "Nurhamida";
+            issuerRole = "Marketing Director";
+        }
+
+        const fullIssuerText = `${issuerName}`;
+        const issuerEl = document.getElementById('footer_issued_by');
+        if (issuerEl) {
+            issuerEl.innerText = fullIssuerText;
+        }
+        return fullIssuerText;
+    }
+
     const databaseCust = {
         "CV. SAMI JAYA": "Jl. HM Arsyad No.05 Sampit,\nKotawaringin Timur - Kalimantan Tengah",
         "PT. PELAYARAN JASA SAMUDRA SHIPPING": "Jl. Gatot Subroto No.15 Pangkalan Bun,\nKotawaringin Barat - Kalimantan Tengah",
@@ -314,7 +336,7 @@
         "PT. INTI DAYA MANDIRI SERVITAMA": "Jl. kawitan I No.54 RT.017 RW.000 Sidorejo Arut Selatan,\nKab.Kotawaringin Barat - Kalimantan Tengah 74111",
         "PT. BORNEO TRENGGINAS MANDIRI": "JL.Sri Kuncoro III No.142 RT.003 RW.003 Kalibanteng Kulon, Semarang Barat Kota Semarang - Jawa Tengah 50145",
         "PT. GADING SAWIT KENCANA": "Jl. Rangkas 3 No.138 RT.014 RW.005 Mentawa Baru Hulu ,Mentawa Baru Ketapang, Kab.Kotawaringin Timur - Kalimantan Tengah 74322",
-        "PT. BORNEO ARMADA PERKASA": "Jl. A.Yani Km.40 RT.021 RW.007 Pandu Sanjaya, Pangkalan Bun, Kab.Kotawringin Barat - Kalimantan Tengah 74184",
+        "PT. BORNEO ARMADA PERKASA": "Jl. A.Yani Km.40 RT.021 RW.007 Pandu Sanjaya, Pangkalan Bun, Kab.Kotwringin Barat - Kalimantan Tengah 74184",
         "PT. KORINDO ARIA BIMA SARII": "Wisma Korindo Jl. MT.Haryono Kav.62 Pancoran,Pancoran Kota Adm. DKI Jakarta 12780",
         "PT. HATAKO KHARISMA ABADI": "Jl. Masjid No.01 Kumai Hilir , Kumai, Kotawaringin Barat – Kalimantan Tengah",
         "PT. ARUT SAWIT MANDIRI": "Jl. Edy Suwargono No.39 Madurejo , Arut Selatan ,Kotawaringin Barat – Kalimantan Tengah 74112",
@@ -443,10 +465,12 @@
 
         const qrContent = `VALID-IDE|NO:${noSurat}|CUST:${customer}|IDR:${formatIDR(total)}`;
         document.getElementById('qr_footer').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrContent)}`;
+        document.getElementById('qr_timestamp').innerText = `Generated: ${new Date().toLocaleString('id-ID')}`;
     }
 
     async function saveToSupabase() {
         const btn = document.getElementById('btn-save-sb');
+        const activeIssuer = loadIssuerInfo();
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> SAVING...'; btn.disabled = true;
         try {
             const noSurat = document.getElementById('in_no').value;
@@ -462,7 +486,8 @@
             await _supabase.from('eforms').insert([{
                 jenis: "SPH", nomor: noSurat, tanggal: document.getElementById('in_tgl_raw').value,
                 tujuan: document.getElementById('in_cust').value, pdf_url: urlData.publicUrl,
-                nominal: Math.round(parseFloat(document.getElementById('in_total_input').value) || 0)
+                nominal: Math.round(parseFloat(document.getElementById('in_total_input').value) || 0),
+                issued_by: activeIssuer
             }]);
             alert("Penawaran Berhasil Tersimpan!");
             syncAutoNumber();
@@ -485,13 +510,14 @@
         });
 
         document.getElementById('in_tgl_raw').value = new Date().toISOString().split('T')[0];
+        loadIssuerInfo();
         handleDateChange();
         
-        document.getElementById('in_produk').value = "BIO SOLAR B50";
+        document.getElementById('in_produk').value = "BIO SOLAR-B50";
         document.getElementById('in_qty').value = "5.000 liter , 8000 liter , 10.000 Liter";
         document.getElementById('in_tol').value = "0,3% (Tera Mobil Transportir/T2)";
         document.getElementById('in_pay').value = "CBD (Cash Before Delivery)";
-        document.getElementById('in_contact').value = "0815-884-1410";
+        document.getElementById('in_contact').value = "0852-2586-2649";
         
         syncAutoNumber();
     };
