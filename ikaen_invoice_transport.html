@@ -84,7 +84,7 @@
         .signature-box { text-align: left; width: 280px; }
         .signature-space { height: 70px; margin: 5px 0; } 
         
-        .footer-kse { margin-top: auto; padding-top: 15px; padding-bottom: 5px; border-top: 2px dashed #800000; }
+        .footer-kse { margin-top: auto; padding-top: 15px; padding-bottom: 5px; border-top: 2px solid #800000; }
 
         .item-input-card { background: #f8f9fa; border: 1px solid #ced4da; border-radius: 4px; padding: 8px; margin-bottom: 8px; }
 
@@ -278,6 +278,9 @@
                         <p class="mb-0" style="font-size:12px;">2. Transfer Bank Rakyat Indonesia(BRI)</p>
                         <p class="mb-0 ms-3" style="font-size:12px;">Account Name   : <b>PT. INVESTAMA KALIMANTAN ENERGI</b></p>
                         <p class="mb-0 ms-3" style="font-size:12px;">Account Number : <b>1806-01-000760-56-2</b></p>
+                        <p class="mb-0" style="font-size:12px;">2. Transfer Bank Mandiri</p>
+                        <p class="mb-0 ms-3" style="font-size:12px;">Account Name   : <b>PT. INVESTAMA KALIMANTAN ENERGI</b></p>
+                        <p class="mb-0 ms-3" style="font-size:12px;">Account Number : <b>159-000-693-301-3</b></p>
                     </div>
                 </div>
 
@@ -296,7 +299,9 @@
                         <div class="d-flex align-items-center gap-2">
                             <img id="qr_footer" src="" width="40">
                             <div style="font-size: 8px; line-height: 1.2;">
-                                <b>Digital E-Form IKAEN System</b><br>Scan QR untuk validasi Invoice.<br><span id="qr_timestamp" style="color: #888; font-size: 7px;"></span>
+                                <b>IKAEN-DIGITAL VERIFIED SYSTEM</b><br>Scan QR untuk validasi Invoice.<br>
+                                <span>Issued By: <strong id="footer_issued_by" style="color: #000;">-</strong></span><br>
+                                <span id="qr_timestamp" style="color: #888; font-size: 7px;"></span>
                             </div>
                         </div>
                         <div class="text-end" style="font-size: 9px;">
@@ -317,6 +322,25 @@
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
     const monthRomawi = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
     const monthsIndo = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+    // Fungsi membaca informasi user aktif dari localStorage
+    function loadIssuerInfo() {
+        let issuerName = localStorage.getItem('holding_user_name');
+        let issuerRole = localStorage.getItem('holding_user_role');
+        let isLoggedIn = localStorage.getItem('holding_is_logged_in');
+
+        if (!isLoggedIn || !issuerName) {
+            issuerName = "Yayuk Wijayanti";
+            issuerRole = "Direktur";
+        }
+
+        const fullIssuerText = `${issuerName}`;
+        const issuerEl = document.getElementById('footer_issued_by');
+        if (issuerEl) {
+            issuerEl.innerText = fullIssuerText;
+        }
+        return fullIssuerText;
+    }
 
     function formatRP(num, isBracket = false) {
         let val = Math.abs(Math.round(num)).toLocaleString('id-ID');
@@ -520,6 +544,8 @@
     async function saveToSupabase() {
         const btn = document.getElementById('btn-save-sb');
         const noInv = document.getElementById('out_no').innerText;
+        const activeIssuer = loadIssuerInfo();
+        
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> UPLOADING...'; btn.disabled = true;
         
         try {
@@ -547,7 +573,8 @@
                 tujuan: document.getElementById('in_cust').value,
                 nominal: Math.round(parseFloat(document.getElementById('out_grand_val').innerText.replace(/[^\d]/g, ''))),
                 pdf_url: publicUrl,
-                client_email: "system@indodharmaenergi.co.id"
+                client_email: "system@indodharmaenergi.co.id",
+                issued_by: activeIssuer
             };
             const { error: dbErr } = await _supabase.from('eforms').insert([payload]);
             if (dbErr) throw dbErr;
@@ -589,6 +616,7 @@
     window.onload = () => {
         const now = new Date();
         document.getElementById('in_tgl_raw').value = now.toISOString().split('T')[0];
+        loadIssuerInfo();
         handleDateChange();
         renderItemInputs();
     };
