@@ -188,9 +188,29 @@
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsc3Z2eGZ5a3RlcXh6Y3BwbmZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0MDc5OTMsImV4cCI6MjEwNzk4Mzk5M30.jpxErPZSL0sJ4PakUSt8tCxHKHXpmA6CFL9sirbLV2I";
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
+        // Fungsi Mengurutkan Baris Berdasarkan Nama Perusahaan (A-Z) & Memperbarui Nomor
         function updateNomor() {
-            const rows = document.querySelectorAll("#tableBody tr");
+            const tbody = document.getElementById("tableBody");
+            const rows = Array.from(tbody.querySelectorAll("tr"));
+
+            // Urutkan baris berdasarkan input "Nama Perusahaan" (kolom indeks ke-2)
+            rows.sort((a, b) => {
+                const inputA = a.cells[2] ? a.cells[2].querySelector("input") : null;
+                const inputB = b.cells[2] ? b.cells[2].querySelector("input") : null;
+                
+                const nameA = inputA ? inputA.value.trim().toUpperCase() : "";
+                const nameB = inputB ? inputB.value.trim().toUpperCase() : "";
+
+                // Baris kosong ditaruh di paling bawah jika ada
+                if (nameA === "" && nameB !== "") return 1;
+                if (nameA !== "" && nameB === "") return -1;
+
+                return nameA.localeCompare(nameB, 'id', { sensitivity: 'base' });
+            });
+
+            // Terapkan kembali urutan ke dalam DOM dan perbarui nomor urut
             rows.forEach((row, index) => {
+                tbody.appendChild(row);
                 row.cells[0].innerText = index + 1;
             });
         }
@@ -203,7 +223,7 @@
             newRow.innerHTML = `
                 <td class="text-center"></td>
                 <td><input type="text" class="npwp-val grid-input" placeholder="NPWP" value="${data.npwp || ''}"></td>
-                <td><input type="text" class="grid-input" placeholder="Nama Perusahaan" value="${data.nama_perusahaan || ''}"></td>
+                <td><input type="text" class="nama-perusahaan-input grid-input" placeholder="Nama Perusahaan" value="${data.nama_perusahaan || ''}"></td>
                 <td><input type="text" class="grid-input" placeholder="Lokasi 1" value="${data.lokasi || ''}"></td>
                 <td><input type="text" class="grid-input" placeholder="Lokasi 2" value="${data.lokasi_2 || ''}"></td>
                 <td><input type="text" class="grid-input" placeholder="Lokasi 3" value="${data.lokasi_3 || ''}"></td>
@@ -221,11 +241,18 @@
             } else {
                 tbody.appendChild(newRow);
             }
+
+            // Tambahkan listener agar saat nama perusahaan diubah/selesai diketik, posisi langsung diurutkan
+            const namaInput = newRow.querySelector(".nama-perusahaan-input");
+            if (namaInput) {
+                namaInput.addEventListener("change", updateNomor);
+            }
+
             updateNomor();
             return newRow;
         }
 
-        // Fungsi khusus tombol Tambah (menambahkan ke baris paling atas dan langsung fokus)
+        // Fungsi khusus tombol Tambah (menambahkan baris baru dan langsung fokus)
         function tambahBarisDiAtas() {
             const newRow = tambahBaris({}, true);
             const firstInput = newRow.children[1].querySelector("input");
