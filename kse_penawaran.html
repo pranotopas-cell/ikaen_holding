@@ -428,6 +428,10 @@
     btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> SAVING...'; btn.disabled = true;
     try {
         const noSurat = document.getElementById('in_no').value;
+        
+        // AMBIL LANGSUNG DARI INPUT HTML
+        const destPengiriman = document.getElementById('in_dest').value; 
+
         const element = document.getElementById('main-doc');
         const opt = { margin: 0, filename: `SPH-${noSurat}.pdf`, image: { type: 'jpeg', quality: 0.98 }, 
                         html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
@@ -437,10 +441,7 @@
         await _supabase.storage.from('documents').upload(fileName, pdfBlob);
         const { data: urlData } = _supabase.storage.from('documents').getPublicUrl(fileName);
 
-        // AMBIL NILAI DARI KOLOM TUJUAN / DESTINATION PADA SIDEBAR (in_dest)
-        const destPengiriman = document.getElementById('in_dest').value;[cite: 1]
-
-        await _supabase.from('eforms').insert([{
+        const { error: insertError } = await _supabase.from('eforms').insert([{
             jenis: "SPH", 
             nomor: noSurat, 
             tanggal: document.getElementById('in_tgl_raw').value,
@@ -448,12 +449,16 @@
             pdf_url: urlData.publicUrl,
             nominal: Math.round(parseFloat(document.getElementById('in_total_input').value) || 0),
             issued_by: activeIssuer,
-            tujuan_pengiriman: destPengiriman // <-- Disimpan ke database Supabase
+            tujuan_pengiriman: destPengiriman // Masukkan nilai ke kolom database
         }]);
+
+        if (insertError) throw insertError;
         
         alert("Penawaran & Tujuan Pengiriman Berhasil Tersimpan!");
         syncAutoNumber();
-    } catch (e) { alert("Gagal: " + e.message); }
+    } catch (e) { 
+        alert("Gagal: " + e.message); 
+    }
     btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN & UPLOAD'; btn.disabled = false;
 }
 
