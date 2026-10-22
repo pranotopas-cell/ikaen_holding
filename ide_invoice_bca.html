@@ -327,13 +327,16 @@
                         <div class="d-flex align-items-center gap-2">
                             <img id="qr_footer" src="" width="40">
                             <div style="font-size: 8px; line-height: 1.2;">
-                                <b>Digital E-Form IDE System</b><br>Scan QR untuk validasi Invoice.<br><span id="qr_timestamp" style="color: #888; font-size: 7px;"></span>
+                                <b>IDE-DIGITAL VERIFIED SYSTEM</b><br>Scan QR untuk validasi Invoice.<br>
+                                <span>Issued By: <strong id="footer_issued_by" style="color: #000;">-</strong></span><br>
+                                <span id="qr_timestamp" style="color: #888; font-size: 7px;"></span>
                             </div>
                         </div>
                         <div class="text-end" style="font-size: 9px;">
                             <b style="color: var(--ide-accent);">PT. INDO DHARMA ENERGI</b><br>
-                            Jl. Ahmad Yani KM 7 Pangkalan Bun<br>
-                            0852-5276-1578 | indodharmaenergi@gmail.com
+                            Jl. Ahmad Yani KM 7 Kel.Baru Pangkalan Bun<br>
+                            0852-2586-2649 | indodharmaenergi@gmail.com
+                        </div>
                     </div>
                 </div>
             </div>
@@ -347,6 +350,25 @@
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
     const monthRomawi = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
     const monthsIndo = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+    // Fungsi membaca informasi user aktif dari localStorage
+    function loadIssuerInfo() {
+        let issuerName = localStorage.getItem('holding_user_name');
+        let issuerRole = localStorage.getItem('holding_user_role');
+        let isLoggedIn = localStorage.getItem('holding_is_logged_in');
+
+        if (!isLoggedIn || !issuerName) {
+            issuerName = "Nurhamida";
+            issuerRole = "Direktur";
+        }
+
+        const fullIssuerText = `${issuerName} `;
+        const issuerEl = document.getElementById('footer_issued_by');
+        if (issuerEl) {
+            issuerEl.innerText = fullIssuerText;
+        }
+        return fullIssuerText;
+    }
 
     function formatIDR(val) {
         return parseFloat(val).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -451,7 +473,7 @@
             "PT. INTI DAYA MANDIRI SERVITAMA": "Jl. kawitan I No.54 RT.017 RW.000 Sidorejo Arut Selatan, Kab.Kotawaringin Barat - Kalimantan Tengah 74111",
             "PT. BORNEO TRENGGINAS MANDIRI": " JL.Sri Kuncoro III No.142 RT.003 RW.003 Kalibanteng Kulon, Semarang Barat Kota Semarang - Jawa Tengah 50145",
             "PT. GADING SAWIT KENCANA": "Jl. Rangkas 3 No.138 RT.014 RW.005 Mentawa Baru Hulu ,Mentawa Baru Ketapang, Kab.Kotawaringin Timur - Kalimantan Tengah 74322",
-            "PT. BORNEO ARMADA PERKASA": "Jl. A.Yani Km.40 RT.021 RW.007 Pandu Sanjaya, Pangkalan Bun, Kab.Kotawringin Barat - Kalimantan Tengah 74184",
+            "PT. BORNEO ARMADA PERKASA": "Jl. A.Yani Km.40 RT.021 RW.007 Pandu Sanjaya, Pangkalan Bun, Kab.Kotwringin Barat - Kalimantan Tengah 74184",
             "PT. GERBANG PERKASA PRATAMA": "Raya Darmo Permai 3/26  Kel.Tanjungsari Kec.Sukomanunggal, Kota Surabaya – Jawa Timur 60187 ",
             "PT. NEW WAHYU BAROKAH": "Jl. A.Yani Km.38 RT.030 RW.008 Pandu Sanjaya, Pangkalan Lada, Kab.Kotawringin Barat - Kalimantan Tengah 74184",
             "PT. TRIDEA SENADA": "JL.Gatot Subroto No.14 Kota Tinggi,Pekan Baru Kota,Kota Pekan Baru - Riau 28112",
@@ -528,6 +550,8 @@
     async function saveToSupabase() {
         const btn = document.getElementById('btn-save-sb');
         const noInv = document.getElementById('out_no').innerText;
+        const activeIssuer = loadIssuerInfo();
+
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> UPLOADING...'; btn.disabled = true;
         
         try {
@@ -555,7 +579,8 @@
                 tujuan: document.getElementById('in_cust').value,
                 nominal: roundKSE(parseFloat(document.getElementById('out_grand_val').innerText.replace(/\./g, '').replace(',', '.'))),
                 pdf_url: publicUrl,
-                client_email: "system@indodharmaenergi.co.id"
+                client_email: "system@indodharmaenergi.co.id",
+                issued_by: activeIssuer
             };
             const { error: dbErr } = await _supabase.from('eforms').insert([payload]);
             if (dbErr) throw dbErr;
@@ -563,7 +588,7 @@
             alert("Berhasil! Data & PDF tersimpan di Cloud.");
             initAutoNumber(); 
         } catch (e) { alert("Error: " + e.message); }
-        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN DATA'; btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN'; btn.disabled = false;
     }
 
     function downloadPDF() {
@@ -597,8 +622,9 @@
     window.onload = () => {
         const now = new Date();
         document.getElementById('in_tgl_raw').value = now.toISOString().split('T')[0];
+        loadIssuerInfo();
         handleDateChange();
-        document.getElementById('in_produk').value = "BIO SOLAR B50";
+        document.getElementById('in_produk').value = "BIO SOLAR-B50";
         document.getElementById('in_qty_text').value = "";
         document.getElementById('in_h_nett_text').value = "";
         calculateFromBasic();
