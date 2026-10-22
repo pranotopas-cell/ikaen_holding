@@ -334,10 +334,12 @@
                 <div class="footer-kse">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center gap-2">
-                            <img id="qr_footer" src="" width="65" style="border: 1px solid #eee; padding: 2px;">
+                            <img id="qr_footer" src="" width="40" style="border: 1px solid #eee; padding: 2px;">
                             <div style="font-size: 8px; line-height: 1.2;">
-                                <strong style="color: var(--kse-primary); font-size: 9px; display: block;">IKAEN SYSTEM DOCS</strong>
-                                <span class="text-muted">Scan QR untuk validasi<br>penawaran ini secara sistem.</span>
+                                <strong style="color: var(--kse-primary); font-size: 8px; display: block;">IKAEN-DIGITAL VERIFIED SYSTEM</strong>
+                                <span class="text-muted">Scan QR untuk validasi Quotation</span><br>
+                                <span>Issued By: <strong id="footer_issued_by" style="color: #000;">-</strong></span><br>
+                                <span id="qr_timestamp" style="font-size: 7px; color: #888;"></span>
                             </div>
                         </div>
                         <div class="text-end" style="font-size: 9px;">
@@ -370,7 +372,7 @@
         "PT. INTI DAYA MANDIRI SERVITAMA": "Jl. kawitan I No.54 RT.017 RW.000 Sidorejo Arut Selatan,\nKab.Kotawaringin Barat - Kalimantan Tengah 74111",
         "PT. BORNEO TRENGGINAS MANDIRI": "JL.Sri Kuncoro III No.142 RT.003 RW.003 Kalibanteng Kulon, Semarang Barat Kota Semarang - Jawa Tengah 50145",
         "PT. GADING SAWIT KENCANA": "Jl. Rangkas 3 No.138 RT.014 RW.005 Mentawa Baru Hulu ,Mentawa Baru Ketapang, Kab.Kotawaringin Timur - Kalimantan Tengah 74322",
-        "PT. BORNEO ARMADA PERKASA": "Jl. A.Yani Km.40 RT.021 RW.007 Pandu Sanjaya, Pangkalan Bun, Kab.Kotawringin Barat - Kalimantan Tengah 74184",
+        "PT. BORNEO ARMADA PERKASA": "Jl. A.Yani Km.40 RT.021 RW.007 Pandu Sanjaya, Pangkalan Bun, Kab.Kotwringin Barat - Kalimantan Tengah 74184",
         "PT. KORINDO ARIA BIMA SARII": "Wisma Korindo Jl. MT.Haryono Kav.62 Pancoran,Pancoran Kota Adm. DKI Jakarta 12780",
         "PT. HATAKO KHARISMA ABADI": "Jl. Masjid No.01 Kumai Hilir , Kumai, Kotawaringin Barat – Kalimantan Tengah",
         "PT. ARUT SAWIT MANDIRI": "Jl. Edy Suwargono No.39 Madurejo , Arut Selatan ,Kotawaringin Barat – Kalimantan Tengah 74112",
@@ -383,6 +385,25 @@
         "PT. MEGA KARYA NUSA": "Jl. Pahlawan Seribu, Ruko Golden Boulevard Block R.29 RT.02 RW.10, Lengkong Karya Serpong Utara, Kota Tangerang Selatan – Banten 15331",
         "PT. JAYA ABADI": "Jl. Merdeka No. 45"
     };
+
+    // Fungsi membaca informasi user aktif dari localStorage
+    function loadIssuerInfo() {
+        let issuerName = localStorage.getItem('holding_user_name');
+        let issuerRole = localStorage.getItem('holding_user_role');
+        let isLoggedIn = localStorage.getItem('holding_is_logged_in');
+
+        if (!isLoggedIn || !issuerName) {
+            issuerName = "Ela Yuliana";
+            issuerRole = "Marketing Direktor";
+        }
+
+        const fullIssuerText = `${issuerName} (${issuerRole})`;
+        const issuerEl = document.getElementById('footer_issued_by');
+        if (issuerEl) {
+            issuerEl.innerText = fullIssuerText;
+        }
+        return fullIssuerText;
+    }
 
     function formatIDR(val) {
         return parseFloat(val).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -399,7 +420,7 @@
                     </div>
                     <select id="in_prod_${i}" class="form-select form-select-sm mb-1" onchange="syncAll()">
                         <option value="">- Pilih Produk -</option>
-                        <option value="BBM SOLAR INDUSTRI (HSD)">BBM SOLAR INDUSTRI (HSD)</option>
+                        <option value="PETRO-4,DIESEL FUEL (B50)">PETRO-4,DIESEL FUEL (B50)</option>
                         <option value="BIO SOLAR (B40)">BIO SOLAR (B40)</option>
                     </select>
                     <input type="text" id="in_dest_${i}" class="form-control form-control-sm mb-1" placeholder="Nama Lokasi Tujuan" oninput="syncAll()">
@@ -449,8 +470,10 @@
         document.getElementById('out_tol').innerText = document.getElementById('in_tol').value;
         document.getElementById('out_pay').innerText = document.getElementById('in_pay').value;
         document.getElementById('out_contact').innerText = document.getElementById('in_contact').value;
-        const qrData = `IKE-SPH|NO:${document.getElementById('in_no').value}|CUST:${document.getElementById('in_cust').value}`;
+        
+        const qrData = `IKAEN-SPH|NO:${document.getElementById('in_no').value}|CUST:${document.getElementById('in_cust').value}`;
         document.getElementById('qr_footer').src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(qrData)}`;
+        document.getElementById('qr_timestamp').innerText = `Generated: ${new Date().toLocaleString('id-ID')}`;
     }
 
     function handleCustChange() {
@@ -467,7 +490,6 @@
         const currentRomawi = monthRomawi[m];
 
         try {
-            // Ambil nomor terakhir (ID terbesar) dari database untuk jenis SPH
             const { data, error } = await _supabase
                 .from('eforms')
                 .select('nomor')
@@ -478,22 +500,19 @@
             let nextNum = 1;
 
             if (data && data.length > 0) {
-                const lastNo = data[0].nomor; // format: "001/SPH-IKE/IV/2026"
+                const lastNo = data[0].nomor; 
                 const parts = lastNo.split('/');
                 const lastRomawi = parts[2];
 
-                // Jika bulan romawi terakhir sama dengan bulan romawi saat ini, maka +1
                 if (lastRomawi === currentRomawi) {
                     nextNum = parseInt(parts[0]) + 1;
                 } else {
-                    // Jika ganti bulan, reset ke 1
                     nextNum = 1;
                 }
             }
 
-            document.getElementById('in_no').value = `${nextNum.toString().padStart(3, '0')}/SPH-IKE/${currentRomawi}/${y}`;
+            document.getElementById('in_no').value = `${nextNum.toString().padStart(3, '0')}/SPH-IKAEN/${currentRomawi}/${y}`;
             
-            // Set Periode 1-14 atau 15-akhir
             let startDay = d <= 14 ? 1 : 15;
             let endDay = d <= 14 ? 14 : new Date(y, m + 1, 0).getDate();
             document.getElementById('in_prd').value = `${startDay} s/d ${endDay} ${monthsIndo[m]} ${y}`;
@@ -501,8 +520,7 @@
             syncAll();
         } catch (e) { 
             console.error(e); 
-            // Fallback jika database gagal/kosong
-            document.getElementById('in_no').value = `001/SPH-IKE/${currentRomawi}/${y}`;
+            document.getElementById('in_no').value = `001/SPH-IKAEN/${currentRomawi}/${y}`;
         }
     }
 
@@ -519,6 +537,7 @@
         const originalText = btn.innerHTML;
         const noSurat = document.getElementById('in_no').value;
         const custName = document.getElementById('in_cust').value;
+        const activeIssuer = loadIssuerInfo();
         
         let maxNominal = 0;
         for(let i=1; i<=6; i++) {
@@ -555,13 +574,13 @@
                 tujuan: custName,
                 nominal: maxNominal, 
                 pdf_url: urlData.publicUrl,
-                created_at: new Date().toISOString()
+                created_at: new Date().toISOString(),
+                issued_by: activeIssuer
             }]);
 
             if (insertError) throw insertError;
             alert("Berhasil! Data penawaran telah disimpan ke Cloud.");
             
-            // Refresh nomor setelah simpan berhasil
             initAutoNumber(new Date(document.getElementById('in_tgl_raw').value));
             
         } catch (e) {
@@ -584,6 +603,7 @@
 
     window.onload = () => {
         setupMultiItems();
+        loadIssuerInfo();
         const listCust = document.getElementById('list_cust');
         Object.keys(databaseCust).forEach(key => {
             const opt = document.createElement('option');
@@ -592,11 +612,11 @@
         });
         document.getElementById('in_tgl_raw').value = new Date().toISOString().split('T')[0];
         handleDateChange();
-        document.getElementById('in_prod_1').value = "BBM SOLAR INDUSTRI (HSD)";
+        document.getElementById('in_prod_1').value = "PETRO-4,DIESEL FUEL (B50)";
         document.getElementById('in_qty').value = "5.000 , 8.000 , 10.000 Liter (Min. Order)";
         document.getElementById('in_tol').value = "0,3% (Tera Mobil Transportir/T2)";
         document.getElementById('in_pay').value = "CBD (Cash Before Delivery)";
-        document.getElementById('in_contact').value = "0815-884-1410";
+        document.getElementById('in_contact').value = "0852-5276-1578";
         syncAll();
     };
 </script>
