@@ -461,52 +461,59 @@
     }
 
     async function saveToSupabase() {
-        const btn = document.getElementById('btn-save-sb');
-        const activeIssuer = loadIssuerInfo();
+    const btn = document.getElementById('btn-save-sb');
+    const activeIssuer = loadIssuerInfo();
 
-        btn.innerHTML = 'SAVING...'; btn.disabled = true;
-        try {
-            const noSurat = document.getElementById('in_no').value;
-            const element = document.getElementById('main-doc');
-            
-            const opt = {
-                margin: 0,
-                filename: `SPH-${noSurat}.pdf`,
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
+    // AMBIL NILAI DARI INPUT DAN CEK DI CONSOLE
+    const destPengiriman = document.getElementById('in_dest') ? document.getElementById('in_dest').value : "";
+    console.log("Nilai tujuan pengiriman saat ini:", destPengiriman);
 
-            const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-            const fileName = `SPH_${Date.now()}.pdf`;
-            const path = `penawaran/${fileName}`;
-            
-            const { error: uploadError } = await _supabase.storage.from('documents').upload(path, pdfBlob);
-            if (uploadError) throw uploadError;
-
-            const { data: urlData } = _supabase.storage.from('documents').getPublicUrl(path);
-
-            const { error: insertError } = await _supabase.from('eforms').insert([{
-                jenis: "SPH",
-                nomor: noSurat,
-                tanggal: document.getElementById('in_tgl_raw').value,
-                tujuan: document.getElementById('in_cust').value,
-                pdf_url: urlData.publicUrl,
-                nominal: Math.round(parseFloat(document.getElementById('out_total_a').innerText.replace(/\./g,'').replace(',','.'))),
-                issued_by: activeIssuer
-            }]);
-
-            if (insertError) throw insertError;
-            alert("Berhasil disimpan ke Database & Cloud Storage!");
-            
-            initAutoNumber(new Date(document.getElementById('in_tgl_raw').value));
-            
-        } catch (e) { 
-            console.error(e);
-            alert("Gagal: " + e.message); 
-        }
-        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN & UPLOAD'; btn.disabled = false;
+    if (!destPengiriman) {
+        alert("Peringatan: Kolom Tujuan / Destination di sidebar sepertinya kosong!");
     }
 
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> SAVING...'; 
+    btn.disabled = true;
+    
+    try {
+        const noSurat = document.getElementById('in_no').value;
+        const element = document.getElementById('main-doc');
+        const opt = { 
+            margin: 0, 
+            filename: `SPH-${noSurat}.pdf`, 
+            image: { type: 'jpeg', quality: 0.98 }, 
+            html2canvas: { scale: 2, useCORS: true }, 
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+        };
+
+        const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+        const fileName = `penawaran/SPH_${Date.now()}_${noSurat.replace(/\//g, '_')}.pdf`;
+        await _supabase.storage.from('documents').upload(fileName, pdfBlob);
+        const { data: urlData } = _supabase.storage.from('documents').getPublicUrl(fileName);
+
+        const { error: insertError } = await _supabase.from('eforms').insert([{
+            jenis: "SPH", 
+            nomor: noSurat, 
+            tanggal: document.getElementById('in_tgl_raw').value,
+            tujuan: document.getElementById('in_cust').value, 
+            pdf_url: urlData.publicUrl,
+            nominal: Math.round(parseFloat(document.getElementById('in_total_input').value) || 0),
+            issued_by: activeIssuer,
+            tujuan_pengiriman: destPengiriman // Dikirim ke Supabase
+        }]);
+
+        if (insertError) throw insertError;
+        
+        alert("Sukses Tersimpan!");
+        syncAutoNumber();
+    } catch (e) { 
+        alert("Gagal: " + e.message); 
+        console.error("Error Detail:", e);
+    }
+    
+    btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN & UPLOAD'; 
+    btn.disabled = false;
+}
     function downloadPDF() {
         const element = document.getElementById('main-doc');
         html2pdf().set({ 
