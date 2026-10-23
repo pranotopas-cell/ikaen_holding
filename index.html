@@ -612,7 +612,7 @@
             const accentClass = dataObj ? dataObj.textAccent : 'text-slate-800';
             const clientDb = getActiveSupabaseClient();
 
-            container.innerHTML = `<div class="text-center py-6 text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2 ${accentClass}"></i> Mengambil data SPH (${subType}) dari tabel eforms...</div>`;
+            container.innerHTML = `<div class="text-center py-6 text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2 ${accentClass}"></i> Mengambil data SPH (${subType}) .......</div>`;
             try {
                 let query = clientDb.from('eforms').select('*').ilike('jenis', '%SPH%').order('created_at', { ascending: false });
                 const { data, error } = await query;
