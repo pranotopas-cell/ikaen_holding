@@ -536,25 +536,50 @@
                 let filterHtml = renderMonthFilterHTML('loadPurchaseOrdersData');
 
                 if (filteredData.length > 0) {
-                    let totalNominalPO = filteredData.reduce((sum, item) => {
-                        let val = Number(item.nominal) || (Number(item.qty || 50) * 14500000);
-                        return sum + val;
-                    }, 0);
+                    // Variabel Total Akumulasi Keseluruhan PO
+                    let totalQtyPO = 0;
+                    let totalHargaDasarPO = 0;
+                    let totalPpnPO = 0;
+                    let totalPbbkbPO = 0;
+                    let totalPphPO = 0;
+                    let totalNominalPO = 0;
 
                     let rows = filteredData.map(item => {
                         let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-bold border border-slate-300 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View PDF</a>` : `<span class="text-slate-400 text-[10px]">No PDF</span>`;
                         let deleteBtn = item.id ? `<button onclick="hapusEformSupabase('${item.id}', 'PO', 'loadPurchaseOrdersData')" class="text-red-600 hover:text-red-700 text-xs px-2 py-1 bg-red-50 rounded border border-red-200 transition" title="Hapus Dokumen Dari Supabase"><i class="fa-solid fa-trash"></i></button>` : '';
                         let nomorVal = item.nomor || item.nomor_po || item.no_po || '-';
-                        let nominalNum = Number(item.nominal) || (Number(item.qty || 50) * 14500000);
-                        let nominalVal = item.nominal ? (isNaN(item.nominal) ? item.nominal : 'Rp ' + Number(item.nominal).toLocaleString('id-ID')) : ('Rp ' + nominalNum.toLocaleString('id-ID'));
                         let tujuanVal = item.tujuan || item.client_name || '-';
+
+                        // Mengambil nilai variabel langsung dari Supabase tabel eforms
+                        let qtyVal = Number(item.qty || item.volume || item.jumlah) || 0;
+                        let perLiterVal = Number(item.harga_per_liter || item.per_liter || item.harga_satuan) || 0;
+                        let hargaDasarVal = Number(item.harga_dasar || item.hd) || 0;
+                        let ppnVal = Number(item.ppn || item.ppn11) || 0;
+                        let pbbkbVal = Number(item.pbbkb) || 0;
+                        let pphVal = Number(item.pph) || 0;
+                        let nominalNum = Number(item.nominal) || (qtyVal * perLiterVal);
+
+                        // Akumulasi Total
+                        totalQtyPO += qtyVal;
+                        totalHargaDasarPO += hargaDasarVal;
+                        totalPpnPO += ppnVal;
+                        totalPbbkbPO += pbbkbVal;
+                        totalPphPO += pphVal;
+                        totalNominalPO += nominalNum;
+
                         return `
                             <tr class="hover:bg-slate-50 transition">
-                                <td class="p-3 text-slate-600">${item.created_at ? item.created_at.substring(0, 10) : '-'}</td>
-                                <td class="p-3 font-mono ${accentClass} font-bold">${nomorVal}</td>
+                                <td class="p-3 text-slate-600 whitespace-nowrap">${item.created_at ? item.created_at.substring(0, 10) : '-'}</td>
+                                <td class="p-3 font-mono ${accentClass} font-bold whitespace-nowrap">${nomorVal}</td>
                                 <td class="p-3 text-slate-900 font-semibold">${tujuanVal}</td>
-                                <td class="p-3 text-slate-700 font-mono">${nominalVal}</td>
-                                <td class="p-3 space-x-1 flex items-center">${viewPdfBtn} ${deleteBtn}</td>
+                                <td class="p-3 text-slate-800 font-mono text-right font-semibold">${qtyVal.toLocaleString('id-ID')}</td>
+                                <td class="p-3 text-slate-700 font-mono text-right">Rp ${hargaDasarVal.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td class="p-3 text-slate-700 font-mono text-right">Rp ${ppnVal.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td class="p-3 text-slate-700 font-mono text-right">Rp ${pbbkbVal.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td class="p-3 text-slate-700 font-mono text-right">Rp ${pphVal.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td class="p-3 text-slate-900 font-mono font-bold text-right">Rp ${perLiterVal.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td class="p-3 text-slate-900 font-mono font-extrabold text-right">Rp ${nominalNum.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td class="p-3 space-x-1 flex items-center justify-center">${viewPdfBtn} ${deleteBtn}</td>
                             </tr>
                         `;
                     }).join('');
@@ -571,23 +596,53 @@
                                         <tr>
                                             <th class="p-3">Tanggal</th>
                                             <th class="p-3">Nomor PO</th>
-                                            <th class="p-3">Klien / Tujuan</th>
-                                            <th class="p-3">Nominal</th>
-                                            <th class="p-3">Aksi PDF</th>
+                                            <th class="p-3">Supplier</th>
+                                            <th class="p-3 text-right">QTY( KL )</th>
+                                            <th class="p-3 text-right">HD</th>
+                                            <th class="p-3 text-right">PPN 11%</th>
+                                            <th class="p-3 text-right">PBBKB 7,5%</th>
+                                            <th class="p-3 text-right">PPH 0,3%</th>
+                                            <th class="p-3 text-right">Per Liter</th>
+                                            <th class="p-3 text-right">TOTAL</th>
+                                            <th class="p-3 text-center">PDF</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100">${rows}</tbody>
                                 </table>
                             </div>
-                            <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-4 rounded-2xl border border-slate-700 flex items-center justify-between shadow-md text-white">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-lg bg-white/10 text-white flex items-center justify-center font-bold border border-white/20">
-                                        <i class="fa-solid fa-money-bill-wave"></i>
+                            <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-5 rounded-2xl border border-slate-700 shadow-xl text-white space-y-3">
+                                <div class="flex items-center justify-between border-b border-slate-700/80 pb-3">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-8 h-8 rounded-lg bg-white/10 text-white flex items-center justify-center font-bold border border-white/20">
+                                            <i class="fa-solid fa-calculator"></i>
+                                        </div>
+                                        <span class="text-xs font-extrabold uppercase tracking-wider">TOTAL SEMUANYA (${compId.toUpperCase()}):</span>
                                     </div>
-                                    <span class="text-xs font-extrabold uppercase tracking-wider">Total Keseluruhan Nominal Purchase Order (PO):</span>
+                                    <div class="text-sm font-black font-mono bg-emerald-500/20 text-emerald-300 px-4 py-2 rounded-xl border border-emerald-500/30 shadow-inner">
+                                        Rp ${totalNominalPO.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                    </div>
                                 </div>
-                                <div class="text-sm font-black font-mono bg-white/10 px-4 py-2 rounded-xl border border-white/20 shadow-inner">
-                                    Rp ${totalNominalPO.toLocaleString('id-ID')}
+                                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs font-mono pt-1">
+                                    <div class="bg-white/5 p-2.5 rounded-xl border border-white/10">
+                                        <span class="text-[10px] text-slate-400 uppercase block font-sans">Total QTY (KL):</span>
+                                        <span class="font-bold text-white">${totalQtyPO.toLocaleString('id-ID')} LTR</span>
+                                    </div>
+                                    <div class="bg-white/5 p-2.5 rounded-xl border border-white/10">
+                                        <span class="text-[10px] text-slate-400 uppercase block font-sans">Total HD:</span>
+                                        <span class="font-bold text-white">${totalHargaDasarPO.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                                    </div>
+                                    <div class="bg-white/5 p-2.5 rounded-xl border border-white/10">
+                                        <span class="text-[10px] text-slate-400 uppercase block font-sans">Total PPN 11%:</span>
+                                        <span class="font-bold text-white">${totalPpnPO.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                                    </div>
+                                    <div class="bg-white/5 p-2.5 rounded-xl border border-white/10">
+                                        <span class="text-[10px] text-slate-400 uppercase block font-sans">Total PBBKB 7,5%:</span>
+                                        <span class="font-bold text-white">${totalPbbkbPO.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                                    </div>
+                                    <div class="bg-white/5 p-2.5 rounded-xl border border-white/10">
+                                        <span class="text-[10px] text-slate-400 uppercase block font-sans">Total PPH 0,3%:</span>
+                                        <span class="font-bold text-white">${totalPphPO.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -669,10 +724,10 @@
                                         <tr>
                                             <th class="p-3">Tanggal</th>
                                             <th class="p-3">Nomor SPH</th>
-                                            <th class="p-3">Klien / Tujuan</th>
+                                            <th class="p-3">Tujuan</th>
                                             <th class="p-3">Lokasi</th>
                                             <th class="p-3">Nominal</th>
-                                            <th class="p-3">Aksi PDF</th>
+                                            <th class="p-3">PDF</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100">${rows}</tbody>
@@ -773,7 +828,7 @@
                                             <th class="p-3">Nomor Invoice</th>
                                             <th class="p-3">Pembeli (Tujuan)</th>
                                             <th class="p-3">Nominal</th>
-                                            <th class="p-3">Aksi PDF</th>
+                                            <th class="p-3">PDF</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100">${rows}</tbody>
