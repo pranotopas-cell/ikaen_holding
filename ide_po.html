@@ -577,9 +577,11 @@
 
             const { data: urlData } = _supabase.storage.from('documents').getPublicUrl(fileName);
             
-            // Mengambil nilai kalkulasi/input untuk dimasukkan ke payload Supabase
+            // Perbaikan: Mengambil nilai kalkulasi dari element span/teks menggunakan innerText (bukan .value)
             const qtyVal = parseFloat(document.getElementById('in_qty').value) || 0;
-            const hargaNetVal = parseFloat(document.getElementById('in_perltr').value) || 0;
+            const rawPerLtrText = document.getElementById('out_perltr').innerText.replace(/\./g, '').replace(',', '.');
+            const hargaNetVal = parseFloat(rawPerLtrText) || 0;
+            
             const p_ppnVal = parseFloat(document.getElementById('in_ppn_pct').value) || 0;
             const p_pbbkbVal = parseFloat(document.getElementById('in_pbbkb_pct').value) || 0;
             const p_pphVal = parseFloat(document.getElementById('in_pph_pct').value) || 0;
