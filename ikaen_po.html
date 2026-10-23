@@ -549,9 +549,9 @@
     async function saveToSupabase() {
         const btn = document.getElementById('btn-save-sb');
         const noPo = document.getElementById('in_no').value;
-        const activeIssuer = loadIssuerInfo();
-
         if(!noPo || noPo.includes('undefined')) return alert("Nomor PO tidak valid!");
+
+        const activeIssuer = loadIssuerInfo();
 
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> UPLOADING...'; btn.disabled = true;
         try {
@@ -562,24 +562,41 @@
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
             };
             const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-            
-            const cleanNoPo = noPo.replace(/[^a-zA-Z0-9-_]/g, '_');
-            const fileName = `PO_${Date.now()}_${cleanNoPo}.pdf`;
+            const fileName = `pos/PO_${Date.now()}_${noPo.replace(/\//g, '_')}.pdf`;
             
             const { error: upErr } = await _supabase.storage.from('documents').upload(fileName, pdfBlob, { contentType: 'application/pdf', upsert: true });
             if (upErr) throw upErr;
 
             const { data: urlData } = _supabase.storage.from('documents').getPublicUrl(fileName);
+            
+            // Mengambil nilai kalkulasi/input untuk dimasukkan ke payload Supabase
+            const qtyVal = parseFloat(document.getElementById('in_qty').value) || 0;
+            const hargaNetVal = parseFloat(document.getElementById('in_perltr').value) || 0;
+            const p_ppnVal = parseFloat(document.getElementById('in_ppn_pct').value) || 0;
+            const p_pbbkbVal = parseFloat(document.getElementById('in_pbbkb_pct').value) || 0;
+            const p_pphVal = parseFloat(document.getElementById('in_pph_pct').value) || 0;
+            
+            const totalPajakPct = (p_ppnVal + p_pbbkbVal + p_pphVal) / 100;
+            const hargaDasarVal = totalPajakPct > 0 ? (hargaNetVal / (1 + totalPajakPct)) : hargaNetVal;
+            const v_ppnVal = hargaDasarVal * (p_ppnVal / 100);
+            const v_pbbkbVal = hargaDasarVal * (p_pbbkbVal / 100);
+            const v_pphVal = hargaDasarVal * (p_pphVal / 100);
+
             const payload = {
                 jenis: "PURCHASE ORDER",
                 nomor: noPo,
                 tanggal: document.getElementById('in_tgl_raw').value,
                 tujuan: document.getElementById('in_cust').value,
-                tujuan_pengiriman: document.getElementById('in_destination').value,
                 nominal: parseFloat(document.getElementById('out_grandtotal').innerText.replace(/\./g, '').replace(',', '.')),
                 pdf_url: urlData.publicUrl,
-                client_email: "system@ike.co.id",
-                issued_by: activeIssuer
+                client_email: "system@kse.co.id",
+                issued_by: activeIssuer,
+                qty: qtyVal,
+                harga_dasar: hargaDasarVal,
+                ppn: v_ppnVal,
+                pbbkb: v_pbbkbVal,
+                pph: v_pphVal,
+                harga_per_liter: hargaNetVal
             };
             const { error: dbErr } = await _supabase.from('eforms').insert([payload]);
             if (dbErr) throw dbErr;
@@ -587,7 +604,7 @@
             alert("Berhasil! PO & PDF telah tersimpan di Cloud.");
             syncAutoNumber(); 
         } catch (e) { alert("Error: " + e.message); }
-        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN & AUTO UPLOAD'; btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN'; btn.disabled = false;
     }
 
     function downloadPDF() {
