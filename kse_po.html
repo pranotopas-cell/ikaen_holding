@@ -331,7 +331,6 @@
     const monthRomawi = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
     const monthsIndo = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
 
-    // Fungsi membaca data admin yang sedang aktif dari localStorage dashboard utama
     function loadIssuerInfo() {
         let issuerName = localStorage.getItem('holding_user_name');
         let issuerRole = localStorage.getItem('holding_user_role');
@@ -535,6 +534,20 @@
             if (upErr) throw upErr;
 
             const { data: urlData } = _supabase.storage.from('documents').getPublicUrl(fileName);
+            
+            // Mengambil nilai kalkulasi/input untuk dimasukkan ke payload Supabase
+            const qtyVal = parseFloat(document.getElementById('in_qty').value) || 0;
+            const hargaNetVal = parseFloat(document.getElementById('in_perltr').value) || 0;
+            const p_ppnVal = parseFloat(document.getElementById('in_ppn_pct').value) || 0;
+            const p_pbbkbVal = parseFloat(document.getElementById('in_pbbkb_pct').value) || 0;
+            const p_pphVal = parseFloat(document.getElementById('in_pph_pct').value) || 0;
+            
+            const totalPajakPct = (p_ppnVal + p_pbbkbVal + p_pphVal) / 100;
+            const hargaDasarVal = totalPajakPct > 0 ? (hargaNetVal / (1 + totalPajakPct)) : hargaNetVal;
+            const v_ppnVal = hargaDasarVal * (p_ppnVal / 100);
+            const v_pbbkbVal = hargaDasarVal * (p_pbbkbVal / 100);
+            const v_pphVal = hargaDasarVal * (p_pphVal / 100);
+
             const payload = {
                 jenis: "PURCHASE ORDER",
                 nomor: noPo,
@@ -543,7 +556,13 @@
                 nominal: parseFloat(document.getElementById('out_grandtotal').innerText.replace(/\./g, '').replace(',', '.')),
                 pdf_url: urlData.publicUrl,
                 client_email: "system@kse.co.id",
-                issued_by: activeIssuer
+                issued_by: activeIssuer,
+                qty: qtyVal,
+                harga_dasar: hargaDasarVal,
+                ppn: v_ppnVal,
+                pbbkb: v_pbbkbVal,
+                pph: v_pphVal,
+                harga_per_liter: hargaNetVal
             };
             const { error: dbErr } = await _supabase.from('eforms').insert([payload]);
             if (dbErr) throw dbErr;
