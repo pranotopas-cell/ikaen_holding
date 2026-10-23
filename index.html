@@ -800,6 +800,7 @@
                         let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-[10px] font-bold border border-red-200 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View Invoice</a>` : `<span class="text-slate-400 text-[10px]">No PDF</span>`;
                         let deleteBtn = item.id ? `<button onclick="hapusEformSupabase('${item.id}', 'Invoice', 'loadInvoiceData')" class="text-red-600 hover:text-red-700 text-xs px-2 py-1 bg-red-50 rounded border border-red-200 transition" title="Hapus Dokumen Dari Supabase"><i class="fa-solid fa-trash"></i></button>` : '';
                         let nomorVal = item.nomor || item.nomor_dokumen || item.no_po || ('INV-0' + (idx+1));
+                        let qtyVal = item.qty !== undefined && item.qty !== null && item.qty !== '' ? Number(item.qty) : 50;
                         let pembeliVal = item.tujuan || item.client_name || 'Perusahaan Klien';
                         let nominalNum = Number(item.nominal) || (Number(item.qty || 50) * 14500000);
                         let nominalVal = item.nominal ? (isNaN(item.nominal) ? item.nominal : 'Rp ' + Number(item.nominal).toLocaleString('id-ID')) : ('Rp ' + nominalNum.toLocaleString('id-ID'));
@@ -807,6 +808,7 @@
                             <tr class="hover:bg-slate-50 transition">
                                 <td class="p-3 text-slate-600">${item.created_at ? item.created_at.substring(0, 10) : '-'}</td>
                                 <td class="p-3 font-mono text-red-600 font-bold">${nomorVal}</td>
+                                <td class="p-3 font-mono text-slate-800 font-bold">${qtyVal.toLocaleString('id-ID')} KL</td>
                                 <td class="p-3 text-slate-900 font-semibold">${pembeliVal}</td>
                                 <td class="p-3 text-slate-700 font-mono">${nominalVal}</td>
                                 <td class="p-3 space-x-1 flex items-center">${viewPdfBtn} ${deleteBtn}</td>
