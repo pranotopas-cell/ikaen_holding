@@ -548,47 +548,51 @@
     }
 
     async function saveToSupabase() {
-        const btn = document.getElementById('btn-save-sb');
-        const noInv = document.getElementById('out_no').innerText;
-        const activeIssuer = loadIssuerInfo();
+    const btn = document.getElementById('btn-save-sb');
+    const noInv = document.getElementById('out_no').innerText;
+    const activeIssuer = loadIssuerInfo();
+    
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> UPLOADING...'; btn.disabled = true;
+    
+    try {
+        // 1. Ambil nilai QTY dari input text dan ubah ke angka float
+        const qtyVal = parseFloat(document.getElementById('in_qty_text').value.replace(/\./g, '').replace(',', '.')) || 0;
 
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> UPLOADING...'; btn.disabled = true;
-        
-        try {
-            const element = document.getElementById('main-doc');
-            const opt = {
-                margin: 0,
-                filename: `INV-${noInv}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
+        const element = document.getElementById('main-doc');
+        const opt = {
+            margin: 0,
+            filename: `INV-${noInv}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
 
-            const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-            const fileName = `invoices/INV_${Date.now()}_${noInv.replace(/\//g, '_').replace(/ /g, '')}.pdf`;
-            const { error: upErr } = await _supabase.storage.from('documents').upload(fileName, pdfBlob, { contentType: 'application/pdf', upsert: true });
-            if (upErr) throw upErr;
+        const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+        const fileName = `invoices/INV_${Date.now()}_${noInv.replace(/\//g, '_').replace(/ /g, '')}.pdf`;
+        const { error: upErr } = await _supabase.storage.from('documents').upload(fileName, pdfBlob, { contentType: 'application/pdf', upsert: true });
+        if (upErr) throw upErr;
 
-            const { data: urlData } = _supabase.storage.from('documents').getPublicUrl(fileName);
-            const publicUrl = urlData.publicUrl;
+        const { data: urlData } = _supabase.storage.from('documents').getPublicUrl(fileName);
+        const publicUrl = urlData.publicUrl;
 
-            const payload = {
-                jenis: "INVOICE", 
-                nomor: noInv,
-                tanggal: document.getElementById('in_tgl_raw').value,
-                tujuan: document.getElementById('in_cust').value,
-                nominal: roundKSE(parseFloat(document.getElementById('out_grand_val').innerText.replace(/\./g, '').replace(',', '.'))),
-                pdf_url: publicUrl,
-                client_email: "system@indodharmaenergi.co.id",
-                issued_by: activeIssuer
-            };
-            const { error: dbErr } = await _supabase.from('eforms').insert([payload]);
-            if (dbErr) throw dbErr;
+        const payload = {
+            jenis: "INVOICE", 
+            nomor: noInv,
+            tanggal: document.getElementById('in_tgl_raw').value,
+            tujuan: document.getElementById('in_cust').value,
+            nominal: roundKSE(parseFloat(document.getElementById('out_grand_val').innerText.replace(/\./g, '').replace(',', '.'))),
+            qty: qtyVal, // <-- Ditambahkan agar QTY ikut tersimpan ke Supabase
+            pdf_url: publicUrl,
+            client_email: "system@ike.co.id",
+            issued_by: activeIssuer
+        };
+        const { error: dbErr } = await _supabase.from('eforms').insert([payload]);
+        if (dbErr) throw dbErr;
 
-            alert("Berhasil! Data & PDF tersimpan di Cloud.");
-            initAutoNumber(); 
-        } catch (e) { alert("Error: " + e.message); }
-        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN'; btn.disabled = false;
+        alert("Berhasil! ");
+        initAutoNumber(); 
+    } catch (e) { alert("Error: " + e.message); }
+    btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN DATA'; btn.disabled = false;
     }
 
     function downloadPDF() {
