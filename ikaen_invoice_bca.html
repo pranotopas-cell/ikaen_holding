@@ -589,7 +589,7 @@
         const { error: dbErr } = await _supabase.from('eforms').insert([payload]);
         if (dbErr) throw dbErr;
 
-        alert("Berhasil! Data & PDF tersimpan di Cloud.");
+        alert("Berhasil! ");
         initAutoNumber(); 
     } catch (e) { alert("Error: " + e.message); }
     btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN DATA'; btn.disabled = false;
