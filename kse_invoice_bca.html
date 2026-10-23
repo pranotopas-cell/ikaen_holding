@@ -486,7 +486,7 @@
         document.getElementById('qr_timestamp').innerText = `Generated: ${new Date().toLocaleString('id-ID')}`;
     }
 
-    async function saveToSupabase() {
+   async function saveToSupabase() {
         const btn = document.getElementById('btn-save-sb');
         const noInv = document.getElementById('out_no').innerText;
         const activeIssuer = loadIssuerInfo();
@@ -494,6 +494,9 @@
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> UPLOADING...'; btn.disabled = true;
         
         try {
+            // Ambil nilai qty dari input dan bersihkan formatnya
+            const qtyVal = parseFloat(document.getElementById('in_qty_text').value.replace(/\./g, '').replace(',', '.')) || 0;
+
             const element = document.getElementById('main-doc');
             const opt = {
                 margin: 0,
@@ -517,6 +520,7 @@
                 tanggal: document.getElementById('in_tgl_raw').value,
                 tujuan: document.getElementById('in_cust').value,
                 nominal: roundKSE(parseFloat(document.getElementById('out_grand_val').innerText.replace(/\./g, '').replace(',', '.'))),
+                qty: qtyVal, // <-- Kolom qty ditambahkan di sini
                 pdf_url: publicUrl,
                 client_email: "system@kse.co.id",
                 issued_by: activeIssuer
@@ -524,7 +528,7 @@
             const { error: dbErr } = await _supabase.from('eforms').insert([payload]);
             if (dbErr) throw dbErr;
 
-            alert("Berhasil! Data & PDF tersimpan di Cloud.");
+            alert("Berhasil! Data, Qty & PDF tersimpan di Cloud.");
             initAutoNumber(); 
         } catch (e) { alert("Error: " + e.message); }
         btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN'; btn.disabled = false;
