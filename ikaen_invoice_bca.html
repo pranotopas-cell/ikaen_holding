@@ -578,6 +578,7 @@
                 tanggal: document.getElementById('in_tgl_raw').value,
                 tujuan: document.getElementById('in_cust').value,
                 nominal: roundKSE(parseFloat(document.getElementById('out_grand_val').innerText.replace(/\./g, '').replace(',', '.'))),
+                qty: qtyVal,
                 pdf_url: publicUrl,
                 client_email: "system@ike.co.id",
                 issued_by: activeIssuer
