@@ -155,7 +155,7 @@
 
             <div class="row g-2 mb-3">
                 <div class="col-6"><label class="small fw-bold">No. PO</label><input type="text" id="in_po_no" class="form-control form-control-sm" oninput="syncAll()"></div>
-                <div class="col-6"><label class="small fw-bold">Tgl PO</label><input type="text" id="in_po_tgl" class="form-control form-control-sm" oninput="syncAll()"></div>
+                <div class="col-6"><label class="small fw-bold">Tgl PO</label><input type="date" id="in_po_tgl" class="form-control form-control-sm" oninput="syncAll()"></div>
             </div>
 
             <!-- HEADER / DESKRIPSI UTAMA -->
@@ -408,58 +408,56 @@
         const y = d.getFullYear();
         
         const urut = document.getElementById('in_no_urut').value || "001";
-        const fullNo = `${urut}/INV-IDE/${monthRomawi[m]}/${y}`;
+        const fullNo = `${urut}/INV-IKAEN/${monthRomawi[m]}/${y}`;
         
-        document.getElementById('in_no_preview').innerText = `/INV-IDE/${monthRomawi[m]}/${y}`;
+        document.getElementById('in_no_preview').innerText = `/INV-IKAEN/${monthRomawi[m]}/${y}`;
         document.getElementById('out_no').innerText = fullNo;
 
         document.getElementById('out_cust').innerText = document.getElementById('in_cust').value;
         document.getElementById('out_addr').innerText = document.getElementById('in_addr').value;
         document.getElementById('out_po_no').innerText = document.getElementById('in_po_no').value;
-        document.getElementById('out_po_tgl').innerText = document.getElementById('in_po_tgl').value;
-
-        const tbody = document.getElementById('out_table_body');
-        tbody.innerHTML = '';
-
-        const headerDesc = document.getElementById('in_header_desc').value;
-        if (headerDesc) {
-            const trHeader = document.createElement('tr');
-            trHeader.innerHTML = `<td colspan="4" class="fw-bold bg-light">${headerDesc}</td>`;
-            tbody.appendChild(trHeader);
+        
+        // --- Konversi Tgl PO Menjadi Format Huruf (Contoh: 24 Oktober 2026) ---
+        const rawPoTgl = document.getElementById('in_po_tgl').value;
+        if (rawPoTgl) {
+            const parts = rawPoTgl.split('-'); // [YYYY, MM, DD]
+            if (parts.length === 3) {
+                const tahun = parts[0];
+                const bulanIndex = parseInt(parts[1], 10) - 1;
+                const tanggal = parseInt(parts[2], 10);
+                document.getElementById('out_po_tgl').innerText = `${tanggal} ${monthsIndo[bulanIndex]} ${tahun}`;
+            } else {
+                document.getElementById('out_po_tgl').innerText = rawPoTgl;
+            }
+        } else {
+            document.getElementById('out_po_tgl').innerText = "";
         }
+        // ---------------------------------------------------------------------
 
-        let totalSub = 0;
-
-        items.forEach(item => {
-            const rowTotal = item.qty * item.harga;
-            totalSub += rowTotal;
-
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${item.tujuan}</td>
-                <td class="text-center">${item.qty > 0 ? formatNumber(item.qty) : ''}</td>
-                <td class="text-end">${item.harga > 0 ? formatRP(item.harga) : ''}</td>
-                <td class="text-end">${rowTotal > 0 ? formatRP(rowTotal) : ''}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        const dppLain = Math.round(totalSub * (11 / 12));
-        const ppn = Math.round(dppLain * 0.12);
+        document.getElementById('out_produk').innerText = document.getElementById('in_produk').value;
+        document.getElementById('out_qty_val').innerText = document.getElementById('in_qty_text').value + " Ltr";
         
-        // PPh 23 (2%) dihitung langsung dari Total (totalSub)
-        const pph23 = Math.round(totalSub * 0.02);
+        const hNettVal = parseFloat(document.getElementById('in_h_nett_text').value.replace(/\./g, '').replace(',', '.')) || 0;
+        document.getElementById('out_h_nett_val').innerText = formatIDR(hNettVal);
         
-        const grandTotal = Math.round(totalSub + ppn - pph23);
-
-        document.getElementById('out_total_val').innerText = formatRP(totalSub);
-        document.getElementById('out_dpp_val').innerText = formatRP(dppLain);
-        document.getElementById('out_ppn_val').innerText = formatRP(ppn);
-        document.getElementById('out_pph23_val').innerText = `(${formatRP(pph23)})`;
-        document.getElementById('out_grand_val').innerText = formatRP(grandTotal);
-
-        document.getElementById('out_terbilang').innerText = grandTotal !== 0 ? terbilang(grandTotal) + " rupiah" : "-";
-        updateQRCode(grandTotal);
+        const dppUnitVal = parseFloat(document.getElementById('in_h_tax_text').value.replace(/\./g, '').replace(',', '.')) || 0;
+        document.getElementById('out_h_tax_val').innerText = formatIDR(dppUnitVal);
+        
+        const sub = parseFloat(document.getElementById('in_subtotal').value) || 0;
+        const dppLain = parseFloat(document.getElementById('in_dpp_lain').value) || 0;
+        const ppn = parseFloat(document.getElementById('in_ppn').value) || 0;
+        const adj = parseFloat(document.getElementById('in_adjust').value) || 0;
+        
+        const grandTotalFinal = roundKSE(sub + ppn + adj);
+        
+        document.getElementById('out_subtotal_top').innerText = formatIDR(sub);
+        document.getElementById('out_subtotal_display').innerText = formatIDR(sub);
+        document.getElementById('out_dpp_val').innerText = formatIDR(dppLain);
+        document.getElementById('out_ppn_val').innerText = formatIDR(ppn);
+        document.getElementById('out_adjust_val').innerText = formatIDR(adj);
+        document.getElementById('out_grand_val').innerText = formatIDR(grandTotalFinal);
+        document.getElementById('out_terbilang').innerText = grandTotalFinal != 0 ?"# " + terbilang(grandTotalFinal) + " Rupiah #" : "-";
+        updateQRCode(grandTotalFinal);
     }
 
     function autoFillCustomer() {
