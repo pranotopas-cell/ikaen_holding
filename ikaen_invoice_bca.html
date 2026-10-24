@@ -685,6 +685,16 @@
         document.getElementById('in_h_nett_text').value = "";
         calculateFromBasic();
     };
+
+    flatpickr("#in_po_tgl", {
+        dateFormat: "Y-m-d", // Format data yang disimpan (bisa disesuaikan, misal "d-m-Y")
+        altInput: true,      // Menampilkan format yang ramah dibaca user
+        altFormat: "j F Y",  // Contoh: 24 Oktober 2026
+        onChange: function(selectedDates, dateStr, instance) {
+         // Panggil fungsi syncAll() Anda secara manual di sini karena oninput biasa tidak terpicu oleh plugin
+        if (typeof syncAll === 'function') {
+        syncAll();
+     }
 </script>
 </body>
 </html>
