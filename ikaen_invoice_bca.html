@@ -177,7 +177,7 @@
 
             <div class="row g-2 mb-3">
                 <div class="col-6"><label class="small fw-bold">No. PO</label><input type="text" id="in_po_no" class="form-control form-control-sm" oninput="syncAll()"></div>
-                <div class="col-6"><label class="small fw-bold">Tgl PO</label><input type="text" id="in_po_tgl" class="form-control form-control-sm" oninput="syncAll()"></div>
+                <input type="date" id="in_po_tgl" class="form-control form-control-sm" onchange="syncAll()">
             </div>
 
             <div class="card p-2 mb-3 border-success">
