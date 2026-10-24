@@ -389,6 +389,29 @@
         return temp;
     }
 
+    // Fungsi membaca informasi user aktif dari localStorage
+    function loadIssuerInfo() {
+        let issuerName = localStorage.getItem('holding_user_name');
+        let issuerRole = localStorage.getItem('holding_user_role');
+        let isLoggedIn = localStorage.getItem('holding_is_logged_in');
+
+        if (!isLoggedIn || !issuerName) {
+            issuerName = "Ela Yuliana";
+            issuerRole = "Marketing Director";
+        }
+
+        const fullIssuerText = `${issuerName}`;
+        const issuerEl = document.getElementById('footer_issued_by');
+        if (issuerEl) {
+            issuerEl.innerText = fullIssuerText;
+        }
+        return fullIssuerText;
+    }
+
+    function formatIDR(val) {
+        return parseFloat(val).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
     async function syncAutoNumber() {
         try {
             const tglVal = document.getElementById('in_tgl_raw').value;
