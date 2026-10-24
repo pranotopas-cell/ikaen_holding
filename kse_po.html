@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KSE - Purchase Order</title>
+    <title>KSE - Purchase Order </title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -40,39 +40,53 @@
             color: #222;
         }
 
-        .header-section { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 40px; padding-bottom: 15px; }
+        .header-section { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 30px; padding-bottom: 15px; }
         .logo-img { height: 40px; width: auto; object-fit: contain; }
         .doc-identity { text-align: right; line-height: 1.1; }
         .doc-identity h2 { font-weight: 800; margin: 0; font-size: 20px; color: var(--kse-primary); letter-spacing: 1px; }
 
-        .intro-text { margin-bottom: 20px; line-height: 1.6; font-size: 12px; }
+        .intro-text { margin-bottom: 15px; line-height: 1.6; font-size: 12px; }
 
         .table-po { width: 100%; border-collapse: collapse; margin-top: 5px; border: 1.5px solid #000; table-layout: fixed; }
         .table-po th { 
             background-color: var(--kse-primary) !important; 
             color: white !important; 
-            padding: 12px 6px; 
+            padding: 10px 6px; 
             border: 1px solid #000; 
             text-align: center; 
             font-size: 10px; 
             text-transform: uppercase; 
             letter-spacing: 0.5px;
         }
-        .table-po td { border: 1px solid #000; padding: 12px 8px; vertical-align: middle; font-size: 11.5px; line-height: 1.4; }
+        .table-po td { border: 1px solid #000; padding: 8px 8px; vertical-align: middle; font-size: 11px; line-height: 1.4; }
         
         .table-clean td { border: none !important; padding: 2px 0; vertical-align: middle; font-size: 11px; white-space: nowrap; }
         .lang-en { font-style: italic; font-size: 9px; color: #777; display: inline-block; margin-left: 4px; font-weight: 400; }
 
+        /* Styling khusus baris rincian HD, PPN, PBBKB, PPH */
+        .calc-row td { 
+            padding: 4px 8px; 
+            font-size: 10.5px; 
+            border-top: none !important;
+            border-bottom: none !important;
+        }
+        .calc-label-col {
+            text-align: center;
+            font-weight: 700;
+            font-size: 10px;
+            letter-spacing: 0.5px;
+        }
+
         .terbilang-box { 
             border: 1.5px solid #000; 
             border-top: none; 
-            padding: 15px; 
+            padding: 12px 15px; 
             background-color: #f9f9f9; 
             font-style: italic; 
             font-weight: 600; 
-            margin-bottom: 25px;
-            font-size: 12px;
-            line-height: 1.5;
+            margin-bottom: 20px;
+            font-size: 11.5px;
+            line-height: 1.4;
         }
 
         .footer-kse { margin-top: auto; border-top: 2px solid var(--kse-primary); padding-top: 15px; padding-bottom: 5px; }
@@ -165,7 +179,7 @@
                     </datalist>
                 </div>
                 <div class="col-6">
-                    <label class="small text-success">Harga Beli</label>
+                    <label class="small text-success">Harga Beli (Total/Ltr)</label>
                     <input type="number" id="in_perltr" class="form-control form-control-sm border-success" value="" oninput="calculate()">
                 </div>
                 <div class="col-6">
@@ -216,11 +230,11 @@
                     </div>
                 </div>
 
-                <div class="row mb-4">
+                <div class="row mb-3">
                     <div class="col-7">
                         <p class="mb-2" style="font-size: 12px;">Kepada yang kami hormati,</p>
-                        <h6 class="fw-bold mb-1 text-uppercase" id="out_cust" style="font-size: 16px; color: var(--kse-primary); letter-spacing: 0.5px;">-</h6>
-                        <p id="out_addr" class="mb-0 mt-1" style="white-space: pre-line; line-height: 1.5; font-size: 12px;">-</p>
+                        <h6 class="fw-bold mb-1 text-uppercase" id="out_cust" style="font-size: 15px; color: var(--kse-primary); letter-spacing: 0.5px;">-</h6>
+                        <p id="out_addr" class="mb-0 mt-1" style="white-space: pre-line; line-height: 1.5; font-size: 11.5px;">-</p>
                     </div>
                     <div class="col-5">
                         <table class="table table-sm table-clean mb-0" style="width: 100%;">
@@ -258,18 +272,45 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="fw-bold text-uppercase" id="out_barang" style="font-size: 10.5px; height: 60px;"></td>
+                            <td class="fw-bold text-uppercase" id="out_barang" style="font-size: 10.5px; height: 40px;"></td>
                             <td class="text-center" id="out_qty">0</td>
                             <td class="text-center" id="out_harga">0,00</td>
                             <td class="text-center" id="out_ppn">0,00</td>
                             <td class="text-center" id="out_pbbkb">0,00</td>
                             <td class="text-center" id="out_pph">0,00</td>
                             <td class="text-center fw-bold" id="out_perltr">0,00</td>
-                            <td class="text-end fw-bold"> <span id="out_total">0,00</span></td>
+                            <td class="text-end fw-bold"><span id="out_total">0,00</span></td>
                         </tr>
-                        <tr class="fw-bold" style="background-color: #f2f2f2; font-size: 15px;">
-                            <td colspan="7" class="text-end p-3">GRAND TOTAL</td>
-                            <td class="text-end p-3" style="color: var(--kse-primary);"> <span id="out_grandtotal">0,00</span></td>
+                        
+                        <!-- Rincian HD, PPN, PBBKB, PPH dengan tata letak sesuai screenshot -->
+                        <tr class="calc-row">
+                            <td colspan="5" class="border-end-0"></td>
+                            <td class="calc-label-col border-start-0">HD</td>
+                            <td class="text-center fw-semibold"><span id="out_sat_hd">0,00</span></td>
+                            <td class="text-end fw-semibold"><span id="out_tot_hd">0,00</span></td>
+                        </tr>
+                        <tr class="calc-row">
+                            <td colspan="5" class="border-end-0"></td>
+                            <td class="calc-label-col border-start-0">PPN 11%</td>
+                            <td class="text-center fw-semibold"><span id="out_sat_ppn">0,00</span></td>
+                            <td class="text-end fw-semibold"><span id="out_tot_ppn">0,00</span></td>
+                        </tr>
+                        <tr class="calc-row">
+                            <td colspan="5" class="border-end-0"></td>
+                            <td class="calc-label-col border-start-0">PBBKB 7,5%</td>
+                            <td class="text-center fw-semibold"><span id="out_sat_pbbkb">0,00</span></td>
+                            <td class="text-end fw-semibold"><span id="out_tot_pbbkb">0,00</span></td>
+                        </tr>
+                        <tr class="calc-row">
+                            <td colspan="5" class="border-end-0"></td>
+                            <td class="calc-label-col border-start-0">PPH 0,3%</td>
+                            <td class="text-center fw-semibold"><span id="out_sat_pph">0,00</span></td>
+                            <td class="text-end fw-semibold"><span id="out_tot_pph">0,00</span></td>
+                        </tr>
+
+                        <tr class="fw-bold" style="background-color: #f2f2f2; font-size: 13.5px; border-top: 1.5px solid #000;">
+                            <td colspan="7" class="text-end p-2">GRAND TOTAL</td>
+                            <td class="text-end p-2" style="color: var(--kse-primary);"><span id="out_grandtotal">0,00</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -279,36 +320,35 @@
                 </div>
 
                 <div class="mt-2" style="font-size: 12px; line-height: 1.6;">
-                    <p class="mb-1">Term of Payment : <b id="out_pay" class=""></b></p>
-                    <p class="mb-1">Term of Delivery : <b id="out_delivery" class=""></b></p>
+                    <p class="mb-1">Term of Payment : <b id="out_pay"></b></p>
+                    <p class="mb-1">Term of Delivery : <b id="out_delivery"></b></p>
                     <p class="mt-2">Demikian kami sampaikan, mohon di bantu untuk prosesnya, atas perhatian dan kerjasamanya kami ucapkan terima kasih.</p>
                 </div>
 
-                <div class="row mt-4">
+                <div class="row mt-3">
                     <div class="col-6">
                         <p class="mb-1 italic" style="font-size: 11px;">Regards,</p>
                         <p class="fw-bold mb-1" style="font-size: 13px;">PT. KHATULISTIWA SINAR ENERGI</p>
-                        <div style="height: 90px; margin: 10px 0; display: flex; align-items: center;">
-                            <img src="ttd.png" style="height: 85px;" onerror="this.style.display='none'">
+                        <div style="height: 80px; margin: 5px 0; display: flex; align-items: center;">
+                            <img src="ttd.png" style="height: 75px;" onerror="this.style.display='none'">
                         </div>
-                        <p class="fw-bold text-decoration-underline mb-0 text-uppercase" style="font-size: 15px; letter-spacing: 0.5px;">SUPRANOTO</p>
-                        <p class="mb-0" style="font-size: 12px; color: #555;">Direktur</p>
+                        <p class="fw-bold text-decoration-underline mb-0 text-uppercase" style="font-size: 14px; letter-spacing: 0.5px;">SUPRANOTO</p>
+                        <p class="mb-0" style="font-size: 11.5px; color: #555;">Direktur</p>
                     </div>
                 </div>
 
                 <div class="footer-kse">
                     <div class="footer-grid">
-                        <img id="qr_footer" width="45" height="45" style="border: 1px solid #eee; padding: 2px;">
-                        <div style="font-size: 8px; color: #555; line-height: 1.2; border-left: 1px solid #eee; padding-left: 10px;">
-                            <b style="color: #000;">Digital E-Form KSE System</b><br>
-                            Scan QR Untuk Validasi PO</b><br>
-                            <span>Issued By: <strong id="footer_issued_by" style="color: #000;">-</strong></span><br>
+                        <img id="qr_footer" width="40" height="40" style="border: 1px solid #eee; padding: 2px;">
+                        <div style="font-size: 9px; color: #555; line-height: 1.4; border-left: 1px solid #eee; padding-left: 10px;">
+                            <b style="color: #000;">KSE - DIGITAL VERIFIED SYSTEM</b><br>
+                            Dokumen ini sah dan diterbitkan secara elektronik.<br>
                             <span id="qr_timestamp" style="font-size: 8px; color: #999;"></span>
                         </div>
                         <div class="text-end" style="font-size: 9px; line-height: 1.5;">
                             <b style="color: var(--kse-primary); font-size: 10px;">PT. KHATULISTIWA SINAR ENERGI</b><br>
                             Jl. H.M. Rafi'i RT.24 Madurejo Pangkalan Bun, Kalimantan Tengah <br>
-                            pt.khatulistiwa.sinar.energi@gmail.com || 0815-884-1410
+                            pt.khatulistiwa.sinar.energi | 0815-884-1410
                         </div>
                     </div>
                 </div>
@@ -330,24 +370,6 @@
 
     const monthRomawi = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
     const monthsIndo = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
-
-    function loadIssuerInfo() {
-        let issuerName = localStorage.getItem('holding_user_name');
-        let issuerRole = localStorage.getItem('holding_user_role');
-        let isLoggedIn = localStorage.getItem('holding_is_logged_in');
-
-        if (!isLoggedIn || !issuerName) {
-            issuerName = "Supranoto";
-        }
-
-        const fullIssuerText = `${issuerName} `;
-        
-        const issuerEl = document.getElementById('footer_issued_by');
-        if (issuerEl) {
-            issuerEl.innerText = fullIssuerText;
-        }
-        return fullIssuerText;
-    }
 
     function terbilang(angka) {
         angka = Math.floor(Math.abs(angka));
@@ -471,6 +493,13 @@
         const v_ppn = hargaDasar * (p_ppn / 100);
         const v_pbbkb = hargaDasar * (p_pbbkb / 100);
         const v_pph = hargaDasar * (p_pph / 100);
+
+        // Kalkulasi perkalian x Qty
+        const totHD = hargaDasar * qty;
+        const totPPN = v_ppn * qty;
+        const totPBBKB = v_pbbkb * qty;
+        const totPPH = v_pph * qty;
+        
         const total = qty * hargaNet;
 
         const f = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
@@ -486,6 +515,18 @@
         document.getElementById('out_pph').innerText = p_pph > 0 ? v_pph.toLocaleString('id-ID', f) : "0,00";
         document.getElementById('out_perltr').innerText = hargaNet.toLocaleString('id-ID', f);
         
+        // Update nilai per liter untuk masing-masing item
+        document.getElementById('out_sat_hd').innerText = hargaDasar.toLocaleString('id-ID', f);
+        document.getElementById('out_sat_ppn').innerText = p_ppn > 0 ? v_ppn.toLocaleString('id-ID', f) : "0,00";
+        document.getElementById('out_sat_pbbkb').innerText = p_pbbkb > 0 ? v_pbbkb.toLocaleString('id-ID', f) : "0,00";
+        document.getElementById('out_sat_pph').innerText = p_pph > 0 ? v_pph.toLocaleString('id-ID', f) : "0,00";
+
+        // Update nilai total perkalian dengan Qty
+        document.getElementById('out_tot_hd').innerText = totHD.toLocaleString('id-ID', f);
+        document.getElementById('out_tot_ppn').innerText = totPPN.toLocaleString('id-ID', f);
+        document.getElementById('out_tot_pbbkb').innerText = totPBBKB.toLocaleString('id-ID', f);
+        document.getElementById('out_tot_pph').innerText = totPPH.toLocaleString('id-ID', f);
+
         const gTotalVal = Math.round(total);
         document.getElementById('out_total').innerText = gTotalVal.toLocaleString('id-ID', f);
         document.getElementById('out_grandtotal').innerText = gTotalVal.toLocaleString('id-ID', f);
@@ -517,8 +558,6 @@
         const noPo = document.getElementById('in_no').value;
         if(!noPo || noPo.includes('undefined')) return alert("Nomor PO tidak valid!");
 
-        const activeIssuer = loadIssuerInfo();
-
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> UPLOADING...'; btn.disabled = true;
         try {
             const element = document.getElementById('main-doc');
@@ -534,20 +573,6 @@
             if (upErr) throw upErr;
 
             const { data: urlData } = _supabase.storage.from('documents').getPublicUrl(fileName);
-            
-            // Mengambil nilai kalkulasi/input untuk dimasukkan ke payload Supabase
-            const qtyVal = parseFloat(document.getElementById('in_qty').value) || 0;
-            const hargaNetVal = parseFloat(document.getElementById('in_perltr').value) || 0;
-            const p_ppnVal = parseFloat(document.getElementById('in_ppn_pct').value) || 0;
-            const p_pbbkbVal = parseFloat(document.getElementById('in_pbbkb_pct').value) || 0;
-            const p_pphVal = parseFloat(document.getElementById('in_pph_pct').value) || 0;
-            
-            const totalPajakPct = (p_ppnVal + p_pbbkbVal + p_pphVal) / 100;
-            const hargaDasarVal = totalPajakPct > 0 ? (hargaNetVal / (1 + totalPajakPct)) : hargaNetVal;
-            const v_ppnVal = hargaDasarVal * (p_ppnVal / 100);
-            const v_pbbkbVal = hargaDasarVal * (p_pbbkbVal / 100);
-            const v_pphVal = hargaDasarVal * (p_pphVal / 100);
-
             const payload = {
                 jenis: "PURCHASE ORDER",
                 nomor: noPo,
@@ -555,14 +580,7 @@
                 tujuan: document.getElementById('in_cust').value,
                 nominal: parseFloat(document.getElementById('out_grandtotal').innerText.replace(/\./g, '').replace(',', '.')),
                 pdf_url: urlData.publicUrl,
-                client_email: "system@kse.co.id",
-                issued_by: activeIssuer,
-                qty: qtyVal,
-                harga_dasar: hargaDasarVal,
-                ppn: v_ppnVal,
-                pbbkb: v_pbbkbVal,
-                pph: v_pphVal,
-                harga_per_liter: hargaNetVal
+                client_email: "system@kse.co.id"
             };
             const { error: dbErr } = await _supabase.from('eforms').insert([payload]);
             if (dbErr) throw dbErr;
@@ -570,7 +588,7 @@
             alert("Berhasil! PO & PDF telah tersimpan di Cloud.");
             syncAutoNumber(); 
         } catch (e) { alert("Error: " + e.message); }
-        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN'; btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN & AUTO UPLOAD'; btn.disabled = false;
     }
 
     function downloadPDF() {
@@ -591,7 +609,6 @@
         const dd = String(now.getDate()).padStart(2, '0');
         
         document.getElementById('in_tgl_raw').value = `${yyyy}-${mm}-${dd}`;
-        loadIssuerInfo();
         handleDateChange();
         calculate();
     };
