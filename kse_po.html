@@ -391,21 +391,18 @@
 
     // Fungsi membaca informasi user aktif dari localStorage
     function loadIssuerInfo() {
-        let issuerName = localStorage.getItem('holding_user_name');
-        let issuerRole = localStorage.getItem('holding_user_role');
-        let isLoggedIn = localStorage.getItem('holding_is_logged_in');
+        let issuerName = localStorage.getItem('holding_user_name') || localStorage.getItem('user_name') || localStorage.getItem('nama');
+        let isLoggedIn = localStorage.getItem('holding_is_logged_in') || localStorage.getItem('is_logged_in');
 
-        if (!isLoggedIn || !issuerName) {
-            issuerName = "Ela Yuliana";
-            issuerRole = "Marketing Director";
+        if (!issuerName) {
+            issuerName = "Ela Yuliana"; // Default fallback jika belum login
         }
 
-        const fullIssuerText = `${issuerName}`;
         const issuerEl = document.getElementById('footer_issued_by');
         if (issuerEl) {
-            issuerEl.innerText = fullIssuerText;
+            issuerEl.innerText = issuerName;
         }
-        return fullIssuerText;
+        return issuerName;
     }
 
     function formatIDR(val) {
@@ -578,7 +575,8 @@
     }
 
     function updateQRCode(no, total) {
-        const data = `KSE-PO|${no}|TOT:${total}`;
+        const issuerName = loadIssuerInfo();
+        const data = `KSE-PO|${no}|TOT:${total}|Issuer:${issuerName}`;
         document.getElementById('qr_footer').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(data)}`;
         document.getElementById('qr_timestamp').innerText = `Generated: ${new Date().toLocaleString('id-ID')}`;
     }
@@ -633,6 +631,7 @@
     }
 
     window.onload = () => {
+        loadIssuerInfo(); // Memuat nama admin yang login ke footer
         const now = new Date();
         const yyyy = now.getFullYear();
         const mm = String(now.getMonth() + 1).padStart(2, '0');
