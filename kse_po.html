@@ -392,7 +392,6 @@
     // Fungsi membaca informasi user aktif dari localStorage
     function loadIssuerInfo() {
         let issuerName = localStorage.getItem('holding_user_name') || localStorage.getItem('user_name') || localStorage.getItem('nama');
-        let isLoggedIn = localStorage.getItem('holding_is_logged_in') || localStorage.getItem('is_logged_in');
 
         if (!issuerName) {
             issuerName = "Ela Yuliana"; // Default fallback jika belum login
@@ -411,7 +410,7 @@
 
     async function syncAutoNumber() {
         try {
-            const tglVal = document.getElementById('in_tgl_raw').value;
+            const tglVal = document.getElementById('in_tgl_raw')?.value;
             let m, y;
             if (tglVal) {
                 const parts = tglVal.split('-');
@@ -449,7 +448,8 @@
             }
 
             const nextNum = maxNum + 1;
-            document.getElementById('in_no_urut').value = nextNum;
+            const elUrut = document.getElementById('in_no_urut');
+            if (elUrut) elUrut.value = nextNum;
             formatFullNumber();
         } catch (err) { 
             console.error("Gagal Sync Nomor:", err); 
@@ -458,8 +458,8 @@
     }
 
     function formatFullNumber() {
-        const urut = document.getElementById('in_no_urut').value || "1";
-        const tglVal = document.getElementById('in_tgl_raw').value;
+        const urut = document.getElementById('in_no_urut')?.value || "1";
+        const tglVal = document.getElementById('in_tgl_raw')?.value;
         
         let m, y;
         if (tglVal) {
@@ -475,13 +475,15 @@
         const noUrutPadded = urut.toString().padStart(3, '0');
         const fullNo = `${noUrutPadded}/PO-BBM/KSE/${monthRomawi[m]}/${y}`;
         
-        document.getElementById('in_no').value = fullNo;
-        document.getElementById('out_no').innerText = fullNo;
+        const elNo = document.getElementById('in_no');
+        if (elNo) elNo.value = fullNo;
+        const outNo = document.getElementById('out_no');
+        if (outNo) outNo.innerText = fullNo;
         updateView();
     }
 
     function handleDateChange() {
-        const val = document.getElementById('in_tgl_raw').value;
+        const val = document.getElementById('in_tgl_raw')?.value;
         if (!val) return;
         
         const parts = val.split('-');
@@ -489,25 +491,27 @@
         const m = parseInt(parts[1], 10) - 1;
         const d = parseInt(parts[2], 10);
 
-        document.getElementById('out_tgl').innerText = `${d.toString().padStart(2, '0')} ${monthsIndo[m]} ${y}`;
+        const outTgl = document.getElementById('out_tgl');
+        if (outTgl) outTgl.innerText = `${d.toString().padStart(2, '0')} ${monthsIndo[m]} ${y}`;
         syncAutoNumber();
     }
 
     function handleCustChange() {
-        const custName = document.getElementById('in_cust').value;
-        if (CUSTOMER_DATABASE[custName]) {
-            document.getElementById('in_addr').value = CUSTOMER_DATABASE[custName];
+        const custName = document.getElementById('in_cust')?.value;
+        if (custName && CUSTOMER_DATABASE[custName]) {
+            const addrEl = document.getElementById('in_addr');
+            if (addrEl) addrEl.value = CUSTOMER_DATABASE[custName];
         }
         updateView();
     }
 
     function calculate() {
-        const qty = parseFloat(document.getElementById('in_qty').value) || 0;
-        const hargaNet = parseFloat(document.getElementById('in_perltr').value) || 0;
+        const qty = parseFloat(document.getElementById('in_qty')?.value) || 0;
+        const hargaNet = parseFloat(document.getElementById('in_perltr')?.value) || 0;
         
-        const p_ppn = parseFloat(document.getElementById('in_ppn_pct').value) || 0;
-        const p_pbbkb = parseFloat(document.getElementById('in_pbbkb_pct').value) || 0;
-        const p_pph = parseFloat(document.getElementById('in_pph_pct').value) || 0;
+        const p_ppn = parseFloat(document.getElementById('in_ppn_pct')?.value) || 0;
+        const p_pbbkb = parseFloat(document.getElementById('in_pbbkb_pct')?.value) || 0;
+        const p_pph = parseFloat(document.getElementById('in_pph_pct')?.value) || 0;
 
         const totalPajakPct = (p_ppn + p_pbbkb + p_pph) / 100;
         const hargaDasar = totalPajakPct > 0 ? (hargaNet / (1 + totalPajakPct)) : hargaNet;
@@ -526,14 +530,20 @@
 
         const f = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
         
-        document.getElementById('th_ppn').innerText = p_ppn > 0 ? `PPN ${p_ppn}%` : "PPN";
-        document.getElementById('th_pbbkb').innerText = p_pbbkb > 0 ? `PBBKB ${p_pbbkb}%` : "PBBKB";
-        document.getElementById('th_pph').innerText = p_pph > 0 ? `PPH ${p_pph}%` : "PPH";
+        const thPpn = document.getElementById('th_ppn');
+        if (thPpn) thPpn.innerText = p_ppn > 0 ? `PPN ${p_ppn}%` : "PPN";
+        const thPbbkb = document.getElementById('th_pbbkb');
+        if (thPbbkb) thPbbkb.innerText = p_pbbkb > 0 ? `PBBKB ${p_pbbkb}%` : "PBBKB";
+        const thPph = document.getElementById('th_pph');
+        if (thPph) thPph.innerText = p_pph > 0 ? `PPH ${p_pph}%` : "PPH";
 
         // Update Label samping Rincian dengan nominal persentase (satu baris)
-        document.getElementById('lbl_ppn').innerText = p_ppn > 0 ? `PPN ${p_ppn}%` : "PPN";
-        document.getElementById('lbl_pbbkb').innerText = p_pbbkb > 0 ? `PBBKB ${p_pbbkb}%` : "PBBKB";
-        document.getElementById('lbl_pph').innerText = p_pph > 0 ? `PPH ${p_pph}%` : "PPH";
+        const lblPpn = document.getElementById('lbl_ppn');
+        if (lblPpn) lblPpn.innerText = p_ppn > 0 ? `PPN ${p_ppn}%` : "PPN";
+        const lblPbbkb = document.getElementById('lbl_pbbkb');
+        if (lblPbbkb) lblPbbkb.innerText = p_pbbkb > 0 ? `PBBKB ${p_pbbkb}%` : "PBBKB";
+        const lblPph = document.getElementById('lbl_pph');
+        if (lblPph) lblPph.innerText = p_pph > 0 ? `PPH ${p_pph}%` : "PPH";
 
         document.getElementById('out_qty').innerText = qty.toLocaleString('id-ID');
         document.getElementById('out_harga').innerText = hargaDasar.toLocaleString('id-ID', f);
@@ -563,27 +573,37 @@
     }
 
     function updateView() {
-        const noPo = document.getElementById('in_no').value || "-";
-        const gTotal = document.getElementById('out_grandtotal').innerText;
-        document.getElementById('out_no').innerText = noPo;
-        document.getElementById('out_cust').innerText = document.getElementById('in_cust').value || "-";
-        document.getElementById('out_addr').innerText = document.getElementById('in_addr').value || "-";
-        document.getElementById('out_barang').innerText = document.getElementById('in_barang').value || "-";
-        document.getElementById('out_pay').innerText = document.getElementById('in_pay').value || "-";
-        document.getElementById('out_delivery').innerText = document.getElementById('in_delivery').value || "-";
+        const noPo = document.getElementById('in_no')?.value || "-";
+        const gTotal = document.getElementById('out_grandtotal')?.innerText || "0,00";
+        
+        const outNo = document.getElementById('out_no');
+        if (outNo) outNo.innerText = noPo;
+        const outCust = document.getElementById('out_cust');
+        if (outCust) outCust.innerText = document.getElementById('in_cust')?.value || "-";
+        const outAddr = document.getElementById('out_addr');
+        if (outAddr) outAddr.innerText = document.getElementById('in_addr')?.value || "-";
+        const outBarang = document.getElementById('out_barang');
+        if (outBarang) outBarang.innerText = document.getElementById('in_barang')?.value || "-";
+        const outPay = document.getElementById('out_pay');
+        if (outPay) outPay.innerText = document.getElementById('in_pay')?.value || "-";
+        const outDelivery = document.getElementById('out_delivery');
+        if (outDelivery) outDelivery.innerText = document.getElementById('in_delivery')?.value || "-";
+        
         updateQRCode(noPo, gTotal);
     }
 
     function updateQRCode(no, total) {
         const issuerName = loadIssuerInfo();
         const data = `KSE-PO|${no}|TOT:${total}|Issuer:${issuerName}`;
-        document.getElementById('qr_footer').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(data)}`;
-        document.getElementById('qr_timestamp').innerText = `Generated: ${new Date().toLocaleString('id-ID')}`;
+        const qrEl = document.getElementById('qr_footer');
+        if (qrEl) qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(data)}`;
+        const timeEl = document.getElementById('qr_timestamp');
+        if (timeEl) timeEl.innerText = `Generated: ${new Date().toLocaleString('id-ID')}`;
     }
 
     async function saveToSupabase() {
         const btn = document.getElementById('btn-save-sb');
-        const noPo = document.getElementById('in_no').value;
+        const noPo = document.getElementById('in_no')?.value;
         if(!noPo || noPo.includes('undefined')) return alert("Nomor PO tidak valid!");
 
         const activeIssuer = loadIssuerInfo();
@@ -604,24 +624,26 @@
 
             const { data: urlData } = _supabase.storage.from('documents').getPublicUrl(fileName);
             
-            // Perbaikan pengambilan data input/kalkulasi untuk disimpan ke Supabase
-            const qtyVal = parseFloat(document.getElementById('in_qty').value) || 0;
-            const hargaDasarVal = parseFloat(document.getElementById('in_hargadasar').value) || 0;
-            const p_ppnVal = parseFloat(document.getElementById('in_ppn_pct').value) || 0;
-            const p_pbbkbVal = parseFloat(document.getElementById('in_pbbkb_pct').value) || 0;
-            const p_pphVal = parseFloat(document.getElementById('in_pph_pct').value) || 0;
+            // Pengambilan nilai aman berdasarkan input form yang ada
+            const qtyVal = parseFloat(document.getElementById('in_qty')?.value) || 0;
+            const hargaNetVal = parseFloat(document.getElementById('in_perltr')?.value) || 0;
+            const p_ppnVal = parseFloat(document.getElementById('in_ppn_pct')?.value) || 0;
+            const p_pbbkbVal = parseFloat(document.getElementById('in_pbbkb_pct')?.value) || 0;
+            const p_pphVal = parseFloat(document.getElementById('in_pph_pct')?.value) || 0;
+            
+            const totalPajakPct = (p_ppnVal + p_pbbkbVal + p_pphVal) / 100;
+            const hargaDasarVal = totalPajakPct > 0 ? (hargaNetVal / (1 + totalPajakPct)) : hargaNetVal;
             
             const v_ppnVal = hargaDasarVal * (p_ppnVal / 100);
             const v_pbbkbVal = hargaDasarVal * (p_pbbkbVal / 100);
             const v_pphVal = hargaDasarVal * (p_pphVal / 100);
-            const hargaNetVal = hargaDasarVal + v_ppnVal + v_pbbkbVal + v_pphVal;
 
             const payload = {
                 jenis: "PURCHASE ORDER",
                 nomor: noPo,
-                tanggal: document.getElementById('in_tgl_raw').value,
-                tujuan: document.getElementById('in_cust').value,
-                nominal: parseFloat(document.getElementById('out_grandtotal').innerText.replace(/\./g, '').replace(',', '.')),
+                tanggal: document.getElementById('in_tgl_raw')?.value,
+                tujuan: document.getElementById('in_cust')?.value,
+                nominal: parseFloat(document.getElementById('out_grandtotal')?.innerText.replace(/\./g, '').replace(',', '.')) || 0,
                 pdf_url: urlData.publicUrl,
                 client_email: "system@kse.co.id",
                 issued_by: activeIssuer,
@@ -643,7 +665,7 @@
 
     function downloadPDF() {
         const element = document.getElementById('main-doc');
-        const noPo = document.getElementById('in_no').value;
+        const noPo = document.getElementById('in_no')?.value || "PO";
         const opt = { 
             margin: 0, filename: `PO-${noPo}.pdf`, image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 }, 
@@ -659,7 +681,9 @@
         const mm = String(now.getMonth() + 1).padStart(2, '0');
         const dd = String(now.getDate()).padStart(2, '0');
         
-        document.getElementById('in_tgl_raw').value = `${yyyy}-${mm}-${dd}`;
+        const inTgl = document.getElementById('in_tgl_raw');
+        if (inTgl) inTgl.value = `${yyyy}-${mm}-${dd}`;
+        
         handleDateChange();
         calculate();
     };
