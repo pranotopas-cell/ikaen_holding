@@ -154,7 +154,7 @@
 
             <div class="row g-2 mb-3">
                 <div class="col-6"><label class="small fw-bold">No. PO</label><input type="text" id="in_po_no" class="form-control form-control-sm" oninput="syncAll()"></div>
-                <div class="col-6"><label class="small fw-bold">Tgl PO</label><input type="text" id="in_po_tgl" class="form-control form-control-sm" oninput="syncAll()"></div>
+                <div class="col-6"><label class="small fw-bold">Tgl PO</label><input type="date" id="in_po_tgl" class="form-control form-control-sm" oninput="syncAll()"></div>
             </div>
 
             <div class="card p-2 mb-3 border-primary">
@@ -427,15 +427,32 @@
         const y = d.getFullYear();
         
         const urut = document.getElementById('in_no_urut').value || "001";
-        const fullNo = `${urut}/INV-IDE/${monthRomawi[m]}/${y}`;
+        const fullNo = `${urut}/INV-IKAEN/${monthRomawi[m]}/${y}`;
         
-        document.getElementById('in_no_preview').innerText = `/INV-IDE/${monthRomawi[m]}/${y}`;
+        document.getElementById('in_no_preview').innerText = `/INV-IKAEN/${monthRomawi[m]}/${y}`;
         document.getElementById('out_no').innerText = fullNo;
 
         document.getElementById('out_cust').innerText = document.getElementById('in_cust').value;
         document.getElementById('out_addr').innerText = document.getElementById('in_addr').value;
         document.getElementById('out_po_no').innerText = document.getElementById('in_po_no').value;
-        document.getElementById('out_po_tgl').innerText = document.getElementById('in_po_tgl').value;
+        
+        // --- Konversi Tgl PO Menjadi Format Huruf (Contoh: 24 Oktober 2026) ---
+        const rawPoTgl = document.getElementById('in_po_tgl').value;
+        if (rawPoTgl) {
+            const parts = rawPoTgl.split('-'); // [YYYY, MM, DD]
+            if (parts.length === 3) {
+                const tahun = parts[0];
+                const bulanIndex = parseInt(parts[1], 10) - 1;
+                const tanggal = parseInt(parts[2], 10);
+                document.getElementById('out_po_tgl').innerText = `${tanggal} ${monthsIndo[bulanIndex]} ${tahun}`;
+            } else {
+                document.getElementById('out_po_tgl').innerText = rawPoTgl;
+            }
+        } else {
+            document.getElementById('out_po_tgl').innerText = "";
+        }
+        // ---------------------------------------------------------------------
+
         document.getElementById('out_produk').innerText = document.getElementById('in_produk').value;
         document.getElementById('out_qty_val').innerText = document.getElementById('in_qty_text').value + " Ltr";
         
