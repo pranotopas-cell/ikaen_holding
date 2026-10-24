@@ -10,6 +10,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
+    <!-- Flatpickr CSS & JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- Bahasa Indonesia untuk Flatpickr -->
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
+
     <style>
         :root { 
             --kse-dark: #1B1B3A; 
@@ -177,7 +183,7 @@
 
             <div class="row g-2 mb-3">
                 <div class="col-6"><label class="small fw-bold">No. PO</label><input type="text" id="in_po_no" class="form-control form-control-sm" oninput="syncAll()"></div>
-                <input type="date" id="in_po_tgl" class="form-control form-control-sm" onchange="syncAll()">
+                <input type="text" id="in_po_tgl" class="form-control form-control-sm" onchange="syncAll()">
             </div>
 
             <div class="card p-2 mb-3 border-success">
