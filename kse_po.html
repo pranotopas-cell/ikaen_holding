@@ -51,21 +51,21 @@
         .table-po th { 
             background-color: var(--kse-primary) !important; 
             color: white !important; 
-            padding: 10px 6px; 
+            padding: 10px 4px; 
             border: 1px solid #000; 
             text-align: center; 
             font-size: 10px; 
             text-transform: uppercase; 
             letter-spacing: 0.5px;
         }
-        .table-po td { border: 1px solid #000; padding: 8px 8px; vertical-align: middle; font-size: 11px; line-height: 1.4; }
+        .table-po td { border: 1px solid #000; padding: 8px 6px; vertical-align: middle; font-size: 11px; line-height: 1.4; }
         
         .table-clean td { border: none !important; padding: 2px 0; vertical-align: middle; font-size: 11px; white-space: nowrap; }
         .lang-en { font-style: italic; font-size: 9px; color: #777; display: inline-block; margin-left: 4px; font-weight: 400; }
 
-        /* Styling khusus baris rincian HD, PPN, PBBKB, PPH */
+        /* Mencegah teks terpotong / berpindah ke bawah */
         .calc-row td { 
-            padding: 4px 8px; 
+            padding: 5px 4px; 
             font-size: 10.5px; 
             border-top: none !important;
             border-bottom: none !important;
@@ -73,8 +73,10 @@
         .calc-label-col {
             text-align: center;
             font-weight: 700;
-            font-size: 10px;
-            letter-spacing: 0.5px;
+            font-size: 9.5px;
+            white-space: nowrap !important; /* Agar teks % tidak turun ke bawah */
+            padding-left: 2px !important;
+            padding-right: 2px !important;
         }
 
         .terbilang-box { 
@@ -260,14 +262,14 @@
                 <table class="table-po">
                     <thead>
                         <tr>
-                            <th width="22%">NAMA BARANG</th>
+                            <th width="20%">NAMA BARANG</th>
                             <th width="10%">QTY (Ltr)</th>
                             <th width="12%">HARGA DASAR</th>
-                            <th id="th_ppn" width="9%">PPN</th>
-                            <th id="th_pbbkb" width="9%">PBBKB</th>
-                            <th id="th_pph" width="9%">PPH</th>
+                            <th id="th_ppn" width="10%">PPN</th>
+                            <th id="th_pbbkb" width="10%">PBBKB</th>
+                            <th id="th_pph" width="10%">PPH</th>
                             <th width="11%">PER LTR</th>
-                            <th width="18%">TOTAL</th>
+                            <th width="17%">TOTAL</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -282,7 +284,7 @@
                             <td class="text-end fw-bold"><span id="out_total">0,00</span></td>
                         </tr>
                         
-                        <!-- Rincian HD, PPN, PBBKB, PPH dengan tata letak sesuai screenshot -->
+                        <!-- Rincian HD, PPN, PBBKB, PPH (dengan white-space: nowrap agar teks persen tidak turun) -->
                         <tr class="calc-row">
                             <td colspan="5" class="border-end-0"></td>
                             <td class="calc-label-col border-start-0">HD</td>
@@ -291,19 +293,19 @@
                         </tr>
                         <tr class="calc-row">
                             <td colspan="5" class="border-end-0"></td>
-                            <td class="calc-label-col border-start-0">PPN 11%</td>
+                            <td class="calc-label-col border-start-0" id="lbl_ppn">PPN 11%</td>
                             <td class="text-center fw-semibold"><span id="out_sat_ppn">0,00</span></td>
                             <td class="text-end fw-semibold"><span id="out_tot_ppn">0,00</span></td>
                         </tr>
                         <tr class="calc-row">
                             <td colspan="5" class="border-end-0"></td>
-                            <td class="calc-label-col border-start-0">PBBKB 7,5%</td>
+                            <td class="calc-label-col border-start-0" id="lbl_pbbkb">PBBKB 7,5%</td>
                             <td class="text-center fw-semibold"><span id="out_sat_pbbkb">0,00</span></td>
                             <td class="text-end fw-semibold"><span id="out_tot_pbbkb">0,00</span></td>
                         </tr>
                         <tr class="calc-row">
                             <td colspan="5" class="border-end-0"></td>
-                            <td class="calc-label-col border-start-0">PPH 0,3%</td>
+                            <td class="calc-label-col border-start-0" id="lbl_pph">PPH 0,3%</td>
                             <td class="text-center fw-semibold"><span id="out_sat_pph">0,00</span></td>
                             <td class="text-end fw-semibold"><span id="out_tot_pph">0,00</span></td>
                         </tr>
@@ -507,6 +509,11 @@
         document.getElementById('th_ppn').innerText = p_ppn > 0 ? `PPN ${p_ppn}%` : "PPN";
         document.getElementById('th_pbbkb').innerText = p_pbbkb > 0 ? `PBBKB ${p_pbbkb}%` : "PBBKB";
         document.getElementById('th_pph').innerText = p_pph > 0 ? `PPH ${p_pph}%` : "PPH";
+
+        // Update Label samping Rincian dengan nominal persentase (satu baris)
+        document.getElementById('lbl_ppn').innerText = p_ppn > 0 ? `PPN ${p_ppn}%` : "PPN";
+        document.getElementById('lbl_pbbkb').innerText = p_pbbkb > 0 ? `PBBKB ${p_pbbkb}%` : "PBBKB";
+        document.getElementById('lbl_pph').innerText = p_pph > 0 ? `PPH ${p_pph}%` : "PPH";
 
         document.getElementById('out_qty').innerText = qty.toLocaleString('id-ID');
         document.getElementById('out_harga').innerText = hargaDasar.toLocaleString('id-ID', f);
