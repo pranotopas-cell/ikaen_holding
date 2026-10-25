@@ -418,9 +418,9 @@
         const y = d.getFullYear();
         
         const urut = document.getElementById('in_no_urut').value || "001";
-        const fullNo = `${urut}/Invoice-Transport/IKAEN/${monthRomawi[m]}/${y}`;
+        const fullNo = `${urut}/Invoice-Trans/IKAEN/${monthRomawi[m]}/${y}`;
         
-        document.getElementById('in_no_preview').innerText = `/Invoice-Transport/IKAEN/${monthRomawi[m]}/${y}`;
+        document.getElementById('in_no_preview').innerText = `/Invoice-Trans/IKAEN/${monthRomawi[m]}/${y}`;
         document.getElementById('out_no').innerText = fullNo;
 
         document.getElementById('out_cust').innerText = document.getElementById('in_cust').value;
