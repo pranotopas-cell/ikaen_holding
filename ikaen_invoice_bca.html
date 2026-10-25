@@ -181,7 +181,7 @@
                 <input type="text" id="in_npwp" class="form-control form-control-sm" oninput="syncAll()">
             </div>
 
-            <!-- DIPERBAIKI DI SINI: Struktur baris No. PO & Tgl PO rapi -->
+            <!-- Struktur baris No. PO & Tgl PO rapi -->
             <div class="row g-2 mb-3">
                 <div class="col-6">
                     <label class="small fw-bold">No. PO</label>
@@ -260,27 +260,27 @@
                             <tr>
                                 <td width="35%">TANGGAL<span class="lang-en">Date</span></td>
                                 <td width="5%">:</td>
-                                <td width="60%" id="out_tgl"></td>
+                                <td width="60%" class="text-end" id="out_tgl"></td>
                             </tr>
                             <tr>
                                 <td>NOMOR INVOICE<span class="lang-en">Invoice Number</span></td>
                                 <td>:</td>
-                                <td id="out_no"></td>
+                                <td class="text-end" id="out_no"></td>
                             </tr>
                             <tr>
                                 <td>NPWP<span class="lang-en">Tax ID Number</span></td>
                                 <td>:</td>
-                                <td>0603 9987 0971-3000</td>
+                                <td class="text-end">0603 9987 0971-3000</td>
                             </tr>
                             <tr>
                                 <td>TANGGAL PO<span class="lang-en">PO Date</span></td>
                                 <td>:</td>
-                                <td id="out_po_tgl"></td>
+                                <td class="text-end" id="out_po_tgl"></td>
                             </tr>
                             <tr>
                                 <td>NOMOR PO<span class="lang-en">PO Number</span></td>
                                 <td>:</td>
-                                <td id="out_po_no"></td>
+                                <td class="text-end" id="out_po_no"></td>
                             </tr>
                         </table>
                     </div>
@@ -469,10 +469,10 @@
         document.getElementById('out_addr').innerText = document.getElementById('in_addr').value;
         document.getElementById('out_po_no').innerText = document.getElementById('in_po_no').value;
         
-        // --- Konversi Tgl PO Menjadi Format Huruf (Contoh: 24 Oktober 2026) ---
+        // Konversi Tgl PO Menjadi Format Huruf
         const rawPoTgl = document.getElementById('in_po_tgl').value;
         if (rawPoTgl) {
-            const parts = rawPoTgl.split('-'); // [YYYY, MM, DD]
+            const parts = rawPoTgl.split('-'); 
             if (parts.length === 3) {
                 const tahun = parts[0];
                 const bulanIndex = parseInt(parts[1], 10) - 1;
@@ -484,7 +484,6 @@
         } else {
             document.getElementById('out_po_tgl').innerText = "";
         }
-        // ---------------------------------------------------------------------
 
         document.getElementById('out_produk').innerText = document.getElementById('in_produk').value;
         document.getElementById('out_qty_val').innerText = document.getElementById('in_qty_text').value + " Ltr";
@@ -508,7 +507,7 @@
         document.getElementById('out_ppn_val').innerText = formatIDR(ppn);
         document.getElementById('out_adjust_val').innerText = formatIDR(adj);
         document.getElementById('out_grand_val').innerText = formatIDR(grandTotalFinal);
-        document.getElementById('out_terbilang').innerText = grandTotalFinal != 0 ?"# " + terbilang(grandTotalFinal) + " Rupiah #" : "-";
+        document.getElementById('out_terbilang').innerText = grandTotalFinal != 0 ? "# " + terbilang(grandTotalFinal) + " Rupiah #" : "-";
         updateQRCode(grandTotalFinal);
     }
 
@@ -709,7 +708,6 @@
         calculateFromBasic();
     };
 
-    // DIPERBAIKI DI SINI: Sintaks Flatpickr ditutup dengan benar
     flatpickr("#in_po_tgl", {
         locale: "id",
         dateFormat: "Y-m-d",
