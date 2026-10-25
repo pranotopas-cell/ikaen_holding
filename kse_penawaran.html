@@ -40,6 +40,10 @@
         .meta-table td.value-col { font-weight: bold; word-break: break-word; }
 
         .lang-en { font-style: italic; font-size: 9px; color: #666; display: block; margin-top: -1px; }
+        .lang-en {
+        display: inline-block !important;
+        margin-left: 6px;
+        }
         .footer-kse { margin-top: auto; padding-top: 15px; border-top: 2px solid var(--kse-primary); }
 
         @media print {
@@ -60,7 +64,7 @@
     <div class="d-flex gap-2">
         <button class="btn btn-dark btn-sm fw-bold" onclick="window.print()"><i class="bi bi-printer"></i> PRINT</button>
         <button class="btn btn-warning btn-sm fw-bold px-3" onclick="saveToSupabase()" id="btn-save-sb">
-            <i class="bi bi-cloud-arrow-up"></i> SIMPAN & UPLOAD
+            <i class="bi bi-cloud-arrow-up"></i> SIMPAN
         </button>
         <button class="btn btn-primary btn-sm fw-bold px-3" onclick="downloadPDF()"><i class="bi bi-download"></i> DOWNLOAD PDF</button>
     </div>
