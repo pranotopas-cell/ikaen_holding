@@ -1385,7 +1385,7 @@
                 `;
 
                 let transportInvoiceMenuHTML = (activeTab === 'ikaen' || activeTab === 'ide') ? `
-                    <button onclick="handleActionRedirect('invoice_transport')" class="w-full text-left text-slate-600 hover:text-red-600 transition">&bull; Buat Invoice Transport</button>
+                    <button onclick="handleActionRedirect('invoice_transport')" class="w-full text-left font-semibold ${accentClass} hover:underline">&bull; Buat Invoice Transport</button>
                 ` : '';
 
                 let transactionMenusHTML = isLoggedIn ? `
