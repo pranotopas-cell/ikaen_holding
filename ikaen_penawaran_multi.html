@@ -64,6 +64,26 @@
             letter-spacing: -0.2px;
         }
 
+        /* Watermark Logo IKAEN Grayscale Transparan di Tengah Dokumen */
+        .watermark-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 700px;
+            max-width: 600px;
+            opacity: 0.06;
+            filter: grayscale(100%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Memastikan elemen konten tetap berada di atas watermark */
+        .header-section, .row, p, table, .mt-2, .mt-3, .signature-row, .footer-kse {
+            position: relative;
+            z-index: 1;
+        }
+
         .header-section { 
             display: flex; 
             align-items: center; 
@@ -257,6 +277,9 @@
 
         <div class="col-lg-9 p-0" id="pdf-area">
             <div class="document-canvas" id="main-doc">
+                <!-- Watermark Logo IKAEN Grayscale Transparan -->
+                <img src="ikaen.png" class="watermark-bg" alt="Watermark IKAEN" onerror="this.style.display='none'">
+
                 <div class="header-section">
                     <div class="brand-container">
                         <img src="ikaen.png" class="logo-img" onerror="this.src='https://via.placeholder.com/80x60?text=IKAEN'">
