@@ -45,16 +45,15 @@
             font-family: 'Courier Prime', Courier, monospace; /* Gaya font printer dot-matrix / monospace */
         }
 
-        /* Watermark Logo IKAEN Transparan (Tanpa Warna / Monochrome) */
+        /* Watermark Logo IKAEN Transparan (Menggunakan ikaen.png) */
         .watermark-bg {
             position: absolute;
-            top: 40%;
+            top: 30%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            width: 70%;
-            max-width: 600px;
-            opacity: 0.08;
-            filter: grayscale(100%);
+            transform: translate(-60%, -60%);
+            width: 65%;
+            max-width: 700px;
+            opacity: 0.12;
             pointer-events: none;
             z-index: 0;
         }
@@ -211,7 +210,7 @@
 
         <div class="col-lg-9 p-0" id="pdf-area">
             <div class="document-canvas" id="main-doc">
-                <!-- Watermark Transparan Logo IKAEN (Tanpa Warna) -->
+                <!-- Watermark Transparan Logo IKAEN -->
                 <img src="ikaen.png" class="watermark-bg" alt="Watermark IKAEN" onerror="this.style.display='none'">
 
                 <div class="header-section">
@@ -512,57 +511,57 @@
     }
 
     async function saveToSupabase() {
-    const btn = document.getElementById('btn-save-sb');
-    const activeIssuer = loadIssuerInfo();
+        const btn = document.getElementById('btn-save-sb');
+        const activeIssuer = loadIssuerInfo();
 
-    const destPengiriman = document.getElementById('in_dest') ? document.getElementById('in_dest').value : "";
+        const destPengiriman = document.getElementById('in_dest') ? document.getElementById('in_dest').value : "";
 
-    if (!destPengiriman) {
-        alert("Peringatan: Kolom Tujuan / Destination di sidebar sepertinya kosong!");
-    }
+        if (!destPengiriman) {
+            alert("Peringatan: Kolom Tujuan / Destination di sidebar sepertinya kosong!");
+        }
 
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> SAVING...'; 
-    btn.disabled = true;
-    
-    try {
-        const noSurat = document.getElementById('in_no').value;
-        const element = document.getElementById('main-doc');
-        const opt = { 
-            margin: 0, 
-            filename: `SPH-${noSurat}.pdf`, 
-            image: { type: 'jpeg', quality: 0.98 }, 
-            html2canvas: { scale: 2, useCORS: true }, 
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-        };
-
-        const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-        const fileName = `penawaran/SPH_${Date.now()}_${noSurat.replace(/\//g, '_')}.pdf`;
-        await _supabase.storage.from('documents').upload(fileName, pdfBlob);
-        const { data: urlData } = _supabase.storage.from('documents').getPublicUrl(fileName);
-
-        const { error: insertError } = await _supabase.from('eforms').insert([{
-            jenis: "SPH", 
-            nomor: noSurat, 
-            tanggal: document.getElementById('in_tgl_raw').value,
-            tujuan: document.getElementById('in_cust').value, 
-            pdf_url: urlData.publicUrl,
-            nominal: Math.round(parseFloat(document.getElementById('in_total_input').value) || 0),
-            issued_by: activeIssuer,
-            tujuan_pengiriman: destPengiriman
-        }]);
-
-        if (insertError) throw insertError;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> SAVING...'; 
+        btn.disabled = true;
         
-        alert("Sukses Tersimpan!");
-        syncAutoNumber();
-    } catch (e) { 
-        alert("Gagal: " + e.message); 
-        console.error("Error Detail:", e);
+        try {
+            const noSurat = document.getElementById('in_no').value;
+            const element = document.getElementById('main-doc');
+            const opt = { 
+                margin: 0, 
+                filename: `SPH-${noSurat}.pdf`, 
+                image: { type: 'jpeg', quality: 0.98 }, 
+                html2canvas: { scale: 2, useCORS: true }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+            };
+
+            const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+            const fileName = `penawaran/SPH_${Date.now()}_${noSurat.replace(/\//g, '_')}.pdf`;
+            await _supabase.storage.from('documents').upload(fileName, pdfBlob);
+            const { data: urlData } = _supabase.storage.from('documents').getPublicUrl(fileName);
+
+            const { error: insertError } = await _supabase.from('eforms').insert([{
+                jenis: "SPH", 
+                nomor: noSurat, 
+                tanggal: document.getElementById('in_tgl_raw').value,
+                tujuan: document.getElementById('in_cust').value, 
+                pdf_url: urlData.publicUrl,
+                nominal: Math.round(parseFloat(document.getElementById('in_total_input').value) || 0),
+                issued_by: activeIssuer,
+                tujuan_pengiriman: destPengiriman
+            }]);
+
+            if (insertError) throw insertError;
+            
+            alert("Sukses Tersimpan!");
+            syncAutoNumber();
+        } catch (e) { 
+            alert("Gagal: " + e.message); 
+            console.error("Error Detail:", e);
+        }
+        
+        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN & UPLOAD'; 
+        btn.disabled = false;
     }
-    
-    btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN & UPLOAD'; 
-    btn.disabled = false;
-}
     
     function downloadPDF() {
         const element = document.getElementById('main-doc');
