@@ -285,11 +285,12 @@
                         </tr>
                         
                         <!-- Rincian HD, PPN, PBBKB, PPH (dengan white-space: nowrap agar teks persen tidak turun) -->
-                        <tr class="no-border-row">
-                            <td colspan="5" class="no-border-right"></td>
-                            <td class="text-end fw-bold no-border-left" style="white-space: nowrap;">HD</td>
-                            <td class="text-end" id="out_break_hd_ltr">0,00</td>
-                            <td class="text-end" id="out_break_hd_tot">0,00</td>
+                        <!-- Baris Rincian HD, PPN, PBBKB, PPH (Tanpa Garis Horizontal Tengah) -->
+                        <tr class="no-border-row" style="border-top: 1.5px solid #000 !important;">
+                            <td colspan="5" class="no-border-right" style="border-top: 1.5px solid #000 !important;"></td>
+                            <td class="text-end fw-bold no-border-left" style="white-space: nowrap; border-top: 1.5px solid #000 !important;">HD</td>
+                            <td class="text-end" id="out_break_hd_ltr" style="border-top: 1.5px solid #000 !important;">0,00</td>
+                            <td class="text-end" id="out_break_hd_tot" style="border-top: 1.5px solid #000 !important;">0,00</td>
                         </tr>
                         <tr class="no-border-row">
                             <td colspan="5" class="no-border-right"></td>
@@ -309,9 +310,9 @@
                             <td class="text-end" id="out_break_pph_ltr">0,00</td>
                             <td class="text-end" id="out_break_pph_tot">0,00</td>
                         </tr>
-                        <tr class="fw-bold" style="background-color: #f8f9fa;">
-                            <td colspan="6" class="text-end py-2 fs-6">GRAND TOTAL</td>
-                            <td colspan="2" class="text-end py-2 fs-6" style="color: var(--ike-primary);"><span id="out_grandtotal">0,00</span></td>
+                        <tr class="fw-bold" style="background-color: #f8f9fa; border-top: 1.5px solid #000 !important; border-bottom: 1.5px solid #000 !important;">
+                            <td colspan="6" class="text-end py-2 fs-6" style="border-top: 1.5px solid #000 !important;">GRAND TOTAL</td>
+                            <td colspan="2" class="text-end py-2 fs-6" style="color: var(--ike-primary); border-top: 1.5px solid #000 !important;"><span id="out_grandtotal">0,00</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -319,7 +320,6 @@
                 <div class="terbilang-box">
                     Terbilang: # <span id="out_terbilang">NOL</span> RUPIAH #
                 </div>
-
                 <div class="mt-2" style="font-size: 12px; line-height: 1.6;">
                     <p class="mb-1">Term of Payment : <b id="out_pay"></b></p>
                     <p class="mb-1">Term of Delivery : <b id="out_delivery"></b></p>
