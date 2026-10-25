@@ -83,7 +83,7 @@
         .meta-table { width: 100%; border-collapse: collapse; }
         .meta-table td { border: none !important; padding: 2px 0; font-size: 12px; vertical-align: top; }
         .meta-table td.label-col { white-space: nowrap; width: 1%; padding-right: 10px; }
-        .meta-table td.value-col { font-weight: bold; word-break: break-word; }
+        .meta-table td.value-col { font-weight: bold; word-break: break-word; text-align: right; }
 
         .lang-en { font-style: italic; font-size: 9px; color: #666; display: block; margin-top: -1px; }
         .footer-ikaen { margin-top: auto; padding-top: 5px; border-top: 2px solid #800000; }
@@ -177,17 +177,17 @@
                 <label class="small fw-bold">Qty (Min Order)</label>
                 <input type="text" list="list_qty" id="in_qty" class="form-control form-control-sm mb-2" oninput="syncAll()">
                 <datalist id="list_qty">
-                    <option value="5.000 Liter (Minimum Order)">
-                    <option value="8.000 Liter (Minimum Order)">
-                    <option value="10.000 Liter (Minimum Order)">
-                    <option value="16.000 Liter (Minimum Order)">
+                    <option value="5.000 Liter (Minimum Order)"></option>
+                    <option value="8.000 Liter (Minimum Order)"></option>
+                    <option value="10.000 Liter (Minimum Order)"></option>
+                    <option value="16.000 Liter (Minimum Order)"></option>
                 </datalist>
 
                 <label class="small fw-bold">Toleransi (+/-)</label>
                 <input type="text" list="list_tol" id="in_tol" class="form-control form-control-sm mb-2" oninput="syncAll()">
                 <datalist id="list_tol">
-                    <option value="0,3% (Flowmeter Transportir)">
-                    <option value="0,5% (Flowmeter Transportir)">
+                    <option value="0,3% (Flowmeter Transportir)"></option>
+                    <option value="0,5% (Flowmeter Transportir)"></option>
                 </datalist>
 
                 <div class="mb-2">
@@ -198,10 +198,10 @@
                 <label class="small fw-bold">Sistem Pembayaran</label>
                 <input type="text" list="list_pay" id="in_pay" class="form-control form-control-sm mb-2" oninput="syncAll()">
                 <datalist id="list_pay">
-                    <option value="Cash">
-                    <option value="COD (Cash on Delivery)">
-                    <option value="CBD (Cash Before Delivery)">
-                    <option value="Tempo 30 Hari Setelah Invoice">
+                    <option value="Cash"></option>
+                    <option value="COD (Cash on Delivery)"></option>
+                    <option value="CBD (Cash Before Delivery)"></option>
+                    <option value="Tempo 30 Hari Setelah Invoice"></option>
                 </datalist>
                 
                 <label class="small fw-bold">Kontak Person</label>
@@ -515,9 +515,7 @@
     const btn = document.getElementById('btn-save-sb');
     const activeIssuer = loadIssuerInfo();
 
-    // AMBIL NILAI DARI INPUT DAN CEK DI CONSOLE
     const destPengiriman = document.getElementById('in_dest') ? document.getElementById('in_dest').value : "";
-    console.log("Nilai tujuan pengiriman saat ini:", destPengiriman);
 
     if (!destPengiriman) {
         alert("Peringatan: Kolom Tujuan / Destination di sidebar sepertinya kosong!");
@@ -550,7 +548,7 @@
             pdf_url: urlData.publicUrl,
             nominal: Math.round(parseFloat(document.getElementById('in_total_input').value) || 0),
             issued_by: activeIssuer,
-            tujuan_pengiriman: destPengiriman // Dikirim ke Supabase
+            tujuan_pengiriman: destPengiriman
         }]);
 
         if (insertError) throw insertError;
