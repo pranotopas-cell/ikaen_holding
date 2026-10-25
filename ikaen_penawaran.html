@@ -45,16 +45,16 @@
             font-family: 'Courier Prime', Courier, monospace; /* Gaya font printer dot-matrix / monospace */
         }
 
-        /* Watermark Logo IKAEN Transparan (Menggunakan ikaen.png) */
+        /* Watermark Logo IKAEN Transparan & Grayscale */
         .watermark-bg {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 700px;
-            height: 600px;
+            width: 700;
+            max-width: 600px;
             opacity: 0.06;
-            filter: grayscale(100%)
+            filter: grayscale(100%);
             pointer-events: none;
             z-index: 0;
         }
@@ -211,7 +211,7 @@
 
         <div class="col-lg-9 p-0" id="pdf-area">
             <div class="document-canvas" id="main-doc">
-                <!-- Watermark Transparan Logo IKAEN -->
+                <!-- Watermark Transparan Grayscale Logo IKAEN -->
                 <img src="ikaen.png" class="watermark-bg" alt="Watermark IKAEN" onerror="this.style.display='none'">
 
                 <div class="header-section">
