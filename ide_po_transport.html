@@ -13,9 +13,9 @@
 
     <style>
         :root { 
-            --kse-dark: #1e3a8a; 
-            --kse-primary: #2563eb; /* Biru */
-            --kse-accent: #16a34a; /* Hijau */
+            --ide-dark: #1e3a8a; 
+            --ide-primary: #0284c7; /* Biru IDE */
+            --ide-accent: #16a34a; /* Hijau IDE */
             --doc-font: 'Courier Prime', Courier, monospace, sans-serif;
         }
         
@@ -44,13 +44,13 @@
         .header-section { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 40px; padding-bottom: 15px; }
         .logo-img { height: 55px; width: auto; object-fit: contain; }
         .doc-identity { text-align: right; line-height: 1.1; }
-        .doc-identity h2 { font-weight: 800; margin: 0; font-size: 28px; color: var(--kse-primary); letter-spacing: 1px; }
+        .doc-identity h2 { font-weight: 800; margin: 0; font-size: 28px; color: var(--ide-primary); letter-spacing: 1px; }
 
         .intro-text { margin-bottom: 20px; line-height: 1.6; font-size: 12px; }
 
         .table-po { width: 100%; border-collapse: collapse; margin-top: 5px; border: 1.5px solid #000; table-layout: fixed; }
         .table-po th { 
-            background-color: var(--kse-primary) !important; 
+            background-color: var(--ide-primary) !important; 
             color: #fff !important; 
             padding: 8px 4px; 
             border: 1px solid #000; 
@@ -75,7 +75,7 @@
             line-height: 1.5;
         }
 
-        .footer-kse { margin-top: auto; border-top: 2px solid var(--kse-primary); padding-top: 15px; padding-bottom: 5px; }
+        .footer-ide { margin-top: auto; border-top: 2px solid var(--ide-primary); padding-top: 15px; padding-bottom: 5px; }
         .footer-grid { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 15px; }
 
         label.small { font-weight: 700; color: #444; margin-bottom: 4px; display: block; }
@@ -115,7 +115,7 @@
                     <label class="small text-primary">Nomor Urut Surat</label>
                     <div class="input-group input-group-sm">
                         <input type="number" id="in_no_urut" class="form-control fw-bold border-primary" value="1" oninput="formatFullNumber()">
-                        <span class="input-group-text">/PO-Transport/KSE/...</span>
+                        <span class="input-group-text">/PO-Transport/IDE/...</span>
                     </div>
                     <input type="hidden" id="in_no">
                 </div>
@@ -129,7 +129,7 @@
                     <datalist id="list_cust">
                         <option value="PT. BANUA PETRA PRIMA">
                         <option value="PT. PALITO ENERGI NUSANTARA">
-                        <option value="PT. INDO DHARMA ENERGI">
+                        <option value="PT. KHATULISTIWA SINAR ENERGI">
                     </datalist>
                 </div>
                 <div class="col-12">
@@ -139,7 +139,7 @@
                 <hr class="my-2">
                 <div class="col-12">
                     <label class="small text-success fw-bold">No. PO di Tabel (Baris Utama)</label>
-                    <input type="text" id="in_no_po_tabel" class="form-control form-control-sm" value="001/PO-BBM/KSE/X/2026" placeholder="Masukkan No. PO Tabel" oninput="calculate()">
+                    <input type="text" id="in_no_po_tabel" class="form-control form-control-sm" value="001/PO-BBM/IDE/X/2026" placeholder="Masukkan No. PO Tabel" oninput="calculate()">
                 </div>
                 <div class="col-12">
                     <label class="small text-danger fw-bold">No. PO di Tabel (Baris Kedua / PPh)</label>
@@ -209,7 +209,7 @@
         <div class="col-lg-9 p-0" id="pdf-area">
             <div class="document-canvas" id="main-doc">
                 <div class="header-section">
-                    <img src="header1.png" class="logo-img" onerror="this.src='https://via.placeholder.com/200x60?text=KSE+LOGO'">
+                    <img src="ide1.png" class="logo-img" onerror="this.src='https://via.placeholder.com/200x60?text=IDE+LOGO'">
                     <div class="doc-identity">
                         <h2>PURCHASE ORDER</h2>
                         <span class="lang-en text-uppercase">Electronic Purchase Order System</span>
@@ -219,7 +219,7 @@
                 <div class="row mb-4">
                     <div class="col-7">
                         <p class="mb-2" style="font-size: 12px;">Kepada :</p>
-                        <h6 class="fw-bold mb-1 text-uppercase" id="out_cust" style="font-size: 16px; color: var(--kse-primary); letter-spacing: 0.5px;">-</h6>
+                        <h6 class="fw-bold mb-1 text-uppercase" id="out_cust" style="font-size: 16px; color: var(--ide-primary); letter-spacing: 0.5px;">-</h6>
                         <p id="out_addr" class="mb-0 mt-1" style="white-space: pre-line; line-height: 1.5; font-size: 12px;">-</p>
                     </div>
                     <div class="col-5">
@@ -232,7 +232,7 @@
                             <tr>
                                 <td class="fw-bold">NOMOR PO<span class="lang-en">PO No.</span></td>
                                 <td style="text-align: center;">:</td>
-                                <td id="out_no" class="fw-bold text-end" style="width: 57%; color: var(--kse-primary);"></td>
+                                <td id="out_no" class="fw-bold text-end" style="width: 57%; color: var(--ide-primary);"></td>
                             </tr>
                         </table>
                     </div>
@@ -358,7 +358,7 @@
     const CUSTOMER_DATABASE = {
         "PT. PALITO ENERGI NUSANTARA": "Up.Bpk Sanur \nJl.Tjilik Riwut Km.06 No.132 ,Palangkaraya - Kalimantan Tengah. ",
         "PT. BANUA PETRA PRIMA": "Up.Ibu Raby \nJl. Alalak Utara RT.016 Kel.Alalak Utara , \nBanjarmasin - Kalimantan Selatan.",
-        "PT. INDO DHARMA ENERGI": "Up.Ibu Nurhamida \nJl. Ahmad Yani Km.07 Pangkalan Bun,\nKalimantan Tengah."
+        "PT. KHATULISTIWA SINAR ENERGI": "Up.Bpk Supranoto \nJl. Ahmad Wongso RT 18 Madurejo Pangkalan Bun,\nKalimantan Tengah."
     };
 
     const SB_URL = "https://qlsvvxfykteqxzcppnfv.supabase.co"; 
@@ -376,7 +376,7 @@
         let isLoggedIn = localStorage.getItem('holding_is_logged_in');
 
         if (!isLoggedIn || !issuerName) {
-            issuerName = "Supranoto";
+            issuerName = "Nurhamida";
         }
 
         const fullIssuerText = `${issuerName}`;
@@ -429,7 +429,7 @@
             if (data && data.length > 0) {
                 data.forEach(item => {
                     if (item.nomor) {
-                        const pattern = new RegExp(`^(\\d+)\\/PO-Transport\\/KSE\\/${romawiBulan}\\/${y}$`);
+                        const pattern = new RegExp(`^(\\d+)\\/PO-Transport\\/IDE\\/${romawiBulan}\\/${y}$`);
                         const match = item.nomor.match(pattern);
                         if (match) {
                             const num = parseInt(match[1], 10);
@@ -466,9 +466,8 @@
         }
         
         const noUrutPadded = urut.toString().padStart(2, '0');
-        const fullNo = `${noUrutPadded}/PO-Transport/KSE/${monthRomawi[m]}/${y}`;
+        const fullNo = `${noUrutPadded}/PO-Transport/IDE/${monthRomawi[m]}/${y}`;
         
-        // HANYA MENGISI NOMOR SURAT UTAMA DI KANAN ATAS (TIDAK LAGI TIMPA NO PO TABEL)
         document.getElementById('in_no').value = fullNo;
         document.getElementById('out_no').innerText = fullNo;
         updateView();
@@ -515,7 +514,7 @@
         document.getElementById('out_tbl_hargaltr').innerText = hargaLtr > 0 ? hargaLtr.toLocaleString('id-ID') : "0";
         document.getElementById('out_tbl_totalbilling').innerText = totalBilling > 0 ? totalBilling.toLocaleString('id-ID') : "0";
         
-        document.getElementById('out_lbl_pph').innerText = `PPH ${pphPct}`;
+        document.getElementById('out_lbl_pph').innerText = `PPH ${pphPct} %`;
         document.getElementById('out_tbl_pph').innerText = pphVal > 0 ? pphVal.toLocaleString('id-ID') : "-";
         
         document.getElementById('out_tbl_losis_qty').innerText = losisQty > 0 ? losisQty.toLocaleString('id-ID') : "-";
@@ -543,7 +542,7 @@
     }
 
     function updateQRCode(no, total) {
-        const data = `KSE-PO|${no}|TOT:${total}`;
+        const data = `IDE-PO|${no}|TOT:${total}`;
         document.getElementById('qr_footer').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(data)}`;
         document.getElementById('qr_timestamp').innerText = `Generated: ${new Date().toLocaleString('id-ID')}`;
     }
@@ -577,7 +576,7 @@
                 tujuan: document.getElementById('in_cust').value,
                 nominal: parseFloat(document.getElementById('out_grandtotal').innerText.replace(/\./g, '').replace(',', '.')),
                 pdf_url: urlData.publicUrl,
-                client_email: "system@kse.co.id",
+                client_email: "indodharmaenergi@gmail.com",
                 issued_by: activeIssuer
             };
             const { error: dbErr } = await _supabase.from('eforms').insert([payload]);
