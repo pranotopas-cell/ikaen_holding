@@ -112,10 +112,10 @@
             <h6 class="fw-bold mb-4 text-success border-bottom pb-2"><i class="bi bi-pencil-square"></i> FORM INPUT PO</h6>
             <div class="row g-3">
                 <div class="col-12">
-                    <label class="small text-primary">Nomor Urut Surat (Header Dokumen)</label>
+                    <label class="small text-primary">Nomor Urut Surat</label>
                     <div class="input-group input-group-sm">
                         <input type="number" id="in_no_urut" class="form-control fw-bold border-primary" value="1" oninput="formatFullNumber()">
-                        <span class="input-group-text">/PO-BBM/KSE/...</span>
+                        <span class="input-group-text">/PO-Transport/KSE/...</span>
                     </div>
                     <input type="hidden" id="in_no">
                 </div>
@@ -139,15 +139,11 @@
                 <hr class="my-2">
                 <div class="col-12">
                     <label class="small text-success fw-bold">No. PO di Tabel (Baris Utama)</label>
-                    <input type="text" id="in_no_po_tabel" class="form-control form-control-sm" placeholder="Masukkan No. PO Baris 1" oninput="calculate()">
+                    <input type="text" id="in_no_po_tabel" class="form-control form-control-sm" value="001/PO-BBM/KSE/X/2026" placeholder="Masukkan No. PO Tabel" oninput="calculate()">
                 </div>
                 <div class="col-12">
                     <label class="small text-danger fw-bold">No. PO di Tabel (Baris Kedua / PPh)</label>
                     <input type="text" id="in_no_po_tabel_sub" class="form-control form-control-sm" placeholder="Kosongkan atau isi No. PO lain..." oninput="calculate()">
-                </div>
-                <div class="col-12">
-                    <label class="small">No. PO Baris Kedua (Opsional / Manual)</label>
-                    <input type="text" id="in_no_po_tabel_sub" class="form-control form-control-sm" placeholder="Kosongkan jika tidak perlu..." oninput="calculate()">
                 </div>
                 <div class="col-12">
                     <label class="small">Product</label>
@@ -174,7 +170,7 @@
 
                 <div class="col-12">
                     <hr class="my-1">
-                    <label class="small text-danger fw-bold">Losis Pengiriman</label>
+                    <label class="small text-danger fw-bold">Pengaturan Losis Pengiriman</label>
                 </div>
                 <div class="col-6">
                     <label class="small">QTY Losis (Liter)</label>
@@ -187,7 +183,7 @@
 
                 <div class="col-12 mt-2">
                     <label class="small">Keterangan Lokasi / Franco</label>
-                    <input type="text" id="in_franco" class="form-control form-control-sm" value="Franco " oninput="calculate()">
+                    <input type="text" id="in_franco" class="form-control form-control-sm" value="Franco Depo OCEAN, Pangkalan Bun" oninput="calculate()">
                 </div>
 
                 <div class="col-12">
@@ -203,7 +199,8 @@
                 <div class="col-12">
                     <label class="small">Term of Delivery</label>
                     <select id="in_delivery" class="form-select form-select-sm" onchange="updateView()">
-                        <option value="Franco">Franco Depo Ocean Indonesia Energy to Pangkalan Bun</option>
+                        <option value="Franco">Franco (Sampai Lokasi Pembeli)</option>
+                        <option value="Locco">Locco (Ambil di Pool/Gudang Penjual)</option>
                     </select>
                 </div>
             </div>
@@ -298,11 +295,11 @@
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="5" class="text-center fw-bold" id="out_tbl_franco">Franco</td>
+                            <td colspan="5" class="text-center fw-bold" id="out_tbl_franco">Franco Depo OCEAN, Pangkalan Bun</td>
                             <td></td>
                         </tr>
                         <tr class="fw-bold" style="border-top: 2px solid #000; border-bottom: 2px solid #000;">
-                            <td colspan="5" class="text-center" style="letter-spacing: 1px; border-bottom: 2px solid #000;">GRAND TOTAL</td>
+                            <td colspan="5" class="text-center" style="letter-spacing: 1px; border-bottom: 2px solid #000;">TOTAL</td>
                             <td class="p-1" style="border-bottom: 2px solid #000;">
                                 <div class="d-flex justify-content-between">
                                     <span>Rp</span>
@@ -471,8 +468,8 @@
         const noUrutPadded = urut.toString().padStart(2, '0');
         const fullNo = `${noUrutPadded}/PO-Transport/KSE/${monthRomawi[m]}/${y}`;
         
+        // HANYA MENGISI NOMOR SURAT UTAMA DI KANAN ATAS (TIDAK LAGI TIMPA NO PO TABEL)
         document.getElementById('in_no').value = fullNo;
-        document.getElementById('in_no_po_tabel').value = fullNo;
         document.getElementById('out_no').innerText = fullNo;
         updateView();
     }
@@ -586,7 +583,7 @@
             const { error: dbErr } = await _supabase.from('eforms').insert([payload]);
             if (dbErr) throw dbErr;
 
-            alert("Berhasil! ");
+            alert("Berhasil! PO & PDF telah tersimpan di Cloud.");
             syncAutoNumber(); 
         } catch (e) { alert("Error: " + e.message); }
         btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN'; btn.disabled = false;
@@ -612,6 +609,7 @@
         document.getElementById('in_tgl_raw').value = `${yyyy}-${mm}-${dd}`;
         loadIssuerInfo();
         handleDateChange();
+        calculate();
     };
 </script>
 </body>
