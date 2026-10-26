@@ -42,12 +42,16 @@
         }
 
         .header-section { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 40px; padding-bottom: 15px; }
-        .logo-container { display: flex; align-items: center; gap: 12px; }
+        
+        /* Pengaturan Header Brand & Teks Dua Baris */
+        .header-brand { display: flex; align-items: center; gap: 12px; }
         .logo-img { height: 55px; width: auto; object-fit: contain; }
-        .brand-title { font-weight: 800; font-size: 18px; color: var(--ide-dark); letter-spacing: 0.5px; line-height: 1.2; font-family: 'Inter', sans-serif; }
+        .brand-text { display: flex; flex-direction: column; line-height: 1.1; font-family: 'Inter', sans-serif; }
+        .brand-title { font-weight: 800; font-size: 25px; color: var(--ide-dark); letter-spacing: 0.5px; }
+        .brand-subtitle { font-weight: 800; font-size: 16px; color: var(--ide-primary); letter-spacing: 1px; }
         
         .doc-identity { text-align: right; line-height: 1.1; }
-        .doc-identity h2 { font-weight: 800; margin: 0; font-size: 28px; color: var(--ide-primary); letter-spacing: 1px; }
+        .doc-identity h2 { font-weight: 800; margin: 0; font-size: 25px; color: var(--ide-primary); letter-spacing: 1px; }
 
         .intro-text { margin-bottom: 20px; line-height: 1.6; font-size: 12px; }
 
