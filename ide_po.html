@@ -1221,29 +1221,3 @@
 </script>
 </body>
 </html>
-
-    function downloadPDF() {
-        const element = document.getElementById('main-doc');
-        const noPo = document.getElementById('in_no').value;
-        const opt = { 
-            margin: 0, filename: `PO-${noPo}.pdf`, image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 }, 
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true } 
-        };
-        html2pdf().set(opt).from(element).save();
-    }
-
-    window.onload = () => {
-        const now = new Date();
-        const yyyy = now.getFullYear();
-        const mm = String(now.getMonth() + 1).padStart(2, '0');
-        const dd = String(now.getDate()).padStart(2, '0');
-        
-        document.getElementById('in_tgl_raw').value = `${yyyy}-${mm}-${dd}`;
-        loadIssuerInfo();
-        handleDateChange();
-        calculate();
-    };
-</script>
-</body>
-</html>
