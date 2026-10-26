@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IDE - INVOICE</title>
+    <title>IDE - INVOICE BCA</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -12,9 +12,10 @@
 
     <style>
         :root { 
-            --kse-dark: #1B1B3A; 
-            --kse-primary: #0d6efd; /* Diubah menjadi warna biru */
-            --kse-accent: #1B1B3A; 
+            --kse-dark: #1e3a8a; 
+            --kse-primary: #0284c7; /* Biru IDE */
+            --kse-accent: #16a34a; /* Hijau IDE */
+            --doc-font: 'Courier Prime', Courier, monospace, sans-serif;
         }
         body { background-color: #f4f7f6; font-family: 'Courier New', Courier, monospace; font-size: 13px; margin: 0; padding: 0; }
         .control-nav { background: #fff; border-bottom: 2px solid #ddd; padding: 10px 20px; position: sticky; top: 0; z-index: 1000; font-family: 'Arial', sans-serif; }
@@ -39,12 +40,12 @@
         /* HEADER & LOGO STYLE MATCHING IMAGE */
         .header-section { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 25px; border-bottom: none; padding-bottom: 0; }
         .logo-container { display: flex; align-items: center; gap: 15px; }
-        .logo-img { height: 55px; width: auto; object-fit: contain; }
+        .logo-img { height: 60px; width: auto; object-fit: contain; }
         .brand-text h1 { 
             font-family: 'Courier New', Courier, monospace; 
             font-weight: 900; 
             font-size: 25px; 
-            color: var(--kse-primary); 
+            color: var(--kse-dark); 
             margin: 0; 
             letter-spacing: 2px;
             text-transform: uppercase; 
@@ -52,17 +53,17 @@
         }
         .brand-text p { 
             font-family: 'Courier New', Courier, monospace;
-            font-size: 18px; 
+            font-size: 16px; 
             margin-top: 4px; 
             margin-bottom: 0;
-            color: var(--kse-dark); 
+            color: var(--kse-primary); 
             font-weight: bold; 
             letter-spacing: 1.5px;
             text-transform: uppercase;
         }
         
         .doc-identity { text-align: right; }
-        .doc-identity h2 { font-family: 'Courier New', Courier, monospace; font-weight: 900; font-style: italic; font-size: 32px; color: var(--kse-primary); margin: 0; letter-spacing: 1px; }
+        .doc-identity h2 { font-family: 'Courier New', Courier, monospace; font-weight: 900; font-style: italic; font-size: 25px; color: var(--kse-primary); margin: 0; letter-spacing: 1px; }
         .doc-identity .sub-doc { font-family: 'Courier New', Courier, monospace; font-size: 12px; font-style: italic; color: #555; font-weight: bold; margin-top: -2px; }
 
         /* TABLE & META RAPI (TIDAK TURUN KE BAWAH) */
