@@ -377,7 +377,7 @@
                     <span class="badge bg-secondary">Item ${index + 1}</span>
                     <button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="removeItemRow(${index})"><i class="bi bi-trash"></i></button>
                 </div>
-                <input type="text" class="form-control form-control-sm mb-1" placeholder="Tujuan Pengiriman" value="${item.tujuan}" oninput="updateItemData(${index}, 'tujuan', this.value)">
+                <textarea class="form-control form-control-sm mb-1" rows="2" placeholder="Tujuan Pengiriman" oninput="updateItemData(${index}, 'tujuan', this.value)">${item.tujuan}</textarea>
                 <div class="row g-1">
                     <div class="col-6">
                         <input type="number" list="list_qty" class="form-control form-control-sm" placeholder="Qty (L)" value="${item.qty || ''}" oninput="updateItemData(${index}, 'qty', this.value)">
@@ -449,7 +449,7 @@
 
         if (headerDesc.trim() !== "") {
             const headerRow = document.createElement('tr');
-            headerRow.innerHTML = `<td colspan="4" class="fw-bold bg-light">${headerDesc}</td>`;
+            headerRow.innerHTML = `<td colspan="4" class="fw-bold bg-light" style="white-space: pre-line;">${headerDesc}</td>`;
             tbody.appendChild(headerRow);
         }
 
@@ -459,7 +459,7 @@
             totalSum += subtotalItem;
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${item.tujuan || '-'}</td>
+                <td style="white-space: pre-line;">${item.tujuan || '-'}</td>
                 <td class="text-center">${formatNumber(item.qty)}</td>
                 <td class="text-end">${formatNumber(item.harga)}</td>
                 <td class="text-end">${formatNumber(subtotalItem)}</td>
@@ -475,7 +475,7 @@
         document.getElementById('out_total_val').innerText = formatRP(totalSum);
         document.getElementById('out_dpp_val').innerText = formatRP(dppLain);
         document.getElementById('out_ppn_val').innerText = formatRP(ppn);
-        document.getElementById('out_pph23_val').innerText = `(${formatRP(ppph23 = pph23)})`;
+        document.getElementById('out_pph23_val').innerText = `(${formatRP(pph23)})`;
         document.getElementById('out_grand_val').innerText = formatRP(grandTotalFinal);
         document.getElementById('out_terbilang').innerText = grandTotalFinal != 0 ? terbilang(grandTotalFinal) + " rupiah" : "-";
         
