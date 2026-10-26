@@ -311,7 +311,7 @@
                             </tr>
                             <tr class="fw-bold" style="background-color: #f8f9fa;">
                                 <td colspan="6" class="text-end py-2 fs-6">GRAND TOTAL</td>
-                                <td colspan="2" class="text-end py-2 fs-6" style="color: var(--ike-primary);"><span id="out_grandtotal">0,00</span></td>
+                                <td colspan="2" class="text-end py-2 fs-6" style="color: var(--kse-primary);"><span id="out_grandtotal">0,00</span></td>
                             </tr>
                         </tbody>
                     </table>
@@ -536,36 +536,66 @@
         if (thPph) thPph.innerText = p_pph > 0 ? `PPH ${p_pph}%` : "PPH";
 
         // Update Label samping Rincian dengan nominal persentase (satu baris)
-        const lblPpn = document.getElementById('lbl_ppn');
+        const lblPpn = document.getElementById('out_break_ppn_lbl');
         if (lblPpn) lblPpn.innerText = p_ppn > 0 ? `PPN ${p_ppn}%` : "PPN";
-        const lblPbbkb = document.getElementById('lbl_pbbkb');
+        const lblPbbkb = document.getElementById('out_break_pbbkb_lbl');
         if (lblPbbkb) lblPbbkb.innerText = p_pbbkb > 0 ? `PBBKB ${p_pbbkb}%` : "PBBKB";
-        const lblPph = document.getElementById('lbl_pph');
+        const lblPph = document.getElementById('out_break_pph_lbl');
         if (lblPph) lblPph.innerText = p_pph > 0 ? `PPH ${p_pph}%` : "PPH";
 
-        document.getElementById('out_qty').innerText = qty.toLocaleString('id-ID');
-        document.getElementById('out_harga').innerText = hargaDasar.toLocaleString('id-ID', f);
-        document.getElementById('out_ppn').innerText = p_ppn > 0 ? v_ppn.toLocaleString('id-ID', f) : "0,00";
-        document.getElementById('out_pbbkb').innerText = p_pbbkb > 0 ? v_pbbkb.toLocaleString('id-ID', f) : "0,00";
-        document.getElementById('out_pph').innerText = p_pph > 0 ? v_pph.toLocaleString('id-ID', f) : "0,00";
-        document.getElementById('out_perltr').innerText = hargaNet.toLocaleString('id-ID', f);
+        const elOutQty = document.getElementById('out_qty');
+        if (elOutQty) elOutQty.innerText = qty.toLocaleString('id-ID');
+        
+        const elOutHarga = document.getElementById('out_harga');
+        if (elOutHarga) elOutHarga.innerText = hargaDasar.toLocaleString('id-ID', f);
+        
+        const elOutPpn = document.getElementById('out_ppn');
+        if (elOutPpn) elOutPpn.innerText = p_ppn > 0 ? v_ppn.toLocaleString('id-ID', f) : "0,00";
+        
+        const elOutPbbkb = document.getElementById('out_pbbkb');
+        if (elOutPbbkb) elOutPbbkb.innerText = p_pbbkb > 0 ? v_pbbkb.toLocaleString('id-ID', f) : "0,00";
+        
+        const elOutPph = document.getElementById('out_pph');
+        if (elOutPph) elOutPph.innerText = p_pph > 0 ? v_pph.toLocaleString('id-ID', f) : "0,00";
+        
+        const elOutPerltr = document.getElementById('out_perltr');
+        if (elOutPerltr) elOutPerltr.innerText = hargaNet.toLocaleString('id-ID', f);
         
         // Update nilai per liter untuk masing-masing item
-        document.getElementById('out_sat_hd').innerText = hargaDasar.toLocaleString('id-ID', f);
-        document.getElementById('out_sat_ppn').innerText = p_ppn > 0 ? v_ppn.toLocaleString('id-ID', f) : "0,00";
-        document.getElementById('out_sat_pbbkb').innerText = p_pbbkb > 0 ? v_pbbkb.toLocaleString('id-ID', f) : "0,00";
-        document.getElementById('out_sat_pph').innerText = p_pph > 0 ? v_pph.toLocaleString('id-ID', f) : "0,00";
+        const elBreakHdLtr = document.getElementById('out_break_hd_ltr');
+        if (elBreakHdLtr) elBreakHdLtr.innerText = hargaDasar.toLocaleString('id-ID', f);
+        
+        const elBreakPpnLtr = document.getElementById('out_break_ppn_ltr');
+        if (elBreakPpnLtr) elBreakPpnLtr.innerText = p_ppn > 0 ? v_ppn.toLocaleString('id-ID', f) : "0,00";
+        
+        const elBreakPbbkbLtr = document.getElementById('out_break_pbbkb_ltr');
+        if (elBreakPbbkbLtr) elBreakPbbkbLtr.innerText = p_pbbkb > 0 ? v_pbbkb.toLocaleString('id-ID', f) : "0,00";
+        
+        const elBreakPphLtr = document.getElementById('out_break_pph_ltr');
+        if (elBreakPphLtr) elBreakPphLtr.innerText = p_pph > 0 ? v_pph.toLocaleString('id-ID', f) : "0,00";
 
         // Update nilai total perkalian dengan Qty
-        document.getElementById('out_tot_hd').innerText = totHD.toLocaleString('id-ID', f);
-        document.getElementById('out_tot_ppn').innerText = totPPN.toLocaleString('id-ID', f);
-        document.getElementById('out_tot_pbbkb').innerText = totPBBKB.toLocaleString('id-ID', f);
-        document.getElementById('out_tot_pph').innerText = totPPH.toLocaleString('id-ID', f);
+        const elBreakHdTot = document.getElementById('out_break_hd_tot');
+        if (elBreakHdTot) elBreakHdTot.innerText = totHD.toLocaleString('id-ID', f);
+        
+        const elBreakPpnTot = document.getElementById('out_break_ppn_tot');
+        if (elBreakPpnTot) elBreakPpnTot.innerText = totPPN.toLocaleString('id-ID', f);
+        
+        const elBreakPbbkbTot = document.getElementById('out_break_pbbkb_tot');
+        if (elBreakPbbkbTot) elBreakPbbkbTot.innerText = totPBBKB.toLocaleString('id-ID', f);
+        
+        const elBreakPphTot = document.getElementById('out_break_pph_tot');
+        if (elBreakPphTot) elBreakPphTot.innerText = totPPH.toLocaleString('id-ID', f);
 
         const gTotalVal = Math.round(total);
-        document.getElementById('out_total').innerText = gTotalVal.toLocaleString('id-ID', f);
-        document.getElementById('out_grandtotal').innerText = gTotalVal.toLocaleString('id-ID', f);
-        document.getElementById('out_terbilang').innerText = (terbilang(gTotalVal) || "NOL").trim().toUpperCase();
+        const elOutTotal = document.getElementById('out_total');
+        if (elOutTotal) elOutTotal.innerText = gTotalVal.toLocaleString('id-ID', f);
+        
+        const elOutGrandTotal = document.getElementById('out_grandtotal');
+        if (elOutGrandTotal) elOutGrandTotal.innerText = gTotalVal.toLocaleString('id-ID', f);
+        
+        const elOutTerbilang = document.getElementById('out_terbilang');
+        if (elOutTerbilang) elOutTerbilang.innerText = (terbilang(gTotalVal) || "NOL").trim().toUpperCase();
         
         updateView();
     }
