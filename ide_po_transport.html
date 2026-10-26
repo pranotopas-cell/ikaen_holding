@@ -42,7 +42,10 @@
         }
 
         .header-section { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 40px; padding-bottom: 15px; }
+        .logo-container { display: flex; align-items: center; gap: 12px; }
         .logo-img { height: 55px; width: auto; object-fit: contain; }
+        .brand-title { font-weight: 800; font-size: 18px; color: var(--ide-dark); letter-spacing: 0.5px; line-height: 1.2; font-family: 'Inter', sans-serif; }
+        
         .doc-identity { text-align: right; line-height: 1.1; }
         .doc-identity h2 { font-weight: 800; margin: 0; font-size: 28px; color: var(--ide-primary); letter-spacing: 1px; }
 
@@ -209,7 +212,10 @@
         <div class="col-lg-9 p-0" id="pdf-area">
             <div class="document-canvas" id="main-doc">
                 <div class="header-section">
-                    <img src="ide1.png" class="logo-img" onerror="this.src='https://via.placeholder.com/200x60?text=IDE+LOGO'">
+                    <div class="logo-container">
+                        <img src="ide1.png" class="logo-img" onerror="this.style.display='none'">
+                        <span class="brand-title">PT. INDO DHARMA ENERGI</span>
+                    </div>
                     <div class="doc-identity">
                         <h2>PURCHASE ORDER</h2>
                         <span class="lang-en text-uppercase">Electronic Purchase Order System</span>
