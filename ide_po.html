@@ -3,37 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IDE - Purchase Order </title>
+    <title>KSE - Purchase Order </title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         :root { 
             --ide-dark: #1e3a8a; 
-            --ide-primary: #2563eb; /* Biru */
-            --ide-accent: #16a34a; /* Hijau */
+            --ide-primary: #0284c7; /* Biru IDE */
+            --ide-accent: #16a34a; /* Hijau IDE */
             --doc-font: 'Courier Prime', Courier, monospace, sans-serif;
         }
         
         body { background-color: #f4f7f6; font-family: var(--doc-font); font-size: 13px; margin: 0; padding: 0; }
         
-        .input-sidebar input, .input-sidebar textarea, .input-sidebar select, .input-sidebar label {
-            font-family: 'Courier Prime', Courier, monospace !important;
-        }
-
-        .control-nav { background: #fff; border-bottom: 2px solid #ddd; padding: 10px 20px; position: sticky; top: 0; z-index: 1000; font-family: 'Inter', sans-serif; }
-        .input-sidebar { background: #fff; height: auto; overflow-y: visible; padding: 25px; border-right: 1px solid #ddd; }
+        .control-nav { background: #fff; border-bottom: 2px solid #ddd; padding: 10px 20px; position: sticky; top: 0; z-index: 1000; }
+        .input-sidebar { background: #fff; height: calc(100vh - 60px); overflow-y: auto; padding: 25px; border-right: 1px solid #ddd; }
         
         #pdf-area { background: #f4f7f6; padding: 40px 0; }
 
         .document-canvas { 
             background: white; 
             width: 210mm; 
-            height: 296mm; 
+            min-height: 296mm; 
             margin: 0 auto; 
             padding: 10mm 15mm 10mm 15mm; 
             position: relative;
@@ -41,89 +37,91 @@
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            overflow: hidden; 
             color: #222;
-            font-family: 'Courier Prime', Courier, monospace !important;
         }
 
-        .doc-watermark {
-            position: absolute;
-            top: 40%;
-            left: 80%;
-            transform: translate(-50%, -50%);
-            width: 950px;
-            opacity: 0.06;
-            filter: grayscale(100%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .header-section, .row, .intro-text, .table-po, .terbilang-box, .destination-box, .footer-ide {
-            position: relative;
-            z-index: 1;
-        }
-
-        .header-section { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 40px; padding-bottom: 15px; }
-        .header-brand { display: flex; align-items: center; gap: 12px; }
-        .logo-img { height: 60px; width: auto; object-fit: contain; }
-        .brand-text { display: flex; flex-direction: column; line-height: 1.15; }
-        .brand-title { font-weight: 800; font-size: 25px; color: var(--ide-primary); letter-spacing: 0.5px; text-transform: uppercase; }
-        .brand-subtitle { font-weight: 700; font-size: 18px; color: var(--ide-accent); letter-spacing: 0.5px; text-transform: uppercase; }
-
+        .header-section { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 30px; padding-bottom: 15px; }
+        .logo-img { height: 40px; width: auto; object-fit: contain; }
         .doc-identity { text-align: right; line-height: 1.1; }
-        .doc-identity h2 { font-weight: 800; margin: 0; font-size: 24px; color: var(--ide-primary); letter-spacing: 1px; }
+        .doc-identity h2 { font-weight: 800; margin: 0; font-size: 20px; color: var(--kse-primary); letter-spacing: 1px; }
 
-        .intro-text { margin-bottom: 20px; line-height: 1.6; font-size: 12px; }
+        .intro-text { margin-bottom: 15px; line-height: 1.6; font-size: 12px; }
 
         .table-po { width: 100%; border-collapse: collapse; margin-top: 5px; border: 1.5px solid #000; table-layout: fixed; }
         .table-po th { 
-            background-color: var(--ide-primary) !important; 
+            background-color: #1a3c15;
             color: white !important; 
-            padding: 12px 6px; 
+            padding: 10px 4px; 
             border: 1px solid #000; 
             text-align: center; 
             font-size: 10px; 
             text-transform: uppercase; 
             letter-spacing: 0.5px;
-            font-family: 'Courier Prime', Courier, monospace !important;
         }
-        .table-po td { border: 1px solid #000; padding: 12px 8px; vertical-align: middle; font-size: 11.5px; line-height: 1.4; }
+        .table-po td { border: 1px solid #000; padding: 8px 6px; vertical-align: middle; font-size: 11px; line-height: 1.4; }
         
         .table-clean td { border: none !important; padding: 2px 0; vertical-align: middle; font-size: 11px; white-space: nowrap; }
         .lang-en { font-style: italic; font-size: 9px; color: #777; display: inline-block; margin-left: 4px; font-weight: 400; }
+
+        /* Mencegah teks terpotong / berpindah ke bawah */
+        .calc-row td { 
+            padding: 5px 4px; 
+            font-size: 10.5px; 
+            border-top: none !important;
+            border-bottom: none !important;
+        }
+        .calc-label-col {
+            text-align: center;
+            font-weight: 700;
+            font-size: 9.5px;
+            white-space: nowrap !important; /* Agar teks % tidak turun ke bawah */
+            padding-left: 2px !important;
+            padding-right: 2px !important;
+        }
 
         .terbilang-box { 
             border: 1.5px solid #000; 
             border-top: none; 
             padding: 12px 15px; 
-            background-color: rgba(249, 249, 249, 0.85); 
+            background-color: #f9f9f9; 
             font-style: italic; 
             font-weight: 600; 
-            margin-bottom: 15px;
-            font-size: 12px;
-            line-height: 1.4;
-        }
-
-        .destination-box {
-            border: 1.5px solid #000;
-            padding: 12px 15px;
-            background-color: rgba(255, 255, 255, 0.85);
             margin-bottom: 20px;
-            font-size: 12px;
+            font-size: 11.5px;
             line-height: 1.4;
         }
 
-        .footer-ide { margin-top: auto; border-top: 2px solid  #16a34a; padding-top: 15px; padding-bottom: 5px; }
+        .footer-kse { margin-top: auto; border-top: 2px solid var(--kse-primary); padding-top: 15px; padding-bottom: 5px; }
         .footer-grid { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 15px; }
 
         label.small { font-weight: 700; color: #444; margin-bottom: 4px; display: block; }
 
         @media print {
-            body { background: none; }
+            body { background: none; height: auto !important; overflow: auto !important; }
             .control-nav, .input-sidebar { display: none !important; }
             .col-lg-9 { width: 100% !important; margin: 0 !important; padding: 0 !important; }
             #pdf-area { padding: 0 !important; }
-            .document-canvas { margin: 0 !important; box-shadow: none !important; width: 100% !important; height: 100% !important; }
+            
+            html, body {
+                height: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .document-canvas { 
+                margin: 0 !important; 
+                box-shadow: none !important; 
+                width: 100% !important; 
+                min-height: 100vh !important;
+                height: 100% !important;
+                display: flex !important;
+                flex-direction: column !important;
+            }
+
+            .footer-kse {
+                margin-top: auto !important;
+                page-break-inside: avoid !important;
+            }
         }
     </style>
 </head>
@@ -131,7 +129,7 @@
 
 <div class="control-nav shadow-sm d-flex justify-content-between align-items-center">
     <div class="d-flex gap-2">
-        <a href="index.html" class="btn btn-outline-primary btn-sm fw-bold" style="color: var(--ide-primary); border-color: var(--ide-primary);"><i class="bi bi-house"></i> HOME</a>
+        <a href="index.html" class="btn btn-outline-success btn-sm fw-bold"><i class="bi bi-house"></i> HOME</a>
         <button class="btn btn-outline-secondary btn-sm" onclick="syncAutoNumber()"><i class="bi bi-arrow-clockwise"></i> SYNC DB NO</button>
     </div>
     <div class="d-flex gap-2">
@@ -139,20 +137,20 @@
         <button class="btn btn-warning btn-sm fw-bold px-3" onclick="saveToSupabase()" id="btn-save-sb">
             <i class="bi bi-cloud-arrow-up"></i> SIMPAN
         </button>
-        <button class="btn btn-sm fw-bold px-3 text-white" style="background-color: var(--ide-accent);" onclick="downloadPDF()"><i class="bi bi-download"></i> DOWNLOAD</button>
+        <button class="btn btn-primary btn-sm fw-bold px-3" onclick="downloadPDF()"><i class="bi bi-download"></i> DOWNLOAD</button>
     </div>
 </div>
 
 <div class="container-fluid">
     <div class="row">
         <div class="col-lg-3 input-sidebar shadow-sm">
-            <h6 class="fw-bold mb-4 border-bottom pb-2" style="color: var(--ide-primary);"><i class="bi bi-pencil-square"></i> FORM INPUT PO</h6>
+            <h6 class="fw-bold mb-4 text-success border-bottom pb-2"><i class="bi bi-pencil-square"></i> FORM INPUT PO</h6>
             <div class="row g-3">
                 <div class="col-12">
-                    <label class="small" style="color: var(--ide-primary);">Nomor Urut</label>
+                    <label class="small text-primary">Nomor Urut</label>
                     <div class="input-group input-group-sm">
-                        <input type="number" id="in_no_urut" class="form-control fw-bold" style="border-color: var(--ide-primary);" value="1" oninput="formatFullNumber()">
-                        <span class="input-group-text">/PO-BBM/IDE/...</span>
+                        <input type="number" id="in_no_urut" class="form-control fw-bold border-primary" value="1" oninput="formatFullNumber()">
+                        <span class="input-group-text">/PO-BBM/KSE/...</span>
                     </div>
                     <input type="hidden" id="in_no">
                 </div>
@@ -166,32 +164,28 @@
                     <datalist id="list_cust">
                         <option value="PT. TELADAN MAKMUR JAYA">
                         <option value="PT. OCEAN INDONESIA ENERGY">
-                        <option value="PT. GLOBAL BORNEO ENERGI"> 
+                        <option value="PT. GLOBAL BORNEO ENERGI">
                     </datalist>
                 </div>
                 <div class="col-12">
-                    <label class="small">Alamat</label>
-                    <textarea id="in_addr" class="form-control form-control-sm" rows="2" oninput="updateView()"></textarea>
+                    <label class="small">Alamat </label>
+                    <textarea id="in_addr" class="form-control form-control-sm" rows="3" oninput="updateView()"></textarea>
                 </div>
-                <div class="col-12">
-                    <label class="small" style="color: var(--ide-accent);">Tujuan Pengiriman</label>
-                    <textarea id="in_destination" class="form-control form-control-sm" rows="2" placeholder="Masukkan lokasi/alamat tujuan pengiriman..." oninput="updateView()"></textarea>
-                </div>
-                <hr class="my-1">
+                <hr class="my-2">
                 <div class="col-12">
                     <label class="small">Nama Barang</label>
-                    <input list="list_barang" id="in_barang" class="form-control form-control-sm" value="BIO SOLAR B50" oninput="updateView()">
+                    <input list="list_barang" id="in_barang" class="form-control form-control-sm" value="BIO SOLAR (B50)" oninput="updateView()">
                     <datalist id="list_barang">
-                        <option value="BIO DIESEL PETRO 4 ">
+                        <option value="BBM SOLAR INDUSTRI">
                         <option value="BIO SOLAR ( B50 )">
                     </datalist>
                 </div>
                 <div class="col-6">
-                    <label class="small" style="color: var(--ide-primary);">Harga Beli</label>
-                    <input type="number" id="in_hargaperliter" class="form-control form-control-sm" style="border-color: var(--ide-primary);" value="" oninput="calculate()">
+                    <label class="small text-success">Harga Beli (Total/Ltr)</label>
+                    <input type="number" id="in_perltr" class="form-control form-control-sm border-success" value="" oninput="calculate()">
                 </div>
                 <div class="col-6">
-                    <label class="small">Qty</label>
+                    <label class="small">Qty (Ltr)</label>
                     <input type="number" id="in_qty" class="form-control form-control-sm" value="" oninput="calculate()">
                 </div>
                 
@@ -201,11 +195,11 @@
                 </div>
                 <div class="col-4">
                     <label class="small">PBBKB %</label>
-                    <input type="number" step="0.1" id="in_pbbkb_pct" class="form-control form-control-sm" value="7.5" oninput="calculate()">
+                    <input type="number" step="0.1" id="in_pbbkb_pct" class="form-control form-control-sm" value="0" oninput="calculate()">
                 </div>
                 <div class="col-4">
                     <label class="small">PPH %</label>
-                    <input type="number" step="0.1" id="in_pph_pct" class="form-control form-control-sm" value="0.3" oninput="calculate()">
+                    <input type="number" step="0.1" id="in_pph_pct" class="form-control form-control-sm" value="0" oninput="calculate()">
                 </div>
 
                 <div class="col-12">
@@ -230,11 +224,11 @@
 
         <div class="col-lg-9 p-0" id="pdf-area">
             <div class="document-canvas" id="main-doc">
-                <img src="ide1.png" class="doc-watermark" onerror="this.style.display='none'">
-
                 <div class="header-section">
+
+                   <div class="header-section">
                     <div class="header-brand">
-                        <img src="ide1.png" class="logo-img" onerror="this.src='https://via.placeholder.com/200x60?text=IDE+LOGO'">
+                        <img src="ide1.png" class="logo-img"onerror="this.src='https://via.placeholder.com/200x60?text=IDE+LOGO'">
                         <div class="brand-text">
                             <span class="brand-title">INDO DHARMA</span>
                             <span class="brand-subtitle">ENERGI</span>
@@ -246,11 +240,11 @@
                     </div>
                 </div>
 
-                <div class="row mb-4">
+                <div class="row mb-3">
                     <div class="col-7">
-                        <p class="mb-2" style="font-size: 12px;">Kepada yang kami hormati,</p>
-                        <h6 class="fw-bold mb-1 text-uppercase" id="out_cust" style="font-size: 16px; color: var(--ide-primary); letter-spacing: 0.5px;">-</h6>
-                        <p id="out_addr" class="mb-0 mt-1" style="white-space: pre-line; line-height: 1.5; font-size: 12px;">-</p>
+                        <p class="mb-2" style="font-size: 12px;">Kepada :</p>
+                        <h6 class="fw-bold mb-1 text-uppercase" id="out_cust" style="font-size: 15px; color: var(--kse-primary); letter-spacing: 0.5px;">-</h6>
+                        <p id="out_addr" class="mb-0 mt-1" style="white-space: pre-line; line-height: 1.5; font-size: 11.5px;">-</p>
                     </div>
                     <div class="col-5">
                         <table class="table table-sm table-clean mb-0" style="width: 100%;">
@@ -262,7 +256,7 @@
                             <tr>
                                 <td class="fw-bold">NOMOR PO<span class="lang-en">PO No.</span></td>
                                 <td style="text-align: center;">:</td>
-                                <td id="out_no" class="fw-bold text-end" style="width: 57%; color: var(--ide-primary);"></td>
+                                <td id="out_no" class="fw-bold text-end" style="width: 57%; color: var(--kse-primary);"></td>
                             </tr>
                         </table>
                     </div>
@@ -276,47 +270,67 @@
                 <table class="table-po">
                     <thead>
                         <tr>
-                            <th width="22%">NAMA BARANG</th>
+                            <th width="20%">NAMA BARANG</th>
                             <th width="10%">QTY (Ltr)</th>
                             <th width="12%">HARGA DASAR</th>
-                            <th id="th_ppn" width="9%">PPN</th>
-                            <th id="th_pbbkb" width="9%">PBBKB</th>
-                            <th id="th_pph" width="9%">PPH</th>
-                            <th width="11%">PER LTR</th>
-                            <th width="18%">TOTAL</th>
+                            <th id="th_ppn" width="10%">PPN</th>
+                            <th id="th_pbbkb" width="10%">PBBKB</th>
+                            <th id="th_pph" width="15%">PPH</th>
+                            <th width="15%">PER LTR</th>
+                            <th width="17%">TOTAL</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="fw-bold text-uppercase" id="out_barang" style="font-size: 10.5px; height: 60px;"></td>
+                            <td class="fw-bold text-uppercase" id="out_barang" style="font-size: 10.5px; height: 40px;"></td>
                             <td class="text-center" id="out_qty">0</td>
-                            <td class="text-center" id="out_harga">0,0</td>
-                            <td class="text-center" id="out_ppn">0,0</td>
-                            <td class="text-center" id="out_pbbkb">0,0</td>
-                            <td class="text-center" id="out_pph">0,0</td>
-                            <td class="text-center fw-bold" id="out_perltr">0,0</td>
-                            <td class="text-end fw-bold"> <span id="out_total">0,0</span></td>
+                            <td class="text-center" id="out_harga">0,00</td>
+                            <td class="text-center" id="out_ppn">0,00</td>
+                            <td class="text-center" id="out_pbbkb">0,00</td>
+                            <td class="text-center" id="out_pph">0,00</td>
+                            <td class="text-center fw-bold" id="out_perltr">0,00</td>
+                            <td class="text-end fw-bold"><span id="out_total">0,00</span></td>
                         </tr>
-                        <tr class="fw-bold" style="background-color: #f2f2f2; font-size: 15px;">
-                            <td colspan="7" class="text-end p-3">GRAND TOTAL</td>
-                            <td class="text-end p-3" style="color: var(--ide-primary);"> <span id="out_grandtotal">0,00</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-
+                        
+                       <!-- Baris Rincian Tanpa Garis Vertikal dan Horizontal di Tengah -->
+                            <tr class="no-border-row">
+                                <td colspan="5" class="no-border-right" style="border-right: none !important; border-top: none !important; border-bottom: none !important;"></td>
+                                <td class="text-end fw-bold no-border-left" style="white-space: nowrap; border-left: none !important; border-top: none !important; border-bottom: none !important;">HD</td>
+                                <td class="text-end" id="out_break_hd_ltr" style="border-top: none !important; border-bottom: none !important;">0,00</td>
+                                <td class="text-end" id="out_break_hd_tot" style="border-top: none !important; border-bottom: none !important;">0,00</td>
+                            </tr>
+                            <tr class="no-border-row">
+                                <td colspan="5" class="no-border-right" style="border-right: none !important; border-top: none !important; border-bottom: none !important;"></td>
+                                <td class="text-end fw-bold no-border-left" id="out_break_ppn_lbl" style="white-space: nowrap; border-left: none !important; border-top: none !important; border-bottom: none !important;">PPN 11%</td>
+                                <td class="text-end" id="out_break_ppn_ltr" style="border-top: none !important; border-bottom: none !important;">0,00</td>
+                                <td class="text-end" id="out_break_ppn_tot" style="border-top: none !important; border-bottom: none !important;">0,00</td>
+                            </tr>
+                            <tr class="no-border-row">
+                                <td colspan="5" class="no-border-right" style="border-right: none !important; border-top: none !important; border-bottom: none !important;"></td>
+                                <td class="text-end fw-bold no-border-left" id="out_break_pbbkb_lbl" style="white-space: nowrap; border-left: none !important; border-top: none !important; border-bottom: none !important;">PBBKB 7.5%</td>
+                                <td class="text-end" id="out_break_pbbkb_ltr" style="border-top: none !important; border-bottom: none !important;">0,00</td>
+                                <td class="text-end" id="out_break_pbbkb_tot" style="border-top: none !important; border-bottom: none !important;">0,00</td>
+                            </tr>
+                            <tr class="no-border-row">
+                                <td colspan="5" class="no-border-right" style="border-right: none !important; border-top: none !important; border-bottom: none !important;"></td>
+                                <td class="text-end fw-bold no-border-left" id="out_break_pph_lbl" style="white-space: nowrap; border-left: none !important; border-top: none !important; border-bottom: none !important;">PPH 0.3%</td>
+                                <td class="text-end" id="out_break_pph_ltr" style="border-top: none !important; border-bottom: none !important;">0,00</td>
+                                <td class="text-end" id="out_break_pph_tot" style="border-top: none !important; border-bottom: none !important;">0,00</td>
+                            </tr>
+                            <tr class="fw-bold" style="background-color: #f8f9fa;">
+                                <td colspan="6" class="text-end py-2 fs-6">GRAND TOTAL</td>
+                                <td colspan="2" class="text-end py-2 fs-6" style="color: var(--kse-primary);"><span id="out_grandtotal">0,00</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                
                 <div class="terbilang-box">
                     Terbilang: # <span id="out_terbilang">NOL</span> RUPIAH #
                 </div>
-
-                <div class="destination-box">
-                    <b style="color: var(--ide-primary);">TUJUAN PENGIRIMAN:</b><br>
-                    <span id="out_destination" style="white-space: pre-line; color: #333;">-</span>
-                </div>
-
-                <div class="mt-1" style="font-size: 12px; line-height: 1.5;">
-                    <p class="mb-1">Term of Payment : <b id="out_pay" class=""></b></p>
-                    <p class="mb-1">Term of Delivery : <b id="out_delivery" class=""></b></p>
-                    <p class="mt-1">Demikian kami sampaikan, mohon di bantu untuk prosesnya, atas perhatian dan kerjasamanya kami ucapkan terima kasih.</p>
+                <div class="mt-2" style="font-size: 12px; line-height: 1.6;">
+                    <p class="mb-1">Term of Payment : <b id="out_pay"></b></p>
+                    <p class="mb-1">Term of Delivery : <b id="out_delivery"></b></p>
+                    <p class="mt-2">Demikian kami sampaikan, mohon di bantu untuk prosesnya, atas perhatian dan kerjasamanya kami ucapkan terima kasih.</p>
                 </div>
 
                 <div class="row mt-2">
@@ -353,39 +367,18 @@
 </div>
 
 <script>
-    // --- KONFIGURASI ---
     const CUSTOMER_DATABASE = {
-        "PT. TELADAN MAKMUR JAYA": "Jl.Hksn no.23 Alalak Utara ,Banjarmasin - Kalimantan Selatan. \nUp: Ibu amel",
-        "PT. OCEAN INDONESIA ENERGY": "Jl. Alalak Utara RT.016 Kel.Alalak Utara , \nBanjarmasin - Kalimantan Selatan.\nUp.Ibu Yuliana",
-        "PT. GLOBAL BORNEO ENERGI": "Jl. Hasan Basri Komp.Ruko Kayu Tangi  ,\nBanjarmasin - Kalimantan Selatan.\nUp.Bpk.Abd.Muthalib"
+        "PT. TELADAN MAKMUR JAYA": "Up.Ibu Amel \nJl.Hksn no.23 Alalak Utara ,Banjarmasin - Kalimantan Selatan.",
+        "PT. OCEAN INDONESIA ENERGY": "Up.Ibu Yuliana \nJl. Alalak Utara RT.016 Kel.Alalak Utara , \nBanjarmasin - Kalimantan Selatan.",
+        "PT. GLOBAL BORNEO ENERGI": "Up.Bpk Abd Munthalib \nJl. Hasan Basri Komp.Ruko Kayu Tangi  ,\nBanjarmasin - Kalimantan Selatan."
     };
+
     const SB_URL = "https://qlsvvxfykteqxzcppnfv.supabase.co"; 
     const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsc3Z2eGZ5a3RlcXh6Y3BwbmZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0MDc5OTMsImV4cCI6MjEwNzk4Mzk5M30.jpxErPZSL0sJ4PakUSt8tCxHKHXpmA6CFL9sirbLV2I";
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
     const monthRomawi = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
     const monthsIndo = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
-
-    // Fungsi membaca informasi user aktif dari localStorage
-    function loadIssuerInfo() {
-        let issuerName = localStorage.getItem('holding_user_name');
-        let issuerRole = localStorage.getItem('holding_user_role');
-        let isLoggedIn = localStorage.getItem('holding_is_logged_in');
-
-        if (!isLoggedIn || !issuerName) {
-            issuerName = "Nurhamida";
-            issuerRole = "Direktur";
-        }
-
-        const fullIssuerText = `${issuerName}`;
-        const issuerEl = document.getElementById('footer_issued_by');
-        if (issuerEl) {
-            issuerEl.innerText = fullIssuerText;
-        }
-        return fullIssuerText;
-    }
-
-    // --- FUNGSI LOGIKA ---
 
     function terbilang(angka) {
         angka = Math.floor(Math.abs(angka));
@@ -403,9 +396,28 @@
         return temp;
     }
 
+    // Fungsi membaca informasi user aktif dari localStorage
+    function loadIssuerInfo() {
+        let issuerName = localStorage.getItem('holding_user_name') || localStorage.getItem('user_name') || localStorage.getItem('nama');
+
+        if (!issuerName) {
+            issuerName = "Ela Yuliana"; // Default fallback jika belum login
+        }
+
+        const issuerEl = document.getElementById('footer_issued_by');
+        if (issuerEl) {
+            issuerEl.innerText = issuerName;
+        }
+        return issuerName;
+    }
+
+    function formatIDR(val) {
+        return parseFloat(val).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
     async function syncAutoNumber() {
         try {
-            const tglVal = document.getElementById('in_tgl_raw').value;
+            const tglVal = document.getElementById('in_tgl_raw')?.value;
             let m, y;
             if (tglVal) {
                 const parts = tglVal.split('-');
@@ -443,7 +455,8 @@
             }
 
             const nextNum = maxNum + 1;
-            document.getElementById('in_no_urut').value = nextNum;
+            const elUrut = document.getElementById('in_no_urut');
+            if (elUrut) elUrut.value = nextNum;
             formatFullNumber();
         } catch (err) { 
             console.error("Gagal Sync Nomor:", err); 
@@ -452,8 +465,8 @@
     }
 
     function formatFullNumber() {
-        const urut = document.getElementById('in_no_urut').value || "1";
-        const tglVal = document.getElementById('in_tgl_raw').value;
+        const urut = document.getElementById('in_no_urut')?.value || "1";
+        const tglVal = document.getElementById('in_tgl_raw')?.value;
         
         let m, y;
         if (tglVal) {
@@ -469,13 +482,15 @@
         const noUrutPadded = urut.toString().padStart(3, '0');
         const fullNo = `${noUrutPadded}/PO-BBM/IDE/${monthRomawi[m]}/${y}`;
         
-        document.getElementById('in_no').value = fullNo;
-        document.getElementById('out_no').innerText = fullNo;
+        const elNo = document.getElementById('in_no');
+        if (elNo) elNo.value = fullNo;
+        const outNo = document.getElementById('out_no');
+        if (outNo) outNo.innerText = fullNo;
         updateView();
     }
 
     function handleDateChange() {
-        const val = document.getElementById('in_tgl_raw').value;
+        const val = document.getElementById('in_tgl_raw')?.value;
         if (!val) return;
         
         const parts = val.split('-');
@@ -483,80 +498,149 @@
         const m = parseInt(parts[1], 10) - 1;
         const d = parseInt(parts[2], 10);
 
-        document.getElementById('out_tgl').innerText = `${d.toString().padStart(2, '0')} ${monthsIndo[m]} ${y}`;
+        const outTgl = document.getElementById('out_tgl');
+        if (outTgl) outTgl.innerText = `${d.toString().padStart(2, '0')} ${monthsIndo[m]} ${y}`;
         syncAutoNumber();
     }
 
     function handleCustChange() {
-        const custName = document.getElementById('in_cust').value;
-        if (CUSTOMER_DATABASE[custName]) {
-            document.getElementById('in_addr').value = CUSTOMER_DATABASE[custName];
+        const custName = document.getElementById('in_cust')?.value;
+        if (custName && CUSTOMER_DATABASE[custName]) {
+            const addrEl = document.getElementById('in_addr');
+            if (addrEl) addrEl.value = CUSTOMER_DATABASE[custName];
         }
         updateView();
     }
 
     function calculate() {
-        const qty = parseFloat(document.getElementById('in_qty').value) || 0;
-        const hargaPerLiter = parseFloat(document.getElementById('in_hargaperliter').value) || 0;
+        const qty = parseFloat(document.getElementById('in_qty')?.value) || 0;
+        const hargaNet = parseFloat(document.getElementById('in_perltr')?.value) || 0;
         
-        const p_ppn = parseFloat(document.getElementById('in_ppn_pct').value) || 0;
-        const p_pbbkb = parseFloat(document.getElementById('in_pbbkb_pct').value) || 0;
-        const p_pph = parseFloat(document.getElementById('in_pph_pct').value) || 0;
+        const p_ppn = parseFloat(document.getElementById('in_ppn_pct')?.value) || 0;
+        const p_pbbkb = parseFloat(document.getElementById('in_pbbkb_pct')?.value) || 0;
+        const p_pph = parseFloat(document.getElementById('in_pph_pct')?.value) || 0;
 
-        // Hitung Harga Dasar otomatis dari Harga per Liter (harga beli / 111%)
-        const totalPct = 1 + ((p_ppn + p_pbbkb + p_pph) / 100);
-        const hargaDasar = totalPct > 0 ? (hargaPerLiter / totalPct) : 0;
-
+        const totalPajakPct = (p_ppn + p_pbbkb + p_pph) / 100;
+        const hargaDasar = totalPajakPct > 0 ? (hargaNet / (1 + totalPajakPct)) : hargaNet;
+        
         const v_ppn = hargaDasar * (p_ppn / 100);
         const v_pbbkb = hargaDasar * (p_pbbkb / 100);
         const v_pph = hargaDasar * (p_pph / 100);
+
+        // Kalkulasi perkalian x Qty
+        const totHD = hargaDasar * qty;
+        const totPPN = v_ppn * qty;
+        const totPBBKB = v_pbbkb * qty;
+        const totPPH = v_pph * qty;
         
-        const hargaNet = hargaDasar + v_ppn + v_pbbkb + v_pph;
         const total = qty * hargaNet;
 
         const f = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
         
-        document.getElementById('th_ppn').innerText = p_ppn > 0 ? `PPN ${p_ppn}%` : "PPN";
-        document.getElementById('th_pbbkb').innerText = p_pbbkb > 0 ? `PBBKB ${p_pbbkb}%` : "PBBKB";
-        document.getElementById('th_pph').innerText = p_pph > 0 ? `PPH ${p_pph}%` : "PPH";
+        const thPpn = document.getElementById('th_ppn');
+        if (thPpn) thPpn.innerText = p_ppn > 0 ? `PPN ${p_ppn}%` : "PPN";
+        const thPbbkb = document.getElementById('th_pbbkb');
+        if (thPbbkb) thPbbkb.innerText = p_pbbkb > 0 ? `PBBKB ${p_pbbkb}%` : "PBBKB";
+        const thPph = document.getElementById('th_pph');
+        if (thPph) thPph.innerText = p_pph > 0 ? `PPH ${p_pph}%` : "PPH";
 
-        document.getElementById('out_qty').innerText = qty.toLocaleString('id-ID');
-        document.getElementById('out_harga').innerText = hargaDasar.toLocaleString('id-ID', f);
-        document.getElementById('out_ppn').innerText = p_ppn > 0 ? v_ppn.toLocaleString('id-ID', f) : "0,00";
-        document.getElementById('out_pbbkb').innerText = p_pbbkb > 0 ? v_pbbkb.toLocaleString('id-ID', f) : "0,00";
-        document.getElementById('out_pph').innerText = p_pph > 0 ? v_pph.toLocaleString('id-ID', f) : "0,00";
-        document.getElementById('out_perltr').innerText = hargaNet.toLocaleString('id-ID', f);
+        // Update Label samping Rincian dengan nominal persentase (satu baris)
+        const lblPpn = document.getElementById('out_break_ppn_lbl');
+        if (lblPpn) lblPpn.innerText = p_ppn > 0 ? `PPN ${p_ppn}%` : "PPN";
+        const lblPbbkb = document.getElementById('out_break_pbbkb_lbl');
+        if (lblPbbkb) lblPbbkb.innerText = p_pbbkb > 0 ? `PBBKB ${p_pbbkb}%` : "PBBKB";
+        const lblPph = document.getElementById('out_break_pph_lbl');
+        if (lblPph) lblPph.innerText = p_pph > 0 ? `PPH ${p_pph}%` : "PPH";
+
+        const elOutQty = document.getElementById('out_qty');
+        if (elOutQty) elOutQty.innerText = qty.toLocaleString('id-ID');
         
+        const elOutHarga = document.getElementById('out_harga');
+        if (elOutHarga) elOutHarga.innerText = hargaDasar.toLocaleString('id-ID', f);
+        
+        const elOutPpn = document.getElementById('out_ppn');
+        if (elOutPpn) elOutPpn.innerText = p_ppn > 0 ? v_ppn.toLocaleString('id-ID', f) : "0,00";
+        
+        const elOutPbbkb = document.getElementById('out_pbbkb');
+        if (elOutPbbkb) elOutPbbkb.innerText = p_pbbkb > 0 ? v_pbbkb.toLocaleString('id-ID', f) : "0,00";
+        
+        const elOutPph = document.getElementById('out_pph');
+        if (elOutPph) elOutPph.innerText = p_pph > 0 ? v_pph.toLocaleString('id-ID', f) : "0,00";
+        
+        const elOutPerltr = document.getElementById('out_perltr');
+        if (elOutPerltr) elOutPerltr.innerText = hargaNet.toLocaleString('id-ID', f);
+        
+        // Update nilai per liter untuk masing-masing item
+        const elBreakHdLtr = document.getElementById('out_break_hd_ltr');
+        if (elBreakHdLtr) elBreakHdLtr.innerText = hargaDasar.toLocaleString('id-ID', f);
+        
+        const elBreakPpnLtr = document.getElementById('out_break_ppn_ltr');
+        if (elBreakPpnLtr) elBreakPpnLtr.innerText = p_ppn > 0 ? v_ppn.toLocaleString('id-ID', f) : "0,00";
+        
+        const elBreakPbbkbLtr = document.getElementById('out_break_pbbkb_ltr');
+        if (elBreakPbbkbLtr) elBreakPbbkbLtr.innerText = p_pbbkb > 0 ? v_pbbkb.toLocaleString('id-ID', f) : "0,00";
+        
+        const elBreakPphLtr = document.getElementById('out_break_pph_ltr');
+        if (elBreakPphLtr) elBreakPphLtr.innerText = p_pph > 0 ? v_pph.toLocaleString('id-ID', f) : "0,00";
+
+        // Update nilai total perkalian dengan Qty
+        const elBreakHdTot = document.getElementById('out_break_hd_tot');
+        if (elBreakHdTot) elBreakHdTot.innerText = totHD.toLocaleString('id-ID', f);
+        
+        const elBreakPpnTot = document.getElementById('out_break_ppn_tot');
+        if (elBreakPpnTot) elBreakPpnTot.innerText = totPPN.toLocaleString('id-ID', f);
+        
+        const elBreakPbbkbTot = document.getElementById('out_break_pbbkb_tot');
+        if (elBreakPbbkbTot) elBreakPbbkbTot.innerText = totPBBKB.toLocaleString('id-ID', f);
+        
+        const elBreakPphTot = document.getElementById('out_break_pph_tot');
+        if (elBreakPphTot) elBreakPphTot.innerText = totPPH.toLocaleString('id-ID', f);
+
         const gTotalVal = Math.round(total);
-        document.getElementById('out_total').innerText = gTotalVal.toLocaleString('id-ID', f);
-        document.getElementById('out_grandtotal').innerText = gTotalVal.toLocaleString('id-ID', f);
-        document.getElementById('out_terbilang').innerText = (terbilang(gTotalVal) || "NOL").trim().toUpperCase();
+        const elOutTotal = document.getElementById('out_total');
+        if (elOutTotal) elOutTotal.innerText = gTotalVal.toLocaleString('id-ID', f);
+        
+        const elOutGrandTotal = document.getElementById('out_grandtotal');
+        if (elOutGrandTotal) elOutGrandTotal.innerText = gTotalVal.toLocaleString('id-ID', f);
+        
+        const elOutTerbilang = document.getElementById('out_terbilang');
+        if (elOutTerbilang) elOutTerbilang.innerText = (terbilang(gTotalVal) || "NOL").trim().toUpperCase();
         
         updateView();
     }
 
     function updateView() {
-        const noPo = document.getElementById('in_no').value || "-";
-        const gTotal = document.getElementById('out_grandtotal').innerText;
-        document.getElementById('out_no').innerText = noPo;
-        document.getElementById('out_cust').innerText = document.getElementById('in_cust').value || "-";
-        document.getElementById('out_addr').innerText = document.getElementById('in_addr').value || "-";
-        document.getElementById('out_destination').innerText = document.getElementById('in_destination').value || "-";
-        document.getElementById('out_barang').innerText = document.getElementById('in_barang').value || "-";
-        document.getElementById('out_pay').innerText = document.getElementById('in_pay').value || "-";
-        document.getElementById('out_delivery').innerText = document.getElementById('in_delivery').value || "-";
+        const noPo = document.getElementById('in_no')?.value || "-";
+        const gTotal = document.getElementById('out_grandtotal')?.innerText || "0,00";
+        
+        const outNo = document.getElementById('out_no');
+        if (outNo) outNo.innerText = noPo;
+        const outCust = document.getElementById('out_cust');
+        if (outCust) outCust.innerText = document.getElementById('in_cust')?.value || "-";
+        const outAddr = document.getElementById('out_addr');
+        if (outAddr) outAddr.innerText = document.getElementById('in_addr')?.value || "-";
+        const outBarang = document.getElementById('out_barang');
+        if (outBarang) outBarang.innerText = document.getElementById('in_barang')?.value || "-";
+        const outPay = document.getElementById('out_pay');
+        if (outPay) outPay.innerText = document.getElementById('in_pay')?.value || "-";
+        const outDelivery = document.getElementById('out_delivery');
+        if (outDelivery) outDelivery.innerText = document.getElementById('in_delivery')?.value || "-";
+        
         updateQRCode(noPo, gTotal);
     }
 
     function updateQRCode(no, total) {
-        const data = `IDE-PO|${no}|TOT:${total}`;
-        document.getElementById('qr_footer').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(data)}`;
-        document.getElementById('qr_timestamp').innerText = `Generated: ${new Date().toLocaleString('id-ID')}`;
+        const issuerName = loadIssuerInfo();
+        const data = `KSE-PO|${no}|TOT:${total}|Issuer:${issuerName}`;
+        const qrEl = document.getElementById('qr_footer');
+        if (qrEl) qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(data)}`;
+        const timeEl = document.getElementById('qr_timestamp');
+        if (timeEl) timeEl.innerText = `Generated: ${new Date().toLocaleString('id-ID')}`;
     }
 
     async function saveToSupabase() {
         const btn = document.getElementById('btn-save-sb');
-        const noPo = document.getElementById('in_no').value;
+        const noPo = document.getElementById('in_no')?.value;
         if(!noPo || noPo.includes('undefined')) return alert("Nomor PO tidak valid!");
 
         const activeIssuer = loadIssuerInfo();
@@ -577,17 +661,16 @@
 
             const { data: urlData } = _supabase.storage.from('documents').getPublicUrl(fileName);
             
-            // Perbaikan: Mengambil nilai kalkulasi dari element span/teks menggunakan innerText (bukan .value)
-            const qtyVal = parseFloat(document.getElementById('in_qty').value) || 0;
-            const rawPerLtrText = document.getElementById('out_perltr').innerText.replace(/\./g, '').replace(',', '.');
-            const hargaNetVal = parseFloat(rawPerLtrText) || 0;
-            
-            const p_ppnVal = parseFloat(document.getElementById('in_ppn_pct').value) || 0;
-            const p_pbbkbVal = parseFloat(document.getElementById('in_pbbkb_pct').value) || 0;
-            const p_pphVal = parseFloat(document.getElementById('in_pph_pct').value) || 0;
+            // Pengambilan nilai aman berdasarkan input form yang ada
+            const qtyVal = parseFloat(document.getElementById('in_qty')?.value) || 0;
+            const hargaNetVal = parseFloat(document.getElementById('in_perltr')?.value) || 0;
+            const p_ppnVal = parseFloat(document.getElementById('in_ppn_pct')?.value) || 0;
+            const p_pbbkbVal = parseFloat(document.getElementById('in_pbbkb_pct')?.value) || 0;
+            const p_pphVal = parseFloat(document.getElementById('in_pph_pct')?.value) || 0;
             
             const totalPajakPct = (p_ppnVal + p_pbbkbVal + p_pphVal) / 100;
             const hargaDasarVal = totalPajakPct > 0 ? (hargaNetVal / (1 + totalPajakPct)) : hargaNetVal;
+            
             const v_ppnVal = hargaDasarVal * (p_ppnVal / 100);
             const v_pbbkbVal = hargaDasarVal * (p_pbbkbVal / 100);
             const v_pphVal = hargaDasarVal * (p_pphVal / 100);
@@ -595,9 +678,9 @@
             const payload = {
                 jenis: "PURCHASE ORDER",
                 nomor: noPo,
-                tanggal: document.getElementById('in_tgl_raw').value,
-                tujuan: document.getElementById('in_cust').value,
-                nominal: parseFloat(document.getElementById('out_grandtotal').innerText.replace(/\./g, '').replace(',', '.')),
+                tanggal: document.getElementById('in_tgl_raw')?.value,
+                tujuan: document.getElementById('in_cust')?.value,
+                nominal: parseFloat(document.getElementById('out_grandtotal')?.innerText.replace(/\./g, '').replace(',', '.')) || 0,
                 pdf_url: urlData.publicUrl,
                 client_email: "system@kse.co.id",
                 issued_by: activeIssuer,
@@ -619,7 +702,7 @@
 
     function downloadPDF() {
         const element = document.getElementById('main-doc');
-        const noPo = document.getElementById('in_no').value;
+        const noPo = document.getElementById('in_no')?.value || "PO";
         const opt = { 
             margin: 0, filename: `PO-${noPo}.pdf`, image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 }, 
@@ -629,13 +712,15 @@
     }
 
     window.onload = () => {
+        loadIssuerInfo(); // Memuat nama admin yang login ke footer
         const now = new Date();
         const yyyy = now.getFullYear();
         const mm = String(now.getMonth() + 1).padStart(2, '0');
         const dd = String(now.getDate()).padStart(2, '0');
         
-        document.getElementById('in_tgl_raw').value = `${yyyy}-${mm}-${dd}`;
-        loadIssuerInfo();
+        const inTgl = document.getElementById('in_tgl_raw');
+        if (inTgl) inTgl.value = `${yyyy}-${mm}-${dd}`;
+        
         handleDateChange();
         calculate();
     };
