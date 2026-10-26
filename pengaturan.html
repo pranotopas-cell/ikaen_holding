@@ -202,7 +202,6 @@
         let clientIp = 'Mendeteksi...';
         let clientLocation = 'Mendeteksi...';
         
-        // Membaca identitas user login secara dinamis dari LocalStorage/SessionStorage
         let currentUser = {
             name: localStorage.getItem('holding_user_name') || localStorage.getItem('user_name') || 'Noto',
             email: localStorage.getItem('holding_user_email') || localStorage.getItem('user_email') || 'noto@energyholding.co.id',
@@ -212,17 +211,15 @@
         let allLogs = [];
         let allLoginHistory = [];
 
-        // 1. Deteksi IP dan Lokasi Presisi (Multi-Fallback & HTML5 Geolocation)
+        // 1. Deteksi IP dan Lokasi Presisi
         async function fetchClientLocation() {
             try {
-                // Method A: Ambil IP Publik dari ipify API (Cepat & Reliabel)
                 const ipRes = await fetch('https://api.ipify.org?format=json');
                 if (ipRes.ok) {
                     const ipData = await ipRes.json();
                     clientIp = ipData.ip;
                 }
 
-                // Method B: Geolocation ISP / Kota
                 const locRes = await fetch(`https://ipapi.co/${clientIp}/json/`);
                 if (locRes.ok) {
                     const locData = await locRes.json();
@@ -231,11 +228,9 @@
                     }
                 }
             } catch (err) {
-                // Fallback jika API terblokir AdBlocker
                 clientLocation = 'Banjarmasin, Kalimantan Selatan, ID';
             }
 
-            // Method C: Jika Browser Mengizinkan GPS / Precise Location
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((pos) => {
                     const lat = pos.coords.latitude.toFixed(4);
@@ -254,9 +249,34 @@
             document.getElementById('currentSessionUser').textContent = `${currentUser.name} (${currentUser.role})`;
             document.getElementById('currentSessionInfo').textContent = `IP: ${clientIp} | Lokasi: ${clientLocation}`;
             sendHeartbeat();
+            recordAdminLoginSession(); // Catat riwayat login saat halaman aktif
         }
 
-        // 2. Fungsi Heartbeat untuk Mengabarkan User Sedang Online
+        // 2. Fungsi Rekam Riwayat Login ke Tabel login_history (Mencegah duplikat beruntun dalam 1 sesi tab)
+        async function recordAdminLoginSession() {
+            const sessionKey = 'logged_recorded_' + currentUser.email;
+            if (sessionStorage.getItem(sessionKey)) return; // Hanya catat sekali per sesi buka browser
+
+            try {
+                const { error } = await _supabase.from('login_history').insert([
+                    {
+                        user_email: currentUser.email,
+                        user_name: currentUser.name,
+                        user_role: currentUser.role,
+                        ip_address: clientIp,
+                        location: clientLocation,
+                        logged_in_at: new Date().toISOString()
+                    }
+                ]);
+                if (!error) {
+                    sessionStorage.setItem(sessionKey, 'true');
+                }
+            } catch (err) {
+                console.error("Gagal mencatat login history:", err);
+            }
+        }
+
+        // 3. Fungsi Heartbeat User Online
         async function sendHeartbeat() {
             try {
                 const payload = {
@@ -270,20 +290,17 @@
                     last_ping: new Date().toISOString()
                 };
 
-                const { error } = await _supabase.from('user_presence').upsert(payload, { onConflict: 'user_email' });
-                if (error) console.error("Heartbeat Upsert Error:", error.message);
-
+                await _supabase.from('user_presence').upsert(payload, { onConflict: 'user_email' });
                 loadPresenceData();
             } catch (e) {
                 console.error("Heartbeat Error:", e);
             }
         }
 
-        // 3. Load Real-time User Online (Aktif dalam 5 Menit Terakhir)
+        // 4. Load Data User Online
         async function loadPresenceData() {
             const container = document.getElementById('presenceTableBody');
             try {
-                // Filter user aktif dalam 5 menit terakhir
                 const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
                 const { data, error } = await _supabase
                     .from('user_presence')
@@ -322,7 +339,7 @@
             }
         }
 
-        // 4. Load Riwayat Login Seluruh Admin
+        // 5. Load Riwayat Login Admin
         async function loadLoginHistoryData() {
             const container = document.getElementById('loginHistoryTableBody');
             try {
@@ -336,7 +353,7 @@
                 allLoginHistory = data || [];
                 renderLoginHistoryTable(allLoginHistory);
             } catch (err) {
-                container.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-600">Gagal memuat riwayat login: ${err.message}</td></tr>`;
+                container.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-600">Gagal memuat riwayat login: ${err.message}. Pastikan tabel login_history sudah dibuat di Supabase.</td></tr>`;
             }
         }
 
@@ -379,7 +396,7 @@
             renderLoginHistoryTable(filtered);
         }
 
-        // 5. Load Audit Logs (Riwayat Perubahan Data)
+        // 6. Load Audit Logs
         async function loadAuditLogsData() {
             const container = document.getElementById('auditLogsTableBody');
             try {
@@ -484,7 +501,7 @@
 
         window.onload = function() {
             fetchClientLocation();
-            setInterval(sendHeartbeat, 15000); // Ping heartbeat setiap 15 detik untuk akurasi online
+            setInterval(sendHeartbeat, 15000); // Ping heartbeat setiap 15 detik
         };
     </script>
 </body>
