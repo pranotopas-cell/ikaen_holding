@@ -52,6 +52,7 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YWVjdHBoZ29lbG1oenJrYXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzExNDYsImV4cCI6MjA4ODE0NzE0Nn0.-8E98wpkzHBARRhW6PKhBtf2XKhWFjq7idAzw9jlcKg';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // DAFTAR TOKEN CARTRACK BERDASARKAN NOPOL
         const databaseLinkCartrack = {
             "KH8068GR": "https://fleetweb-id.cartrack.com/share?account=101080&token=zXgdh9OHd5nxVLnuG9YejPD08mGKbpNIO475lDPIFO4ySR5Zf1k&client=2af9969c-320f-44b3-95ad-7e4e892ac8e5",
             "KH8734GH": "https://fleetweb-id.cartrack.com/share?account=101080&token=2Qr4dnKSwK35ZIhPvFcFreOJ7oZcu7YGT0mNRlROGBbpEQi8pnA&client=2af9969c-320f-44b3-95ad-7e4e892ac8e5",
@@ -61,7 +62,7 @@
         window.onload = async function() {
             const urlParams = new URLSearchParams(window.location.search);
             const nopolRaw = urlParams.get('nopol') || '';
-            const nopolClean = nopolRaw.replace(/\s+/g, '').toUpperCase();
+            const nopolClean = nopolRaw.replace(/[^a-zA-Z0-9]/g, '').toUpperCase(); // Membersihkan semua spasi & simbol agar akurat
             const card = document.getElementById('status-card');
 
             if (!nopolClean) {
@@ -74,37 +75,59 @@
             }
 
             try {
-                // Mengambil SEMUA data pengiriman yang mencocokkan Nopol tanpa batasan tanggal/hari
+                // Tarik seluruh data dari tabel tanpa filter ketat di awal agar kita bisa filter manual di Javascript
                 const { data, error } = await _supabase
                     .from('data_pengiriman')
-                    .select('*')
-                    .ilike('nopol', `%${nopolClean}%`);
+                    .select('*');
 
                 if (error || !data || data.length === 0) {
                     card.innerHTML = `
                         <div class="icon-box text-blocked"><i class="fas fa-search"></i></div>
-                        <h4 class="fw-bold">Data Pengiriman Tidak Ditemukan</h4>
-                        <p class="text-muted small">Unit <strong>${nopolRaw}</strong> tidak terdaftar dalam database pengiriman.</p>
+                        <h4 class="fw-bold">Database Kosong</h4>
+                        <p class="text-muted small">Tidak dapat terhubung ke data pengiriman.</p>
                     `;
                     return;
                 }
 
-                // Cari apakah ada data yang statusnya masih PROSES di hari apa pun
-                let activeData = data.find(item => {
+                // Cari data yang nopol-nya cocok (mengabaikan spasi dan huruf besar/kecil di database)
+                const matchedRows = data.filter(item => {
+                    const dbNopol = (item.nopol || item.Nopol || item.unit || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+                    return dbNopol.includes(nopolClean) || nopolClean.includes(dbNopol);
+                });
+
+                if (matchedRows.length === 0) {
+                    // Jika data tidak ditemukan di database sama sekali, tapi token Cartrack-nya ada di list, 
+                    // tetap izinkan buka link Cartrack agar operasional tidak terhambat!
+                    const fallbackUrl = databaseLinkCartrack[nopolClean];
+                    if (fallbackUrl) {
+                        window.location.href = fallbackUrl;
+                        return;
+                    }
+
+                    card.innerHTML = `
+                        <div class="icon-box text-blocked"><i class="fas fa-search"></i></div>
+                        <h4 class="fw-bold">Data Pengiriman Tidak Ditemukan</h4>
+                        <p class="text-muted small">Unit <strong>${nopolRaw}</strong> tidak terdaftar dalam database.</p>
+                    `;
+                    return;
+                }
+
+                // Cek apakah ada unit yang statusnya masih PROSES di hari apa pun
+                let activeData = matchedRows.find(item => {
                     let st = (item.status || item.Status || '').toUpperCase();
                     return st.includes('PROSES');
                 });
 
-                // Jika tidak ada yang statusnya PROSES, ambil data terbaru dari baris terakhir
+                // Jika tidak ada yang statusnya PROSES, ambil baris data terakhir dari unit tersebut
                 if (!activeData) {
-                    activeData = data[data.length - 1];
+                    activeData = matchedRows[matchedRows.length - 1];
                 }
 
                 const status = (activeData.status || activeData.Status || '').toUpperCase();
                 const tujuan = activeData.delivery_to || activeData.Tujuan || activeData.lokasi || '-';
                 const nopolUnit = activeData.nopol || activeData.Nopol || nopolRaw;
 
-                // Logika pengecekan status terblokir / delivered
+                // Logika pemblokiran jika sudah DELIVERED / DONE / SELESAI
                 if (status.includes('DELIVERED') || status.includes('DONE') || status.includes('SAMPAI') || status.includes('SELESAI')) {
                     card.innerHTML = `
                         <div class="icon-box text-delivered"><i class="fas fa-check-circle"></i></div>
@@ -117,7 +140,7 @@
                         </div>
                     `;
                 } else {
-                    // Jika status PROSES (berlaku untuk pengiriman hari apa pun), arahkan ke link Cartrack asli
+                    // Jika status PROSES atau lainnya, buka link Cartrack
                     const cartrackUrl = databaseLinkCartrack[nopolClean];
                     if (cartrackUrl) {
                         card.innerHTML = `
@@ -128,7 +151,7 @@
                         `;
                         setTimeout(() => {
                             window.location.href = cartrackUrl;
-                        }, 1000);
+                        }, 800);
                     } else {
                         card.innerHTML = `
                             <div class="icon-box text-blocked"><i class="fas fa-map-marked-alt"></i></div>
