@@ -74,25 +74,26 @@
             }
 
             try {
-                // Ambil data pengiriman terbaru untuk Nopol ini dari Supabase
+                // Mengambil data dari Supabase tanpa pembatasan urutan created_at agar lebih aman dari error kolom
                 const { data, error } = await _supabase
                     .from('data_pengiriman')
-                    .select('status, delivery_to, nopol')
-                    .ilike('nopol', `%${nopolClean}%`)
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                    .maybeSingle();
+                    .select('*')
+                    .ilike('nopol', `%${nopolClean}%`);
 
-                if (error || !data) {
+                if (error || !data || data.length === 0) {
                     card.innerHTML = `
                         <div class="icon-box text-blocked"><i class="fas fa-search"></i></div>
                         <h4 class="fw-bold">Data Pengiriman Tidak Ditemukan</h4>
-                        <p class="text-muted small">Unit ${nopolRaw} tidak sedang dalam perjalanan aktif.</p>
+                        <p class="text-muted small">Unit <strong>${nopolRaw}</strong> tidak terdaftar dalam database pengiriman.</p>
                     `;
                     return;
                 }
 
-                const status = (data.status || '').toUpperCase();
+                // Ambil data baris terakhir/teratas dari hasil pencarian
+                const latestData = data[data.length - 1];
+                const status = (latestData.status || latestData.Status || '').toUpperCase();
+                const tujuan = latestData.delivery_to || latestData.Tujuan || latestData.lokasi || '-';
+                const nopolUnit = latestData.nopol || latestData.Nopol || nopolRaw;
 
                 // Pengecekan status terblokir / delivered
                 if (status.includes('DELIVERED') || status.includes('DONE') || status.includes('SAMPAI') || status.includes('SELESAI')) {
@@ -100,20 +101,20 @@
                         <div class="icon-box text-delivered"><i class="fas fa-check-circle"></i></div>
                         <h4 class="fw-bold">PENGIRIMAN SELESAI</h4>
                         <p class="badge bg-success px-3 py-2 fs-6">Status: ${status}</p>
-                        <p class="text-muted small mt-3">Unit BBM <strong>${data.nopol || nopolRaw}</strong> telah sampai di lokasi tujuan (<strong>${data.delivery_to || '-'}</strong>).</p>
+                        <p class="text-muted small mt-3">Unit BBM <strong>${nopolUnit}</strong> telah sampai di lokasi tujuan (<strong>${tujuan}</strong>).</p>
                         <hr class="border-secondary">
                         <div class="alert alert-warning text-dark small mb-0 fw-semibold">
                             <i class="fas fa-lock me-1"></i> Akses Live Tracking Cartrack otomatis dinonaktifkan demi keamanan operasional.
                         </div>
                     `;
-                } else if (status.includes('PROSES')) {
-                    // Jika masih dalam PROSES pengiriman, teruskan ke link Cartrack asli
+                } else {
+                    // Jika status PROSES atau status lainnya, arahkan ke link Cartrack asli
                     const cartrackUrl = databaseLinkCartrack[nopolClean];
                     if (cartrackUrl) {
                         card.innerHTML = `
                             <div class="icon-box text-success"><i class="fas fa-truck-fast"></i></div>
                             <h4 class="fw-bold">Mengarahkan ke Map...</h4>
-                            <p class="text-muted small">Status Unit: <span class="badge bg-primary">IN TRANSIT / PROSES</span></p>
+                            <p class="text-muted small">Status Unit: <span class="badge bg-primary">${status || 'PROSES'}</span></p>
                             <p class="text-muted small">Menghubungkan ke server Cartrack...</p>
                         `;
                         setTimeout(() => {
@@ -123,15 +124,9 @@
                         card.innerHTML = `
                             <div class="icon-box text-blocked"><i class="fas fa-map-marked-alt"></i></div>
                             <h4 class="fw-bold">Link Cartrack Belum Didaftarkan</h4>
-                            <p class="text-muted small">Unit ${nopolRaw} belum memiliki pemetaan token Cartrack.</p>
+                            <p class="text-muted small">Unit ${nopolRaw} belum memiliki pemetaan token Cartrack di sistem.</p>
                         `;
                     }
-                } else {
-                    card.innerHTML = `
-                        <div class="icon-box text-blocked"><i class="fas fa-info-circle"></i></div>
-                        <h4 class="fw-bold">Tracking Tidak Aktif</h4>
-                        <p class="text-muted small">Status unit saat ini: <strong>${status}</strong>.</p>
-                    `;
                 }
 
             } catch (err) {
