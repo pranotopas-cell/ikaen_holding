@@ -3,310 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CONFIRMATION HUB - CARTRACK LIVE TRACKING</title>
+    <title>Live Tracking Pengiriman BBM</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <style>
-        :root {
-            --primary-dark: #1a1c23;
-            --wa-green: #25D366;
-            --wa-danger: #dc3545;
-            --accent-blue: #0d6efd;
-            --bg-light: #f8f9fa;
-        }
-
-        body, html { 
-            height: 100%;
+        body {
+            background-color: #1a1c23;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin: 0;
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--primary-dark);
-            overflow-x: hidden;
         }
-
-        #main-app { display: block; background-color: var(--bg-light); min-height: 100vh; }
-
-        .navbar-custom {
-            background-color: var(--primary-dark);
-            padding: 12px 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .navbar-brand { color: white !important; font-weight: 700; font-size: 1.2rem; cursor: pointer; letter-spacing: 1px; }
-        
-        .main-card {
-            border: none;
+        .card-status {
+            background: #252836;
+            border: 1px solid #323546;
             border-radius: 16px;
-            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08);
-            background: white;
-            margin-top: 20px;
-            overflow: hidden;
+            padding: 30px;
+            max-width: 480px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-
-        .table thead { background-color: #f8f9fa; border-bottom: 2px solid #e9ecef; }
-        .table th { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; padding: 15px 10px; text-align: center; vertical-align: middle; color: #6c757d; letter-spacing: 0.5px; }
-        .table td { vertical-align: middle; padding: 12px 10px; font-size: 0.85rem; border-bottom: 1px solid #f1f3f5; }
-        
-        .form-control-custom { 
-            font-size: 0.8rem; border-radius: 8px; border: 1px solid #e0e5e9; 
-            background-color: #fcfcfc; transition: 0.2s;
+        .icon-box {
+            font-size: 3rem;
+            margin-bottom: 20px;
         }
-        .form-control-custom:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1); }
-        
-        .btn-wa {
-            background-color: var(--wa-green);
-            color: white; border: none; padding: 8px 16px; border-radius: 8px;
-            font-weight: 600; font-size: 0.8rem; transition: 0.2s; width: 100%; 
-            box-shadow: 0 2px 5px rgba(37, 211, 102, 0.3);
-        }
-        .btn-wa:hover { background-color: #1ebc57; color: white; }
-        .btn-wa.sent { background-color: var(--wa-danger) !important; pointer-events: none; opacity: 0.7; }
-
-        .sopir-name { font-weight: 700; display: block; font-size: 0.9rem; color: #343a40; }
-        .telp-input { border: none; background: transparent; color: var(--wa-green); font-size: 0.8rem; width: 100%; outline: none; font-weight: 600; padding: 0; }
-        
-        .badge-proses { background: #e7f1ff; color: #0b5ed7; border: 1px solid #b6d4fe; border-radius: 6px; }
-        .badge-common { font-size: 0.7rem; padding: 5px 10px; font-weight: 700; display: inline-block; }
+        .text-delivered { color: #198754; }
+        .text-blocked { color: #dc3545; }
+        .text-loading { color: #0d6efd; }
     </style>
 </head>
 <body>
 
-    <div id="main-app">
-        <nav class="navbar navbar-custom">
-            <div class="container-fluid">
-                <span class="navbar-brand"><i class="fas fa-truck-loading me-2"></i> CONFIRMATION HUB</span>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-outline-light btn-sm" onclick="ambilData()">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
-                </div>
-            </div>
-        </nav>
-
-        <div id="section-konfirmasi" class="container-fluid p-3 p-md-4">
-            <div class="d-flex justify-content-between align-items-end mb-3">
-                <div>
-                    <h4 class="fw-bold m-0 text-dark">KONFIRMASI PENGIRIMAN BBM & LIVE TRACKING</h4>
-                    <p class="text-muted small mb-0">Real-time status monitoring (Hanya unit status PROSES)</p>
-                </div>
-                <div class="text-end d-none d-md-block">
-                    <span class="badge bg-light text-dark border p-2" id="date-display"></span>
-                </div>
-            </div>
-
-            <div class="card main-card">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th>Nopol / Tgl</th>
-                                <th>Transportir</th>
-                                <th>Sopir / Telp</th>
-                                <th>Tujuan</th>
-                                <th>Qty</th>
-                                <th>Status</th>
-                                <th>Contact Person</th>
-                                <th class="text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabel-supabase">
-                            <!-- Data dimuat dinamis via script -->
-                        </tbody>
-                    </table>
-                </div>
-                <div id="loading-state" class="text-center p-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="text-muted mt-2 small">Mengambil data dari server...</p>
-                </div>
-            </div>
+    <div class="card-status" id="status-card">
+        <div class="icon-box text-loading">
+            <i class="fas fa-spinner fa-spin"></i>
         </div>
+        <h4 class="fw-bold">Memverifikasi Status Unit...</h4>
+        <p class="text-muted small">Mohon tunggu sebentar, sistem sedang memverifikasi izin akses tracking.</p>
     </div>
-
-    <datalist id="list_transportir">
-        <option value="PT.KHATULISTIWA SINAR ENERGI">
-        <option value="PT.INVESTAMA KALIMANTAN ENERGI">
-        <option value="PT.INDO DHARMA ENERGI">
-        <option value="PT.BERKAH SARANA MAKMUR BENUA">
-        <option value="PT.TELADAN BERKAH SEJAHTERA">
-        <option value="PT.GLOBAL BORNEO ENERGI"> 
-        <option value="PT.TRANS GLOBAL ENERGI"> 
-        <option value="PT.DABELINA KARYA BERSAMA">
-        <option value="PT.CITRA SUKSES ENERGI">
-        <option value="PT.KALIMANTAN CITRA MANDIRI"> 
-    </datalist>
-
-    <datalist id="list_cust">
-        <option value="082154201859">PAN - DODIK HARIANTO</option>
-        <option value="082255430046">PAN - BUNGA SIHOMBING</option>
-        <option value="082234422799">PAN - LIA NOVITA</option>
-        <option value="082253091913">PAN - OFFICIAL PHONE</option>
-        <option value="081350373893">PAN - ZAENURI</option>
-        <option value="081325244335">BAP -  P USMAN</option>
-        <option value="08114319721">BAP - P FERRY</option>
-    </datalist>
 
     <script>
         const SUPABASE_URL = 'https://ntaectphgoelmhzrkatp.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YWVjdHBoZ29lbG1oenJrYXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzExNDYsImV4cCI6MjA4ODE0NzE0Nn0.-8E98wpkzHBARRhW6PKhBtf2XKhWFjq7idAzw9jlcKg';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        const NAMA_TABEL = 'data_pengiriman'; 
 
-        // DOMAIN HOSING/VERCEL UNTUK LINK SMART PROXY
-        const BASE_TRACKING_URL = window.location.origin + "/track.html";
-
-        const databaseSopir = {
-            "WIYANTO": "085705750524", "WAHID KHUMAINI": "08115232946",
-            "AGUS EFENDI": "082264220069", "AGUS MULYANTO": "081255852929",
-            "SUPRIYADI": "082330138377", "NUR KHOLIS": "082151512123",
-            "AGUS WANTO": "081228008887"
+        const databaseLinkCartrack = {
+            "KH8068GR": "https://fleetweb-id.cartrack.com/share?account=101080&token=zXgdh9OHd5nxVLnuG9YejPD08mGKbpNIO475lDPIFO4ySR5Zf1k&client=2af9969c-320f-44b3-95ad-7e4e892ac8e5",
+            "KH8734GH": "https://fleetweb-id.cartrack.com/share?account=101080&token=2Qr4dnKSwK35ZIhPvFcFreOJ7oZcu7YGT0mNRlROGBbpEQi8pnA&client=2af9969c-320f-44b3-95ad-7e4e892ac8e5",
+            "L9761UJ": "https://fleetweb-id.cartrack.com/share?account=101080&token=YfkQF8qg3hPeAefU91xWSmQZbCGHXcCgpmc2JoaMYtWRNOUcLVi&client=2af9969c-320f-44b3-95ad-7e4e892ac8e5"
         };
 
-        window.onload = function() {
-            document.getElementById('date-display').innerText = getTanggalSekarang();
-            ambilData();
-        };
+        window.onload = async function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const nopolRaw = urlParams.get('nopol') || '';
+            const nopolClean = nopolRaw.replace(/\s+/g, '').toUpperCase();
+            const card = document.getElementById('status-card');
 
-        function getTanggalSekarang() {
-            const d = new Date();
-            return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-        }
-
-        async function ambilData() {
-            const tbody = document.getElementById('tabel-supabase');
-            const loading = document.getElementById('loading-state');
-            
-            if(!tbody) return;
-            
-            tbody.innerHTML = '';
-            loading.style.display = 'block';
-
-            try {
-                // HANYA MENGAMBIL DATA YANG STATUSNYA PROSES
-                const { data, error } = await _supabase
-                    .from(NAMA_TABEL)
-                    .select('*')
-                    .ilike('status', '%PROSES%');
-
-                loading.style.display = 'none';
-
-                if (error) throw error;
-
-                if (!data || data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="8" class="text-center p-5 text-muted">TIDAK ADA UNIT DALAM STATUS PROSES PENGIRIMAN</td></tr>`;
-                    return;
-                }
-
-                let html = '';
-                data.forEach((row, index) => {
-                    const idRow = row.id || '';
-                    const namaMentah = (row.sopir || row.Sopir || row.driver || '').toUpperCase();
-                    const namaPertama = namaMentah.split(/[,/]/)[0].trim();
-                    const namaDepan = namaPertama.split(' ')[0];
-                    const telpSopir = databaseSopir[namaPertama] || databaseSopir[namaDepan] || '';
-
-                    const nopol = row.nopol || row.Nopol || row.unit || '-';
-                    const tujuan = row.delivery_to || row.Tujuan || row.lokasi || '-';
-                    const qty = row.jumlah_keluar || row.qty || '0';
-                    const statusRaw = (row.status || 'PROSES').toUpperCase();
-                    const statusClass = 'badge-proses';
-                    const transportir = row.transportir || '';
-
-                    html += `
-                        <tr>
-                            <td>
-                                <div class="nopol-container">
-                                    <div class="fw-bold text-dark text-nowrap">${nopol}</div>
-                                    <div class="text-muted" style="font-size:10px">${getTanggalSekarang()}</div>
-                                </div>
-                            </td>
-                            <td>
-                                <input type="text" id="trans_${index}" class="form-control form-control-sm form-control-custom" 
-                                       value="${transportir}" list="list_transportir">
-                            </td>
-                            <td>
-                                <span class="sopir-name text-nowrap">${namaMentah}</span>
-                                <div class="d-flex align-items-center mt-1">
-                                    <i class="fas fa-phone-alt me-1" style="font-size:10px; color:#aaa;"></i>
-                                    <input type="text" id="sopir_telp_${index}" class="telp-input" value="${telpSopir}" placeholder="No Telp...">
-                                </div>
-                            </td>
-                            <td class="text-center"><span class="fw-bold small text-dark">${tujuan}</span></td>
-                            <td class="text-center"><span class="badge bg-light text-dark border border-secondary">${qty} KL</span></td>
-                            <td class="text-center"><span class="badge-common ${statusClass}">${statusRaw}</span></td>
-                            <td>
-                                <input type="text" id="telp_cust_${index}" class="form-control form-control-sm form-control-custom" 
-                                       placeholder="Cari Customer..." list="list_cust">
-                            </td>
-                            <td class="text-center">
-                                <button id="btn_wa_${index}" onclick="kirimWA('${idRow}', '${nopol}', '${namaPertama}', '${tujuan}', '${qty}', ${index})" class="btn-wa">
-                                    <i class="fab fa-whatsapp me-1"></i> KIRIM
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                tbody.innerHTML = html;
-
-            } catch (err) {
-                loading.style.display = 'none';
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger p-4">
-                    <i class="fas fa-exclamation-triangle mb-2"></i><br>Error: ${err.message}
-                </td></tr>`;
-            }
-        }
-
-        async function kirimWA(idRow, nopol, sopir, tujuan, qty, index) {
-            const telpCust = document.getElementById(`telp_cust_${index}`).value;
-            const transportir = document.getElementById(`trans_${index}`).value;
-            const telpSopirBaru = document.getElementById(`sopir_telp_${index}`).value;
-            const btn = document.getElementById(`btn_wa_${index}`);
-
-            if (!telpCust) {
-                alert("Silakan pilih nomor customer dari daftar!");
-                document.getElementById(`telp_cust_${index}`).focus();
+            if (!nopolClean) {
+                card.innerHTML = `
+                    <div class="icon-box text-blocked"><i class="fas fa-exclamation-triangle"></i></div>
+                    <h4 class="fw-bold">Link Tidak Valid</h4>
+                    <p class="text-muted small">Parameter nomor polisi tidak ditemukan.</p>
+                `;
                 return;
             }
 
-            let num = telpCust.replace(/[^0-9]/g, '');
-            if (num.startsWith('0')) num = '62' + num.slice(1);
+            try {
+                // Mengambil data dari Supabase tanpa pembatasan urutan created_at agar lebih aman dari error kolom
+                const { data, error } = await _supabase
+                    .from('data_pengiriman')
+                    .select('*')
+                    .ilike('nopol', `%${nopolClean}%`);
 
-            const cleanNopol = nopol.replace(/\s+/g, '').toUpperCase();
-            
-            // MENGGUNAKAN LINK SMART PROXY TRACKING
-            const smartTrackLink = `${BASE_TRACKING_URL}?nopol=${encodeURIComponent(cleanNopol)}`;
+                if (error || !data || data.length === 0) {
+                    card.innerHTML = `
+                        <div class="icon-box text-blocked"><i class="fas fa-search"></i></div>
+                        <h4 class="fw-bold">Data Pengiriman Tidak Ditemukan</h4>
+                        <p class="text-muted small">Unit <strong>${nopolRaw}</strong> tidak terdaftar dalam database pengiriman.</p>
+                    `;
+                    return;
+                }
 
-            let bagianTracking = `Berikut adalah link live tracking khusus untuk memantau unit ${nopol}:\n${smartTrackLink}\n\n*Catatan: Link otomatis terblokir/kedaluwarsa saat unit tiba di tujuan (DELIVERED).*`;
+                // Ambil data baris terakhir/teratas dari hasil pencarian
+                const latestData = data[data.length - 1];
+                const status = (latestData.status || latestData.Status || '').toUpperCase();
+                const tujuan = latestData.delivery_to || latestData.Tujuan || latestData.lokasi || '-';
+                const nopolUnit = latestData.nopol || latestData.Nopol || nopolRaw;
 
-            const teks = `Dengan hormat,
-Kami Konfirmasikan Pengiriman BBM hari ini status Dalam Perjalanan, dengan data Unit Sebagai Berikut:
+                // Pengecekan status terblokir / delivered
+                if (status.includes('DELIVERED') || status.includes('DONE') || status.includes('SAMPAI') || status.includes('SELESAI')) {
+                    card.innerHTML = `
+                        <div class="icon-box text-delivered"><i class="fas fa-check-circle"></i></div>
+                        <h4 class="fw-bold">PENGIRIMAN SELESAI</h4>
+                        <p class="badge bg-success px-3 py-2 fs-6">Status: ${status}</p>
+                        <p class="text-muted small mt-3">Unit BBM <strong>${nopolUnit}</strong> telah sampai di lokasi tujuan (<strong>${tujuan}</strong>).</p>
+                        <hr class="border-secondary">
+                        <div class="alert alert-warning text-dark small mb-0 fw-semibold">
+                            <i class="fas fa-lock me-1"></i> Akses Live Tracking Cartrack otomatis dinonaktifkan demi keamanan operasional.
+                        </div>
+                    `;
+                } else {
+                    // Jika status PROSES atau status lainnya, arahkan ke link Cartrack asli
+                    const cartrackUrl = databaseLinkCartrack[nopolClean];
+                    if (cartrackUrl) {
+                        card.innerHTML = `
+                            <div class="icon-box text-success"><i class="fas fa-truck-fast"></i></div>
+                            <h4 class="fw-bold">Mengarahkan ke Map...</h4>
+                            <p class="text-muted small">Status Unit: <span class="badge bg-primary">${status || 'PROSES'}</span></p>
+                            <p class="text-muted small">Menghubungkan ke server Cartrack...</p>
+                        `;
+                        setTimeout(() => {
+                            window.location.href = cartrackUrl;
+                        }, 1000);
+                    } else {
+                        card.innerHTML = `
+                            <div class="icon-box text-blocked"><i class="fas fa-map-marked-alt"></i></div>
+                            <h4 class="fw-bold">Link Cartrack Belum Didaftarkan</h4>
+                            <p class="text-muted small">Unit ${nopolRaw} belum memiliki pemetaan token Cartrack di sistem.</p>
+                        `;
+                    }
+                }
 
-Tanggal: ${getTanggalSekarang()}
-Unit: ${nopol}
-Transportir: ${transportir}
-Sopir: ${sopir}
-Telp Sopir: ${telpSopirBaru}
-Tujuan: ${tujuan}
-Qty: ${qty}
-
-${bagianTracking}
-
-Demikian Informasi ini kami sampaikan.
-Atas Perhatian dan Kerja Samanya, Kami Ucapkan Terima Kasih.
-
-Regards,
-Operasional`;
-            
-            btn.classList.add('sent');
-            btn.innerHTML = '<i class="fas fa-check"></i> SENT';
-            window.open(`https://api.whatsapp.com/send?phone=${num}&text=${encodeURIComponent(teks)}`, '_blank');
-        }
+            } catch (err) {
+                card.innerHTML = `
+                    <div class="icon-box text-blocked"><i class="fas fa-bug"></i></div>
+                    <h4 class="fw-bold">Terjadi Kesalahan Server</h4>
+                    <p class="text-muted small">${err.message}</p>
+                `;
+            }
+        };
     </script>
 </body>
 </html>
