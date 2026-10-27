@@ -74,7 +74,7 @@
             }
 
             try {
-                // Mengambil data dari Supabase tanpa pembatasan urutan created_at agar lebih aman dari error kolom
+                // Mengambil SEMUA data pengiriman yang mencocokkan Nopol tanpa batasan tanggal/hari
                 const { data, error } = await _supabase
                     .from('data_pengiriman')
                     .select('*')
@@ -89,13 +89,22 @@
                     return;
                 }
 
-                // Ambil data baris terakhir/teratas dari hasil pencarian
-                const latestData = data[data.length - 1];
-                const status = (latestData.status || latestData.Status || '').toUpperCase();
-                const tujuan = latestData.delivery_to || latestData.Tujuan || latestData.lokasi || '-';
-                const nopolUnit = latestData.nopol || latestData.Nopol || nopolRaw;
+                // Cari apakah ada data yang statusnya masih PROSES di hari apa pun
+                let activeData = data.find(item => {
+                    let st = (item.status || item.Status || '').toUpperCase();
+                    return st.includes('PROSES');
+                });
 
-                // Pengecekan status terblokir / delivered
+                // Jika tidak ada yang statusnya PROSES, ambil data terbaru dari baris terakhir
+                if (!activeData) {
+                    activeData = data[data.length - 1];
+                }
+
+                const status = (activeData.status || activeData.Status || '').toUpperCase();
+                const tujuan = activeData.delivery_to || activeData.Tujuan || activeData.lokasi || '-';
+                const nopolUnit = activeData.nopol || activeData.Nopol || nopolRaw;
+
+                // Logika pengecekan status terblokir / delivered
                 if (status.includes('DELIVERED') || status.includes('DONE') || status.includes('SAMPAI') || status.includes('SELESAI')) {
                     card.innerHTML = `
                         <div class="icon-box text-delivered"><i class="fas fa-check-circle"></i></div>
@@ -108,7 +117,7 @@
                         </div>
                     `;
                 } else {
-                    // Jika status PROSES atau status lainnya, arahkan ke link Cartrack asli
+                    // Jika status PROSES (berlaku untuk pengiriman hari apa pun), arahkan ke link Cartrack asli
                     const cartrackUrl = databaseLinkCartrack[nopolClean];
                     if (cartrackUrl) {
                         card.innerHTML = `
