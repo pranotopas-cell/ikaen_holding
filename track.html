@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Tracking Pengiriman BBM</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            background-color: #1a1c23;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+        .card-status {
+            background: #252836;
+            border: 1px solid #323546;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 480px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .icon-box {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        .text-delivered { color: #198754; }
+        .text-blocked { color: #dc3545; }
+        .text-loading { color: #0d6efd; }
+    </style>
+</head>
+<body>
+
+    <div class="card-status" id="status-card">
+        <div class="icon-box text-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+        </div>
+        <h4 class="fw-bold">Memverifikasi Status Unit...</h4>
+        <p class="text-muted small">Mohon tunggu sebentar, sistem sedang memverifikasi izin akses tracking.</p>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://ntaectphgoelmhzrkatp.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YWVjdHBoZ29lbG1oenJrYXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzExNDYsImV4cCI6MjA4ODE0NzE0Nn0.-8E98wpkzHBARRhW6PKhBtf2XKhWFjq7idAzw9jlcKg';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const databaseLinkCartrack = {
+            "KH8068GR": "https://fleetweb-id.cartrack.com/share?account=101080&token=zXgdh9OHd5nxVLnuG9YejPD08mGKbpNIO475lDPIFO4ySR5Zf1k&client=2af9969c-320f-44b3-95ad-7e4e892ac8e5",
+            "KH8734GH": "https://fleetweb-id.cartrack.com/share?account=101080&token=2Qr4dnKSwK35ZIhPvFcFreOJ7oZcu7YGT0mNRlROGBbpEQi8pnA&client=2af9969c-320f-44b3-95ad-7e4e892ac8e5",
+            "L9761UJ": "https://fleetweb-id.cartrack.com/share?account=101080&token=YfkQF8qg3hPeAefU91xWSmQZbCGHXcCgpmc2JoaMYtWRNOUcLVi&client=2af9969c-320f-44b3-95ad-7e4e892ac8e5"
+        };
+
+        window.onload = async function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const nopolRaw = urlParams.get('nopol') || '';
+            const nopolClean = nopolRaw.replace(/\s+/g, '').toUpperCase();
+            const card = document.getElementById('status-card');
+
+            if (!nopolClean) {
+                card.innerHTML = `
+                    <div class="icon-box text-blocked"><i class="fas fa-exclamation-triangle"></i></div>
+                    <h4 class="fw-bold">Link Tidak Valid</h4>
+                    <p class="text-muted small">Parameter nomor polisi tidak ditemukan.</p>
+                `;
+                return;
+            }
+
+            try {
+                // Ambil data pengiriman terbaru untuk Nopol ini dari Supabase
+                const { data, error } = await _supabase
+                    .from('data_pengiriman')
+                    .select('status, delivery_to, nopol')
+                    .ilike('nopol', `%${nopolClean}%`)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .maybeSingle();
+
+                if (error || !data) {
+                    card.innerHTML = `
+                        <div class="icon-box text-blocked"><i class="fas fa-search"></i></div>
+                        <h4 class="fw-bold">Data Pengiriman Tidak Ditemukan</h4>
+                        <p class="text-muted small">Unit ${nopolRaw} tidak sedang dalam perjalanan aktif.</p>
+                    `;
+                    return;
+                }
+
+                const status = (data.status || '').toUpperCase();
+
+                // Pengecekan status terblokir / delivered
+                if (status.includes('DELIVERED') || status.includes('DONE') || status.includes('SAMPAI') || status.includes('SELESAI')) {
+                    card.innerHTML = `
+                        <div class="icon-box text-delivered"><i class="fas fa-check-circle"></i></div>
+                        <h4 class="fw-bold">PENGIRIMAN SELESAI</h4>
+                        <p class="badge bg-success px-3 py-2 fs-6">Status: ${status}</p>
+                        <p class="text-muted small mt-3">Unit BBM <strong>${data.nopol || nopolRaw}</strong> telah sampai di lokasi tujuan (<strong>${data.delivery_to || '-'}</strong>).</p>
+                        <hr class="border-secondary">
+                        <div class="alert alert-warning text-dark small mb-0 fw-semibold">
+                            <i class="fas fa-lock me-1"></i> Akses Live Tracking Cartrack otomatis dinonaktifkan demi keamanan operasional.
+                        </div>
+                    `;
+                } else if (status.includes('PROSES')) {
+                    // Jika masih dalam PROSES pengiriman, teruskan ke link Cartrack asli
+                    const cartrackUrl = databaseLinkCartrack[nopolClean];
+                    if (cartrackUrl) {
+                        card.innerHTML = `
+                            <div class="icon-box text-success"><i class="fas fa-truck-fast"></i></div>
+                            <h4 class="fw-bold">Mengarahkan ke Map...</h4>
+                            <p class="text-muted small">Status Unit: <span class="badge bg-primary">IN TRANSIT / PROSES</span></p>
+                            <p class="text-muted small">Menghubungkan ke server Cartrack...</p>
+                        `;
+                        setTimeout(() => {
+                            window.location.href = cartrackUrl;
+                        }, 1000);
+                    } else {
+                        card.innerHTML = `
+                            <div class="icon-box text-blocked"><i class="fas fa-map-marked-alt"></i></div>
+                            <h4 class="fw-bold">Link Cartrack Belum Didaftarkan</h4>
+                            <p class="text-muted small">Unit ${nopolRaw} belum memiliki pemetaan token Cartrack.</p>
+                        `;
+                    }
+                } else {
+                    card.innerHTML = `
+                        <div class="icon-box text-blocked"><i class="fas fa-info-circle"></i></div>
+                        <h4 class="fw-bold">Tracking Tidak Aktif</h4>
+                        <p class="text-muted small">Status unit saat ini: <strong>${status}</strong>.</p>
+                    `;
+                }
+
+            } catch (err) {
+                card.innerHTML = `
+                    <div class="icon-box text-blocked"><i class="fas fa-bug"></i></div>
+                    <h4 class="fw-bold">Terjadi Kesalahan Server</h4>
+                    <p class="text-muted small">${err.message}</p>
+                `;
+            }
+        };
+    </script>
+</body>
+</html>
