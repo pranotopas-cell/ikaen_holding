@@ -128,7 +128,6 @@
         .info-label { color: #94a3b8; font-weight: 600; }
         .info-value { color: #f8fafc; font-weight: 700; text-align: right; }
 
-        /* Teks Pemberitahuan Kendala Teknis / Maintenance Server */
         .notice-maintenance {
             background: rgba(217, 119, 6, 0.12);
             border: 1px solid rgba(217, 119, 6, 0.3);
@@ -159,11 +158,11 @@
         // DAFTAR NOPOL UNIT HINO CONNECT YANG DI-SET PEMBERITAHUAN MAINTENANCE
         const listUnitHino = ["KH8942GN", "KH8943GN", "KH8141GM"];
 
-        // KAMUS LINK CARTRACK (UNTUK UNIT CARTRACK NON-HINO)
+        // KAMUS LINK CARTRACK (UNTUK UNIT CARTRACK NON-HINO) - DIPERBARUI
         const databaseLinkCartrack = {
-            "KH8068GR": "https://fleetweb-id.cartrack.com/share?account=101080&token=zXgdh9OHd5nxVLnuG9YejPD08mGKbpNIO475lDPIFO4ySR5Zf1k&client=2af9969c-320f-44b3-95ad-7e4e892ac8e5",
-            "KH8734GH": "https://fleetweb-id.cartrack.com/share?account=101080&token=2Qr4dnKSwK35ZIhPvFcFreOJ7oZcu7YGT0mNRlROGBbpEQi8pnA&client=2af9969c-320f-44b3-95ad-7e4e892ac8e5",
-            "L9761UJ": "https://fleetweb-id.cartrack.com/share?account=101080&token=YfkQF8qg3hPeAefU91xWSmQZbCGHXcCgpmc2JoaMYtWRNOUcLVi&client=2af9969c-320f-44b3-95ad-7e4e892ac8e5"
+            "KH8068GR": "https://fleetweb-id.cartrack.com/share?account=101080&token=6EOPL5JGZ1qcAQKqsSyYQQa4YiZsIJctbdtlGs14Sfopm0Wtzlg&client=2af9969c-320f-44b3-95ad-7e4e892ac8e5",
+            "KH8734GH": "https://fleetweb-id.cartrack.com/share?account=101080&token=D9Y25gxnx6aaOA54KwWcUGvKQXunaNEFymoK9Jfgni8jybQNQzx&client=2af9969c-320f-44b3-95ad-7e4e892ac8e5",
+            "L9761UJ": "https://fleetweb-id.cartrack.com/share?account=101080&token=QdIuPqtUu2ZNIweZfjxlB49GfseyEQX60IvWD4Bn4PbLjBbHXWu&client=2af9969c-320f-44b3-95ad-7e4e892ac8e5"
         };
 
         window.onload = async function() {
@@ -184,7 +183,6 @@
             }
 
             try {
-                // Tarik data pengiriman dari Supabase
                 const { data, error } = await _supabase
                     .from('data_pengiriman')
                     .select('*');
@@ -200,7 +198,6 @@
                     return;
                 }
 
-                // Cari data nopol yang cocok
                 const matchedRows = data.filter(item => {
                     const dbNopol = (item.nopol || item.Nopol || item.unit || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
                     return dbNopol.includes(nopolClean) || nopolClean.includes(dbNopol);
@@ -217,7 +214,6 @@
                     return;
                 }
 
-                // Cari status PROSES
                 let activeData = matchedRows.find(item => {
                     let st = (item.status || item.Status || '').toUpperCase();
                     return st.includes('PROSES');
@@ -241,7 +237,6 @@
 
                 const isHinoUnit = listUnitHino.includes(nopolClean);
 
-                // JIKA STATUS SUDAH SELESAI / DELIVERED
                 if (isDelivered) {
                     card.innerHTML = `
                         <div class="brand-header text-uppercase mb-1">
@@ -286,8 +281,6 @@
                         </div>
                     `;
                 } else {
-                    // JIKA STATUS MASIH PROSES
-                    // Jika unit Cartrack Non-Hino & ada di daftar Cartrack, redirect langsung ke Cartrack Map
                     if (!isHinoUnit && databaseLinkCartrack[nopolClean]) {
                         card.innerHTML = `
                             <div class="icon-box-status icon-proses">
@@ -302,7 +295,6 @@
                         return;
                     }
 
-                    // JIKA UNIT HINO (KH 8942 GN, KH 8943 GN, KH 8141 GM): Tampilkan Kartu Corporate + Teks Maintenance
                     card.innerHTML = `
                         <div class="brand-header text-uppercase mb-1">
                             <i class="fas fa-shield-halved text-primary me-1"></i> HOLDING GROUP LOGISTICS
