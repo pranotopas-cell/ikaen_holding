@@ -112,7 +112,8 @@
         
         .input-combo { width: 92%; font-size: 11px; padding: 3px 1px; border: 1px solid #ced4da; border-radius: 2px; text-align: center; color: #495057; font-weight: bold; margin: 1px 0; background: #fff; }
         .no-sj-display { font-size: 9.5px; font-weight: bold; color: var(--accent-red); background: #e8f4fd; border: 1px dashed #b6d4fe; border-radius: 2px; padding: 1px 2px; margin-top: 2px; word-break: break-all; min-height: 14px; }
-        .no-rangka-display { font-size: 9px; font-weight: bold; color: #bd2130 ; background: #e9ecef; border-radius: 2px; padding: 1px 2px; margin-top: 2px; word-break: break-all; }
+        .no-po-display { font-size: 9px; font-weight: bold; color: #004080; background: #eef2f7; border: 1px dashed #9bc0e6; border-radius: 2px; padding: 1px 2px; margin-top: 2px; word-break: break-all; min-height: 14px; }
+        .no-rangka-display { font-size: 10px; font-weight: bold; color: #bd2130 ; background: #e9ecef; border-radius: 2px; padding: 1px 2px; margin-top: 2px; word-break: break-all; }
         .action-cell { display: flex; gap: 3px; justify-content: center; align-items: center; height: 100%; }
         .btn-add, .btn-del { border: 1px solid #ced4da; background: #fff; border-radius: 3px; width: 24px; height: 24px; cursor: pointer; font-size: 16px; font-weight: bold; color: var(--primary); display: flex; align-items: center; justify-content: center; }
         
@@ -136,7 +137,7 @@
     </datalist>
 
     <datalist id="list-sopir">
-        <option value="AGUS WANTO"> <option value="WAHYUDI">
+        <option value="AGUS WANTO"> <option value="KEKER DWI">
         <option value="SUPRIYADI"> <option value="NUR KHOLIS"> <option value="ALFIN">
         <option value="AGUS MULYANTO"> <option value="MISNAN">
     </datalist>
@@ -193,8 +194,8 @@
 
             </div>
             <div class="action-buttons">
-                <button class="btn-common btn-save" id="btnSave" onclick="saveData()">SIMPAN </button>
-                <button class="btn-common btn-wa" id="btnShare" onclick="openWaModal()">SHARE JADWAL</button>
+                <button class="btn-common btn-save" id="btnSave" onclick="saveData()">SIMPAN DATA</button>
+                <button class="btn-common btn-wa" id="btnShare" onclick="openWaModal()">BAGIKAN JADWAL</button>
                 <a href="index.html" class="btn-common btn-home">HOME</a>
             </div>
         </div>
@@ -212,7 +213,7 @@
                     <tr>
                         <th style="width: 75px;">TGL</th>
                         <th style="width: 65px;">HARI</th>
-                        <th style="width: 80px;">SELLER</th>
+                        <th style="width: 80px;">SELLER / NO PO</th>
                         <th style="width: 85px;">SUPPLIER</th>
                         <th style="width: 45px;">IN</th>
                         <th style="width: 120px;">DELIVERY TO / NO SJ</th>
@@ -283,7 +284,7 @@
             { id: 'KH 8141 GM', cap: 5 }, { id: 'KH 8942 GN', cap: 5 },
             { id: 'KH 8943 GN', cap: 5 }, { id: 'L 9761 UJ', cap: 8 }
         ];
-        const sopirMaster = ['AGUS WANTO', 'WAHYUDI', 'SUPRIYADI', 'NUR KHOLIS', 'ALFIN', 'MISNAN', 'AGUS MULYANTO'];
+        const sopirMaster = ['AGUS WANTO', 'KEKER DWI', 'SUPRIYADI', 'NUR KHOLIS', 'ALFIN', 'MISNAN', 'AGUS MULYANTO'];
         const quotes = [
             { q: "Cintai pekerjaanmu, maka kamu tidak perlu bekerja satu hari pun dalam hidupmu.", s: "Confucius" },
             { q: "Satu-satunya cara untuk melakukan pekerjaan besar adalah dengan mencintai apa yang Anda lakukan.", s: "Steve Jobs" },
@@ -467,7 +468,7 @@
 
             displayDates.forEach(dateStr => {
                 const dayRows = data ? data.filter(r => r.tanggal === dateStr) : [];
-                const finalRows = dayRows.length > 0 ? dayRows : [{ seller: '', supplier: '', jumlah_masuk: '', delivery_to: '', no_sj: '', lokasi: '', nopol: '', sopir: '', jumlah_keluar: '', status: '' }];
+                const finalRows = dayRows.length > 0 ? dayRows : [{ seller: '', no_po_customer: '', supplier: '', jumlah_masuk: '', delivery_to: '', no_sj: '', lokasi: '', nopol: '', sopir: '', jumlah_keluar: '', status: '' }];
                 finalRows.forEach((item, i) => {
                     const tr = createRow(dateStr, item, i, finalRows.length, todayStr);
                     tbody.appendChild(tr);
@@ -491,7 +492,10 @@
 
             tr.innerHTML = `
                 ${dateHtml}
-                <td contenteditable="true" class="cell-data cell-seller">${item.seller || ''}</td>
+                <td>
+                    <div contenteditable="true" class="cell-data cell-seller">${item.seller || ''}</div>
+                    <div contenteditable="true" class="cell-data cell-po no-po-display" placeholder="NO PO">${item.no_po_customer || ''}</div>
+                </td>
                 <td contenteditable="true" class="cell-data cell-supplier">${item.supplier || ''}</td>
                 <td contenteditable="true" class="cell-data cell-in">${item.jumlah_masuk || ''}</td>
                 <td>
@@ -767,6 +771,7 @@
             rows.forEach(r => {
                 const tanggal = r.dataset.tgl;
                 const seller = r.querySelector('.cell-seller').innerText.trim();
+                const no_po_customer = r.querySelector('.cell-po').innerText.trim();
                 const supplier = r.querySelector('.cell-supplier').innerText.trim();
                 const jumlah_masuk = parseFloat(r.querySelector('.cell-in').innerText) || null;
                 const delivery_to = r.querySelector('.cell-to').innerText.trim();
@@ -778,8 +783,8 @@
                 const status = r.querySelector('.cell-status').innerText.trim();
                 const no_rangka = getNoRangka(nopol);
 
-                if(seller || supplier || jumlah_masuk || delivery_to || no_sj || lokasi || nopol || sopir || jumlah_keluar || status) {
-                    records.push({ tanggal, seller, supplier, jumlah_masuk, delivery_to, no_sj, lokasi, nopol, sopir, jumlah_keluar, status, no_rangka });
+                if(seller || no_po_customer || supplier || jumlah_masuk || delivery_to || no_sj || lokasi || nopol || sopir || jumlah_keluar || status) {
+                    records.push({ tanggal, seller, no_po_customer, supplier, jumlah_masuk, delivery_to, no_sj, lokasi, nopol, sopir, jumlah_keluar, status, no_rangka });
                 }
             });
 
