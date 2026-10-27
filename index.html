@@ -179,6 +179,66 @@
         const SB_KEY = "sb_publishable_YlFIMi2XTpX77USP0qxAzw_SatAvLT6";
         const _supabaseIde = supabase.createClient(SB_URL, SB_KEY);
 
+        // LOGIKA & PROXY TRACKING UNIT CARTRACK
+        const BASE_TRACKING_URL = window.location.origin + "/track.html";
+
+        function getTanggalSekarang() {
+            const d = new Date();
+            return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        async function kirimWA(idRow, nopol, sopir, tujuan, qty, cartrackLink, index) {
+            const telpCustInput = document.getElementById(`telp_cust_${index}`);
+            const transInput = document.getElementById(`trans_${index}`);
+            const sopirTelpInput = document.getElementById(`sopir_telp_${index}`);
+            const btn = document.getElementById(`btn_wa_${index}`);
+
+            const telpCust = telpCustInput ? telpCustInput.value : '';
+            const transportir = transInput ? transInput.value : '';
+            const telpSopirBaru = sopirTelpInput ? sopirTelpInput.value : '';
+
+            if (!telpCust) {
+                alert("Silakan pilih nomor customer dari daftar!");
+                if(telpCustInput) telpCustInput.focus();
+                return;
+            }
+
+            let num = telpCust.replace(/[^0-9]/g, '');
+            if (num.startsWith('0')) num = '62' + num.slice(1);
+
+            const cleanNopol = nopol.replace(/\s+/g, '').toUpperCase();
+            
+            // LINK SMART PROXY TRACKING (Otomatis Ter-block jika Status Delivered di Supabase)
+            const smartTrackLink = `${BASE_TRACKING_URL}?nopol=${encodeURIComponent(cleanNopol)}`;
+
+            let bagianTracking = `Berikut adalah link live tracking khusus untuk memantau unit ${nopol}:\n${smartTrackLink}\n\n*Catatan: Link otomatis terblokir/kedaluwarsa saat unit tiba di tujuan (DELIVERED).*`;
+
+            const teks = `Dengan hormat,
+Kami Konfirmasikan Pengiriman BBM hari ini status Dalam Perjalanan, dengan data Unit Sebagai Berikut:
+
+Tanggal: ${getTanggalSekarang()}
+Unit: ${nopol}
+Transportir: ${transportir}
+Sopir: ${sopir}
+Telp Sopir: ${telpSopirBaru}
+Tujuan: ${tujuan}
+Qty: ${qty}
+
+${bagianTracking}
+
+Demikian Informasi ini kami sampaikan.
+Atas Perhatian dan Kerja Samanya, Kami Ucapkan Terima Kasih.
+
+Regards,
+Operasional`;
+            
+            if (btn) {
+                btn.classList.add('sent');
+                btn.innerHTML = '<i class="fas fa-check"></i> SENT';
+            }
+            window.open(`https://api.whatsapp.com/send?phone=${num}&text=${encodeURIComponent(teks)}`, '_blank');
+        }
+
         // Database 6 Akun Pengguna (Username & No. Telepon sebagai Password)
         const authorizedUsers = [
             { username: "supranoto", phone: "08114558778", name: "Supranoto", role: "Administrator All" },
