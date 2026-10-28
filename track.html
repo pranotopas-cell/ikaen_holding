@@ -158,7 +158,7 @@
         // DAFTAR NOPOL UNIT HINO CONNECT YANG DI-SET PEMBERITAHUAN MAINTENANCE
         const listUnitHino = ["KH8942GN", "KH8943GN", "KH8141GM"];
 
-        // KAMUS LINK CARTRACK (UNTUK UNIT CARTRACK NON-HINO) - DIPERBARUI
+        // KAMUS LINK CARTRACK (UNTUK UNIT CARTRACK NON-HINO)
         const databaseLinkCartrack = {
             "KH8068GR": "https://fleetweb-id.cartrack.com/share?account=101080&token=6EOPL5JGZ1qcAQKqsSyYQQa4YiZsIJctbdtlGs14Sfopm0Wtzlg&client=2af9969c-320f-44b3-95ad-7e4e892ac8e5",
             "KH8734GH": "https://fleetweb-id.cartrack.com/share?account=101080&token=D9Y25gxnx6aaOA54KwWcUGvKQXunaNEFymoK9Jfgni8jybQNQzx&client=2af9969c-320f-44b3-95ad-7e4e892ac8e5",
@@ -198,6 +198,7 @@
                     return;
                 }
 
+                // Filter data berdasarkan nopol yang cocok
                 const matchedRows = data.filter(item => {
                     const dbNopol = (item.nopol || item.Nopol || item.unit || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
                     return dbNopol.includes(nopolClean) || nopolClean.includes(dbNopol);
@@ -214,11 +215,21 @@
                     return;
                 }
 
+                // KOREKSI UTAMA: Cari apakah ada baris data yang statusnya sudah DELIVERED/SELESAI/SAMPAI
                 let activeData = matchedRows.find(item => {
                     let st = (item.status || item.Status || '').toUpperCase();
-                    return st.includes('PROSES');
+                    return st.includes('DELIVERED') || st.includes('DONE') || st.includes('SAMPAI') || st.includes('SELESAI');
                 });
 
+                // Jika tidak ada yang delivered, cari yang statusnya PROSES
+                if (!activeData) {
+                    activeData = matchedRows.find(item => {
+                        let st = (item.status || item.Status || '').toUpperCase();
+                        return st.includes('PROSES');
+                    });
+                }
+
+                // Jika masih belum ketemu juga, ambil data terakhir dari array yang cocok
                 if (!activeData) {
                     activeData = matchedRows[matchedRows.length - 1];
                 }
