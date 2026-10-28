@@ -165,6 +165,14 @@
             "L9761UJ": "https://fleetweb-id.cartrack.com/share?account=101080&token=QdIuPqtUu2ZNIweZfjxlB49GfseyEQX60IvWD4Bn4PbLjBbHXWu&client=2af9969c-320f-44b3-95ad-7e4e892ac8e5"
         };
 
+        // Helper untuk memformat objek Date ke format ISO String Tanggal (YYYY-MM-DD)
+        function getYYYYMMDD(dateObj) {
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         window.onload = async function() {
             const urlParams = new URLSearchParams(window.location.search);
             const nopolRaw = urlParams.get('nopol') || '';
@@ -215,23 +223,53 @@
                     return;
                 }
 
-                // KOREKSI UTAMA: Cari apakah ada baris data yang statusnya sudah DELIVERED/SELESAI/SAMPAI
+                // Hitung string tanggal hari ini & besok (YYYY-MM-DD)
+                const now = new Date();
+                const todayStr = getYYYYMMDD(now);
+                
+                const tomorrow = new Date();
+                tomorrow.setDate(now.getDate() + 1);
+                const tomorrowStr = getYYYYMMDD(tomorrow);
+
+                // Helper untuk mengecek apakah tanggal baris pengiriman jatuh pada hari ini atau besok
+                const isTodayOrTomorrow = (item) => {
+                    const rawDate = item.tanggal || item.Tanggal || item.tgl_pengiriman || item.created_at || '';
+                    if (!rawDate) return false;
+                    const dateFormatted = String(rawDate).substring(0, 10);
+                    return dateFormatted === todayStr || dateFormatted === tomorrowStr;
+                };
+
+                // KOREKSI UTAMA & LOGIKA FILTER TANGGAL:
+                // 1. Cari data DELIVERED untuk HARI INI dan BESOK
                 let activeData = matchedRows.find(item => {
                     let st = (item.status || item.Status || '').toUpperCase();
-                    return st.includes('DELIVERED') || st.includes('DONE') || st.includes('SAMPAI') || st.includes('SELESAI');
+                    let isDeliveredStatus = st.includes('DELIVERED') || st.includes('DONE') || st.includes('SAMPAI') || st.includes('SELESAI');
+                    return isDeliveredStatus && isTodayOrTomorrow(item);
                 });
 
-                // Jika tidak ada yang delivered, cari yang statusnya PROSES
+                // 2. Jika tidak ada yang DELIVERED hari ini/besok, cari status PROSES untuk HARI INI dan BESOK
+                if (!activeData) {
+                    activeData = matchedRows.find(item => {
+                        let st = (item.status || item.Status || '').toUpperCase();
+                        let isProsesStatus = st.includes('PROSES') || st.includes('TRANSIT');
+                        return isProsesStatus && isTodayOrTomorrow(item);
+                    });
+                }
+
+                // 3. Jika tidak ada pengiriman hari ini/besok sama sekali, cari DELIVERED yang mana saja
+                if (!activeData) {
+                    activeData = matchedRows.find(item => {
+                        let st = (item.status || item.Status || '').toUpperCase();
+                        return st.includes('DELIVERED') || st.includes('DONE') || st.includes('SAMPAI') || st.includes('SELESAI');
+                    });
+                }
+
+                // 4. Jika masih tidak ditemukan, ambil status PROSES terbaru atau baris data paling akhir
                 if (!activeData) {
                     activeData = matchedRows.find(item => {
                         let st = (item.status || item.Status || '').toUpperCase();
                         return st.includes('PROSES');
-                    });
-                }
-
-                // Jika masih belum ketemu juga, ambil data terakhir dari array yang cocok
-                if (!activeData) {
-                    activeData = matchedRows[matchedRows.length - 1];
+                    }) || matchedRows[matchedRows.length - 1];
                 }
 
                 const nopolUnit = activeData.nopol || activeData.Nopol || nopolRaw;
