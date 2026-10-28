@@ -239,7 +239,6 @@
                     return dateFormatted === todayStr || dateFormatted === tomorrowStr;
                 };
 
-                // KOREKSI UTAMA & LOGIKA FILTER TANGGAL:
                 // 1. Cari data DELIVERED untuk HARI INI dan BESOK
                 let activeData = matchedRows.find(item => {
                     let st = (item.status || item.Status || '').toUpperCase();
@@ -272,11 +271,6 @@
                     }) || matchedRows[matchedRows.length - 1];
                 }
 
-                const nopolUnit = activeData.nopol || activeData.Nopol || nopolRaw;
-                const driverMentah = (activeData.sopir || activeData.Sopir || activeData.driver || '-').toUpperCase();
-                const transportir = activeData.transportir || activeData.Transportir || 'PT. INDO DHARMA ENERGI';
-                const qtyVal = activeData.jumlah_keluar || activeData.jumlah_masuk || activeData.qty || '0';
-                const tujuanVal = activeData.delivery_to || activeData.Tujuan || activeData.lokasi || '-';
                 const statusRaw = (activeData.status || activeData.Status || 'PROSES').toUpperCase();
 
                 const isDelivered = statusRaw.includes('DELIVERED') || 
@@ -287,6 +281,7 @@
                 const isHinoUnit = listUnitHino.includes(nopolClean);
 
                 if (isDelivered) {
+                    // TAMPILAN KHUSUS DELIVERED (Hanya status, ikon, dan pemberitahuan tanpa rincian detail)
                     card.innerHTML = `
                         <div class="brand-header text-uppercase mb-1">
                             <i class="fas fa-shield-halved text-success me-1"></i> HOLDING GROUP LOGISTICS
@@ -297,31 +292,8 @@
                             <i class="fas fa-check"></i>
                         </div>
 
-                        <div class="mb-3">
+                        <div class="mb-4">
                             <span class="badge-status badge-delivered">PENGIRIMAN SELESAI / DELIVERED</span>
-                        </div>
-
-                        <div class="info-container mb-3 text-start">
-                            <div class="info-item">
-                                <span class="info-label"><i class="fas fa-truck me-1"></i> Nomor Unit</span>
-                                <span class="info-value">${nopolUnit}</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label"><i class="fas fa-user-tie me-1"></i> Driver</span>
-                                <span class="info-value">${driverMentah}</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label"><i class="fas fa-building me-1"></i> Transportir</span>
-                                <span class="info-value text-truncate ms-2" style="max-width: 200px;">${transportir}</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label"><i class="fas fa-gas-pump me-1"></i> Qty BBM</span>
-                                <span class="info-value text-success">${qtyVal} KL</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label"><i class="fas fa-map-marker-alt me-1"></i> Tujuan</span>
-                                <span class="info-value">${tujuanVal}</span>
-                            </div>
                         </div>
 
                         <div class="notice-maintenance text-start">
@@ -330,6 +302,12 @@
                         </div>
                     `;
                 } else {
+                    const nopolUnit = activeData.nopol || activeData.Nopol || nopolRaw;
+                    const driverMentah = (activeData.sopir || activeData.Sopir || activeData.driver || '-').toUpperCase();
+                    const transportir = activeData.transportir || activeData.Transportir || 'PT. INDO DHARMA ENERGI';
+                    const qtyVal = activeData.jumlah_keluar || activeData.jumlah_masuk || activeData.qty || '0';
+                    const tujuanVal = activeData.delivery_to || activeData.Tujuan || activeData.lokasi || '-';
+
                     if (!isHinoUnit && databaseLinkCartrack[nopolClean]) {
                         card.innerHTML = `
                             <div class="icon-box-status icon-proses">
