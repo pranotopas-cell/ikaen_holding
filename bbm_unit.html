@@ -105,10 +105,10 @@
 
         th, td {
             border: 1px solid var(--border-color);
-            padding: 3px 4px;
+            padding: 4px 6px;
             text-align: center;
             vertical-align: middle;
-            height: 22px;
+            height: 24px;
         }
 
         th {
@@ -121,7 +121,21 @@
         }
 
         .tabel-bawah th { background-color: #334155; }
-        .tabel-resume th { background-color: #475569; }
+        
+        /* Merapikan Tabel Resume Perjalanan (Tabel 4) */
+        #tabelResumePerjalanan th { 
+            background-color: #475569; 
+            padding: 6px 4px;
+        }
+        #tabelResumePerjalanan tbody tr {
+            transition: background-color 0.15s ease;
+        }
+        #tabelResumePerjalanan tbody tr:hover {
+            background-color: #f1f5f9;
+        }
+        #tabelResumePerjalanan td {
+            padding: 4px 6px;
+        }
 
         /* Styling Warna-Warni Pembeda Per Tanggal */
         tr.row-tgl-group-0, tr.row-tgl-group-0 td {
@@ -143,24 +157,25 @@
         /* Input & Select Styling */
         table input, table select {
             width: 100%;
-            padding: 2px;
+            padding: 2px 4px;
             border: 1px solid transparent;
             background: inherit; /* Mengikuti background td/tr */
             box-sizing: border-box;
             text-align: center;
             font-size: 11px;
             color: var(--text-main);
-            height: 20px;
+            height: 22px;
+            border-radius: 3px;
         }
 
         table input:focus, table select:focus {
-            border-bottom: 2px solid var(--accent-blue);
+            border: 1px solid var(--accent-blue);
             background: #ffffff !important;
             outline: none;
         }
 
         .readonly-input {
-            background-color: rgba(0, 0, 0, 0.05) !important;
+            background-color: rgba(0, 0, 0, 0.03) !important;
             font-weight: 600;
             color: #475569;
         }
@@ -619,7 +634,7 @@ async function tarikDataSupabase() {
         document.getElementById("bodyAtas").innerHTML = "";
         document.getElementById("bodyBawah").innerHTML = "";
         document.getElementById("bodyPengisianLuar").innerHTML = "";
-        document.getElementById("bodyResumePerjalanan").innerHTML = ""; // Riset DOM resume saat tarik data baru
+        document.getElementById("bodyResumePerjalanan").innerHTML = ""; // Reset DOM resume saat tarik data baru
 
         if (resAtas.data && resAtas.data.length > 0) {
             if (resAtas.data[0].awal_flow !== undefined && resAtas.data[0].awal_flow !== null) {
@@ -868,8 +883,8 @@ function simpanNilaiTangkiManual(inputEl, nopol, field) {
     }
     dataTangkiManual[nopol][field] = parseFloat(inputEl.value) || 0;
     
-    // Perbarui nilai Total Fleet secara langsung tanpa membuat ulang DOM tabel
-    updateTotalFleetResumePerjalanan();
+    // Panggil kalkulasi ulang agar total efisiensi KM/L otomatis ter-update
+    hitungOtomatisAtas();
 }
 
 function updateTotalFleetResumePerjalanan() {
@@ -877,7 +892,7 @@ function updateTotalFleetResumePerjalanan() {
     if (!bodyResumePerjalanan) return;
 
     let grandTotalJarak = 0;
-    let grandTotalBbm = 0;
+    let grandTotalBbmIsi = 0;
     let grandTotalTangkiAwal = 0;
     let grandTotalTangkiAkhir = 0;
 
@@ -908,14 +923,15 @@ function updateTotalFleetResumePerjalanan() {
         grandTotalTangkiAwal += tAwal;
         grandTotalTangkiAkhir += tAkhir;
         grandTotalJarak += valJarak;
-        grandTotalBbm += valBbm;
+        grandTotalBbmIsi += valBbm;
     }
 
     if (rowTotalFleet) {
-        let grandTotalRasio = grandTotalBbm > 0 ? (grandTotalJarak / grandTotalBbm).toFixed(1) : "0.0";
+        let grandTotalBbmEfektif = (grandTotalBbmIsi + grandTotalTangkiAwal) - grandTotalTangkiAkhir;
+        let grandTotalRasio = grandTotalBbmEfektif > 0 ? (grandTotalJarak / grandTotalBbmEfektif).toFixed(1) : "0.0";
         rowTotalFleet.cells[1].innerText = grandTotalTangkiAwal.toLocaleString('id-ID') + " L";
         rowTotalFleet.cells[2].innerText = grandTotalJarak.toLocaleString('id-ID') + " KM";
-        rowTotalFleet.cells[3].innerText = grandTotalBbm.toLocaleString('id-ID') + " L";
+        rowTotalFleet.cells[3].innerText = grandTotalBbmIsi.toLocaleString('id-ID') + " L";
         rowTotalFleet.cells[4].innerText = grandTotalTangkiAkhir.toLocaleString('id-ID') + " L";
         rowTotalFleet.cells[5].innerText = grandTotalRasio + " KM/L";
     }
@@ -1141,7 +1157,7 @@ function hitungOtomatisAtas() {
         }
 
         let grandTotalJarak = 0;
-        let grandTotalBbm = 0;
+        let grandTotalBbmIsi = 0;
         let grandTotalTangkiAwal = 0;
         let grandTotalTangkiAkhir = 0;
 
@@ -1150,8 +1166,6 @@ function hitungOtomatisAtas() {
             let tAwal = dataTangkiManual[nopolKey] ? dataTangkiManual[nopolKey].tangkiAwal : 0;
             let tAkhir = dataTangkiManual[nopolKey] ? dataTangkiManual[nopolKey].tangkiAkhir : 0;
 
-            let rataRataKmLiter = unit.totalBbm > 0 ? (unit.totalJarak / unit.totalBbm).toFixed(1) : "0.0";
-            
             let rowRes = existingRowsMap[nopolKey];
 
             if (!rowRes) {
@@ -1163,36 +1177,43 @@ function hitungOtomatisAtas() {
                     <td><input type="text" class="readonly-input" value="${unit.totalJarak.toLocaleString('id-ID')} KM" readonly></td>
                     <td><input type="text" class="readonly-input" value="${unit.totalBbm.toLocaleString('id-ID')} L" readonly style="color: #2563eb;"></td>
                     <td><input type="number" class="tangki-akhir-input" value="${tAkhir}" min="0" oninput="simpanNilaiTangkiManual(this, '${nopolKey}', 'tangkiAkhir')"></td>
-                    <td><input type="text" class="readonly-input" value="${rataRataKmLiter} KM/L" readonly style="text-align: center; font-weight: bold; color: #7c3aed;"></td>`;
+                    <td><input type="text" class="readonly-input" value="0.0 KM/L" readonly style="text-align: center; font-weight: bold; color: #7c3aed;"></td>`;
                 existingRowsMap[nopolKey] = rowRes;
-            } else {
-                // Jika baris sudah ada, cukuplah perbarui nilainya tanpa membuat ulang input
-                let inputAwal = rowRes.querySelector(".tangki-awal-input");
-                let inputAkhir = rowRes.querySelector(".tangki-akhir-input");
-
-                if (document.activeElement !== inputAwal && inputAwal) {
-                    inputAwal.value = tAwal;
-                }
-                if (document.activeElement !== inputAkhir && inputAkhir) {
-                    inputAkhir.value = tAkhir;
-                }
-
-                // Ambil nilai aktual input tangki
-                tAwal = inputAwal ? (parseFloat(inputAwal.value) || 0) : 0;
-                tAkhir = inputAkhir ? (parseFloat(inputAkhir.value) || 0) : 0;
-
-                rowRes.cells[2].querySelector("input").value = unit.totalJarak.toLocaleString('id-ID') + " KM";
-                rowRes.cells[3].querySelector("input").value = unit.totalBbm.toLocaleString('id-ID') + " L";
-                rowRes.cells[5].querySelector("input").value = rataRataKmLiter + " KM/L";
             }
+
+            // Ambil nilai input aktual tangki awal dan akhir dari DOM
+            let inputAwal = rowRes.querySelector(".tangki-awal-input");
+            let inputAkhir = rowRes.querySelector(".tangki-akhir-input");
+
+            if (document.activeElement !== inputAwal && inputAwal) {
+                inputAwal.value = tAwal;
+            }
+            if (document.activeElement !== inputAkhir && inputAkhir) {
+                inputAkhir.value = tAkhir;
+            }
+
+            tAwal = inputAwal ? (parseFloat(inputAwal.value) || 0) : 0;
+            tAkhir = inputAkhir ? (parseFloat(inputAkhir.value) || 0) : 0;
+
+            // LOGIKA PEMBARUAN: (Total Pengisian BBM + Tangki Awal) - Tangki Akhir
+            let totalPengisianBbmSaja = unit.totalBbm;
+            let totalBbmEfektifPakai = (totalPengisianBbmSaja + tAwal) - tAkhir;
+            
+            // Perhitungan KM/L = Jarak / Pemakaian Efektif BBM
+            let rataRataKmLiter = totalBbmEfektifPakai > 0 ? (unit.totalJarak / totalBbmEfektifPakai).toFixed(1) : "0.0";
+
+            rowRes.cells[2].querySelector("input").value = unit.totalJarak.toLocaleString('id-ID') + " KM";
+            rowRes.cells[3].querySelector("input").value = totalPengisianBbmSaja.toLocaleString('id-ID') + " L";
+            rowRes.cells[5].querySelector("input").value = rataRataKmLiter + " KM/L";
 
             grandTotalTangkiAwal += tAwal;
             grandTotalTangkiAkhir += tAkhir;
             grandTotalJarak += unit.totalJarak;
-            grandTotalBbm += unit.totalBbm;
+            grandTotalBbmIsi += totalPengisianBbmSaja;
         }
 
-        let grandTotalRasio = grandTotalBbm > 0 ? (grandTotalJarak / grandTotalBbm).toFixed(1) : "0.0";
+        let grandTotalBbmEfektif = (grandTotalBbmIsi + grandTotalTangkiAwal) - grandTotalTangkiAkhir;
+        let grandTotalRasio = grandTotalBbmEfektif > 0 ? (grandTotalJarak / grandTotalBbmEfektif).toFixed(1) : "0.0";
 
         if (!rowTotalFleet) {
             rowTotalFleet = bodyResumePerjalanan.insertRow();
@@ -1202,13 +1223,13 @@ function hitungOtomatisAtas() {
                 <td style="color: #0f172a;">TOTAL FLEET</td>
                 <td>${grandTotalTangkiAwal.toLocaleString('id-ID')} L</td>
                 <td>${grandTotalJarak.toLocaleString('id-ID')} KM</td>
-                <td>${grandTotalBbm.toLocaleString('id-ID')} L</td>
+                <td>${grandTotalBbmIsi.toLocaleString('id-ID')} L</td>
                 <td>${grandTotalTangkiAkhir.toLocaleString('id-ID')} L</td>
                 <td style="text-align: center; color: #7c3aed;">${grandTotalRasio} KM/L</td>`;
         } else {
             rowTotalFleet.cells[1].innerText = grandTotalTangkiAwal.toLocaleString('id-ID') + " L";
             rowTotalFleet.cells[2].innerText = grandTotalJarak.toLocaleString('id-ID') + " KM";
-            rowTotalFleet.cells[3].innerText = grandTotalBbm.toLocaleString('id-ID') + " L";
+            rowTotalFleet.cells[3].innerText = grandTotalBbmIsi.toLocaleString('id-ID') + " L";
             rowTotalFleet.cells[4].innerText = grandTotalTangkiAkhir.toLocaleString('id-ID') + " L";
             rowTotalFleet.cells[5].innerText = grandTotalRasio + " KM/L";
         }
