@@ -136,15 +136,25 @@
                     <label class="small">Alamat </label>
                     <textarea id="in_addr" class="form-control form-control-sm" rows="3" oninput="updateView()"></textarea>
                 </div>
+                
                 <hr class="my-2">
+                
+                <!-- CONTAINER NO PO DINAMIS -->
                 <div class="col-12">
-                    <label class="small text-success fw-bold">No. PO di Tabel (Baris Utama)</label>
-                    <input type="text" id="in_no_po_tabel" class="form-control form-control-sm" value="001/PO-BBM/KSE/X/2026" placeholder="Masukkan No. PO Tabel" oninput="calculate()">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="small text-success fw-bold m-0">Daftar No. PO di Tabel</label>
+                        <button type="button" class="btn btn-xs btn-success py-0 px-2 fw-bold" style="font-size: 11px;" onclick="addPoRow()">
+                            <i class="bi bi-plus-lg"></i> Tambah PO
+                        </button>
+                    </div>
+                    <div id="po_input_container">
+                        <div class="input-group input-group-sm mb-1 po-input-row">
+                            <input type="text" class="form-control form-control-sm in_no_po_item" value="001/PO-BBM/KSE/X/2026" placeholder="Nomor PO..." oninput="calculate()">
+                            <button class="btn btn-outline-danger" type="button" onclick="removePoRow(this)"><i class="bi bi-trash"></i></button>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-12">
-                    <label class="small text-danger fw-bold">No. PO di Tabel (Baris Kedua / PPh)</label>
-                    <input type="text" id="in_no_po_tabel_sub" class="form-control form-control-sm" placeholder="Kosongkan atau isi No. PO lain..." oninput="calculate()">
-                </div>
+
                 <div class="col-12">
                     <label class="small">Product</label>
                     <input list="list_barang" id="in_barang" class="form-control form-control-sm" value="Transport" oninput="calculate()">
@@ -243,7 +253,7 @@
                     <p class="mb-0">Bersama ini kami kirimkan purchase order ( PO ) dengan rincian sebagai berikut :</p>
                 </div>
 
-                <!-- TABEL -->
+                <!-- TABEL PREVIEW -->
                 <table class="table-po">
                     <thead>
                         <tr>
@@ -255,57 +265,8 @@
                             <th width="16%">Total BILLING</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td class="text-center" style="vertical-align: top;">1</td>
-                            <td class="text-center" style="vertical-align: top;" id="out_tbl_nopo">-</td>
-                            <td class="text-center" style="vertical-align: top;" id="out_tbl_product">Transport</td>
-                            <td class="text-center" style="vertical-align: top;" id="out_tbl_qty">0</td>
-                            <td class="text-center" style="vertical-align: top;" id="out_tbl_hargaltr">0</td>
-                            <td class="p-1" style="vertical-align: top;">
-                                <div class="d-flex justify-content-between">
-                                    <span>Rp</span>
-                                    <span class="fw-bold" id="out_tbl_totalbilling">0</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-center" style="vertical-align: top;"></td>
-                            <td class="text-center" style="vertical-align: top;" id="out_tbl_nopo_sub"></td>
-                            <td class="text-center" style="vertical-align: top;"></td>
-                            <td class="text-center" style="vertical-align: top;"></td>
-                            <td class="text-center fw-bold" id="out_lbl_pph">PPH 2 %</td>
-                            <td class="p-1">
-                                <div class="d-flex justify-content-between">
-                                    <span>Rp</span>
-                                    <span id="out_tbl_pph">-</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="3" class="text-center">Losis Pengiriman</td>
-                            <td class="text-center" id="out_tbl_losis_qty">-</td>
-                            <td class="text-center" id="out_tbl_losis_harga">-</td>
-                            <td class="p-1">
-                                <div class="d-flex justify-content-between">
-                                    <span>Rp</span>
-                                    <span id="out_tbl_losis_total">-</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="5" class="text-center fw-bold" id="out_tbl_franco">Franco Depo OCEAN, Pangkalan Bun</td>
-                            <td></td>
-                        </tr>
-                        <tr class="fw-bold" style="border-top: 2px solid #000; border-bottom: 2px solid #000;">
-                            <td colspan="5" class="text-center" style="letter-spacing: 1px; border-bottom: 2px solid #000;">TOTAL</td>
-                            <td class="p-1" style="border-bottom: 2px solid #000;">
-                                <div class="d-flex justify-content-between">
-                                    <span>Rp</span>
-                                    <span id="out_grandtotal">0</span>
-                                </div>
-                            </td>
-                        </tr>
+                    <tbody id="po_table_body">
+                        <!-- Baris PO akan digenerate secara otomatis via JavaScript -->
                     </tbody>
                 </table>
 
@@ -356,6 +317,7 @@
     // --- KONFIGURASI ---
     const CUSTOMER_DATABASE = {
         "PT. PALITO ENERGI NUSANTARA": "Up.Bpk Sanur \nJl.Tjilik Riwut Km.06 No.132 ,Palangkaraya - Kalimantan Tengah. ",
+        "PT. OCEAN INDONESIA ENERGY": "Up.Ibu Raby \nJl. Alalak Utara RT.016 Kel.Alalak Utara , \nBanjarmasin - Kalimantan Selatan.",
         "PT. BANUA PETRA PRIMA": "Up.Ibu Raby \nJl. Alalak Utara RT.016 Kel.Alalak Utara , \nBanjarmasin - Kalimantan Selatan.",
         "PT. INDO DHARMA ENERGI": "Up.Ibu Nurhamida \nJl. Ahmad Yani Km.07 Pangkalan Bun,\nKalimantan Tengah."
     };
@@ -366,6 +328,40 @@
 
     const monthRomawi = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
     const monthsIndo = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
+
+    // --- FUNGSI MANAJEMEN BARIS PO DINAMIS ---
+    function addPoRow(val = '') {
+        const container = document.getElementById('po_input_container');
+        const div = document.createElement('div');
+        div.className = 'input-group input-group-sm mb-1 po-input-row';
+        div.innerHTML = `
+            <input type="text" class="form-control form-control-sm in_no_po_item" value="${val}" placeholder="Nomor PO..." oninput="calculate()">
+            <button class="btn btn-outline-danger" type="button" onclick="removePoRow(this)"><i class="bi bi-trash"></i></button>
+        `;
+        container.appendChild(div);
+        calculate();
+    }
+
+    function removePoRow(btn) {
+        const rows = document.querySelectorAll('.po-input-row');
+        if (rows.length <= 1) {
+            // Biarkan minimal 1 baris
+            const input = rows[0].querySelector('.in_no_po_item');
+            if (input) input.value = '';
+        } else {
+            btn.closest('.po-input-row').remove();
+        }
+        calculate();
+    }
+
+    function getPoNumbers() {
+        const inputs = document.querySelectorAll('.in_no_po_item');
+        const list = [];
+        inputs.forEach(input => {
+            list.push(input.value.trim());
+        });
+        return list;
+    }
 
     // --- FUNGSI LOGIKA ---
 
@@ -467,7 +463,6 @@
         const noUrutPadded = urut.toString().padStart(2, '0');
         const fullNo = `${noUrutPadded}/PO-Transport/KSE/${monthRomawi[m]}/${y}`;
         
-        // HANYA MENGISI NOMOR SURAT UTAMA DI KANAN ATAS (TIDAK LAGI TIMPA NO PO TABEL)
         document.getElementById('in_no').value = fullNo;
         document.getElementById('out_no').innerText = fullNo;
         updateView();
@@ -507,24 +502,109 @@
         const pphVal = totalBilling * (pphPct / 100);
         const grandTotal = totalBilling - pphVal - losisTotal;
 
-        document.getElementById('out_tbl_nopo').innerText = document.getElementById('in_no_po_tabel').value || "-";
-        document.getElementById('out_tbl_nopo_sub').innerText = document.getElementById('in_no_po_tabel_sub').value || "";
-        document.getElementById('out_tbl_product').innerText = document.getElementById('in_barang').value || "-";
-        document.getElementById('out_tbl_qty').innerText = qty > 0 ? qty.toLocaleString('id-ID') : "0";
-        document.getElementById('out_tbl_hargaltr').innerText = hargaLtr > 0 ? hargaLtr.toLocaleString('id-ID') : "0";
-        document.getElementById('out_tbl_totalbilling').innerText = totalBilling > 0 ? totalBilling.toLocaleString('id-ID') : "0";
-        
-        document.getElementById('out_lbl_pph').innerText = `PPH ${pphPct}`;
-        document.getElementById('out_tbl_pph').innerText = pphVal > 0 ? pphVal.toLocaleString('id-ID') : "-";
-        
-        document.getElementById('out_tbl_losis_qty').innerText = losisQty > 0 ? losisQty.toLocaleString('id-ID') : "-";
-        document.getElementById('out_tbl_losis_harga').innerText = losisHarga > 0 ? losisHarga.toLocaleString('id-ID') : "-";
-        document.getElementById('out_tbl_losis_total').innerText = losisTotal > 0 ? losisTotal.toLocaleString('id-ID') : "-";
+        const poList = getPoNumbers();
+        const mainPo = poList.length > 0 ? poList[0] : "-";
+        const barang = document.getElementById('in_barang').value || "-";
+        const strQty = qty > 0 ? qty.toLocaleString('id-ID') : "0";
+        const strHargaLtr = hargaLtr > 0 ? hargaLtr.toLocaleString('id-ID') : "0";
+        const strTotalBilling = totalBilling > 0 ? totalBilling.toLocaleString('id-ID') : "0";
+        const strPphVal = pphVal > 0 ? pphVal.toLocaleString('id-ID') : "-";
+        const strLosisQty = losisQty > 0 ? losisQty.toLocaleString('id-ID') : "-";
+        const strLosisHarga = losisHarga > 0 ? losisHarga.toLocaleString('id-ID') : "-";
+        const strLosisTotal = losisTotal > 0 ? losisTotal.toLocaleString('id-ID') : "-";
+        const francoVal = document.getElementById('in_franco').value || "-";
 
-        document.getElementById('out_tbl_franco').innerText = document.getElementById('in_franco').value || "-";
+        let html = '';
 
+        // Baris Utama (PO Pertama)
+        html += `
+            <tr>
+                <td class="text-center" style="vertical-align: top;">1</td>
+                <td class="text-center" style="vertical-align: top;">${mainPo || '-'}</td>
+                <td class="text-center" style="vertical-align: top;">${barang}</td>
+                <td class="text-center" style="vertical-align: top;">${strQty}</td>
+                <td class="text-center" style="vertical-align: top;">${strHargaLtr}</td>
+                <td class="p-1" style="vertical-align: top;">
+                    <div class="d-flex justify-content-between">
+                        <span>Rp</span>
+                        <span class="fw-bold">${strTotalBilling}</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+
+        // Baris Tambahan No. PO (Jika ada lebih dari 1 PO)
+        if (poList.length > 1) {
+            for (let i = 1; i < poList.length; i++) {
+                html += `
+                    <tr>
+                        <td class="text-center" style="vertical-align: top;"></td>
+                        <td class="text-center" style="vertical-align: top;">${poList[i]}</td>
+                        <td class="text-center" style="vertical-align: top;"></td>
+                        <td class="text-center" style="vertical-align: top;"></td>
+                        <td class="text-center" style="vertical-align: top;"></td>
+                        <td class="p-1" style="vertical-align: top;"></td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Baris PPh
+        html += `
+            <tr>
+                <td class="text-center" style="vertical-align: top;"></td>
+                <td class="text-center" style="vertical-align: top;"></td>
+                <td class="text-center" style="vertical-align: top;"></td>
+                <td class="text-center" style="vertical-align: top;"></td>
+                <td class="text-center fw-bold">PPH ${pphPct} %</td>
+                <td class="p-1">
+                    <div class="d-flex justify-content-between">
+                        <span>Rp</span>
+                        <span>${strPphVal}</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+
+        // Baris Losis
+        html += `
+            <tr>
+                <td colspan="3" class="text-center">Losis Pengiriman</td>
+                <td class="text-center">${strLosisQty}</td>
+                <td class="text-center">${strLosisHarga}</td>
+                <td class="p-1">
+                    <div class="d-flex justify-content-between">
+                        <span>Rp</span>
+                        <span>${strLosisTotal}</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+
+        // Baris Franco
+        html += `
+            <tr>
+                <td colspan="5" class="text-center fw-bold">${francoVal}</td>
+                <td></td>
+            </tr>
+        `;
+
+        // Baris Grand Total
         const gTotalVal = Math.round(grandTotal);
-        document.getElementById('out_grandtotal').innerText = gTotalVal.toLocaleString('id-ID');
+        const strGrandTotal = gTotalVal.toLocaleString('id-ID');
+        html += `
+            <tr class="fw-bold" style="border-top: 2px solid #000; border-bottom: 2px solid #000;">
+                <td colspan="5" class="text-center" style="letter-spacing: 1px; border-bottom: 2px solid #000;">TOTAL</td>
+                <td class="p-1" style="border-bottom: 2px solid #000;">
+                    <div class="d-flex justify-content-between">
+                        <span>Rp</span>
+                        <span>${strGrandTotal}</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+
+        document.getElementById('po_table_body').innerHTML = html;
         document.getElementById('out_terbilang').innerText = (terbilang(gTotalVal) || "NOL").trim().toUpperCase();
         
         updateView();
@@ -532,7 +612,8 @@
 
     function updateView() {
         const noPo = document.getElementById('in_no').value || "-";
-        const gTotal = document.getElementById('out_grandtotal').innerText;
+        const gTotalEl = document.querySelector('#po_table_body tr:last-child span:last-child');
+        const gTotal = gTotalEl ? gTotalEl.innerText : "0";
         document.getElementById('out_no').innerText = noPo;
         document.getElementById('out_cust').innerText = document.getElementById('in_cust').value || "-";
         document.getElementById('out_addr').innerText = document.getElementById('in_addr').value || "-";
@@ -568,13 +649,16 @@
             const { error: upErr } = await _supabase.storage.from('documents').upload(fileName, pdfBlob, { contentType: 'application/pdf', upsert: true });
             if (upErr) throw upErr;
 
+            const gTotalEl = document.querySelector('#po_table_body tr:last-child span:last-child');
+            const gTotalNum = gTotalEl ? parseFloat(gTotalEl.innerText.replace(/\./g, '').replace(',', '.')) : 0;
+
             const { data: urlData } = _supabase.storage.from('documents').getPublicUrl(fileName);
             const payload = {
                 jenis: "PURCHASE ORDER",
                 nomor: noPo,
                 tanggal: document.getElementById('in_tgl_raw').value,
                 tujuan: document.getElementById('in_cust').value,
-                nominal: parseFloat(document.getElementById('out_grandtotal').innerText.replace(/\./g, '').replace(',', '.')),
+                nominal: gTotalNum,
                 pdf_url: urlData.publicUrl,
                 client_email: "system@kse.co.id",
                 issued_by: activeIssuer
