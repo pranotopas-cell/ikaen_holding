@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INTEGRATED</title>
+    <title>INTEGRATED - Energy Holding Group</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
@@ -112,7 +112,7 @@
                 <div class="w-14 h-14 bg-gradient-to-tr from-blue-700 to-slate-900 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-lg border border-blue-500/30">
                     <i class="fa-solid fa-users-gear"></i>
                 </div>
-                <h3 class="text-xl font-extrabold text-slate-900">Login Akses </h3>
+                <h3 class="text-xl font-extrabold text-slate-900">Login Akses</h3>
                 <p class="text-xs text-slate-500 mt-1">Masukkan Username dan sebagai kata sandi untuk mengakses sistem dan mencetak dokumen.</p>
             </div>
             <form onsubmit="handleLogin(event)" class="space-y-4 relative z-10">
@@ -207,8 +207,6 @@
             if (num.startsWith('0')) num = '62' + num.slice(1);
 
             const cleanNopol = nopol.replace(/\s+/g, '').toUpperCase();
-            
-            // LINK SMART PROXY TRACKING (Otomatis Ter-block jika Status Delivered di Supabase)
             const smartTrackLink = `${BASE_TRACKING_URL}?nopol=${encodeURIComponent(cleanNopol)}`;
 
             let bagianTracking = `Berikut adalah link live tracking khusus untuk memantau unit ${nopol}:\n${smartTrackLink}\n\n*Catatan: Link otomatis terblokir/kedaluwarsa saat unit tiba di tujuan (DELIVERED).*`;
@@ -272,7 +270,7 @@ Operasional`;
         
         let currentAdmin = { 
             name: localStorage.getItem('holding_user_name') || 'Supranoto', 
-            email: 'admin@energyholding.co.id', 
+            email: localStorage.getItem('holding_user_email') || 'admin@energyholding.co.id', 
             role: localStorage.getItem('holding_user_role') || 'Director / Administrator',
             phone: localStorage.getItem('holding_user_phone') || '081234567890'
         };
@@ -391,10 +389,66 @@ Operasional`;
             }).join('');
         }
 
+        // FUNGSI PENCATATAN OTOMATIS LOGIN ADMIN KE SUPABASE (Tabel login_history)
+        async function recordAdminLoginSession() {
+            if (!isLoggedIn) return;
+            const sessionKey = 'login_recorded_' + currentAdmin.email + '_' + new Date().toDateString();
+            if (sessionStorage.getItem(sessionKey)) return;
+
+            try {
+                let ip = 'Unknown';
+                let location = 'Indonesia';
+                try {
+                    const ipRes = await fetch('https://api.ipify.org?format=json');
+                    const ipData = await ipRes.json();
+                    ip = ipData.ip;
+                    
+                    const locRes = await fetch(`https://ipapi.co/${ip}/json/`);
+                    const locData = await locRes.json();
+                    if (locData.city) {
+                        location = `${locData.city}, ${locData.region || ''}, ${locData.country_name}`;
+                    }
+                } catch (e) {
+                    console.warn("Gagal mendeteksi IP/Lokasi spesifik:", e);
+                }
+
+                const { error } = await _supabaseDefault.from('login_history').insert([
+                    {
+                        user_email: currentAdmin.email,
+                        user_name: currentAdmin.name,
+                        user_role: currentAdmin.role,
+                        ip_address: ip,
+                        location: location,
+                        logged_in_at: new Date().toISOString()
+                    }
+                ]);
+
+                if (!error) {
+                    sessionStorage.setItem(sessionKey, 'true');
+                }
+            } catch (err) {
+                console.error("Gagal mencatat login history:", err);
+            }
+        }
+
         function renderAuthUI() {
             const authArea = document.getElementById('authArea');
             if (isLoggedIn) {
-                authArea.innerHTML = `<div class="flex items-center space-x-3"><div class="hidden sm:block text-right"><div class="text-xs font-bold text-slate-900">${currentAdmin.name}</div><div class="text-[10px] text-emerald-600 font-semibold">${currentAdmin.role}</div></div><button onclick="handleLogout()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition shadow-sm">Logout</button></div>`;
+                authArea.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="hidden sm:block text-right">
+                            <div class="text-xs font-bold text-slate-900">${currentAdmin.name}</div>
+                            <div class="text-[10px] text-emerald-600 font-semibold">${currentAdmin.role}</div>
+                        </div>
+                        <div class="flex flex-col items-center gap-1.5">
+                            <button onclick="handleLogout()" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition shadow-sm">Logout</button>
+                            <!-- Tombol Pengaturan (Gambar Gerigi) di bawah tombol Logout untuk mencatat semua admin yang login -->
+                            <button onclick="window.location.href='pengaturan_sistem.html'" title="Pengaturan Sistem & Keamanan (Catatan Admin Login)" class="w-7 h-7 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg flex items-center justify-center border border-slate-300 transition shadow-sm">
+                                <i class="fa-solid fa-gear text-xs"></i>
+                            </button>
+                        </div>
+                    </div>`;
+                recordAdminLoginSession();
             } else {
                 authArea.innerHTML = `<button onclick="openGeneralLogin()" class="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-slate-900 to-blue-800 hover:from-slate-800 hover:to-blue-700 text-white shadow-md transition border border-blue-500/30">Login</button>`;
             }
@@ -430,6 +484,7 @@ Operasional`;
                 localStorage.setItem('holding_user_name', matchedUser.name);
                 localStorage.setItem('holding_user_role', matchedUser.role);
                 localStorage.setItem('holding_user_phone', matchedUser.phone);
+                localStorage.setItem('holding_user_email', currentAdmin.email);
                 
                 openGeneralLogin();
                 renderNav(); 
@@ -446,6 +501,7 @@ Operasional`;
             localStorage.removeItem('holding_user_name');
             localStorage.removeItem('holding_user_role');
             localStorage.removeItem('holding_user_phone');
+            localStorage.removeItem('holding_user_email');
             activeTab = 'holding'; 
             window.selectedMonthFilter = '-10-'; 
             renderNav(); 
@@ -529,7 +585,7 @@ Operasional`;
                     container.innerHTML = `
                         <div class="space-y-3">
                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                <span class="text-xs font-bold ${accentClass}"><i class="fa-solid fa-cash-register mr-1"></i> Data Penjualan ${compId.toUpperCase()} </span>
+                                <span class="text-xs font-bold ${accentClass}"><i class="fa-solid fa-cash-register mr-1"></i> Data Penjualan ${compId.toUpperCase()}</span>
                                 ${filterHtml}
                             </div>
                             <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm bg-white">
@@ -597,7 +653,6 @@ Operasional`;
                 let filterHtml = renderMonthFilterHTML('loadPurchaseOrdersData');
 
                 if (filteredData.length > 0) {
-                    // Variabel Total Akumulasi Keseluruhan PO
                     let totalQtyPO = 0;
                     let totalHargaDasarPO = 0;
                     let totalPpnPO = 0;
@@ -611,7 +666,6 @@ Operasional`;
                         let nomorVal = item.nomor || item.nomor_po || item.no_po || '-';
                         let tujuanVal = item.tujuan || item.client_name || '-';
 
-                        // Mengambil nilai variabel langsung dari Supabase tabel eforms
                         let qtyVal = Number(item.qty || item.volume || item.jumlah) || 0;
                         let perLiterVal = Number(item.harga_per_liter || item.per_liter || item.harga_satuan) || 0;
                         let hargaDasarVal = Number(item.harga_dasar || item.hd) || 0;
@@ -620,7 +674,6 @@ Operasional`;
                         let pphVal = Number(item.pph) || 0;
                         let nominalNum = Number(item.nominal) || (qtyVal * perLiterVal);
 
-                        // Akumulasi Total
                         totalQtyPO += qtyVal;
                         totalHargaDasarPO += hargaDasarVal;
                         totalPpnPO += ppnVal;
@@ -807,6 +860,7 @@ Operasional`;
                 container.innerHTML = `<div class="p-4 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-600">Gagal memuat data SPH: ${err.message}</div>`;
             }
         }
+
         async function loadInvoiceData(subType = 'Invoice BRI') {
             const container = document.getElementById('supabaseLiveContainer');
             if (!container) return;
@@ -1055,7 +1109,7 @@ Operasional`;
                     </div>
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-sm">
                         <div class="space-y-1">
-                            <h4 class="text-sm font-bold text-slate-900"><i class="fa-solid fa-cloud-arrow-up text-emerald-600 mr-1.5"></i> Upload Rekap Excel (.xlsx / .xls) </h4>
+                            <h4 class="text-sm font-bold text-slate-900"><i class="fa-solid fa-cloud-arrow-up text-emerald-600 mr-1.5"></i> Upload Rekap Excel (.xlsx / .xls)</h4>
                             <p class="text-xs text-slate-500">Pilih file Excel rekapitulasi Pajak Masukan Coretax DJP untuk diunggah dan disimpan langsung ke server database</p>
                         </div>
                         <div class="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center space-y-3 bg-slate-50/50 hover:bg-slate-50 transition">
@@ -1121,7 +1175,7 @@ Operasional`;
                         if (error) {
                             alert('Gagal mengimpor data ke Supabase: ' + error.message);
                         } else {
-                            alert(`Berhasil mengimpor dan menyimpan ${batchData.length} `);
+                            alert(`Berhasil mengimpor dan menyimpan ${batchData.length} data.`);
                             loadFakturPajakData();
                         }
                     } else {
@@ -1328,7 +1382,7 @@ Operasional`;
                                     <span class="block text-xs font-bold text-slate-800">Absensi Online</span>
                                 </a>
 
-                                <a href="pengaturan.html" class="bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-500 p-4 rounded-2xl text-center space-y-2 transition shadow-sm group">
+                                <a href="pengaturan_sistem.html" class="bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-500 p-4 rounded-2xl text-center space-y-2 transition shadow-sm group">
                                     <div class="w-10 h-10 mx-auto rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-base group-hover:scale-110 transition">
                                         <i class="fa-solid fa-gear"></i>
                                     </div>
@@ -1446,7 +1500,7 @@ Operasional`;
                 `;
 
                 let transportInvoiceMenuHTML = (activeTab === 'ikaen' || activeTab === 'ide') ? `
-                    <button onclick="handleActionRedirect('invoice_transport')" class="w-full text-left font-semibold ${accentClass} rounded transition hover:bg-current/10 ${accentClass}">&bull; Buat Invoice Transport</button>
+                    <button onclick="handleActionRedirect('invoice_transport')" class="w-full text-left font-semibold ${accentClass} rounded transition hover:bg-current/10">&bull; Buat Invoice Transport</button>
                 ` : '';
 
                 let transactionMenusHTML = isLoggedIn ? `
@@ -1457,7 +1511,7 @@ Operasional`;
                                     <i class="fa-solid fa-shield-halved"></i>
                                 </div>
                                 <div>
-                                    <h3 class="text-sm font-extrabold text-slate-900">PANEL DATA  OPERASIONAL&bull; ${data.shortName}</h3>
+                                    <h3 class="text-sm font-extrabold text-slate-900">PANEL DATA OPERASIONAL &bull; ${data.shortName}</h3>
                                     <p class="text-[10px] text-slate-500">User Aktif: <strong class="${accentClass}">${currentAdmin.name} (${currentAdmin.role})</strong></p>
                                 </div>
                             </div>
@@ -1469,14 +1523,14 @@ Operasional`;
                             <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-sm">
                                 <div class="${accentClass} font-bold text-xs"><i class="fa-solid fa-cash-register mr-1"></i> DATA PENJUALAN & PO</div>
                                 <div class="space-y-1.5 pt-1 text-[12px]">
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenjualanData();" class="w-full text-left font-bold text-black rrounded transition hover:bg-slate-200/80">&bull; Buka All Delivery</button>
+                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenjualanData();" class="w-full text-left font-bold text-black rounded transition hover:bg-slate-200/80">&bull; Buka All Delivery</button>
                                     <button onclick="window.selectedMonthFilter='-10-'; loadPurchaseOrdersData();" class="w-full text-left font-bold text-black rounded transition hover:bg-slate-200/80">&bull; Buka Semua Purchase Order</button>
                                     <button onclick="handleActionRedirect('po')" class="w-full text-left font-semibold ${accentClass} rounded transition hover:bg-slate-200/80">&bull; Buat Purchase Order BBM</button>
                                     <button onclick="handleActionRedirect('po_transport')" class="w-full text-left font-semibold ${accentClass} rounded transition hover:bg-slate-200/80">&bull; Buat Purchase Order Transport</button>
                                 </div>
                             </div>
                             <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-sm">
-                                <div class="${accentClass} font-bold text-xs"><i class="fa-solid fa-file-lines mr-1"></i> PENAWARAN - QUOTATION </div>
+                                <div class="${accentClass} font-bold text-xs"><i class="fa-solid fa-file-lines mr-1"></i> PENAWARAN - QUOTATION</div>
                                 <div class="space-y-1.5 pt-1 text-[12px]">
                                     <button onclick="window.selectedMonthFilter='-10-'; loadPenawaranData('Penawaran Biasa');" class="w-full text-left font-bold text-black rounded transition hover:bg-slate-200/80">&bull; Buka All Quotation</button>
                                     <button onclick="handleActionRedirect('penawaran')" class="w-full text-left font-semibold ${accentClass} rounded transition hover:bg-slate-200/80">&bull; Buat Quotation</button>
@@ -1489,7 +1543,7 @@ Operasional`;
                                 <div class="space-y-1.5 pt-1 text-[12px]">
                                     <button onclick="window.selectedMonthFilter='-10-'; loadInvoiceData('Buka Invoice');" class="w-full text-left font-bold text-black rounded transition hover:bg-slate-200/80">&bull; Buka Semua Invoice</button>
                                     <button onclick="handleActionRedirect('Buat Invoice BRI')" class="w-full text-left font-semibold ${accentClass} rounded transition hover:bg-slate-200/80">&bull; Buat Invoice BRI-MANDIRI</button>
-                                    <button onclick="handleActionRedirect('Buat Invoice BCA')" class="w-full text-left font-semibold ${accentClass} hrounded transition hover:bg-slate-200/80">&bull; Buat Invoice BCA</button>
+                                    <button onclick="handleActionRedirect('Buat Invoice BCA')" class="w-full text-left font-semibold ${accentClass} rounded transition hover:bg-slate-200/80">&bull; Buat Invoice BCA</button>
                                     ${transportInvoiceMenuHTML}
                                 </div>
                             </div>
