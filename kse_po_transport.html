@@ -316,7 +316,7 @@
     const monthsIndo = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
 
     // --- FUNGSI MANAJEMEN BARIS ITEM PO DINAMIS ---
-    function addItemRow(poVal = "0/PO-BBM/KSE/X/2026", prodVal = "Transport", qtyVal = 0, hargaVal = 0) {
+    function addItemRow(poVal = "001/PO-BBM/KSE/X/2026", prodVal = "Transport", qtyVal = 0, hargaVal = 0) {
         const container = document.getElementById('po_items_container');
         const div = document.createElement('div');
         div.className = 'card card-body p-2 mb-2 border bg-light po-item-row';
@@ -664,7 +664,7 @@
         handleDateChange();
         
         // Buat 1 baris awal default
-        addItemRow("001/PO-BBM/KSE/X/2026", "Transport", 0, 0);
+        addItemRow("0/PO-BBM/KSE/X/2026", "Transport", 0, 0);
     };
 </script>
 </body>
