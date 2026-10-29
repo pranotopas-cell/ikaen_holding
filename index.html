@@ -437,25 +437,25 @@ Operasional`;
             }
         }
 
-        // Ambil Foto Profil dari Supabase (Tabel attendances, kolom photo_url)
         async function fetchAdminPhotoFromAttendances(adminName) {
-            try {
-                // Cari data berdasarkan nama atau kemiripan nama
-                const { data, error } = await _supabaseAttendances
-                    .from('attendances')
-                    .select('photo_url')
-                    .or(`name.ilike.%${adminName}%`)
-                    .limit(1);
+    try {
+        // Menggunakan kolom 'user_name' dan diurutkan berdasarkan baris terbaru (descending)
+        const { data, error } = await _supabaseAttendances
+            .from('attendances')
+            .select('photo_url, user_name, check_in_time')
+            .ilike('user_name', `%${adminName}%`)
+            .order('check_in_time', { ascending: false })
+            .limit(1);
 
-                if (!error && data && data.length > 0 && data[0].photo_url) {
-                    return data[0].photo_url;
-                }
+            if (!error && data && data.length > 0 && data[0].photo_url) {
+            return data[0].photo_url;
+            }
             } catch (err) {
                 console.log("Gagal mengambil foto dari attendances:", err);
             }
             return null;
         }
-
+        
         async function renderAuthUI() {
             const authArea = document.getElementById('authArea');
             if (isLoggedIn) {
