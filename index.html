@@ -749,19 +749,25 @@ Operasional`;
                         let nomorVal = item.nomor || item.nomor_po || item.no_po || '-';
                         let tujuanVal = item.tujuan || item.client_name || '-';
 
+                        // Mengambil nilai variabel dan dikalikan dengan QTY
                         let qtyVal = Number(item.qty || item.volume || item.jumlah) || 0;
                         let perLiterVal = Number(item.harga_per_liter || item.per_liter || item.harga_satuan) || 0;
-                        let hargaDasarVal = Number(item.harga_dasar || item.hd) || 0;
-                        let ppnVal = Number(item.ppn || item.ppn11) || 0;
-                        let pbbkbVal = Number(item.pbbkb) || 0;
-                        let pphVal = Number(item.pph) || 0;
+                        
+                        
+                        // Nilai satuan dikali QTY
+                        let hargaDasarVal = (Number(item.harga_dasar || item.hd) || 0) * qtyVal;
+                        let ppnVal = (Number(item.ppn || item.ppn11) || 0) * qtyVal;
+                        let pbbkbVal = (Number(item.pbbkb) || 0) * qtyVal;
+                        let pphVal = (Number(item.pph) || 0) * qtyVal;
+                        
                         let nominalNum = Number(item.nominal) || (qtyVal * perLiterVal);
-
+                        
+                        // Akumulasi Total
                         totalQtyPO += qtyVal;
-                        totalHargaDasarPO += hargaDasarVal;
-                        totalPpnPO += ppnVal;
-                        totalPbbkbPO += pbbkbVal;
-                        totalPphPO += pphVal;
+                        totalHargaDasarPO += hargaDasarVal; // Ini sekarang sudah total (HD x QTY)
+                        totalPpnPO += ppnVal;             // Ini sekarang sudah total (PPN x QTY)
+                        totalPbbkbPO += pbbkbVal;         // Ini sekarang sudah total (PBBKB x QTY)
+                        totalPphPO += pphVal;             // Ini sekarang sudah total (PPh x QTY)
                         totalNominalPO += nominalNum;
 
                         return `
