@@ -44,7 +44,7 @@
             overflow: hidden; 
             color: #222;
             font-family: 'Courier Prime', Courier, monospace !important;
-            font-size: 12.5px; /* Sedikit diperbesar dari sebelumnya */
+            font-size: 12.5px;
         }
 
         .doc-watermark {
@@ -76,25 +76,26 @@
 
         .intro-text { margin-bottom: 18px; line-height: 1.6; font-size: 11px; }
 
+        /* TABEL DIOPTIMALKAN AGAR KOLOM TOTAL LEGA DAN TIDAK KELUAR GARIS */
         .table-po { width: 100%; border-collapse: collapse; margin-top: 5px; border: 1.5px solid #000; table-layout: fixed; }
         .table-po th { 
             background-color: var(--ike-accent) !important; 
             color: white !important; 
-            padding: 8px 2px; /* Padding kiri-kanan diperkecil */
+            padding: 6px 2px; 
             border: 1.5px solid #000; 
             text-align: center; 
-            font-size: 10px; /* Ukuran font header diperkecil sedikit agar muat */
+            font-size: 8.5px; 
             text-transform: uppercase; 
-            letter-spacing: 0.3px;
+            letter-spacing: 0.2px;
             font-family: 'Courier Prime', Courier, monospace !important;
         }
         .table-po td { 
             border: 1.5px solid #000; 
-            padding: 5px 4px; /* Padding sel diperkecil */
+            padding: 4px 2px; 
             vertical-align: middle; 
-            font-size: 11px; /* Ukuran font angka/teks diperkecil agar tidak menabrak garis */
-            line-height: 1.2; 
-            white-space: nowrap; /* Mencegah teks/angka terpotong turun ke bawah */
+            font-size: 9.5px; /* Dikecilkan sedikit agar angka panjang muat sempurna */
+            line-height: 1.15; 
+            white-space: nowrap; 
         }
         
         .no-border-row td { border-top: none !important; border-bottom: none !important; }
@@ -283,21 +284,33 @@
                     <p class="mb-0">Bersama ini kami kirimkan purchase order ( PO ) dengan rincian sebagai berikut :</p>
                 </div>
 
+                <!-- TABEL DENGAN COLGROUP YANG DISESUAIKAN (NAMA BARANG DIKECILKAN, PER LTR & TOTAL DILEBARKAN) -->
                 <table class="table-po">
+                    <colgroup>
+                        <col style="width: 17%;"> <!-- NAMA BARANG (Dikecilkan agar kolom kanan lega) -->
+                        <col style="width: 8%;">  <!-- QTY -->
+                        <col style="width: 11%;"> <!-- HD -->
+                        <col style="width: 9%;">  <!-- PPN -->
+                        <col style="width: 9%;">  <!-- PBBKB -->
+                        <col style="width: 8%;">  <!-- PPH -->
+                        <col style="width: 19%;"> <!-- PER LTR (Dilebarkan) -->
+                        <col style="width: 19%;"> <!-- TOTAL (Dilebarkan) -->
+                    </colgroup>
                     <thead>
-                        <colgroup>
-                            <col style="width: 8%;">  <!-- NO / QTY -->
-                            <col style="width: 14%;"> <!-- HD -->
-                            <col style="width: 12%;"> <!-- PPN -->
-                            <col style="width: 12%;"> <!-- PBBKB -->
-                            <col style="width: 11%;"> <!-- PPH -->
-                            <col style="width: 19%;"> <!-- PER LITER -->
-                            <col style="width: 24%;"> <!-- TOTAL (Dibuat lebih lebar agar angka tidak keluar garis) -->
-                        </colgroup>
+                        <tr>
+                            <th>NAMA BARANG</th>
+                            <th>QTY</th>
+                            <th>HD</th>
+                            <th id="th_ppn">PPN 11%</th>
+                            <th id="th_pbbkb">PBBKB 7.5%</th>
+                            <th id="th_pph">PPH 0.3%</th>
+                            <th>PER LTR</th>
+                            <th>TOTAL</th>
+                        </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="fw-bold text-uppercase" id="out_barang" style="font-size: 11.5px; vertical-align: top;"></td>
+                            <td class="fw-bold text-uppercase" id="out_barang" style="font-size: 9px; vertical-align: top; white-space: normal;"></td>
                             <td class="text-center" id="out_qty" style="vertical-align: top;">0</td>
                             <td class="text-end" id="out_harga" style="vertical-align: top;">0,00</td>
                             <td class="text-end" id="out_ppn" style="vertical-align: top;">0,00</td>
@@ -306,7 +319,6 @@
                             <td class="text-end fw-bold" id="out_perltr" style="vertical-align: top;">0,00</td>
                             <td class="text-end fw-bold" id="out_total" style="vertical-align: top;">0,00</td>
                         </tr>
-                        <!-- Baris Rincian HD, PPN, PBBKB, PPH (Tanpa Garis Horizontal & Teks Tidak Turun) -->
                         <tr class="no-border-row">
                             <td colspan="5" class="no-border-right"></td>
                             <td class="text-end fw-bold no-border-left" style="white-space: nowrap;">HD</td>
@@ -332,8 +344,8 @@
                             <td class="text-end" id="out_break_pph_tot">0,00</td>
                         </tr>
                         <tr class="fw-bold" style="background-color: #f8f9fa;">
-                            <td colspan="6" class="text-end py-2 fs-6">GRAND TOTAL</td>
-                            <td colspan="2" class="text-end py-2 fs-6" style="color: var(--ike-primary);"><span id="out_grandtotal">0,00</span></td>
+                            <td colspan="6" class="text-end py-2" style="font-size: 10px;">GRAND TOTAL</td>
+                            <td colspan="2" class="text-end py-2" style="color: var(--ike-primary); font-size: 10px;"><span id="out_grandtotal">0,00</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -387,7 +399,6 @@
 </div>
 
 <script>
-    // --- KONFIGURASI ---
     const CUSTOMER_DATABASE = {
         "PT. PETRO ANDALAN NUSANTARA": "Up.Bpk Dodi \nJl.Pelabuhan Cpo Bumiharjo Kumai, \nPangkalan Bun - Kalimantan Tengah.",
     };
@@ -399,12 +410,8 @@
     const monthRomawi = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
     const monthsIndo = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
 
-    // --- FUNGSI LOGIKA ---
-
-    // Membaca informasi user aktif dari localStorage
     function loadIssuerInfo() {
         let issuerName = localStorage.getItem('holding_user_name');
-        let issuerRole = localStorage.getItem('holding_user_role');
         let isLoggedIn = localStorage.getItem('holding_is_logged_in');
 
         if (!isLoggedIn || !issuerName) {
@@ -542,7 +549,6 @@
         const hargaNet = hargaDasar + v_ppn + v_pbbkb + v_pph;
         const total = qty * hargaNet;
 
-        // Total perkalian per item
         const tot_hd = qty * hargaDasar;
         const tot_ppn = qty * v_ppn;
         const tot_pbbkb = qty * v_pbbkb;
@@ -550,12 +556,10 @@
 
         const f = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
         
-        // Update Table Headers
         document.getElementById('th_ppn').innerText = p_ppn > 0 ? `PPN ${p_ppn}%` : "PPN";
         document.getElementById('th_pbbkb').innerText = p_pbbkb > 0 ? `PBBKB ${p_pbbkb}%` : "PBBKB";
         document.getElementById('th_pph').innerText = p_pph > 0 ? `PPH ${p_pph}%` : "PPH";
 
-        // Update Row Utama
         document.getElementById('out_qty').innerText = qty.toLocaleString('id-ID');
         document.getElementById('out_harga').innerText = hargaDasar.toLocaleString('id-ID', f);
         document.getElementById('out_ppn').innerText = p_ppn > 0 ? v_ppn.toLocaleString('id-ID', f) : "0,00";
@@ -566,7 +570,6 @@
         const gTotalVal = Math.round(total);
         document.getElementById('out_total').innerText = gTotalVal.toLocaleString('id-ID', f);
 
-        // Update Breakdown Rows (Persis seperti Foto)
         document.getElementById('out_break_hd_ltr').innerText = hargaDasar.toLocaleString('id-ID', f);
         document.getElementById('out_break_hd_tot').innerText = tot_hd.toLocaleString('id-ID', f);
 
@@ -582,7 +585,6 @@
         document.getElementById('out_break_pph_ltr').innerText = v_pph.toLocaleString('id-ID', f);
         document.getElementById('out_break_pph_tot').innerText = tot_pph.toLocaleString('id-ID', f);
 
-        // Grand Total & Terbilang
         document.getElementById('out_grandtotal').innerText = gTotalVal.toLocaleString('id-ID', f);
         document.getElementById('out_terbilang').innerText = (terbilang(gTotalVal) || "NOL").trim().toUpperCase();
         
@@ -631,7 +633,6 @@
 
             const { data: urlData } = _supabase.storage.from('documents').getPublicUrl(fileName);
             
-            // Perbaikan pengambilan data input/kalkulasi untuk disimpan ke Supabase
             const qtyVal = parseFloat(document.getElementById('in_qty').value) || 0;
             const hargaDasarVal = parseFloat(document.getElementById('in_hargadasar').value) || 0;
             const p_ppnVal = parseFloat(document.getElementById('in_ppn_pct').value) || 0;
