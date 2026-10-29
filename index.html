@@ -443,7 +443,7 @@ Operasional`;
                 // Cari data berdasarkan nama atau kemiripan nama
                 const { data, error } = await _supabaseAttendances
                     .from('attendances')
-                    .select('photo_url, name')
+                    .select('photo_url')
                     .or(`name.ilike.%${adminName}%`)
                     .limit(1);
 
