@@ -179,6 +179,11 @@
         const SB_KEY = "sb_publishable_YlFIMi2XTpX77USP0qxAzw_SatAvLT6";
         const _supabaseIde = supabase.createClient(SB_URL, SB_KEY);
 
+        // Supabase untuk foto profil dari tabel attendances (https://qnamtickoteyvydayyor.supabase.co)
+        const SB_ATTENDANCES_URL = "https://qnamtickoteyvydayyor.supabase.co";
+        const SB_ATTENDANCES_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuYW10aWNrb3RleXZ5ZGF5eW9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MDY0MTIsImV4cCI6MjA4NzA4MjQxMn0.Mlw3e8C4xKHcJPSMRkcsRXL5udtR9SeWk2GmqM1NyYc"; // Menggunakan anon key standar
+        const _supabaseAttendances = supabase.createClient(SB_ATTENDANCES_URL, SB_ATTENDANCES_KEY);
+
         // LOGIKA & PROXY TRACKING UNIT CARTRACK
         const BASE_TRACKING_URL = window.location.origin + "/track.html";
 
@@ -272,7 +277,8 @@ Operasional`;
             name: localStorage.getItem('holding_user_name') || 'Supranoto', 
             email: localStorage.getItem('holding_user_email') || 'admin@energyholding.co.id', 
             role: localStorage.getItem('holding_user_role') || 'Director / Administrator',
-            phone: localStorage.getItem('holding_user_phone') || '081234567890'
+            phone: localStorage.getItem('holding_user_phone') || '081234567890',
+            photoUrl: localStorage.getItem('holding_user_photo') || ''
         };
         
         window.selectedMonthFilter = '-10-';
@@ -431,20 +437,64 @@ Operasional`;
             }
         }
 
-        function renderAuthUI() {
+        // Ambil Foto Profil dari Supabase (Tabel attendances, kolom photo_url)
+        async function fetchAdminPhotoFromAttendances(adminName) {
+            try {
+                // Cari data berdasarkan nama atau kemiripan nama
+                const { data, error } = await _supabaseAttendances
+                    .from('attendances')
+                    .select('photo_url, name')
+                    .or(`name.ilike.%${adminName}%`)
+                    .limit(1);
+
+                if (!error && data && data.length > 0 && data[0].photo_url) {
+                    return data[0].photo_url;
+                }
+            } catch (err) {
+                console.log("Gagal mengambil foto dari attendances:", err);
+            }
+            return null;
+        }
+
+        async function renderAuthUI() {
             const authArea = document.getElementById('authArea');
             if (isLoggedIn) {
+                // Cek jika photoUrl belum ada di currentAdmin, coba fetch dari Supabase attendances
+                if (!currentAdmin.photoUrl) {
+                    const fetchedPhoto = await fetchAdminPhotoFromAttendances(currentAdmin.name);
+                    if (fetchedPhoto) {
+                        currentAdmin.photoUrl = fetchedPhoto;
+                        localStorage.setItem('holding_user_photo', fetchedPhoto);
+                    }
+                }
+
+                // Default fallback icon jika foto tidak ditemukan di database
+                let avatarHTML = currentAdmin.photoUrl ? 
+                    `<img src="${currentAdmin.photoUrl}" alt="Profile" class="w-10 h-10 rounded-full object-cover border-2 border-emerald-500 shadow-sm">` :
+                    `<div class="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs border-2 border-slate-700 shadow-sm"><i class="fa-solid fa-user"></i></div>`;
+
                 authArea.innerHTML = `
-                    <div class="flex items-center space-x-3">
-                        <div class="hidden sm:block text-right">
-                            <div class="text-xs font-bold text-slate-900">${currentAdmin.name}</div>
-                            <div class="text-[10px] text-emerald-600 font-semibold">${currentAdmin.role}</div>
+                    <div class="flex items-center space-x-3 relative">
+                        <div class="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-2xl border border-slate-200 shadow-sm cursor-pointer" onclick="toggleProfileDropdown(event)">
+                            ${avatarHTML}
+                            <div class="hidden sm:block text-left">
+                                <div class="text-xs font-bold text-slate-900">${currentAdmin.name}</div>
+                                <div class="text-[10px] text-emerald-600 font-semibold">${currentAdmin.role}</div>
+                            </div>
+                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-1"></i>
                         </div>
-                        <div class="flex flex-col items-center gap-1.5">
-                            <button onclick="handleLogout()" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition shadow-sm">Logout</button>
-                            <!-- Tombol Pengaturan (Gambar Gerigi) di bawah tombol Logout untuk mencatat semua admin yang login -->
-                            <button onclick="window.location.href='pengaturan_sistem.html'" title="Pengaturan Sistem & Keamanan (Catatan Admin Login)" class="w-7 h-7 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg flex items-center justify-center border border-slate-300 transition shadow-sm">
-                                <i class="fa-solid fa-gear text-xs"></i>
+                        
+                        <!-- Dropdown Menu Profile & Logout -->
+                        <div id="profileDropdownMenu" class="absolute right-0 top-12 w-48 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 hidden z-50 fade-in">
+                            <div class="px-4 py-2 border-b border-slate-100 sm:hidden">
+                                <div class="text-xs font-bold text-slate-900">${currentAdmin.name}</div>
+                                <div class="text-[10px] text-emerald-600 font-semibold">${currentAdmin.role}</div>
+                            </div>
+                            <a href="pengaturan_sistem.html" class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                                <i class="fa-solid fa-user-gear text-blue-600"></i> Profil & Pengaturan
+                            </a>
+                            <button onclick="handleLogout()" class="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2">
+                                <i class="fa-solid fa-right-from-bracket"></i> Logout Profile
                             </button>
                         </div>
                     </div>`;
@@ -453,6 +503,22 @@ Operasional`;
                 authArea.innerHTML = `<button onclick="openGeneralLogin()" class="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-slate-900 to-blue-800 hover:from-slate-800 hover:to-blue-700 text-white shadow-md transition border border-blue-500/30">Login</button>`;
             }
         }
+
+        function toggleProfileDropdown(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('profileDropdownMenu');
+            if (menu) {
+                menu.classList.toggle('hidden');
+            }
+        }
+
+        // Tutup dropdown jika klik di luar
+        window.addEventListener('click', () => {
+            const menu = document.getElementById('profileDropdownMenu');
+            if (menu && !menu.classList.contains('hidden')) {
+                menu.classList.add('hidden');
+            }
+        });
 
         function openGeneralLogin() { document.getElementById('loginModal').classList.toggle('hidden'); }
         
@@ -470,7 +536,7 @@ Operasional`;
             }
         }
 
-        function handleLogin(e) {
+        async function handleLogin(e) {
             e.preventDefault();
             const usernameInput = document.getElementById('loginUsername').value.trim().toLowerCase();
             const passwordInput = document.getElementById('loginPassword').value.trim();
@@ -478,13 +544,29 @@ Operasional`;
             const matchedUser = authorizedUsers.find(u => u.username.toLowerCase() === usernameInput && u.phone === passwordInput);
 
             if (matchedUser) {
-                currentAdmin = { name: matchedUser.name, email: `${matchedUser.username}@energyholding.co.id`, role: matchedUser.role, phone: matchedUser.phone };
+                // Cek foto profil dari tabel attendances Supabase saat login
+                let userPhoto = '';
+                try {
+                    const { data } = await _supabaseAttendances
+                        .from('attendances')
+                        .select('photo_url, name')
+                        .or(`name.ilike.%${matchedUser.name}%`)
+                        .limit(1);
+                    if (data && data.length > 0 && data[0].photo_url) {
+                        userPhoto = data[0].photo_url;
+                    }
+                } catch (err) {
+                    console.log("Error fetching photo during login:", err);
+                }
+
+                currentAdmin = { name: matchedUser.name, email: `${matchedUser.username}@energyholding.co.id`, role: matchedUser.role, phone: matchedUser.phone, photoUrl: userPhoto };
                 isLoggedIn = true;
                 localStorage.setItem('holding_is_logged_in', 'true');
                 localStorage.setItem('holding_user_name', matchedUser.name);
                 localStorage.setItem('holding_user_role', matchedUser.role);
                 localStorage.setItem('holding_user_phone', matchedUser.phone);
                 localStorage.setItem('holding_user_email', currentAdmin.email);
+                localStorage.setItem('holding_user_photo', userPhoto);
                 
                 openGeneralLogin();
                 renderNav(); 
@@ -502,6 +584,7 @@ Operasional`;
             localStorage.removeItem('holding_user_role');
             localStorage.removeItem('holding_user_phone');
             localStorage.removeItem('holding_user_email');
+            localStorage.removeItem('holding_user_photo');
             activeTab = 'holding'; 
             window.selectedMonthFilter = '-10-'; 
             renderNav(); 
