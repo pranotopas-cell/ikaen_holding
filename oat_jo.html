@@ -367,19 +367,21 @@
         dropdownBulan.innerHTML = '';
 
         const namaBulanIndo = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
+        const hariIni = new Date();
+        const bulanAktif = hariIni.getMonth(); // Mendapatkan bulan saat ini (0-11)
         const tahunSkarang = 2026; 
-        const bulanSaatIni = new Date().getMonth(); 
 
-        for (let blnIndex = 0; blnIndex < 12; blnIndex++) {
+        // Melakukan looping untuk 12 bulan (Januari = 0 sampai Desember = 11)
+        for (let i = 0; i < 12; i++) {
             const option = document.createElement('option');
-            option.value = blnIndex; 
+            option.value = i; // Nilai value 0 untuk Januari, 1 untuk Februari, dst.
+            option.innerText = `${namaBulanIndo[i]} ${tahunSkarang}`;
             
-            if (blnIndex === bulanSaatIni) {
-                option.innerText = `${namaBulanIndo[blnIndex]} ${tahunSkarang} (INI)`;
+            // Otomatis memilih bulan yang sedang berjalan saat ini
+            if (i === bulanAktif) {
                 option.selected = true;
-            } else {
-                option.innerText = `${namaBulanIndo[blnIndex]} ${tahunSkarang}`;
             }
+            
             dropdownBulan.appendChild(option);
         }
     }
