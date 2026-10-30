@@ -966,21 +966,23 @@ Operasional`;
             const clientDb = getActiveSupabaseClient();
             container.innerHTML = `<div class="text-center py-6 text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2 text-red-600"></i> Mengambil data INVOICE (${subType})......</div>`;
             try {
-                let query = clientDb.from('eforms').select('*').ilike('jenis', '%INVOICE%').order('created_at', { ascending: false });
+                // Mengurutkan berdasarkan tanggal dokumen asli (item.tanggal) secara descending
+                let query = clientDb.from('eforms').select('*').ilike('jenis', '%INVOICE%').order('tanggal', { ascending: false });
                 const { data, error } = await query;
                 if (error) throw error;
-
+        
                 let filteredData = data || [];
                 if (filteredData.length === 0) {
                     const resAll = await clientDb.from('eforms').select('*').limit(15);
                     filteredData = resAll.data || [];
                 }
-
+        
                 const selectedMonth = window.selectedMonthFilter !== undefined ? window.selectedMonthFilter : '-10-';
                 if (selectedMonth !== '') {
-                    filteredData = filteredData.filter(item => item.created_at && item.created_at.includes(selectedMonth));
+                    // KOREKSI: Filter menggunakan 'item.tanggal' (tanggal asli dokumen) agar data bulan lalu (misal September) tidak loncat ke bulan ini
+                    filteredData = filteredData.filter(item => item.tanggal && item.tanggal.includes(selectedMonth));
                 }
-
+        
                 let totalPpnMasukan = 0;
                 try {
                     let fpQuery = clientDb.from('faktur_pajak').select('tanggal, ppn');
@@ -995,31 +997,36 @@ Operasional`;
                 } catch (e) {
                     console.log("Faktur pajak tidak ditemukan:", e);
                 }
-
+        
                 let filterHtml = renderMonthFilterHTML('loadInvoiceData');
-
+        
                 if (filteredData.length > 0) {
                     let totalNominalInvoice = filteredData.reduce((sum, item) => {
                         let val = Number(item.nominal) || (Number(item.qty || 50) * 14500000);
                         return sum + val;
                     }, 0);
-
+        
                     let calcDpp = totalNominalInvoice * (100 / 111);
                     let calcDppNilaiLain = calcDpp * (11 / 12);
                     let calcPpnKeluaran = calcDppNilaiLain * 0.12;
                     let calcKurangBayar = calcPpnKeluaran - totalPpnMasukan;
-
+        
                     let rows = filteredData.map((item, idx) => {
                         let viewPdfBtn = item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-[10px] font-bold border border-red-200 inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> View Invoice</a>` : `<span class="text-slate-400 text-[10px]">No PDF</span>`;
                         let deleteBtn = item.id ? `<button onclick="hapusEformSupabase('${item.id}', 'Invoice', 'loadInvoiceData')" class="text-red-600 hover:text-red-700 text-xs px-2 py-1 bg-red-50 rounded border border-red-200 transition" title="Hapus Dokumen Dari Supabase"><i class="fa-solid fa-trash"></i></button>` : '';
                         let nomorVal = item.nomor || item.nomor_dokumen || item.no_po || ('INV-0' + (idx+1));
+                        
+                        // KOREKSI: Ambil tanggal asli dari 'item.tanggal' untuk ditampilkan di tabel
+                        let tanggalVal = item.tanggal ? item.tanggal : (item.created_at ? item.created_at.substring(0, 10) : '-');
+        
                         let qtyVal = item.qty !== undefined && item.qty !== null && item.qty !== '' ? Number(item.qty) : 50;
                         let pembeliVal = item.tujuan || item.client_name || 'Perusahaan Klien';
                         let nominalNum = Number(item.nominal) || (Number(item.qty || 50) * 14500000);
                         let nominalVal = item.nominal ? (isNaN(item.nominal) ? item.nominal : 'Rp ' + Number(item.nominal).toLocaleString('id-ID')) : ('Rp ' + nominalNum.toLocaleString('id-ID'));
+                        
                         return `
                             <tr class="hover:bg-slate-50 transition">
-                                <td class="p-3 text-slate-600">${item.created_at ? item.created_at.substring(0, 10) : '-'}</td>
+                                <td class="p-3 text-slate-600">${tanggalVal}</td>
                                 <td class="p-3 font-mono text-red-600 font-bold">${nomorVal}</td>
                                 <td class="p-3 font-mono text-slate-800 font-bold">${qtyVal.toLocaleString('id-ID')} KL</td>
                                 <td class="p-3 text-slate-900 font-semibold">${pembeliVal}</td>
@@ -1028,7 +1035,7 @@ Operasional`;
                             </tr>
                         `;
                     }).join('');
-
+        
                     container.innerHTML = `
                         <div class="space-y-4">
                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
