@@ -886,7 +886,10 @@ Operasional`;
 
                 const selectedMonth = window.selectedMonthFilter !== undefined ? window.selectedMonthFilter : '-10-';
                 if (selectedMonth !== '') {
-                    filteredData = filteredData.filter(item => item.created_at && item.created_at.includes(selectedMonth));
+                    filteredData = filteredData.filter(item => {
+                        const dateVal = item.tanggal || item.created_at;
+                        return dateVal && dateVal.includes(selectedMonth);
+                    });
                 }
 
                 let filterHtml = renderMonthFilterHTML('loadPenawaranData');
@@ -900,9 +903,13 @@ Operasional`;
                         let tujuanVal = item.tujuan || item.client_name || 'Mitra Industri';
                         let lokasiVal = item.tujuan_pengiriman || item.lokasi || '-';
                         
+                        // Mengambil tanggal asli dari item.tanggal, fallback ke item.created_at
+                        let rawDate = item.tanggal || item.created_at;
+                        let tanggalVal = rawDate ? rawDate.substring(0, 10) : '-';
+
                         return `
                             <tr class="hover:bg-slate-50 transition">
-                                <td class="p-3 text-slate-600">${item.created_at ? item.created_at.substring(0, 10) : '-'}</td>
+                                <td class="p-3 text-slate-600">${tanggalVal}</td>
                                 <td class="p-3 font-mono ${accentClass} font-bold">${nomorVal}</td>
                                 <td class="p-3 text-slate-900 font-semibold">${tujuanVal}</td>
                                 <td class="p-3 text-slate-600">${lokasiVal}</td>
