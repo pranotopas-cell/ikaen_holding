@@ -29,7 +29,7 @@
                 <!-- DROPDOWN PILIHAN BULAN -->
                 <div class="flex items-center gap-1 bg-slate-100 border border-slate-300 px-1.5 py-0.5 rounded text-[10px]">
                     <label for="filter-bulan" class="font-bold text-slate-700">PERIODE:</label>
-                    <select id="filter-bulan" onchange="fetchDeliveryData()" class="w-28 p-0.5 text-center font-semibold border border-slate-300 rounded bg-white text-[10px] focus:outline-none focus:border-blue-500 uppercase">
+                    <select id="filter-bulan" onchange="fetchAllData()" class="w-28 p-0.5 text-center font-semibold border border-slate-300 rounded bg-white text-[10px] focus:outline-none focus:border-blue-500 uppercase">
                         <!-- Diisi dinamis oleh JavaScript -->
                     </select>
                 </div>
@@ -211,20 +211,22 @@
 
         const namaBulanIndo = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
         const hariIni = new Date();
-        const bulanAktif = hariIni.getMonth(); // Mendapatkan bulan saat ini (0-11)
         const tahunSkarang = 2026; 
 
-        // Melakukan looping untuk 12 bulan (Januari = 0 sampai Desember = 11)
         for (let i = 0; i < 12; i++) {
+            const targetTanggal = new Date(tahunSkarang, hariIni.getMonth() - i, 1);
+            const blnIndex = targetTanggal.getMonth();
+            const thn = targetTanggal.getFullYear();
+            
             const option = document.createElement('option');
-            option.value = i; // Nilai value 0 untuk Januari, 1 untuk Februari, dst.
-            option.innerText = `${namaBulanIndo[i]} ${tahunSkarang}`;
+            option.value = blnIndex; 
             
-            // Otomatis memilih bulan yang sedang berjalan saat ini
-            if (i === bulanAktif) {
+            if (i === 0) {
+                option.innerText = `BULAN INI (${namaBulanIndo[blnIndex]})`;
                 option.selected = true;
+            } else {
+                option.innerText = `${namaBulanIndo[blnIndex]} ${thn}`;
             }
-            
             dropdownBulan.appendChild(option);
         }
     }
@@ -362,35 +364,58 @@
     }
 
     async function fetchAllData() {
-        const localHargaBbm = localStorage.getItem('master_harga_bbm');
-        if (localHargaBbm !== null) {
-            document.getElementById('master-harga-bbm').value = localHargaBbm;
-        }
-
-        try {
-            let { data: master_oat, error } = await supabaseBaru.from('master_oat').select('*').order('id', { ascending: true });
-            if (error) throw error;
-            
-            const mBody = document.getElementById('master-rute-body');
-            mBody.innerHTML = "";
-            masterDataList = [];
-
-            if (master_oat && master_oat.length > 0) {
-                master_oat.forEach(m => {
-                    masterDataList.push(m.id);
-                    renderBarisMaster(m.id, m.tujuan, m.lokasi, m.qty, m.oat, m.premi_sopir, m.premi_helper, m.um_sopir, m.um_helper, m.lembur, m.portal, m.jarak);
-                });
-            } else {
-                renderBarisMaster('', 'morowali', 'atas', 10, 450, 150000, 100000, 50000, 40000, 0, 0, 250);
-                renderBarisMaster('', 'morowali', 'bawah', 10, 400, 130000, 90000, 50000, 40000, 0, 0, 220);
-            }
-        } catch(e) {
-            console.error("Gagal memuat master_oat:", e);
-        }
-
-        await fetchDeliveryData();
+    const localHargaBbm = localStorage.getItem('master_harga_bbm');
+    if (localHargaBbm !== null) {
+        document.getElementById('master-harga-bbm').value = localHargaBbm;
     }
 
+    // Tentukan kunci bulan aktif berdasarkan dropdown (Format: YYYY-MM)
+    const bulanDipilihIndex = parseInt(document.getElementById('filter-bulan').value) + 1;
+    const tahunSkarang = 2026; 
+    const formatBulanKey = `${tahunSkarang}-${String(bulanDipilihIndex).padStart(2, '0')}`;
+
+    try {
+        // 1. Coba tarik data master OAT yang sesuai dengan bulan aktif
+        let { data: master_oat, error } = await supabaseBaru
+            .from('master_oat')
+            .select('*')
+            .eq('bulan', formatBulanKey)
+            .order('id', { ascending: true });
+
+        if (error) throw error;
+        
+        // 2. FALLBACK: Jika tidak ada data untuk bulan ini, ambil data master yang bulan-nya NULL / Kosong
+        if (!master_oat || master_oat.length === 0) {
+            let { data: masterNull } = await supabaseBaru
+                .from('master_oat')
+                .select('*')
+                .or(`bulan.is.null,bulan.eq.''`)
+                .order('id', { ascending: true });
+                
+            if (masterNull && masterNull.length > 0) {
+                master_oat = masterNull;
+            }
+        }
+
+        const mBody = document.getElementById('master-rute-body');
+        mBody.innerHTML = "";
+        masterDataList = [];
+
+        if (master_oat && master_oat.length > 0) {
+            master_oat.forEach(m => {
+                masterDataList.push(m.id);
+                renderBarisMaster(m.id, m.tujuan, m.lokasi, m.qty, m.oat, m.premi_sopir, m.premi_helper, m.um_sopir, m.um_helper, m.lembur, m.portal, m.jarak);
+            });
+        } else {
+            renderBarisMaster('', '', '', 10, 0, 0, 0, 0, 0, 0, 0, 0);
+        }
+    } catch(e) {
+        console.error("Gagal memuat master_oat:", e);
+    }
+
+    await fetchDeliveryData();
+}
+        
     async function fetchDeliveryData() {
         const tbody = document.getElementById('tabel-body');
         tbody.innerHTML = `<tr><td colspan="20" class="text-center py-4 text-slate-500 italic animate-pulse">Memuat data aktual dari database Supabase...</td></tr>`;
@@ -436,7 +461,6 @@
             populateDropdownsUploader(data_pengiriman);
             const defaultHargaBbm = parseFloat(document.getElementById('master-harga-bbm').value) || 0;
 
-            // TARIK DATA HARGA BBM, LOSIS, LEMBUR, PORTAL DARI TABEL bbm_losis MENGGUNAKAN _supabase
             let { data: bbmLosisSaved } = await _supabase.from('bbm_losis').select('*');
             const mapBbmLosis = {};
             if (bbmLosisSaved) {
@@ -790,12 +814,17 @@
             let dataMasterInsert = []; 
             let currentMasterIds = [];
 
+            // Tangkap periode bulan yang sedang aktif di dropdown untuk disimpan ke master
+            const bulanDipilihIndex = parseInt(document.getElementById('filter-bulan').value) + 1;
+            const formatBulanKey = `2026-${String(bulanDipilihIndex).padStart(2, '0')}`;
+
             masterRows.forEach(row => {
                 const mid = row.getAttribute('data-id');
                 const tujuan = (row.querySelector('.target-tujuan').value || '').trim();
                 if (!tujuan) return;
 
                 const payload = {
+                    bulan: formatBulanKey, // Menyimpan sesuai bulan aktif
                     tujuan: tujuan,
                     lokasi: (row.querySelector('.target-lokasi').value || '').trim(),
                     jarak: parseFloat(row.querySelector('.ref-jarak').value) || 0,
