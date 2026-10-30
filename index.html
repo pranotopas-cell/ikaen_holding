@@ -967,7 +967,7 @@ Operasional`;
             container.innerHTML = `<div class="text-center py-6 text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2 text-red-600"></i> Mengambil data INVOICE (${subType})......</div>`;
             try {
                 // Mengurutkan berdasarkan tanggal dokumen asli (item.tanggal) secara descending
-                let query = clientDb.from('eforms').select('*').ilike('jenis', '%INVOICE%').order('tanggal', { ascending: true });
+                let query = clientDb.from('eforms').select('*').ilike('jenis', '%INVOICE%').order('tanggal', { ascending: false });
                 const { data, error } = await query;
                 if (error) throw error;
         
@@ -982,6 +982,8 @@ Operasional`;
                     // KOREKSI: Filter menggunakan 'item.tanggal' (tanggal asli dokumen) agar data bulan lalu (misal September) tidak loncat ke bulan ini
                     filteredData = filteredData.filter(item => item.tanggal && item.tanggal.includes(selectedMonth));
                 }
+
+                filteredData.reverse();
         
                 let totalPpnMasukan = 0;
                 try {
