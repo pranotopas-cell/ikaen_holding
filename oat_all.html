@@ -179,12 +179,12 @@
     </div>
 
     <script>
-    // 1. CLIENT KONEKSI SUPABASE LAMA - DIGUNAKAN UNTUK TARIK DATA PENGIRIMAN & TABEL bbm_losis
+    // 1. CLIENT KONEKSI SUPABASE LAMA
     const SUPABASE_URL = 'https://ntaectphgoelmhzrkatp.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YWVjdHBoZ29lbG1oenJrYXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzExNDYsImV4cCI6MjA4ODE0NzE0Nn0.-8E98wpkzHBARRhW6PKhBtf2XKhWFjq7idAzw9jlcKg';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // 2. CLIENT KONEKSI SUPABASE BARU - DIGUNAKAN UNTUK TABEL master_oat
+    // 2. CLIENT KONEKSI SUPABASE BARU UNTUK master_oat
     const SB_URL = "https://qnamtickoteyvydayyor.supabase.co";
     const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuYW10aWNrb3RleXZ5ZGF5eW9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4OTU2MzksImV4cCI6MjA5MzQ3MTYzOX0.VAeN0JVnz4WNPzY5NTGmtGeHD-Da_qkCvy84ZDYZNHo";
     const supabaseBaru = supabase.createClient(SB_URL, SB_KEY);
@@ -364,58 +364,73 @@
     }
 
     async function fetchAllData() {
-    const localHargaBbm = localStorage.getItem('master_harga_bbm');
-    if (localHargaBbm !== null) {
-        document.getElementById('master-harga-bbm').value = localHargaBbm;
-    }
+        const localHargaBbm = localStorage.getItem('master_harga_bbm');
+        if (localHargaBbm !== null) {
+            document.getElementById('master-harga-bbm').value = localHargaBbm;
+        }
 
-    // Tentukan kunci bulan aktif berdasarkan dropdown (Format: YYYY-MM)
-    const bulanDipilihIndex = parseInt(document.getElementById('filter-bulan').value) + 1;
-    const tahunSkarang = 2026; 
-    const formatBulanKey = `${tahunSkarang}-${String(bulanDipilihIndex).padStart(2, '0')}`;
+        // Tentukan kunci bulan aktif (Format: YYYY-MM)
+        const bulanDipilihIndex = parseInt(document.getElementById('filter-bulan').value) + 1;
+        const tahunSkarang = 2026; 
+        const formatBulanKey = `${tahunSkarang}-${String(bulanDipilihIndex).padStart(2, '0')}`;
 
-    try {
-        // 1. Coba tarik data master OAT yang sesuai dengan bulan aktif
-        let { data: master_oat, error } = await supabaseBaru
-            .from('master_oat')
-            .select('*')
-            .eq('bulan', formatBulanKey)
-            .order('id', { ascending: true });
-
-        if (error) throw error;
-        
-        // 2. FALLBACK: Jika tidak ada data untuk bulan ini, ambil data master yang bulan-nya NULL / Kosong
-        if (!master_oat || master_oat.length === 0) {
-            let { data: masterNull } = await supabaseBaru
+        try {
+            // 1. Cari master_oat khusus bulan yang sedang aktif
+            let { data: master_oat, error } = await supabaseBaru
                 .from('master_oat')
                 .select('*')
-                .or(`bulan.is.null,bulan.eq.''`)
+                .eq('bulan', formatBulanKey)
                 .order('id', { ascending: true });
-                
-            if (masterNull && masterNull.length > 0) {
-                master_oat = masterNull;
+
+            if (error) throw error;
+            
+            let isInherited = false;
+
+            // 2. LOGIKA OTOMATIS WARISAN: Jika bulan ini belum ada data master OAT,
+            // tarik otomatis seluruh master OAT yang pernah tersimpan dari bulan sebelumnya
+            if (!master_oat || master_oat.length === 0) {
+                let { data: masterSemua } = await supabaseBaru
+                    .from('master_oat')
+                    .select('*')
+                    .order('id', { ascending: false });
+
+                if (masterSemua && masterSemua.length > 0) {
+                    const petaUnik = {};
+                    masterSemua.forEach(m => {
+                        const key = `${m.tujuan}_${m.lokasi}_${m.qty}`.toLowerCase();
+                        if (!petaUnik[key]) petaUnik[key] = m;
+                    });
+                    master_oat = Object.values(petaUnik).reverse();
+                    isInherited = true; // Tandai bahwa ini data tiruan dari bulan lalu
+                }
             }
+            
+            const mBody = document.getElementById('master-rute-body');
+            mBody.innerHTML = "";
+            masterDataList = [];
+
+            if (master_oat && master_oat.length > 0) {
+                master_oat.forEach(m => {
+                    // Jika data tiruan dari bulan lalu, kosongkan ID-nya agar saat Save
+                    // otomatis di-insert sebagai baris baru untuk bulan ini
+                    const idUntukRender = isInherited ? '' : m.id;
+                    
+                    if (!isInherited) {
+                        masterDataList.push(m.id);
+                    }
+                    
+                    renderBarisMaster(idUntukRender, m.tujuan, m.lokasi, m.qty, m.oat, m.premi_sopir, m.premi_helper, m.um_sopir, m.um_helper, m.lembur, m.portal, m.jarak);
+                });
+            } else {
+                renderBarisMaster('', '', '', 10, 0, 0, 0, 0, 0, 0, 0, 0);
+            }
+        } catch(e) {
+            console.error("Gagal memuat master_oat:", e);
         }
 
-        const mBody = document.getElementById('master-rute-body');
-        mBody.innerHTML = "";
-        masterDataList = [];
-
-        if (master_oat && master_oat.length > 0) {
-            master_oat.forEach(m => {
-                masterDataList.push(m.id);
-                renderBarisMaster(m.id, m.tujuan, m.lokasi, m.qty, m.oat, m.premi_sopir, m.premi_helper, m.um_sopir, m.um_helper, m.lembur, m.portal, m.jarak);
-            });
-        } else {
-            renderBarisMaster('', '', '', 10, 0, 0, 0, 0, 0, 0, 0, 0);
-        }
-    } catch(e) {
-        console.error("Gagal memuat master_oat:", e);
+        await fetchDeliveryData();
     }
 
-    await fetchDeliveryData();
-}
-        
     async function fetchDeliveryData() {
         const tbody = document.getElementById('tabel-body');
         tbody.innerHTML = `<tr><td colspan="20" class="text-center py-4 text-slate-500 italic animate-pulse">Memuat data aktual dari database Supabase...</td></tr>`;
@@ -814,7 +829,7 @@
             let dataMasterInsert = []; 
             let currentMasterIds = [];
 
-            // Tangkap periode bulan yang sedang aktif di dropdown untuk disimpan ke master
+            // Periode bulan aktif di dropdown
             const bulanDipilihIndex = parseInt(document.getElementById('filter-bulan').value) + 1;
             const formatBulanKey = `2026-${String(bulanDipilihIndex).padStart(2, '0')}`;
 
@@ -824,7 +839,7 @@
                 if (!tujuan) return;
 
                 const payload = {
-                    bulan: formatBulanKey, // Menyimpan sesuai bulan aktif
+                    bulan: formatBulanKey,
                     tujuan: tujuan,
                     lokasi: (row.querySelector('.target-lokasi').value || '').trim(),
                     jarak: parseFloat(row.querySelector('.ref-jarak').value) || 0,
@@ -902,7 +917,7 @@
             const inputMasterBbm = document.getElementById('master-harga-bbm').value || 0;
             localStorage.setItem('master_harga_bbm', inputMasterBbm);
 
-            alert("✅ Sukses");
+            alert("✅ Sukses Menyimpan Data Master OAT & Pengiriman");
             await fetchAllData(); 
 
         } catch (err) {
