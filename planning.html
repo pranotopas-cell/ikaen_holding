@@ -329,6 +329,25 @@
             return { start: firstDayIso, end: lastDayIso };
         }
 
+        function getDynamicDateRange() {
+            const now = getWIBDate();
+            
+            const startDate = new Date(now);
+            startDate.setDate(now.getDate() - 3);
+            
+            const endDate = new Date(now);
+            endDate.setDate(now.getDate() + 7);
+            
+            const toISO = (d) => {
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${y}-${m}-${day}`;
+            };
+
+            return { start: toISO(startDate), end: toISO(endDate) };
+        }
+
         function singkatNama(nama) {
             if (!nama) return "";
             const kata = nama.trim().split(/\s+/);
@@ -370,12 +389,12 @@
         }
 
         function formatDateID(dateStr) {
-            const d = new Date(dateStr);
+            const d = new Date(dateStr + 'T00:00:00');
             return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
         }
 
         async function fetchPOSummary() {
-            const range = getSelectedDateRange();
+            const range = getDynamicDateRange();
             const targets = ['ANDALAN', 'OCEAN', 'TMJ', 'GLOBAL'];
             const summary = {
                 ANDALAN: { po: 0, out: 0 },
@@ -442,7 +461,7 @@
         async function loadData() {
             await fetchPoiLokasi();
 
-            const range = getSelectedDateRange();
+            const range = getDynamicDateRange();
             const now = getWIBDate();
             const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
@@ -763,7 +782,7 @@
         }
 
         async function saveData() {
-            const range = getSelectedDateRange();
+            const range = getDynamicDateRange();
 
             const rows = document.querySelectorAll('#tableBody tr');
             const records = [];
