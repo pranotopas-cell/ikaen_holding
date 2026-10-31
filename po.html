@@ -273,15 +273,20 @@
         function initBulanDropdown() {
             const select = document.getElementById('select-bulan');
             const namaBulan = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
-            const now = new Date();
+            const currentYear = new Date().getFullYear();
 
-            for (let i = 0; i < 3; i++) {
-                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            // Melakukan looping dari bulan Januari (0) sampai Desember (11) untuk tahun berjalan
+            for (let i = 0; i < 12; i++) {
                 const opt = document.createElement('option');
-                opt.value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-                opt.text = `${namaBulan[d.getMonth()]} ${d.getFullYear()}`;
+                const monthStr = String(i + 1).padStart(2, '0');
+                opt.value = `${currentYear}-${monthStr}`;
+                opt.text = `${namaBulan[i]} ${currentYear}`;
                 select.appendChild(opt);
             }
+
+            // Opsional: Set pilihan default ke bulan saat ini
+            const currentMonthStr = `${currentYear}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+            select.value = currentMonthStr;
         }
 
         function getSelectedDateRange() {
