@@ -966,7 +966,6 @@ Operasional`;
             const clientDb = getActiveSupabaseClient();
             container.innerHTML = `<div class="text-center py-6 text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2 text-red-600"></i> Mengambil data INVOICE (${subType})......</div>`;
             try {
-                // Mengurutkan berdasarkan tanggal dokumen asli (item.tanggal) secara descending
                 let query = clientDb.from('eforms').select('*').ilike('jenis', '%INVOICE%').order('tanggal', { ascending: false });
                 const { data, error } = await query;
                 if (error) throw error;
@@ -979,11 +978,10 @@ Operasional`;
         
                 const selectedMonth = window.selectedMonthFilter !== undefined ? window.selectedMonthFilter : '-10-';
                 if (selectedMonth !== '') {
-                    // KOREKSI: Filter menggunakan 'item.tanggal' (tanggal asli dokumen) agar data bulan lalu (misal September) tidak loncat ke bulan ini
                     filteredData = filteredData.filter(item => item.tanggal && item.tanggal.includes(selectedMonth));
                 }
-
-                filteredData.reverse();
+        
+                // Hapus filteredData.reverse() agar urutan tetap konsisten sesuai index kueri Supabase (ascending: false)
         
                 let totalPpnMasukan = 0;
                 try {
@@ -1018,7 +1016,6 @@ Operasional`;
                         let deleteBtn = item.id ? `<button onclick="hapusEformSupabase('${item.id}', 'Invoice', 'loadInvoiceData')" class="text-red-600 hover:text-red-700 text-xs px-2 py-1 bg-red-50 rounded border border-red-200 transition" title="Hapus Dokumen Dari Supabase"><i class="fa-solid fa-trash"></i></button>` : '';
                         let nomorVal = item.nomor || item.nomor_dokumen || item.no_po || ('INV-0' + (idx+1));
                         
-                        // KOREKSI: Ambil tanggal asli dari 'item.tanggal' untuk ditampilkan di tabel
                         let tanggalVal = item.tanggal ? item.tanggal : (item.created_at ? item.created_at.substring(0, 10) : '-');
         
                         let qtyVal = item.qty !== undefined && item.qty !== null && item.qty !== '' ? Number(item.qty) : 50;
