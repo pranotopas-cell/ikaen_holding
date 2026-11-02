@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Absensi & Performa</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen text-xs">
+
+  <!-- Modal Password Lock Screen -->
+  <div id="auth-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-sm w-full p-6 shadow-2xl space-y-4 border border-slate-200">
+      <div class="text-center space-y-1">
+        <div class="inline-flex p-2.5 bg-indigo-50 text-indigo-600 rounded-full mb-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+        </div>
+        <h2 class="text-base font-bold text-slate-800">Akses Terkunci</h2>
+        <p class="text-[11px] text-slate-500">Kata Sandi untuk melihat data absensi</p>
+      </div>
+
+      <form id="auth-form" onsubmit="unlockDashboard(event)" class="space-y-3">
+        <div>
+          <input type="password" id="auth-password" placeholder="Masukkan Password" required autofocus
+            class="w-full text-center tracking-widest text-sm bg-slate-50 border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <p id="auth-error" class="text-[10px] text-rose-500 font-medium mt-1 text-center hidden">Password salah! Silakan coba lagi.</p>
+        </div>
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg text-xs transition">
+          Buka Dashboard
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Dashboard Main Content (Hidden Until Unlocked) -->
+  <div id="dashboard-content" class="hidden">
+    <!-- Top Header Navigation -->
+    <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-md">
+      <div class="max-w-7xl mx-auto px-4 h-12 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="bg-indigo-600 text-white px-2 py-0.5 rounded font-bold text-xs leading-none">
+            HR
+          </div>
+          <div>
+            <h1 class="text-xs font-semibold leading-none text-slate-100">Record & Performa Kehadiran</h1>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="index.html" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-medium px-2.5 py-1 rounded transition border border-slate-700">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+            Home 
+          </a>
+          <button id="btn-export" class="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-semibold px-2.5 py-1 rounded transition shadow-sm">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Download
+          </button>
+          <button onclick="lockDashboard()" class="inline-flex items-center gap-1 bg-slate-800 hover:bg-rose-900 text-slate-300 hover:text-rose-200 text-[11px] font-medium px-2 py-1 rounded transition border border-slate-700 ml-2" title="Kunci Kembali">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-4 space-y-3">
+
+      <!-- Control Bar & Filters -->
+      <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
+        
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- View Mode Switcher -->
+          <div class="flex items-center gap-1.5">
+            <label for="filter-mode" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tipe:</label>
+            <select id="filter-mode" class="bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded p-1.5 font-medium">
+              <option value="month">Per Bulan</option>
+              <option value="day">Per Hari</option>
+            </select>
+          </div>
+
+          <!-- Month Dropdown -->
+          <div id="month-picker-wrapper" class="flex items-center gap-1.5">
+            <label for="filter-month" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Periode:</label>
+            <select id="filter-month" class="bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded p-1.5 font-medium">
+              <!-- Populated via JS (1 Tahun) -->
+            </select>
+          </div>
+
+          <!-- Date Picker -->
+          <div id="date-picker-wrapper" class="hidden flex items-center gap-1.5">
+            <label for="filter-date" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tanggal:</label>
+            <input type="date" id="filter-date" class="bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded p-1 font-medium">
+          </div>
+
+          <!-- Dropdown Filter Karyawan -->
+          <div class="flex items-center gap-1.5 border-l border-slate-200 pl-3">
+            <label for="filter-user" class="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">Karyawan:</label>
+            <select id="filter-user" class="bg-indigo-50/50 border border-indigo-200 text-indigo-900 text-xs rounded p-1.5 font-semibold focus:ring-1 focus:ring-indigo-500">
+              <option value="ALL">-- Pilih Karyawan </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Live Counter Badge -->
+        <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded">
+          <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+          <span class="text-[11px] text-slate-500 font-medium">Record Tampil:</span>
+          <span id="record-count" class="font-bold text-slate-900 text-xs">0</span>
+        </div>
+
+      </div>
+
+      <!-- Resume Performa & Keuangan Karyawan (Cards Summary) -->
+      <div id="resume-container" class="grid grid-cols-2 md:grid-cols-6 gap-3">
+        <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+          <div class="text-[10px] font-bold text-slate-400 uppercase">Hari Kerja Efektif</div>
+          <div id="stat-workdays" class="text-base font-extrabold text-slate-800 mt-0.5">0 Hari</div>
+          <div class="text-[9px] text-slate-400 mt-0.5">(Tgl 1 s/d Akhir Bulan, tdk tmasuk Minggu & Tgl Merah)</div>
+        </div>
+        <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm border-l-4 border-l-emerald-500">
+          <div class="text-[10px] font-bold text-emerald-600 uppercase">Hadir Tepat Waktu</div>
+          <div id="stat-ontime" class="text-base font-extrabold text-emerald-700 mt-0.5">0</div>
+          <div class="text-[9px] text-emerald-600/80 mt-0.5">Presensi Normal</div>
+        </div>
+        <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm border-l-4 border-l-rose-500">
+          <div class="text-[10px] font-bold text-rose-600 uppercase">Terlambat / Alpha</div>
+          <div id="stat-late" class="text-base font-extrabold text-rose-700 mt-0.5">0</div>
+          <div class="text-[9px] text-rose-600/80 mt-0.5">Potong Rp 50.000 / hari</div>
+        </div>
+        <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm border-l-4 border-l-amber-500">
+          <div class="text-[10px] font-bold text-amber-600 uppercase">Izin / Sakit / Dinas</div>
+          <div id="stat-permission" class="text-base font-extrabold text-amber-700 mt-0.5">0</div>
+          <div class="text-[9px] text-amber-600/80 mt-0.5">Approve: Normal | Non-Approve: Potong 50rb</div>
+        </div>
+        <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm border-l-4 border-l-indigo-500">
+          <div class="text-[10px] font-bold text-indigo-600 uppercase">Rate Performa</div>
+          <div id="stat-rate" class="text-base font-extrabold text-indigo-700 mt-0.5">0%</div>
+          <div class="text-[9px] text-indigo-600/80 mt-0.5">Kehadiran Netto</div>
+        </div>
+        <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm border-l-4 border-l-teal-500 col-span-2 md:col-span-1">
+          <div class="text-[10px] font-bold text-teal-600 uppercase">Total / Potongan</div>
+          <div id="stat-allowance" class="text-base font-extrabold text-teal-700 mt-0.5">Rp 0</div>
+          <div class="text-[9px] text-teal-600/80 mt-0.5">Lembur Libur +50rb / Telat-Alpha -50rb</div>
+        </div>
+      </div>
+
+      <!-- Panel Evaluasi & Penilaian Karyawan -->
+      <div id="grade-container" class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div id="grade-badge" class="w-12 h-12 rounded-full bg-slate-100 border-2 border-slate-300 flex items-center justify-center font-black text-xl text-slate-600 shadow-inner">
+            -
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-slate-800 text-xs">Evaluasi Kedisiplinan Karyawan</h3>
+              <span id="grade-label" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 uppercase">Belum Dihitung</span>
+            </div>
+            <p id="grade-desc" class="text-[11px] text-slate-500 mt-0.5">Pilih karyawan tertentu pada dropdown di atas untuk melihat rapor penilaian individu secara mendetail.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 border-t md:border-t-0 md:border-l border-slate-200 pt-2 md:pt-0 md:pl-4 w-full md:w-auto justify-between md:justify-end">
+          <div class="text-right">
+            <div class="text-[10px] font-bold text-slate-400 uppercase">Rasio Ketepatan Waktu</div>
+            <div id="stat-punctuality" class="text-sm font-extrabold text-slate-700">0%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Table Container -->
+      <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-[11px] text-slate-600">
+            <thead class="bg-slate-800 border-b border-slate-700 uppercase text-[10px] font-bold text-slate-200 tracking-wider">
+              <tr>
+                <th scope="col" class="px-3 py-2 whitespace-nowrap">Tanggal</th>
+                <th scope="col" class="px-3 py-2 whitespace-nowrap">Nama & Jabatan</th>
+                <th scope="col" class="px-3 py-2 whitespace-nowrap">Status Karyawan</th>
+                <th scope="col" class="px-3 py-2 whitespace-nowrap">Perusahaan</th>
+                <th scope="col" class="px-3 py-2 whitespace-nowrap">Lokasi Absen</th>
+                <th scope="col" class="px-3 py-2 whitespace-nowrap">Jam Absen</th>
+                <th scope="col" class="px-3 py-2 whitespace-nowrap">Status (Klik Alasan)</th>
+                <th scope="col" class="px-3 py-2 whitespace-nowrap text-center">Approval</th>
+                <th scope="col" class="px-3 py-2 text-right whitespace-nowrap">Potongan / Nominal</th>
+                <th scope="col" class="px-3 py-2 text-center whitespace-nowrap">Grade Hari Ini</th>
+                <th scope="col" class="px-3 py-2 text-center whitespace-nowrap">Foto</th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <tr>
+                <td colspan="11" class="px-4 py-8 text-center text-slate-400">
+                  Memuat data dari Supabase...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Image Modal View -->
+  <div id="photo-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg max-w-sm w-full p-3 shadow-2xl space-y-2 relative">
+      <div class="flex justify-between items-center pb-1.5 border-b border-slate-100">
+        <h3 class="text-xs font-semibold text-slate-800">Bukti Foto Absensi</h3>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-base font-bold">&times;</button>
+      </div>
+      <div class="overflow-hidden rounded bg-slate-100 flex items-center justify-center min-h-[200px]">
+        <img id="modal-img" src="" alt="Bukti Absensi" class="max-h-[60vh] w-auto object-contain">
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Detail Alasan Izin / Terlambat -->
+  <div id="reason-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full p-5 shadow-2xl space-y-4 relative border border-slate-200">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <span id="reason-modal-badge" class="px-2 py-0.5 rounded text-[10px] font-bold border">STATUS</span>
+          <h3 class="text-xs font-bold text-slate-800">Detail Alasan </h3>
+        </div>
+        <button onclick="closeReasonModal()" class="text-slate-400 hover:text-slate-600 text-base font-bold">&times;</button>
+      </div>
+      
+      <div class="space-y-3">
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Karyawan</label>
+          <p id="reason-modal-user" class="text-xs font-semibold text-slate-800">-</p>
+        </div>
+        
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Keterangan / Alasan</label>
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 text-xs mt-1 leading-relaxed whitespace-pre-wrap min-h-[60px]" id="reason-modal-text">
+            Tidak ada alasan/keterangan tertulis.
+          </div>
+        </div>
+
+        <div id="reason-modal-status-info" class="p-2.5 rounded-lg bg-indigo-50 border border-indigo-100 text-[11px] text-indigo-900 flex items-start gap-2">
+          <svg class="w-4 h-4 text-indigo-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span id="reason-modal-note">Status approval mempengaruhi nominal Potongan Gaji.</span>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end">
+        <button onclick="closeReasonModal()" class="bg-slate-800 hover:bg-slate-900 text-white font-medium px-4 py-1.5 rounded-lg text-xs transition">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DASHBOARD_PASSWORD = "ikaen2027";
+
+    // Supabase Configuration
+    const SB_URL = "https://qnamtickoteyvydayyor.supabase.co";
+    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuYW10aWNrb3RleXZ5ZGF5eW9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4OTU2MzksImV4cCI6MjA5MzQ3MTYzOX0.VAeN0JVnz4WNPzY5NTGmtGeHD-Da_qkCvy84ZDYZNHo";
+    const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+
+    let rawFetchedData = [];
+    let currentFilteredData = [];
+    let nationalHolidays = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (sessionStorage.getItem("dashboard_unlocked") === "true") {
+        showDashboard();
+      }
+    });
+
+    function unlockDashboard(e) {
+      e.preventDefault();
+      const inputPass = document.getElementById("auth-password").value;
+      const errorMsg = document.getElementById("auth-error");
+
+      if (inputPass === DASHBOARD_PASSWORD) {
+        sessionStorage.setItem("dashboard_unlocked", "true");
+        errorMsg.classList.add("hidden");
+        showDashboard();
+      } else {
+        errorMsg.classList.remove("hidden");
+      }
+    }
+
+    function lockDashboard() {
+      sessionStorage.removeItem("dashboard_unlocked");
+      document.getElementById("dashboard-content").classList.add("hidden");
+      document.getElementById("auth-modal").classList.remove("hidden");
+      document.getElementById("auth-password").value = "";
+    }
+
+    async function showDashboard() {
+      document.getElementById("auth-modal").classList.add("hidden");
+      document.getElementById("dashboard-content").classList.remove("hidden");
+      setupMonthDropdown();
+      setupEventListeners();
+      await fetchHolidays();
+      fetchAttendances();
+    }
+
+    // Mengambil data libur nasional dari API
+    async function fetchHolidays() {
+      try {
+        const year = new Date().getFullYear();
+        const res = await fetch(`https://dayoff-api.vercel.app/api?year=${year}`);
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          nationalHolidays = data.filter(item => item.is_holiday).map(item => item.holiday_date);
+        }
+      } catch (err) {
+        console.warn("Gagal memuat tanggal merah, hanya mengabaikan Hari Minggu:", err);
+      }
+    }
+
+    // Menampilkan 12 Bulan (1 Tahun Penuh)
+    function setupMonthDropdown() {
+      const selectMonth = document.getElementById("filter-month");
+      selectMonth.innerHTML = "";
+
+      const now = new Date();
+      for (let i = 0; i < 12; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const monthName = d.toLocaleString("id-ID", { month: "long" });
+
+        const option = document.createElement("option");
+        option.value = `${year}-${month}`;
+        option.textContent = i === 0 ? `${monthName} ${year} (Bulan Ini)` : `${monthName} ${year}`;
+        selectMonth.appendChild(option);
+      }
+
+      document.getElementById("filter-date").value = now.toISOString().split('T')[0];
+    }
+
+    function setupEventListeners() {
+      const filterMode = document.getElementById("filter-mode");
+      const monthWrapper = document.getElementById("month-picker-wrapper");
+      const dateWrapper = document.getElementById("date-picker-wrapper");
+
+      filterMode.addEventListener("change", (e) => {
+        if (e.target.value === "day") {
+          dateWrapper.classList.remove("hidden");
+          monthWrapper.classList.add("hidden");
+        } else {
+          dateWrapper.classList.add("hidden");
+          monthWrapper.classList.remove("hidden");
+        }
+        fetchAttendances();
+      });
+
+      document.getElementById("filter-month").addEventListener("change", fetchAttendances);
+      document.getElementById("filter-date").addEventListener("change", fetchAttendances);
+      document.getElementById("filter-user").addEventListener("change", applyUserFilter);
+      document.getElementById("btn-export").addEventListener("click", exportToCSV);
+    }
+
+    async function fetchAttendances() {
+      const tbody = document.getElementById("table-body");
+      tbody.innerHTML = `<tr><td colspan="11" class="px-4 py-8 text-center text-slate-400">Memuat data dari Supabase...</td></tr>`;
+
+      const mode = document.getElementById("filter-mode").value;
+      let query = supabaseClient.from("attendances").select("*").order("created_at", { ascending: false });
+
+      if (mode === "month") {
+        const monthVal = document.getElementById("filter-month").value;
+        const [year, month] = monthVal.split("-");
+        const startDate = `${year}-${month}-01T00:00:00.000Z`;
+        const lastDay = new Date(year, month, 0).getDate();
+        const endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}T23:59:59.999Z`;
+
+        query = query.gte("created_at", startDate).lte("created_at", endDate);
+      } else {
+        const dateVal = document.getElementById("filter-date").value;
+        if (dateVal) {
+          query = query.gte("created_at", `${dateVal}T00:00:00.000Z`).lte("created_at", `${dateVal}T23:59:59.999Z`);
+        }
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error("Supabase Error:", error);
+        tbody.innerHTML = `<tr><td colspan="11" class="px-4 py-8 text-center text-rose-500 font-medium">Gagal memuat data: ${error.message}</td></tr>`;
+        return;
+      }
+
+      rawFetchedData = data || [];
+      populateUserDropdown(rawFetchedData);
+      applyUserFilter();
+    }
+
+    // Mengisi pilihan Dropdown Karyawan
+    function populateUserDropdown(data) {
+      const userSelect = document.getElementById("filter-user");
+      const currentSelected = userSelect.value;
+      
+      const users = [...new Set(data.map(item => item.user_name).filter(Boolean))].sort();
+
+      userSelect.innerHTML = `<option value="ALL">-- Pilih Karyawan </option>`;
+      users.forEach(user => {
+        const opt = document.createElement("option");
+        opt.value = user;
+        opt.textContent = user;
+        userSelect.appendChild(opt);
+      });
+
+      if (users.includes(currentSelected)) {
+        userSelect.value = currentSelected;
+      } else {
+        userSelect.value = "ALL";
+      }
+    }
+
+    // Filter Lokal Berdasarkan Karyawan & Generate Alpha Otomatis (Hanya dari Tgl 1 s/d Tanggal Hari Ini)
+    function applyUserFilter() {
+      const selectedUser = document.getElementById("filter-user").value;
+      const mode = document.getElementById("filter-mode").value;
+
+      let filtered = [];
+      if (selectedUser === "ALL") {
+        filtered = rawFetchedData;
+      } else {
+        filtered = rawFetchedData.filter(item => item.user_name === selectedUser);
+      }
+
+      // Jika mode per bulan dan spesifik memilih satu karyawan, generate tanggal Alpha dari tgl 1 s/d batas hari ini
+      if (mode === "month" && selectedUser !== "ALL") {
+        const monthVal = document.getElementById("filter-month").value;
+        const [year, month] = monthVal.split("-").map(Number);
+        
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth() + 1;
+        const currentDay = now.getDate();
+
+        // Tentukan batas akhir perulangan: jika bulan yang dipilih adalah bulan berjalan, batasi sampai hari ini. 
+        // Jika bulan yang dipilih adalah bulan lalu, gunakan akhir bulan tersebut secara penuh.
+        let maxDayToGenerate = new Date(year, month, 0).getDate();
+        if (year === currentYear && month === currentMonth) {
+          maxDayToGenerate = Math.min(currentDay, maxDayToGenerate);
+        }
+
+        // Set tanggal yang sudah dihadiri
+        const attendedDates = new Set();
+        filtered.forEach(item => {
+          if (item.created_at) {
+            const dStr = item.created_at.split('T')[0];
+            attendedDates.add(dStr);
+          }
+        });
+
+        const sampleItem = filtered.length > 0 ? filtered[0] : { user_name: selectedUser, position: '-', company_name: '-', phone: '-' };
+        let combinedData = [...filtered];
+
+        // Loop dari tanggal 1 hingga batas hari (hari ini atau akhir bulan)
+        for (let d = 1; d <= maxDayToGenerate; d++) {
+          const dateObj = new Date(year, month - 1, d);
+          const dayOfWeek = dateObj.getDay(); // 0 = Minggu
+          const formattedStr = dateObj.toISOString().split('T')[0];
+
+          const isSunday = (dayOfWeek === 0);
+          const isRedDate = nationalHolidays.includes(formattedStr);
+
+          // Hari Minggu & Tanggal Merah TIDAK dihitung sebagai hari kerja efektif (tidak digenerate Alpha)
+          if (!isSunday && !isRedDate && !attendedDates.has(formattedStr)) {
+            combinedData.push({
+              id: `alpha-${selectedUser}-${formattedStr}`,
+              user_name: sampleItem.user_name,
+              position: sampleItem.position,
+              company_name: sampleItem.company_name,
+              phone: sampleItem.phone,
+              location_name: '-',
+              check_in_time: '-',
+              status: 'ALPHA',
+              reason: 'Tidak melakukan absensi (Alpha)',
+              is_approved: false,
+              created_at: `${formattedStr}T08:00:00.000Z`,
+              isAlphaGenerated: true
+            });
+          }
+        }
+
+        // Urutkan berdasarkan tanggal terbaru ke terlama
+        combinedData.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        currentFilteredData = combinedData;
+      } else {
+        currentFilteredData = filtered;
+      }
+
+      renderTable(currentFilteredData);
+      calculatePerformanceResume(currentFilteredData);
+    }
+
+    // Menghitung Hari Kerja Efektif (Tgl 1 s/d Tanggal Hari Ini untuk bulan berjalan; Mengabaikan Minggu & Tanggal Merah)
+    function getEffectiveWorkdays() {
+      const mode = document.getElementById("filter-mode").value;
+      let datesToCheck = [];
+
+      if (mode === "month") {
+        const monthVal = document.getElementById("filter-month").value;
+        const [year, month] = monthVal.split("-").map(Number);
+        
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth() + 1;
+        const currentDay = now.getDate();
+
+        let maxDayToCount = new Date(year, month, 0).getDate();
+        if (year === currentYear && month === currentMonth) {
+          maxDayToCount = Math.min(currentDay, maxDayToCount);
+        }
+
+        for (let d = 1; d <= maxDayToCount; d++) {
+          const dateObj = new Date(year, month - 1, d);
+          datesToCheck.push(dateObj);
+        }
+      } else {
+        const dateVal = document.getElementById("filter-date").value;
+        if (dateVal) {
+          datesToCheck.push(new Date(dateVal));
+        }
+      }
+
+      let effectiveDays = 0;
+      datesToCheck.forEach(d => {
+        const dayOfWeek = d.getDay(); // 0 = Minggu
+        const formattedStr = d.toISOString().split('T')[0];
+        
+        const isSunday = (dayOfWeek === 0);
+        const isNationalHoliday = nationalHolidays.includes(formattedStr);
+
+        // Hari Minggu dan Tanggal Merah TIDAK dihitung dalam hari kerja efektif
+        if (!isSunday && !isNationalHoliday) {
+          effectiveDays++;
+        }
+      });
+
+      return effectiveDays;
+    }
+
+    function isTrainingEmployee(name, phone) {
+      const cleanName = (name || "").toUpperCase();
+      const cleanPhone = (phone || "").trim();
+      return cleanName.includes("WAHYUDI") || cleanPhone === "085392181645";
+    }
+
+    // LOGIKA POTONGAN / NOMINAL GAJI & LEMBUR
+    function calculateDailyAllowance(item) {
+      const name = item.user_name || "";
+      const phone = item.phone || "";
+      const statusText = (item.status || "HADIR").toUpperCase();
+      const isApproved = item.is_approved === true || item.approval_status === "APPROVED";
+      const isTraining = isTrainingEmployee(name, phone);
+
+      const dateObj = item.created_at ? new Date(item.created_at) : null;
+      let isHoliday = false;
+
+      if (dateObj) {
+        const dayOfWeek = dateObj.getDay(); // 0 = Minggu
+        const formattedDate = dateObj.toISOString().split('T')[0];
+        const isSunday = (dayOfWeek === 0);
+        const isRedDate = nationalHolidays.includes(formattedDate);
+
+        if (isSunday || isRedDate) {
+          isHoliday = true;
+        }
+      }
+
+      const isLate = statusText.includes("TERLAMBAT") || statusText.includes("LATE");
+      const isPermission = statusText.includes("IZIN") || statusText.includes("SAKIT") || statusText.includes("DINAS");
+      const isAlpha = statusText.includes("ALPHA") || item.isAlphaGenerated || !item.check_in_time || item.check_in_time === '-';
+
+      // JIKA ABSEN DI HARI MINGGU / TANGGAL MERAH (LEMBUR HARI LIBUR = +50.000)
+      if (isHoliday && !isAlpha) {
+        return 50000;
+      }
+
+      if (isTraining) {
+        if (isLate || isAlpha || (isPermission && !isApproved)) {
+          return 0; 
+        } else if (isPermission && isApproved) {
+          return 0; 
+        } else {
+          return 25000; // Bonus training
+        }
+      } else {
+        if (isLate) {
+          if (isApproved) return 0;
+          return -50000;
+        } else if (isPermission || isAlpha) {
+          if (isApproved) return 0;
+          return -50000; // Potong Rp 50.000 untuk Alpha / Izin non-approve
+        } else {
+          return 0;
+        }
+      }
+    }
+
+    // Menghitung & Menampilkan Resume Performa Serta Penilaian Karyawan
+    function calculatePerformanceResume(data) {
+      const effectiveWorkdays = getEffectiveWorkdays();
+      let onTimeCount = 0;
+      let lateCount = 0;
+      let permissionCount = 0;
+      let totalAllowance = 0;
+
+      data.forEach(item => {
+        const st = (item.status || "HADIR").toUpperCase();
+        const isAlpha = st.includes("ALPHA") || item.isAlphaGenerated || !item.check_in_time || item.check_in_time === '-';
+
+        if (isAlpha) {
+          lateCount++; // Alpha dihitung dalam rekap pemotongan
+        } else if (st.includes("TERLAMBAT") || st.includes("LATE")) {
+          lateCount++;
+        } else if (st.includes("IZIN") || st.includes("SAKIT") || st.includes("DINAS")) {
+          permissionCount++;
+        } else {
+          onTimeCount++;
+        }
+
+        totalAllowance += calculateDailyAllowance(item);
+      });
+
+      const totalPresensi = onTimeCount; 
+      const rate = effectiveWorkdays > 0 ? Math.round((totalPresensi / effectiveWorkdays) * 100) : 0;
+      const punctualityRate = totalPresensi > 0 ? Math.round((onTimeCount / totalPresensi) * 100) : 0;
+
+      document.getElementById("stat-workdays").textContent = `${effectiveWorkdays} Hari`;
+      document.getElementById("stat-ontime").textContent = onTimeCount;
+      document.getElementById("stat-late").textContent = lateCount;
+      document.getElementById("stat-permission").textContent = permissionCount;
+      document.getElementById("stat-rate").textContent = `${Math.min(Math.max(rate, 0), 100)}%`;
+      document.getElementById("stat-punctuality").textContent = `${punctualityRate}%`;
+      
+      const totalText = totalAllowance < 0 ? `-Rp ${Math.abs(totalAllowance).toLocaleString('id-ID')}` : `+Rp ${totalAllowance.toLocaleString('id-ID')}`;
+      document.getElementById("stat-allowance").textContent = totalText;
+
+      evaluateEmployeeGrade(effectiveWorkdays, totalPresensi, onTimeCount, lateCount, rate);
+    }
+
+    function evaluateEmployeeGrade(effectiveWorkdays, totalPresensi, onTime, late, rate) {
+      const selectedUser = document.getElementById("filter-user").value;
+      const badgeEl = document.getElementById("grade-badge");
+      const labelEl = document.getElementById("grade-label");
+      const descEl = document.getElementById("grade-desc");
+
+      if (selectedUser === "ALL") {
+        badgeEl.textContent = "ALL";
+        badgeEl.className = "w-12 h-12 rounded-full bg-slate-100 border-2 border-slate-300 flex items-center justify-center font-bold text-xs text-slate-600 shadow-inner";
+        labelEl.textContent = "Overview Tim";
+        labelEl.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 uppercase";
+        descEl.textContent = "Pilih satu nama karyawan ";
+        return;
+      }
+
+      let grade = "D";
+      let label = "Perlu Perhatian";
+      let badgeStyle = "bg-rose-100 border-rose-500 text-rose-700";
+      let labelStyle = "bg-rose-100 text-rose-700";
+      let desc = "";
+
+      if (rate >= 90 && late === 0) {
+        grade = "A";
+        label = "Sangat Baik ";
+        badgeStyle = "bg-emerald-100 border-emerald-500 text-emerald-700";
+        labelStyle = "bg-emerald-100 text-emerald-700";
+        desc = `Tercapai Tingkat kehadiran  ${rate}% Jaga disiplin dan Performa`;
+      } else if (rate >= 80 && late <= 2) {
+        grade = "B";
+        label = "Baik";
+        badgeStyle = "bg-blue-100 border-blue-500 text-blue-700";
+        labelStyle = "bg-blue-100 text-blue-700";
+        desc = `Memenuhi Standar Kehadiran ${rate}% masih perlu perbaikan absen. Jaga absen`;
+      } else if (rate >= 70 && late <= 4) {
+        grade = "C";
+        label = "Cukup";
+        badgeStyle = "bg-amber-100 border-amber-500 text-amber-700";
+        labelStyle = "bg-amber-100 text-amber-700";
+        desc = `Belum standar minimum. Terdapat beberapa hari tidak masuk atau terlambat. Perlu Teguran`;
+      } else {
+        grade = "D";
+        label = "Warning-Surat Peringatan Pertama";
+        badgeStyle = "bg-rose-100 border-rose-500 text-rose-700";
+        labelStyle = "bg-rose-100 text-rose-700";
+        desc = `Performa presensi rendah! Kehadiran (${rate}%) tidak memenuhi batas wajar karena banyak hari tanpa keterangan (Alpha).`;
+      }
+
+      badgeEl.textContent = grade;
+      badgeEl.className = `w-12 h-12 rounded-full border-2 flex items-center justify-center font-black text-xl shadow-inner ${badgeStyle}`;
+      labelEl.textContent = label;
+      labelEl.className = `px-2 py-0.5 rounded text-[10px] font-bold uppercase ${labelStyle}`;
+      descEl.textContent = desc;
+    }
+
+    function toggleApproval(id, status) {
+      const item = rawFetchedData.find(d => d.id === id);
+      if (item) {
+        item.is_approved = (status === 'APPROVED');
+        item.approval_status = status;
+        applyUserFilter();
+      }
+    }
+
+    function showReasonModal(id) {
+      const item = currentFilteredData.find(d => d.id === id);
+      if (!item) return;
+
+      const statusText = (item.status || "HADIR").toUpperCase();
+      const isApproved = item.is_approved === true || item.approval_status === "APPROVED";
+      const reasonText = item.reason || item.keterangan || item.notes || item.description || "Tidak melakukan presensi / absen pada tanggal efektif kerja ini.";
+      const isTraining = isTrainingEmployee(item.user_name, item.phone);
+
+      const badgeEl = document.getElementById("reason-modal-badge");
+      const userEl = document.getElementById("reason-modal-user");
+      const textEl = document.getElementById("reason-modal-text");
+      const noteEl = document.getElementById("reason-modal-note");
+
+      userEl.textContent = `${item.user_name || '-'} (${item.position || '-'}) [${isTraining ? 'TRAINING' : 'TETAP'}]`;
+      textEl.textContent = reasonText;
+
+      if (statusText.includes("ALPHA") || item.isAlphaGenerated) {
+        badgeEl.textContent = "ALPHA";
+        badgeEl.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-300";
+        noteEl.textContent = "Status: ALPHA. Tidak ada catatan absen pada hari kerja efektif -> Kena potongan Rp 50.000.";
+      } else {
+        badgeEl.textContent = statusText;
+        badgeEl.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300";
+        noteEl.textContent = isApproved ? "Status: APPROVED." : "Status: UNAPPROVED -> Kena potongan Rp 50.000.";
+      }
+
+      document.getElementById("reason-modal").classList.remove("hidden");
+    }
+
+    function closeReasonModal() {
+      document.getElementById("reason-modal").classList.add("hidden");
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById("table-body");
+      document.getElementById("record-count").textContent = data.length;
+
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="px-4 py-8 text-center text-slate-400">Silakan pilih nama karyawan pada filter untuk menampilkan record kehadiran & Alpha.</td></tr>`;
+        return;
+      }
+
+      let currentDateGroup = "";
+      let isAltBg = false;
+
+      tbody.innerHTML = data.map((item) => {
+        const dateObj = item.created_at ? new Date(item.created_at) : null;
+        const formattedDate = dateObj ? dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+        const rawDateStr = dateObj ? dateObj.toISOString().split('T')[0] : '';
+
+        let isHoliday = false;
+        if (dateObj) {
+          const dayOfWeek = dateObj.getDay();
+          if (dayOfWeek === 0 || nationalHolidays.includes(rawDateStr)) {
+            isHoliday = true;
+          }
+        }
+
+        let borderClass = "border-t border-slate-200";
+        if (rawDateStr !== currentDateGroup) {
+          currentDateGroup = rawDateStr;
+          isAltBg = !isAltBg;
+          borderClass = "border-t-2 border-indigo-500/50";
+        }
+
+        const bgClass = isAltBg ? "bg-indigo-50/20" : "bg-white";
+
+        const isTraining = isTrainingEmployee(item.user_name, item.phone);
+        const employeeCategoryBadge = isTraining
+          ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-100 text-purple-700 border border-purple-200">TRAINING</span>`
+          : `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 text-blue-700 border border-blue-200">TETAP</span>`;
+
+        const statusText = (item.status || "HADIR").toUpperCase();
+        const isAlpha = statusText.includes("ALPHA") || item.isAlphaGenerated || !item.check_in_time || item.check_in_time === '-';
+        const isLate = statusText.includes("TERLAMBAT") || statusText.includes("LATE");
+        const isApproved = item.is_approved === true || item.approval_status === "APPROVED";
+
+        let statusBadgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+        let shortStatusText = statusText;
+        let isClickableReason = false;
+
+        if (isHoliday && !isAlpha) {
+          statusBadgeClass = "bg-purple-50 text-purple-700 border-purple-200 font-bold";
+          shortStatusText = "LEMBUR (HARI LIBUR)";
+        } else if (isAlpha) {
+          statusBadgeClass = "bg-rose-100 text-rose-800 border-rose-300 cursor-pointer hover:bg-rose-200 font-bold";
+          shortStatusText = "ALPHA (TIDAK ABSEN)";
+          isClickableReason = true;
+        } else if (isLate) {
+          statusBadgeClass = "bg-rose-50 text-rose-700 border-rose-200 cursor-pointer hover:bg-rose-100";
+          shortStatusText = "TERLAMBAT";
+          isClickableReason = true;
+        } else if (statusText.includes("IZIN") || statusText.includes("SAKIT")) {
+          statusBadgeClass = "bg-amber-50 text-amber-700 border-amber-200 cursor-pointer hover:bg-amber-100";
+          isClickableReason = true;
+        }
+
+        const clickAction = isClickableReason ? `onclick="showReasonModal(${typeof item.id === 'number' ? item.id : `'${item.id}'`})"` : '';
+
+        let approvalColumn = `<span class="text-slate-400 text-[10px] font-medium">-</span>`;
+        let dailyGradeBadge = '<span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[9px]">100 pts</span>';
+
+        if (isHoliday && !isAlpha) {
+          dailyGradeBadge = '<span class="px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 font-bold text-[9px]">Lembur +50rb</span>';
+        } else if (isAlpha) {
+          approvalColumn = `<span class="text-rose-500 font-bold text-[10px]">Non-Absen</span>`;
+          dailyGradeBadge = '<span class="px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 font-bold text-[9px]">Potong 50rb</span>';
+        } else if (isLate || statusText.includes("IZIN")) {
+          if (isApproved) {
+            approvalColumn = `<span class="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-[9px] rounded-full">Approved</span>`;
+            dailyGradeBadge = '<span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[9px]">Normal</span>';
+          } else {
+            approvalColumn = `
+              <button onclick="toggleApproval(${item.id}, 'APPROVED')" class="px-1.5 py-0.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[9px] rounded transition">
+                Approve
+              </button>`;
+            dailyGradeBadge = '<span class="px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 font-bold text-[9px]">Potong 50rb</span>';
+          }
+        }
+
+        const allowance = calculateDailyAllowance(item);
+        let allowanceBadge = '';
+
+        if (allowance < 0) {
+          allowanceBadge = `<span class="font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">-Rp ${Math.abs(allowance).toLocaleString('id-ID')}</span>`;
+        } else if (allowance > 0) {
+          allowanceBadge = `<span class="font-bold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200">+Rp ${allowance.toLocaleString('id-ID')}</span>`;
+        } else {
+          allowanceBadge = `<span class="font-bold text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200">Rp 0 (Aman)</span>`;
+        }
+
+        const photoHtml = item.photo_url 
+          ? `<button onclick="openModal('${item.photo_url}')" class="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded border border-indigo-200 transition">Foto</button>`
+          : `<span class="text-slate-300 text-[10px]">${isAlpha ? 'Tanpa Foto' : 'No Pic'}</span>`;
+
+        return `
+          <tr class="${bgClass} ${borderClass} hover:bg-slate-100/80 transition">
+            <td class="px-3 py-2 font-semibold text-slate-700 whitespace-nowrap">${formattedDate}</td>
+            <td class="px-3 py-2 max-w-[140px] truncate">
+              <div class="font-bold text-slate-900 truncate" title="${item.user_name || '-'}">${item.user_name || '-'}</div>
+              <div class="text-[10px] text-slate-500 font-normal truncate" title="${item.position || '-'}">${item.position || '-'}</div>
+            </td>
+            <td class="px-3 py-2 whitespace-nowrap">${employeeCategoryBadge}</td>
+            <td class="px-3 py-2 text-slate-700 font-medium max-w-[120px] truncate" title="${item.company_name || '-'}">${item.company_name || '-'}</td>
+            <td class="px-3 py-2 text-slate-600 max-w-[130px] truncate" title="${item.location_name || '-'}">${item.location_name || '-'}</td>
+            <td class="px-3 py-2 whitespace-nowrap font-medium text-slate-800">${item.check_in_time || '-'}</td>
+            
+            <td class="px-3 py-2 whitespace-nowrap">
+              <span ${clickAction} class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ${statusBadgeClass} max-w-[140px] truncate">
+                ${shortStatusText}
+              </span>
+            </td>
+
+            <td class="px-3 py-2 text-center whitespace-nowrap">${approvalColumn}</td>
+            <td class="px-3 py-2 text-right whitespace-nowrap font-mono">${allowanceBadge}</td>
+            <td class="px-3 py-2 text-center whitespace-nowrap">${dailyGradeBadge}</td>
+            <td class="px-3 py-2 text-center whitespace-nowrap">${photoHtml}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function openModal(url) {
+      document.getElementById("modal-img").src = url;
+      document.getElementById("photo-modal").classList.remove("hidden");
+    }
+
+    function closeModal() {
+      document.getElementById("photo-modal").classList.add("hidden");
+      document.getElementById("modal-img").src = "";
+    }
+
+    function exportToCSV() {
+      if (!currentFilteredData || currentFilteredData.length === 0) {
+        alert("Tidak ada data untuk di-export.");
+        return;
+      }
+
+      const headers = ["Nama Pegawai", "Kategori Status", "Jabatan", "Perusahaan", "No Telepon", "Lokasi", "Waktu Absen", "Tanggal Created", "Status", "Alasan", "Approval", "Potongan / Nominal (Rp)", "URL Foto"];
+      const rows = currentFilteredData.map(item => [
+        `"${item.user_name || ''}"`,
+        `"${isTrainingEmployee(item.user_name, item.phone) ? 'TRAINING' : 'TETAP'}"`,
+        `"${item.position || ''}"`,
+        `"${item.company_name || ''}"`,
+        `"${item.phone || ''}"`,
+        `"${item.location_name || ''}"`,
+        `"${item.check_in_time || ''}"`,
+        `"${item.created_at || ''}"`,
+        `"${item.status || ''}"`,
+        `"${(item.reason || item.keterangan || '').replace(/"/g, '""')}"`,
+        `"${item.is_approved ? 'APPROVED' : 'PENDING/REJECTED'}"`,
+        `"${calculateDailyAllowance(item)}"`,
+        `"${item.photo_url || ''}"`
+      ]);
+
+      const csvContent = "data:text/csv;charset=utf-8,\uFEFF" 
+        + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `Report_Absensi_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>
