@@ -1,894 +1,1012 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Manajemen Karyawan - Dashboard</title>
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Supabase JS Client v2 CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- Google Fonts Inter & Plus Jakarta Sans -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <style>
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Terpadu Absensi & Manajemen Karyawan</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    body { font-family: 'Inter', 'Plus Jakarta Sans', sans-serif; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
 </head>
-<body class="bg-slate-50 font-sans text-slate-800 min-h-screen flex flex-col selection:bg-blue-500 selection:text-white">
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen text-xs flex flex-col">
 
-    <!-- TOP NAVBAR -->
-    <header class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            
-            <!-- Main Brand Title & Supabase Status -->
-            <div class="flex items-center space-x-4">
-                <div class="p-2.5 bg-blue-600 text-white rounded-xl shadow-md shadow-blue-500/20">
-                    <i data-lucide="users" class="w-7 h-7"></i>
-                </div>
-                <div>
-                    <h1 class="font-extrabold text-lg sm:text-xl tracking-tight text-slate-900 flex items-center gap-2">
-                        MANAJEMEN KARYAWAN
-                        <span class="text-[10px] bg-blue-50 text-blue-600 px-2.5 py-0.5 rounded-full border border-blue-200 font-semibold tracking-normal">PORTAL</span>
-                    </h1>
-                    <div class="flex items-center space-x-2 text-xs text-slate-500">
-                        <span>Database Sync:</span>
-                        <span id="syncStatus" class="inline-flex items-center text-[11px] text-emerald-600 font-medium">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
-                            Supabase Connected
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Header Action Controls -->
-            <div class="flex items-center space-x-3">
-                <button onclick="openModal()" class="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl shadow-md shadow-blue-500/20 transition-all duration-300 text-xs sm:text-sm active:scale-95">
-                    <i data-lucide="user-plus" class="w-4 h-4"></i>
-                    <span class="hidden sm:inline">Tambah Karyawan</span>
-                </button>
-
-                <!-- Tombol Record Absen Baru -->
-                <a href="absen_harian.html" class="flex items-center space-x-2 bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 py-2.5 rounded-xl shadow-md transition-all duration-300 text-xs sm:text-sm active:scale-95">
-                    <i data-lucide="calendar-check" class="w-4 h-4"></i>
-                    <span class="hidden sm:inline">Record Absen</span>
-                </a>
-                
-                <div class="h-6 w-px bg-slate-200"></div>
-
-                <button onclick="exportData()" title="Export JSON" class="p-2.5 bg-white hover:bg-slate-100 text-slate-700 rounded-xl transition border border-slate-200 shadow-sm">
-                    <i data-lucide="download" class="w-4 h-4"></i>
-                </button>
-                <label title="Import JSON" class="p-2.5 bg-white hover:bg-slate-100 text-slate-700 rounded-xl transition border border-slate-200 shadow-sm cursor-pointer">
-                    <i data-lucide="upload" class="w-4 h-4"></i>
-                    <input type="file" id="importFile" accept=".json" onchange="importData(event)" class="hidden">
-                </label>
-            </div>
+  <!-- TOP NAVIGATION BAR WITH TABS -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="bg-indigo-600 text-white p-1.5 rounded-lg font-extrabold text-xs">
+          HR
         </div>
-    </header>
-
-    <!-- MAIN CONTAINER -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-
-        <!-- DASHBOARD SUMMARY CARDS -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <!-- Total Group Stats -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between relative overflow-hidden group hover:border-blue-300 transition">
-                <div>
-                    <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Total Karyawan</p>
-                    <h3 id="statTotal" class="text-3xl font-black text-slate-900 mt-1">0</h3>
-                </div>
-                <div class="p-3.5 bg-blue-50 text-blue-600 rounded-2xl border border-blue-100">
-                    <i data-lucide="users" class="w-6 h-6"></i>
-                </div>
-            </div>
-
-            <!-- IKE Stats -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between hover:border-amber-300 transition">
-                <div>
-                    <div class="h-7 mb-2 flex items-center">
-                        <img src="ikaen.png" alt="IKE Logo" class="h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <span class="hidden text-xs font-bold text-slate-700">IKE LOGO</span>
-                    </div>
-                    <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Investama Kal. Energi</p>
-                    <h3 id="statIKE" class="text-2xl font-bold text-slate-900 mt-1">0</h3>
-                </div>
-                <div class="p-2.5 bg-amber-50 text-amber-600 rounded-xl border border-amber-100">
-                    <i data-lucide="zap" class="w-5 h-5"></i>
-                </div>
-            </div>
-
-            <!-- KSE Stats -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between hover:border-emerald-300 transition">
-                <div>
-                    <div class="h-7 mb-2 flex items-center">
-                        <img src="header1.png" alt="KSE Logo" class="h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <span class="hidden text-xs font-bold text-slate-700">KSE LOGO</span>
-                    </div>
-                    <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Khatulistiwa Sinar Energi</p>
-                    <h3 id="statKSE" class="text-2xl font-bold text-slate-900 mt-1">0</h3>
-                </div>
-                <div class="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100">
-                    <i data-lucide="sun" class="w-5 h-5"></i>
-                </div>
-            </div>
-
-            <!-- IDE Stats -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between hover:border-sky-300 transition">
-                <div>
-                    <div class="h-7 mb-2 flex items-center">
-                        <img src="ide1.png" alt="IDE Logo" class="h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <span class="hidden text-xs font-bold text-slate-700">IDE LOGO</span>
-                    </div>
-                    <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Indo Dharma Energi</p>
-                    <h3 id="statIDE" class="text-2xl font-bold text-slate-900 mt-1">0</h3>
-                </div>
-                <div class="p-2.5 bg-sky-50 text-sky-600 rounded-xl border border-sky-100">
-                    <i data-lucide="flame" class="w-5 h-5"></i>
-                </div>
-            </div>
+        <div>
+          <h1 class="text-sm font-bold leading-tight text-slate-100 flex items-center gap-2">
+            SISTEM MANAJEMEN ABSENSI & KARYAWAN
+            <span id="syncStatus" class="text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-emerald-800 font-medium">
+              ● Online
+            </span>
+          </h1>
         </div>
+      </div>
 
-        <!-- FILTER & BRAND TAB TOOLBAR -->
-        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col lg:flex-row gap-4 items-center justify-between">
-            
-            <!-- Company Filter Buttons -->
-            <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-                <button onclick="setCompanyFilter('ALL')" id="filterBtnALL" class="px-4 py-2 rounded-xl text-xs font-semibold transition border border-blue-500 bg-blue-50 text-blue-700 shadow-sm">
-                    Semua Unit (Group)
-                </button>
-                <button onclick="setCompanyFilter('Investama Kalimantan Energi')" id="filterBtnIKE" class="px-3.5 py-2 rounded-xl text-xs font-semibold transition border border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 flex items-center gap-2">
-                    <img src="ikaen.png" class="h-3.5 object-contain" onerror="this.style.display='none'">
-                    <span>IKE</span>
-                </button>
-                <button onclick="setCompanyFilter('Khatulistiwa Sinar Energi')" id="filterBtnKSE" class="px-3.5 py-2 rounded-xl text-xs font-semibold transition border border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 flex items-center gap-2">
-                    <img src="header1.png" class="h-3.5 object-contain" onerror="this.style.display='none'">
-                    <span>KSE</span>
-                </button>
-                <button onclick="setCompanyFilter('Indo Dharma Energi')" id="filterBtnIDE" class="px-3.5 py-2 rounded-xl text-xs font-semibold transition border border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 flex items-center gap-2">
-                    <img src="ide1.png" class="h-3.5 object-contain" onerror="this.style.display='none'">
-                    <span>IDE</span>
-                </button>
-            </div>
-
-            <!-- Search and View Toggles -->
-            <div class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
-                <!-- Live Search -->
-                <div class="relative w-full sm:w-72">
-                    <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="searchInput" oninput="renderData()" placeholder="Cari nama, jabatan, telp..." 
-                        class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-blue-500 transition">
-                </div>
-
-                <!-- View Mode Switch -->
-                <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 w-full sm:w-auto justify-center">
-                    <button id="viewCardBtn" onclick="switchView('card')" class="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition bg-white text-blue-600 shadow-sm border border-slate-200">
-                        <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
-                        <span>Card View</span>
-                    </button>
-                    <button id="viewTableBtn" onclick="switchView('table')" class="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition">
-                        <i data-lucide="table" class="w-3.5 h-3.5"></i>
-                        <span>Tabel Data</span>
-                    </button>
-                </div>
-            </div>
+      <!-- Navigation Tabs & Actions -->
+      <div class="flex items-center gap-2">
+        <div class="bg-slate-800 p-1 rounded-lg flex border border-slate-700">
+          <button id="tab-btn-attendance" onclick="switchMainTab('attendance')" class="px-3 py-1 rounded text-xs font-semibold bg-indigo-600 text-white transition">
+            Dashboard Absensi
+          </button>
+          <button id="tab-btn-employees" onclick="switchMainTab('employees')" class="px-3 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white transition">
+            Data Karyawan
+          </button>
         </div>
-
-        <!-- MAIN DATA DISPLAY CONTAINER -->
-        <!-- Card View -->
-        <div id="cardViewContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-
-        <!-- Table View -->
-        <div id="tableViewContainer" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs">
-                    <thead>
-                        <tr class="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
-                            <th class="py-4 px-6">Foto & Nama</th>
-                            <th class="py-4 px-6">Perusahaan Unit</th>
-                            <th class="py-4 px-6">Jabatan</th>
-                            <th class="py-4 px-6">Kontak & Alamat</th>
-                            <th class="py-4 px-6 text-center">Tahun Masuk</th>
-                            <th class="py-4 px-6 text-right">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody" class="divide-y divide-slate-100"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Empty State -->
-        <div id="emptyState" class="hidden text-center py-16 bg-white rounded-2xl border border-dashed border-slate-200 shadow-sm">
-            <div class="p-4 bg-slate-50 rounded-full w-16 h-16 mx-auto flex items-center justify-center text-slate-400 mb-3 border border-slate-200">
-                <i data-lucide="users-round" class="w-7 h-7"></i>
-            </div>
-            <h3 class="text-sm font-bold text-slate-700">Data Karyawan Tidak Ditemukan</h3>
-            <p class="text-xs text-slate-400 mt-1">Coba atur ulang filter pencarian atau tambahkan karyawan baru.</p>
-        </div>
-
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="bg-white border-t border-slate-200 mt-auto py-6 text-center text-xs text-slate-500">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p>&copy; 2026 Sistem Manajemen Karyawan &bull; All Rights Reserved.</p>
-            <div class="flex items-center space-x-4">
-                <span>Investama Kalimantan Energi</span> &bull; 
-                <span>Khatulistiwa Sinar Energi</span> &bull; 
-                <span>Indo Dharma Energi</span>
-            </div>
-        </div>
-    </footer>
-
-    <!-- MODAL FORM (ADD / EDIT) -->
-    <div id="employeeModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
-        <div class="bg-white w-full max-w-xl rounded-2xl border border-slate-200 shadow-2xl overflow-hidden my-8 transform transition-all">
-            
-            <!-- Modal Header -->
-            <div class="bg-slate-50 px-6 py-4 flex items-center justify-between text-slate-900 border-b border-slate-200">
-                <div class="flex items-center space-x-2">
-                    <i data-lucide="user-cog" class="w-5 h-5 text-blue-600"></i>
-                    <h3 id="modalTitle" class="font-bold text-base tracking-wide">Form Data Karyawan</h3>
-                </div>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg transition">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-
-            <!-- Modal Form Body -->
-            <form id="employeeForm" onsubmit="handleFormSubmit(event)" class="p-6 space-y-4">
-                <input type="hidden" id="empId">
-
-                <!-- Company Select -->
-                <div>
-                    <label class="block text-[11px] font-semibold uppercase text-slate-600 tracking-wider mb-1">Perusahaan Unit *</label>
-                    <select id="empCompany" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:border-blue-500 focus:outline-none">
-                        <option value="">-- Pilih Perusahaan Unit --</option>
-                        <option value="PT. INVESTAMA KALIMANTAN ENERGI">PT. INVESTAMA KALIMANTAN ENERGI</option>
-                        <option value="PT. KHATULISTIWA SINAR ENERGI">PT. KHATULISTIWA SINAR ENERGI</option>
-                        <option value="PT. INDO DHARMA ENERGI">PT. INDO DHARMA ENERGI</option>
-                    </select>
-                </div>
-
-                <!-- Full Name & Jabatan -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-[11px] font-semibold uppercase text-slate-600 tracking-wider mb-1">Nama Lengkap *</label>
-                        <input type="text" id="empName" required placeholder="Contoh: Ir. Budi Santoso, M.T." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:border-blue-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-semibold uppercase text-slate-600 tracking-wider mb-1">Jabatan *</label>
-                        <input type="text" id="empPosition" required placeholder="Contoh: Senior General Manager" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:border-blue-500 focus:outline-none">
-                    </div>
-                </div>
-
-                <!-- Telepon & Tahun Masuk -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-[11px] font-semibold uppercase text-slate-600 tracking-wider mb-1">Nomor Telepon *</label>
-                        <input type="tel" id="empPhone" required placeholder="081234567890" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:border-blue-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-semibold uppercase text-slate-600 tracking-wider mb-1">Tahun Masuk *</label>
-                        <input type="number" id="empYear" required min="1990" max="2030" placeholder="2021" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:border-blue-500 focus:outline-none">
-                    </div>
-                </div>
-
-                <!-- Alamat Karyawan -->
-                <div>
-                    <label class="block text-[11px] font-semibold uppercase text-slate-600 tracking-wider mb-1">Alamat Lengkap *</label>
-                    <textarea id="empAddress" required rows="2" placeholder="Jl. Jend. Sudirman No. 45, Jakarta Selatan" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:border-blue-500 focus:outline-none"></textarea>
-                </div>
-
-                <!-- Foto Karyawan -->
-                <div>
-                    <label class="block text-[11px] font-semibold uppercase text-slate-600 tracking-wider mb-1">Foto Karyawan</label>
-                    <div class="flex items-center space-x-4 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <div class="w-12 h-12 rounded-full border border-slate-200 overflow-hidden bg-white flex-shrink-0 flex items-center justify-center">
-                            <img id="photoPreview" src="" alt="Preview" class="w-full h-full object-cover hidden">
-                            <i id="photoPlaceholder" data-lucide="user" class="w-6 h-6 text-slate-400"></i>
-                        </div>
-                        <div class="flex-grow">
-                            <input type="file" id="empPhotoInput" accept="image/*" onchange="previewImage(event)" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300 cursor-pointer">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Modal Actions -->
-                <div class="flex justify-end space-x-3 pt-4 border-t border-slate-200">
-                    <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-semibold transition">
-                        Batal
-                    </button>
-                    <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition">
-                        Simpan Data
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- CUSTOM TOAST MESSAGE -->
-    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 flex items-center space-x-3 translate-y-20 opacity-0 transition-all duration-300 z-50">
-        <i id="toastIcon" data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
-        <span id="toastMsg" class="text-xs font-semibold">Notifikasi</span>
-    </div>
-
-    <!-- JAVASCRIPT APP LOGIC -->
-    <script>
-        // SUPABASE CONFIGURATION
-        const SB_URL = "https://qnamtickoteyvydayyor.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuYW10aWNrb3RleXZ5ZGF5eW9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4OTU2MzksImV4cCI6MjA5MzQ3MTYzOX0.VAeN0JVnz4WNPzY5NTGmtGeHD-Da_qkCvy84ZDYZNHo";
         
-        let _supabase = null;
-        let isSupabaseReady = false;
+        <button id="btn-export-csv" onclick="exportToCSV()" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold px-2.5 py-1.5 rounded transition shadow-sm">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          Export
+        </button>
+      </div>
+    </div>
+  </header>
 
-        // GLOBAL APP STATE
-        let employees = [];
-        let currentView = 'card';
-        let currentCompanyFilter = 'ALL';
-        let base64Photo = '';
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 py-4 space-y-4 flex-grow w-full">
 
-        // Helper untuk membersihkan string agar pencarian/filter tidak sensitif terhadap 'pt', spasi, atau kapitalisasi
-        function cleanString(str) {
-            if (!str) return '';
-            return str.toString()
-                .toLowerCase()
-                .replace(/^pt\.?\s*/i, '') // Hapus kata PT / PT. di depan
-                .replace(/[^a-z0-9]/g, ''); // Hapus spasi dan karakter khusus
+    <!-- ================================================================= -->
+    <!-- TAB 1: DASHBOARD ABSENSI & PERFORMANCE                           -->
+    <!-- ================================================================= -->
+    <div id="tab-attendance-content" class="space-y-3">
+
+      <!-- Control Bar & Filters -->
+      <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- View Mode Switcher -->
+          <div class="flex items-center gap-1.5">
+            <label for="filter-mode" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tipe:</label>
+            <select id="filter-mode" class="bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded p-1.5 font-medium">
+              <option value="day">Per Hari</option>
+              <option value="month">Per Bulan</option>
+            </select>
+          </div>
+
+          <!-- Date Picker -->
+          <div id="date-picker-wrapper" class="flex items-center gap-1.5">
+            <label for="filter-date" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tanggal:</label>
+            <input type="date" id="filter-date" class="bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded p-1.5 font-medium">
+          </div>
+
+          <!-- Month Dropdown -->
+          <div id="month-picker-wrapper" class="hidden flex items-center gap-1.5">
+            <label for="filter-month" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Periode:</label>
+            <select id="filter-month" class="bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded p-1.5 font-medium">
+            </select>
+          </div>
+
+          <!-- Karyawan Filter -->
+          <div class="flex items-center gap-1.5 border-l border-slate-200 pl-3">
+            <label for="filter-user" class="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">Karyawan:</label>
+            <select id="filter-user" class="bg-indigo-50/50 border border-indigo-200 text-indigo-900 text-xs rounded p-1.5 font-semibold focus:ring-1 focus:ring-indigo-500">
+              <option value="ALL">-- Semua Karyawan --</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Live Counter Badge -->
+        <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded">
+          <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+          <span class="text-[11px] text-slate-500 font-medium">Record Tampil:</span>
+          <span id="record-count" class="font-bold text-slate-900 text-xs">0</span>
+        </div>
+      </div>
+
+      <!-- Resume Cards Summary -->
+      <div id="resume-container" class="grid grid-cols-2 md:grid-cols-6 gap-3">
+        <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+          <div class="text-[10px] font-bold text-slate-400 uppercase">Hari Kerja Efektif</div>
+          <div id="stat-workdays" class="text-base font-extrabold text-slate-800 mt-0.5">0 Hari</div>
+          <div class="text-[9px] text-slate-400 mt-0.5">(Tdk tmasuk Minggu & Tgl Merah)</div>
+        </div>
+        <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm border-l-4 border-l-emerald-500">
+          <div class="text-[10px] font-bold text-emerald-600 uppercase">Hadir Normal</div>
+          <div id="stat-ontime" class="text-base font-extrabold text-emerald-700 mt-0.5">0</div>
+          <div class="text-[9px] text-emerald-600/80 mt-0.5">Presensi Tepat Waktu</div>
+        </div>
+        <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm border-l-4 border-l-rose-500">
+          <div class="text-[10px] font-bold text-rose-600 uppercase">Terlambat / Alpha</div>
+          <div id="stat-late" class="text-base font-extrabold text-rose-700 mt-0.5">0</div>
+          <div class="text-[9px] text-rose-600/80 mt-0.5">Potong - 50,000 / hari</div>
+        </div>
+        <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm border-l-4 border-l-amber-500">
+          <div class="text-[10px] font-bold text-amber-600 uppercase">Izin / Sakit / Dinas</div>
+          <div id="stat-permission" class="text-base font-extrabold text-amber-700 mt-0.5">0</div>
+          <div class="text-[9px] text-amber-600/80 mt-0.5">Approve: Normal | Non: Potong - 50,000</div>
+        </div>
+        <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm border-l-4 border-l-indigo-500">
+          <div class="text-[10px] font-bold text-indigo-600 uppercase">Rate Performa</div>
+          <div id="stat-rate" class="text-base font-extrabold text-indigo-700 mt-0.5">0%</div>
+          <div class="text-[9px] text-indigo-600/80 mt-0.5">Kehadiran Netto</div>
+        </div>
+        <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm border-l-4 border-l-teal-500 col-span-2 md:col-span-1">
+          <div class="text-[10px] font-bold text-teal-600 uppercase">Total Nominal / Potongan</div>
+          <div id="stat-allowance" class="text-base font-extrabold text-teal-700 mt-0.5">Rp 0</div>
+          <div class="text-[9px] text-teal-600/80 mt-0.5">Lembur Libur +50rb / Alpha - 50,000</div>
+        </div>
+      </div>
+
+      <!-- Panel Evaluasi Penilaian -->
+      <div id="grade-container" class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div id="grade-badge" class="w-12 h-12 rounded-full bg-slate-100 border-2 border-slate-300 flex items-center justify-center font-black text-xl text-slate-600 shadow-inner">
+            -
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-slate-800 text-xs">Evaluasi Kedisiplinan Karyawan</h3>
+              <span id="grade-label" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 uppercase">Belum Dihitung</span>
+            </div>
+            <p id="grade-desc" class="text-[11px] text-slate-500 mt-0.5">Pilih karyawan tertentu pada dropdown di atas untuk melihat rapor penilaian individu secara mendetail.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 border-t md:border-t-0 md:border-l border-slate-200 pt-2 md:pt-0 md:pl-4 w-full md:w-auto justify-between md:justify-end">
+          <div class="text-right">
+            <div class="text-[10px] font-bold text-slate-400 uppercase">Rasio Ketepatan Waktu</div>
+            <div id="stat-punctuality" class="text-sm font-extrabold text-slate-700">0%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Table Container -->
+      <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-[11px] text-slate-600">
+            <thead class="bg-slate-800 border-b border-slate-700 uppercase text-[10px] font-bold text-slate-200 tracking-wider">
+              <tr>
+                <th scope="col" class="px-3 py-2.5 whitespace-nowrap">Tanggal</th>
+                <th scope="col" class="px-3 py-2.5 whitespace-nowrap">Nama & Jabatan</th>
+                <th scope="col" class="px-3 py-2.5 whitespace-nowrap">Status Karyawan</th>
+                <th scope="col" class="px-3 py-2.5 whitespace-nowrap">Perusahaan</th>
+                <th scope="col" class="px-3 py-2.5 whitespace-nowrap">Lokasi Absen</th>
+                <th scope="col" class="px-3 py-2.5 whitespace-nowrap">Jam Absen</th>
+                <th scope="col" class="px-3 py-2.5 whitespace-nowrap">STATUS (KLIK ALASAN)</th>
+                <th scope="col" class="px-3 py-2.5 whitespace-nowrap text-center">APPROVAL</th>
+                <th scope="col" class="px-3 py-2.5 text-right whitespace-nowrap">POTONGAN / NOMINAL</th>
+                <th scope="col" class="px-3 py-2.5 text-center whitespace-nowrap">Grade Hari Ini</th>
+                <th scope="col" class="px-3 py-2.5 text-center whitespace-nowrap">Foto</th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <tr>
+                <td colspan="11" class="px-4 py-8 text-center text-slate-400">
+                  Memuat data dari Supabase...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 2: MANAJEMEN MASTER KARYAWAN                                 -->
+    <!-- ================================================================= -->
+    <div id="tab-employees-content" class="hidden space-y-4">
+      
+      <!-- Action Toolbar -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col lg:flex-row gap-4 items-center justify-between">
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="setCompanyFilter('ALL')" id="filterBtnALL" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-blue-500 bg-blue-50 text-blue-700">Semua Unit</button>
+          <button onclick="setCompanyFilter('Investama Kalimantan Energi')" id="filterBtnIKE" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-slate-50 text-slate-600">IKAEN</button>
+          <button onclick="setCompanyFilter('Khatulistiwa Sinar Energi')" id="filterBtnKSE" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-slate-50 text-slate-600">KSE</button>
+          <button onclick="setCompanyFilter('Indo Dharma Energi')" id="filterBtnIDE" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-slate-50 text-slate-600">IDE</button>
+        </div>
+
+        <div class="flex items-center gap-3 w-full lg:w-auto">
+          <input type="text" id="empSearchInput" oninput="renderMasterEmployees()" placeholder="Cari nama, jabatan..." class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs w-full lg:w-64 focus:outline-none focus:border-indigo-500">
+          <button onclick="openEmployeeModal()" class="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3.5 py-1.5 rounded-lg text-xs whitespace-nowrap shadow-sm">
+            <i data-lucide="user-plus" class="w-4 h-4"></i> Tambah Karyawan
+          </button>
+        </div>
+      </div>
+
+      <!-- Employee Grid / Cards -->
+      <div id="employeeCardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL FOTO ABSEN -->
+  <div id="photo-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg max-w-sm w-full p-3 shadow-2xl space-y-2 relative">
+      <div class="flex justify-between items-center pb-1.5 border-b border-slate-100">
+        <h3 class="text-xs font-semibold text-slate-800">Bukti Foto Absensi</h3>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-base font-bold">&times;</button>
+      </div>
+      <div class="overflow-hidden rounded bg-slate-100 flex items-center justify-center min-h-[200px]">
+        <img id="modal-img" src="" alt="Bukti Absensi" class="max-h-[60vh] w-auto object-contain">
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DETAIL ALASAN / REASON -->
+  <div id="reason-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full p-5 shadow-2xl space-y-4 relative border border-slate-200">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <span id="reason-modal-badge" class="px-2 py-0.5 rounded text-[10px] font-bold border">STATUS</span>
+          <h3 class="text-xs font-bold text-slate-800">Detail Alasan</h3>
+        </div>
+        <button onclick="closeReasonModal()" class="text-slate-400 hover:text-slate-600 text-base font-bold">&times;</button>
+      </div>
+      
+      <div class="space-y-3">
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Karyawan</label>
+          <p id="reason-modal-user" class="text-xs font-semibold text-slate-800">-</p>
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Keterangan / Alasan</label>
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 text-xs mt-1 leading-relaxed whitespace-pre-wrap min-h-[60px]" id="reason-modal-text">
+            Tidak ada alasan/keterangan tertulis.
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end">
+        <button onclick="closeReasonModal()" class="bg-slate-800 hover:bg-slate-900 text-white font-medium px-4 py-1.5 rounded-lg text-xs transition">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL TAMBAH/EDIT KARYAWAN -->
+  <div id="employeeModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white w-full max-w-md rounded-xl border border-slate-200 shadow-2xl overflow-hidden my-8">
+      <div class="bg-slate-900 px-4 py-3 flex items-center justify-between text-white">
+        <h3 id="modalTitle" class="font-bold text-xs">Form Data Karyawan</h3>
+        <button onclick="closeEmployeeModal()" class="text-slate-400 hover:text-white">&times;</button>
+      </div>
+
+      <form id="employeeForm" onsubmit="handleEmployeeFormSubmit(event)" class="p-4 space-y-3">
+        <input type="hidden" id="empOriginalName">
+
+        <div>
+          <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Perusahaan Unit *</label>
+          <select id="empCompany" required class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-800">
+            <option value="PT. INVESTAMA KALIMANTAN ENERGI">PT. INVESTAMA KALIMANTAN ENERGI</option>
+            <option value="PT. KHATULISTIWA SINAR ENERGI">PT. KHATULISTIWA SINAR ENERGI</option>
+            <option value="PT. INDO DHARMA ENERGI">PT. INDO DHARMA ENERGI</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Nama Lengkap *</label>
+            <input type="text" id="empName" required placeholder="Nama Karyawan" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Jabatan *</label>
+            <input type="text" id="empPosition" required placeholder="Jabatan" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">No Telepon</label>
+            <input type="tel" id="empPhone" placeholder="0812..." class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Status Karyawan</label>
+            <select id="empStatus" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs">
+              <option value="TETAP">TETAP</option>
+              <option value="TRAINING">TRAINING</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+          <button type="button" onclick="closeEmployeeModal()" class="px-3 py-1.5 rounded border border-slate-300 text-xs font-semibold">Batal</button>
+          <button type="submit" class="px-4 py-1.5 rounded bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // SUPABASE CONFIGURATION
+    const SB_URL = "https://qnamtickoteyvydayyor.supabase.co";
+    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuYW10aWNrb3RleXZ5ZGF5eW9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4OTU2MzksImV4cCI6MjA5MzQ3MTYzOX0.VAeN0JVnz4WNPzY5NTGmtGeHD-Da_qkCvy84ZDYZNHo";
+    const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+
+    // APP STATE
+    let masterEmployees = [];
+    let rawAttendanceData = [];
+    let currentFilteredData = [];
+    let nationalHolidays = [];
+    let currentMasterCompanyFilter = 'ALL';
+
+    // INITIALIZATION
+    document.addEventListener("DOMContentLoaded", async () => {
+      setupMonthDropdown();
+      setupEventListeners();
+      
+      const todayStr = new Date().toLocaleDateString('en-CA');
+      document.getElementById("filter-date").value = todayStr;
+
+      await fetchHolidays();
+      await loadMasterEmployees();
+      await fetchAttendances();
+
+      lucide.createIcons();
+    });
+
+    function switchMainTab(tab) {
+      const attTab = document.getElementById("tab-attendance-content");
+      const empTab = document.getElementById("tab-employees-content");
+      const attBtn = document.getElementById("tab-btn-attendance");
+      const empBtn = document.getElementById("tab-btn-employees");
+
+      if (tab === 'attendance') {
+        attTab.classList.remove("hidden");
+        empTab.classList.add("hidden");
+        attBtn.className = "px-3 py-1 rounded text-xs font-semibold bg-indigo-600 text-white transition";
+        empBtn.className = "px-3 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white transition";
+      } else {
+        attTab.classList.add("hidden");
+        empTab.classList.remove("hidden");
+        empBtn.className = "px-3 py-1 rounded text-xs font-semibold bg-indigo-600 text-white transition";
+        attBtn.className = "px-3 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white transition";
+        renderMasterEmployees();
+      }
+    }
+
+    async function fetchHolidays() {
+      try {
+        const year = new Date().getFullYear();
+        const res = await fetch(`https://dayoff-api.vercel.app/api?year=${year}`);
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          nationalHolidays = data.filter(item => item.is_holiday).map(item => item.holiday_date);
         }
+      } catch (err) {
+        console.warn("Gagal memuat tanggal merah:", err);
+      }
+    }
 
-        // Helper untuk memvalidasi dan memformat URL foto dari Supabase
-        function formatPhotoUrl(url) {
-            if (!url || typeof url !== 'string') return '';
-            let cleanedUrl = url.trim();
-            if (!cleanedUrl || cleanedUrl === 'null' || cleanedUrl === 'undefined') return '';
+    function setupMonthDropdown() {
+      const selectMonth = document.getElementById("filter-month");
+      selectMonth.innerHTML = "";
+      const now = new Date();
+      for (let i = 0; i < 12; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const monthName = d.toLocaleString("id-ID", { month: "long" });
+
+        const option = document.createElement("option");
+        option.value = `${year}-${month}`;
+        option.textContent = i === 0 ? `${monthName} ${year} (Bulan Ini)` : `${monthName} ${year}`;
+        selectMonth.appendChild(option);
+      }
+    }
+
+    function setupEventListeners() {
+      document.getElementById("filter-mode").addEventListener("change", (e) => {
+        if (e.target.value === "day") {
+          document.getElementById("date-picker-wrapper").classList.remove("hidden");
+          document.getElementById("month-picker-wrapper").classList.add("hidden");
+        } else {
+          document.getElementById("date-picker-wrapper").classList.add("hidden");
+          document.getElementById("month-picker-wrapper").classList.remove("hidden");
+        }
+        fetchAttendances();
+      });
+
+      document.getElementById("filter-month").addEventListener("change", fetchAttendances);
+      document.getElementById("filter-date").addEventListener("change", fetchAttendances);
+      document.getElementById("filter-user").addEventListener("change", applyFiltersAndGenerateAlpha);
+    }
+
+    function formatPhotoUrl(url) {
+      if (!url || typeof url !== 'string') return '';
+      let cleaned = url.trim();
+      if (!cleaned || cleaned === 'null' || cleaned === 'undefined') return '';
+      if (cleaned.startsWith('data:image') || cleaned.startsWith('http://') || cleaned.startsWith('https://')) return cleaned;
+      if (cleaned.startsWith('/')) return `${SB_URL}/storage/v1/object/public${cleaned}`;
+      return `${SB_URL}/storage/v1/object/public/${cleaned}`;
+    }
+
+    function getInitialsAvatar(name) {
+      const initials = name ? name.replace(/[^a-zA-Z\s]/g, '').trim().split(' ').map(n => n[0]).join('').slice(0, 2) : 'HR';
+      return `https://placehold.co/200x200/e2e8f0/475569?text=${initials.toUpperCase()}`;
+    }
+
+    function getLocalDateString(utcString) {
+      if (!utcString) return '';
+      const d = new Date(utcString);
+      const wibDate = new Date(d.getTime() + (7 * 60 * 60 * 1000));
+      return wibDate.toISOString().split('T')[0];
+    }
+
+    async function loadMasterEmployees() {
+      try {
+        const { data: attData, error: attErr } = await supabaseClient.from("attendances").select("*").order("created_at", { ascending: true });
+        
+        if (!attErr && attData && attData.length > 0) {
+          const map = new Map();
+          attData.forEach(item => {
+            const uName = (item.user_name || item.name || '').trim();
+            if (!uName) return;
+            const key = uName.toLowerCase();
+            const validPhoto = formatPhotoUrl(item.photo_url || item.photo);
             
-            // Jika foto merupakan Base64 atau URL HTTP/HTTPS lengkap
-            if (cleanedUrl.startsWith('data:image') || cleanedUrl.startsWith('http://') || cleanedUrl.startsWith('https://')) {
-                return cleanedUrl;
-            }
-            // Jika foto berupa path relatif storage
-            if (cleanedUrl.startsWith('/')) {
-                return `${SB_URL}/storage/v1/object/public${cleanedUrl}`;
-            }
-            return `${SB_URL}/storage/v1/object/public/${cleanedUrl}`;
-        }
+            const dbStatus = item.status_karyawan || item.status_pegawai || item.employee_status;
+            const defaultStatus = dbStatus ? dbStatus.toUpperCase() : (isTrainingEmployee(uName, item.phone) ? 'TRAINING' : 'TETAP');
 
-        // APPLICATION INIT
-        window.onload = async function() {
-            initSupabase();
-            await loadEmployees();
-            renderData();
-            lucide.createIcons();
-        };
-
-        // INITIALIZE SUPABASE
-        function initSupabase() {
-            try {
-                if (window.supabase) {
-                    _supabase = window.supabase.createClient(SB_URL, SB_KEY);
-                    isSupabaseReady = true;
-                    updateSyncStatus(true, "Supabase Online");
-                } else {
-                    updateSyncStatus(false, "Local Offline Mode");
-                }
-            } catch (err) {
-                console.warn("Supabase Init Warning:", err);
-                updateSyncStatus(false, "Local Offline Mode");
-            }
-        }
-
-        function updateSyncStatus(online, text) {
-            const el = document.getElementById('syncStatus');
-            if (online) {
-                el.className = "inline-flex items-center text-[11px] text-emerald-600 font-medium";
-                el.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>${text}`;
+            if (!map.has(key)) {
+              map.set(key, {
+                id: item.id,
+                name: uName,
+                position: item.position || 'Staff',
+                company: item.company_name || 'PT. INVESTAMA KALIMANTAN ENERGI',
+                phone: item.phone || '',
+                photo: validPhoto,
+                status: defaultStatus
+              });
             } else {
-                el.className = "inline-flex items-center text-[11px] text-amber-600 font-medium";
-                el.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 mr-1.5"></span>${text}`;
+              const prev = map.get(key);
+              map.set(key, {
+                ...prev,
+                position: item.position || prev.position,
+                company: item.company_name || prev.company,
+                phone: item.phone || prev.phone,
+                photo: validPhoto || prev.photo,
+                status: dbStatus ? dbStatus.toUpperCase() : prev.status
+              });
             }
+          });
+          masterEmployees = Array.from(map.values());
+        }
+      } catch (err) {
+        console.error("Gagal load master karyawan:", err);
+      }
+
+      populateUserDropdown();
+    }
+
+    function populateUserDropdown() {
+      const userSelect = document.getElementById("filter-user");
+      const currentVal = userSelect.value;
+      userSelect.innerHTML = `<option value="ALL">-- Semua Karyawan --</option>`;
+
+      masterEmployees.sort((a,b) => a.name.localeCompare(b.name)).forEach(emp => {
+        const opt = document.createElement("option");
+        opt.value = emp.name;
+        opt.textContent = emp.name;
+        userSelect.appendChild(opt);
+      });
+
+      userSelect.value = currentVal || "ALL";
+    }
+
+    async function fetchAttendances() {
+      const tbody = document.getElementById("table-body");
+      tbody.innerHTML = `<tr><td colspan="11" class="px-4 py-8 text-center text-slate-400">Memuat data dari Supabase...</td></tr>`;
+
+      const mode = document.getElementById("filter-mode").value;
+      let query = supabaseClient.from("attendances").select("*").order("created_at", { ascending: false });
+
+      if (mode === "month") {
+        const monthVal = document.getElementById("filter-month").value;
+        const [year, month] = monthVal.split("-");
+        const startDate = `${year}-${month}-01T00:00:00.000Z`;
+        const lastDay = new Date(year, month, 0).getDate();
+        const endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}T23:59:59.999Z`;
+
+        query = query.gte("created_at", startDate).lte("created_at", endDate);
+      } else {
+        const dateVal = document.getElementById("filter-date").value;
+        if (dateVal) {
+          const startQuery = new Date(new Date(`${dateVal}T00:00:00`).getTime() - (7 * 60 * 60 * 1000)).toISOString();
+          const endQuery = new Date(new Date(`${dateVal}T23:59:59`).getTime() + (17 * 60 * 60 * 1000)).toISOString();
+          query = query.gte("created_at", startQuery).lte("created_at", endQuery);
+        }
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        tbody.innerHTML = `<tr><td colspan="11" class="px-4 py-8 text-center text-rose-500 font-medium">Gagal memuat: ${error.message}</td></tr>`;
+        return;
+      }
+
+      rawAttendanceData = data || [];
+      applyFiltersAndGenerateAlpha();
+    }
+
+    function applyFiltersAndGenerateAlpha() {
+      const mode = document.getElementById("filter-mode").value;
+      const selectedUser = document.getElementById("filter-user").value;
+
+      let resultRows = [];
+
+      if (mode === "day") {
+        const dateVal = document.getElementById("filter-date").value;
+        
+        let dailyAttendances = rawAttendanceData.filter(att => {
+          if (!att.created_at) return false;
+          return getLocalDateString(att.created_at) === dateVal;
+        });
+
+        if (selectedUser !== "ALL") {
+          dailyAttendances = dailyAttendances.filter(att => {
+            const attName = (att.user_name || att.name || '').trim().toLowerCase();
+            return attName === selectedUser.trim().toLowerCase();
+          });
         }
 
-        // LOAD EMPLOYEES FROM SUPABASE (attendances table)
-        async function loadEmployees() {
-            if (isSupabaseReady && _supabase) {
-                try {
-                    // Tarik seluruh baris attendances diurutkan dari terlama ke terbaru
-                    const { data, error } = await _supabase.from('attendances').select('*').order('created_at', { ascending: true });
-                    
-                    if (!error && data && data.length > 0) {
-                        const uniqueMap = new Map();
-                        
-                        data.forEach((item, index) => {
-                            // Baca kolom user_name & company_name persis sesuai tabel Supabase
-                            const userName = item.user_name || item.name || '';
-                            if (!userName.trim()) return;
+        dailyAttendances.forEach(att => {
+          const empObj = masterEmployees.find(e => e.name.toLowerCase() === (att.user_name || att.name || '').trim().toLowerCase());
+          resultRows.push({
+            ...att,
+            user_name: empObj ? empObj.name : (att.user_name || att.name),
+            position: empObj ? empObj.position : (att.position || '-'),
+            company_name: empObj ? empObj.company : (att.company_name || '-'),
+            phone: empObj ? empObj.phone : (att.phone || '-'),
+            status_karyawan: empObj ? empObj.status : 'TETAP',
+            photo_url: formatPhotoUrl(att.photo_url || (empObj ? empObj.photo : ''))
+          });
+        });
 
-                            const key = userName.trim().toLowerCase();
-                            const compName = item.company_name || item.cmpany_name || 'PT. INVESTAMA KALIMANTAN ENERGI';
-                            const validPhoto = formatPhotoUrl(item.photo_url || item.photo);
+      } else {
+        const monthVal = document.getElementById("filter-month").value;
+        const [year, month] = monthVal.split("-").map(Number);
+        const now = new Date();
+        let maxDay = new Date(year, month, 0).getDate();
 
-                            if (!uniqueMap.has(key)) {
-                                uniqueMap.set(key, {
-                                    id: item.id ? String(item.id) : 'emp-att-' + index,
-                                    company: compName,
-                                    name: userName.trim(),
-                                    position: item.position || 'Staff',
-                                    phone: item.phone || '-',
-                                    year: item.year || '2022',
-                                    address: item.address || 'Alamat Input Manual',
-                                    photo: validPhoto
-                                });
-                            } else {
-                                // Timpa dengan data paling baru, dan pertahankan foto jika ada foto baru
-                                const prev = uniqueMap.get(key);
-                                uniqueMap.set(key, {
-                                    id: item.id ? String(item.id) : prev.id,
-                                    company: compName || prev.company,
-                                    name: userName.trim(),
-                                    position: item.position || prev.position,
-                                    phone: item.phone || prev.phone,
-                                    year: item.year || prev.year,
-                                    address: item.address || prev.address,
-                                    photo: validPhoto || prev.photo
-                                });
-                            }
-                        });
-
-                        employees = Array.from(uniqueMap.values());
-                        saveLocalBackup();
-                        return;
-                    }
-                } catch(e) {
-                    console.error("Gagal mengambil data dari Supabase:", e);
-                }
-            }
-
-            // Fallback LocalStorage
-            const saved = localStorage.getItem('corporate_employees_exec');
-            if (saved) {
-                try { employees = JSON.parse(saved); } catch(e) { employees = []; }
-            }
+        if (year === now.getFullYear() && month === (now.getMonth() + 1)) {
+          maxDay = Math.min(now.getDate(), maxDay);
         }
 
-        function saveLocalBackup() {
-            localStorage.setItem('corporate_employees_exec', JSON.stringify(employees));
+        let targetUsers = masterEmployees;
+        if (selectedUser !== "ALL") {
+          targetUsers = masterEmployees.filter(e => e.name === selectedUser);
         }
 
-        // SYNC SINGLE EMPLOYEE TO SUPABASE
-        async function syncEmployeeToSupabase(employee) {
-            if (!isSupabaseReady || !_supabase) return;
-            try {
-                const payload = {
-                    company_name: employee.company,
-                    user_name: employee.name,
-                    position: employee.position,
-                    phone: employee.phone,
-                    address: employee.address,
-                    year: employee.year,
-                    photo_url: employee.photo
-                };
-                if (!employee.id.startsWith('emp-att-') && !isNaN(employee.id)) {
-                    payload.id = parseInt(employee.id);
-                }
-                await _supabase.from('attendances').upsert([payload]);
-            } catch(e) {
-                console.error("Supabase Sync Error:", e);
-            }
-        }
+        for (let d = 1; d <= maxDay; d++) {
+          const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          const dateObj = new Date(dateStr);
+          const isSunday = (dateObj.getDay() === 0);
+          const isHoliday = nationalHolidays.includes(dateStr);
 
-        // DELETE FROM SUPABASE
-        async function deleteEmployeeFromSupabase(id) {
-            if (!isSupabaseReady || !_supabase) return;
-            try {
-                let queryId = isNaN(id) ? id : parseInt(id);
-                await _supabase.from('attendances').delete().eq('id', queryId);
-            } catch(e) {
-                console.error("Supabase Delete Error:", e);
-            }
-        }
-
-        // SET FILTER COMPANY TAB
-        function setCompanyFilter(company) {
-            currentCompanyFilter = company;
-            
-            ['ALL', 'IKE', 'KSE', 'IDE'].forEach(type => {
-                const btn = document.getElementById(`filterBtn${type}`);
-                if (!btn) return;
-                
-                if ((type === 'ALL' && company === 'ALL') || 
-                    (type === 'IKE' && company === 'Investama Kalimantan Energi') ||
-                    (type === 'KSE' && company === 'Khatulistiwa Sinar Energi') ||
-                    (type === 'IDE' && company === 'Indo Dharma Energi')) {
-                    btn.className = "px-4 py-2 rounded-xl text-xs font-semibold transition border border-blue-500 bg-blue-50 text-blue-700 shadow-sm";
-                } else {
-                    btn.className = "px-3.5 py-2 rounded-xl text-xs font-semibold transition border border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 flex items-center gap-2";
-                }
+          targetUsers.forEach(emp => {
+            const cleanEmpName = emp.name.trim().toLowerCase().replace(/\s+/g, ' ');
+            const existingAtt = rawAttendanceData.find(att => {
+              const attDate = getLocalDateString(att.created_at);
+              const attName = (att.user_name || att.name || '').trim().toLowerCase().replace(/\s+/g, ' ');
+              return attDate === dateStr && attName === cleanEmpName;
             });
 
-            renderData();
-        }
-
-        // RENDER DATA & STATS
-        function renderData() {
-            const searchInputEl = document.getElementById('searchInput');
-            const searchQuery = searchInputEl ? searchInputEl.value.toLowerCase().trim() : '';
-
-            const filtered = employees.filter(emp => {
-                // Saring company_name secara aman
-                let matchCompany = false;
-                if (currentCompanyFilter === 'ALL') {
-                    matchCompany = true;
-                } else {
-                    const empClean = cleanString(emp.company);
-                    const targetClean = cleanString(currentCompanyFilter);
-                    matchCompany = empClean.includes(targetClean) || targetClean.includes(empClean);
-                }
-
-                const matchSearch = emp.name.toLowerCase().includes(searchQuery) ||
-                                    emp.position.toLowerCase().includes(searchQuery) ||
-                                    emp.phone.toLowerCase().includes(searchQuery);
-                return matchCompany && matchSearch;
-            });
-
-            updateStats();
-
-            const emptyState = document.getElementById('emptyState');
-            if (filtered.length === 0) {
-                emptyState.classList.remove('hidden');
+            if (existingAtt) {
+              resultRows.push({
+                ...existingAtt,
+                user_name: emp.name,
+                position: emp.position || existingAtt.position,
+                company_name: emp.company || existingAtt.company_name,
+                phone: emp.phone || existingAtt.phone,
+                status_karyawan: emp.status,
+                photo_url: formatPhotoUrl(existingAtt.photo_url || emp.photo)
+              });
             } else {
-                emptyState.classList.add('hidden');
+              if (!isSunday && !isHoliday) {
+                resultRows.push({
+                  id: `alpha-${emp.name}-${dateStr}`,
+                  user_name: emp.name,
+                  position: emp.position,
+                  company_name: emp.company,
+                  phone: emp.phone,
+                  status_karyawan: emp.status,
+                  location_name: '-',
+                  check_in_time: '-',
+                  status: 'ALPHA',
+                  reason: 'Tidak melakukan presensi (Alpha)',
+                  is_approved: 'PENDING',
+                  created_at: `${dateStr}T08:00:00.000Z`,
+                  isAlphaGenerated: true,
+                  targetDate: dateStr,
+                  photo_url: emp.photo
+                });
+              }
             }
+          });
+        }
+      }
 
-            if (currentView === 'card') {
-                renderCardView(filtered);
-            } else {
-                renderTableView(filtered);
-            }
+      resultRows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      currentFilteredData = resultRows;
 
-            lucide.createIcons();
+      renderTable(currentFilteredData);
+      calculatePerformanceResume(currentFilteredData);
+    }
+
+    function isTrainingEmployee(name, phone) {
+      const cleanName = (name || "").toUpperCase();
+      const cleanPhone = (phone || "").trim();
+      return cleanName.includes("WAHYUDI") || cleanPhone === "085392181645";
+    }
+
+    // Fungsi Toggle Approval yang mendukung baris Alpha untuk dimasukkan sebagai Tugas Luar
+    async function toggleApproval(recordId, currentlyApproved, isAlphaGen, employeeName, targetDate) {
+      // Jika baris Alpha di-approve, buatkan record baru di tabel attendances sebagai "TUGAS LUAR"
+      if (isAlphaGen) {
+        if (!currentlyApproved) {
+          const confirmLuar = confirm(`Setujui ${employeeName} sebagai Tugas Luar pada tanggal ${targetDate}?`);
+          if (!confirmLuar) return;
+
+          const { error } = await supabaseClient
+            .from("attendances")
+            .insert([{
+              user_name: employeeName,
+              status: 'TUGAS LUAR',
+              reason: 'Disetujui sebagai Tugas Luar oleh Admin',
+              is_approved: 'APPROVED',
+              location_name: 'Luar Kantor / Lapangan',
+              check_in_time: '-',
+              created_at: `${targetDate}T08:00:00.000Z`
+            }]);
+
+          if (error) {
+            alert("Gagal menyimpan tugas luar: " + error.message);
+          } else {
+            await fetchAttendances();
+          }
+        }
+        return;
+      }
+
+      // Untuk data absensi biasa di database
+      const newStatus = currentlyApproved ? "PENDING" : "APPROVED";
+
+      const { error } = await supabaseClient
+        .from("attendances")
+        .update({ is_approved: newStatus })
+        .eq('id', recordId);
+
+      if (error) {
+        alert("Gagal mengubah status approval: " + error.message);
+      } else {
+        await fetchAttendances();
+      }
+    }
+
+    function calculateDailyAllowance(item) {
+      const name = item.user_name || "";
+      const phone = item.phone || "";
+      const statusText = (item.status || "HADIR").toUpperCase();
+      
+      const valApp = String(item.is_approved || "").trim().toUpperCase();
+      const isApproved = (valApp === "APPROVED" || valApp === "TRUE" || valApp === "1");
+      
+      const empObj = masterEmployees.find(e => e.name.toLowerCase() === name.toLowerCase());
+      const isTraining = item.status_karyawan === 'TRAINING' || (empObj ? empObj.status === 'TRAINING' : isTrainingEmployee(name, phone));
+
+      const dateObj = item.created_at ? new Date(item.created_at) : null;
+      let isHoliday = false;
+
+      if (dateObj) {
+        const dayOfWeek = dateObj.getDay();
+        const formattedDate = dateObj.toISOString().split('T')[0];
+        if (dayOfWeek === 0 || nationalHolidays.includes(formattedDate)) {
+          isHoliday = true;
+        }
+      }
+
+      const isLate = statusText.includes("TERLAMBAT") || statusText.includes("LATE");
+      const isPermission = statusText.includes("IZIN") || statusText.includes("SAKIT") || statusText.includes("DINAS") || statusText.includes("TUGAS LUAR");
+      const isAlpha = (statusText.includes("ALPHA") || !item.check_in_time || item.check_in_time === '-') && !statusText.includes("TUGAS LUAR");
+
+      if (isHoliday && !isAlpha) return 50000;
+
+      // Jika sudah di-approve atau status Tugas Luar, bebas potongan (0)
+      if (isApproved || statusText.includes("TUGAS LUAR")) return 0;
+
+      if (isTraining) {
+        if (isLate || isAlpha || isPermission) return 0;
+        return 25000;
+      } else {
+        if (isLate || isPermission || isAlpha) {
+          return -50000;
+        }
+        return 0;
+      }
+    }
+
+    function calculatePerformanceResume(data) {
+      let effectiveWorkdays = 0;
+      const mode = document.getElementById("filter-mode").value;
+
+      if (mode === "day") {
+        effectiveWorkdays = 1;
+      } else {
+        const monthVal = document.getElementById("filter-month").value;
+        const [year, month] = monthVal.split("-").map(Number);
+        const now = new Date();
+        let maxD = new Date(year, month, 0).getDate();
+        if (year === now.getFullYear() && month === (now.getMonth() + 1)) {
+          maxD = Math.min(now.getDate(), maxD);
+        }
+        for (let d = 1; d <= maxD; d++) {
+          const dObj = new Date(year, month - 1, d);
+          const fStr = dObj.toISOString().split('T')[0];
+          if (dObj.getDay() !== 0 && !nationalHolidays.includes(fStr)) {
+            effectiveWorkdays++;
+          }
+        }
+      }
+
+      let onTimeCount = 0;
+      let lateCount = 0;
+      let permissionCount = 0;
+      let totalAllowance = 0;
+
+      data.forEach(item => {
+        const st = (item.status || "HADIR").toUpperCase();
+        const isAlpha = (st.includes("ALPHA") || !item.check_in_time || item.check_in_time === '-') && !st.includes("TUGAS LUAR");
+
+        if (isAlpha || st.includes("TERLAMBAT") || st.includes("LATE")) {
+          lateCount++;
+        } else if (st.includes("IZIN") || st.includes("SAKIT") || st.includes("DINAS") || st.includes("TUGAS LUAR")) {
+          permissionCount++;
+        } else {
+          onTimeCount++;
         }
 
-        // UPDATE DASHBOARD STATS
-        function updateStats() {
-            document.getElementById('statTotal').innerText = employees.length;
-            document.getElementById('statIKE').innerText = employees.filter(e => cleanString(e.company).includes('investama') || cleanString(e.company).includes('kalimantan')).length;
-            document.getElementById('statKSE').innerText = employees.filter(e => cleanString(e.company).includes('khatulistiwa')).length;
-            document.getElementById('statIDE').innerText = employees.filter(e => cleanString(e.company).includes('indodharma')).length;
+        totalAllowance += calculateDailyAllowance(item);
+      });
+
+      const rate = effectiveWorkdays > 0 ? Math.round((onTimeCount / (effectiveWorkdays * (masterEmployees.length || 1))) * 100) : 0;
+      const punctualityRate = (onTimeCount + lateCount) > 0 ? Math.round((onTimeCount / (onTimeCount + lateCount)) * 100) : 0;
+
+      document.getElementById("stat-workdays").textContent = `${effectiveWorkdays} Hari`;
+      document.getElementById("stat-ontime").textContent = onTimeCount;
+      document.getElementById("stat-late").textContent = lateCount;
+      document.getElementById("stat-permission").textContent = permissionCount;
+      document.getElementById("stat-rate").textContent = `${Math.min(Math.max(rate, 0), 100)}%`;
+      document.getElementById("stat-punctuality").textContent = `${punctualityRate}%`;
+
+      const totalText = totalAllowance < 0 ? `- 50,000` : `+Rp ${totalAllowance.toLocaleString('id-ID')}`;
+      document.getElementById("stat-allowance").textContent = totalText;
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById("table-body");
+      document.getElementById("record-count").textContent = data.length;
+
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="px-4 py-8 text-center text-slate-400">Tidak ada record absensi pada tanggal ini.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.map((item) => {
+        const dateObj = item.created_at ? new Date(item.created_at) : null;
+        const formattedDate = dateObj ? new Date(dateObj.getTime() + (7 * 60 * 60 * 1000)).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+
+        const empObj = masterEmployees.find(e => e.name.toLowerCase() === (item.user_name || '').toLowerCase());
+        const empStatus = item.status_karyawan || (empObj ? empObj.status : 'TETAP');
+        const isTraining = empStatus === 'TRAINING';
+
+        const employeeCategoryBadge = isTraining
+          ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-100 text-purple-700 border border-purple-200">TRAINING</span>`
+          : `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 text-blue-700 border border-blue-200">TETAP</span>`;
+
+        const statusText = (item.status || "HADIR").toUpperCase();
+        const isAlpha = (statusText.includes("ALPHA") || item.isAlphaGenerated || !item.check_in_time || item.check_in_time === '-') && !statusText.includes("TUGAS LUAR");
+        const isLate = statusText.includes("TERLAMBAT") || statusText.includes("LATE");
+        const isPermission = statusText.includes("IZIN") || statusText.includes("SAKIT") || statusText.includes("DINAS");
+        const isTugasLuar = statusText.includes("TUGAS LUAR");
+        
+        const valApp = String(item.is_approved || "").trim().toUpperCase();
+        const isApproved = (valApp === "APPROVED" || valApp === "TRUE" || valApp === "1" || isTugasLuar);
+
+        let statusBadgeClass = "bg-emerald-50 text-emerald-600 border-emerald-200 font-bold";
+        let shortStatusText = "TEPAT WAKTU";
+
+        if (isAlpha) {
+          statusBadgeClass = "bg-rose-50 text-rose-600 border-rose-200 font-bold";
+          shortStatusText = "ALPHA (TIDAK ABSEN)";
+        } else if (isLate) {
+          statusBadgeClass = "bg-rose-50 text-rose-600 border-rose-200 font-bold";
+          shortStatusText = "TERLAMBAT";
+        } else if (isPermission) {
+          statusBadgeClass = "bg-sky-50 text-sky-600 border-sky-200 font-bold";
+          shortStatusText = statusText;
+        } else if (isTugasLuar) {
+          statusBadgeClass = "bg-teal-50 text-teal-700 border-teal-200 font-bold";
+          shortStatusText = "TUGAS LUAR";
         }
 
-        // LOGO COMPANY HELPER
-        function getCompanyLogo(company) {
-            const cleaned = cleanString(company);
-            if (cleaned.includes('investama') || cleaned.includes('kalimantan')) return 'ikaen.png';
-            if (cleaned.includes('khatulistiwa')) return 'header1.png';
-            if (cleaned.includes('indodharma')) return 'ide1.png';
-            return '';
+        const reasonText = item.reason ? `<div class="text-[10px] text-slate-500 italic mt-0.5">"${item.reason}"</div>` : '';
+
+        // Render Tombol Approval (Alpha sekarang bisa diklik untuk di-approve menjadi Tugas Luar)
+        let approvalButton = `<span class="text-slate-400 font-medium">-</span>`;
+
+        if (isLate || isPermission || isAlpha || isTugasLuar) {
+          if (isApproved) {
+            approvalButton = `<span onclick="toggleApproval('${item.id}', true, ${!!item.isAlphaGenerated}, '${item.user_name}', '${item.targetDate || getLocalDateString(item.created_at)}')" class="cursor-pointer inline-block px-3 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300 font-semibold text-[11px] shadow-sm" title="Klik untuk ubah status">Approved</span>`;
+          } else {
+            approvalButton = `<button onclick="toggleApproval('${item.id}', false, ${!!item.isAlphaGenerated}, '${item.user_name}', '${item.targetDate || getLocalDateString(item.created_at)}')" class="px-3 py-0.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-300 text-[11px] font-medium transition" title="Klik untuk approve sebagai Tugas Luar">Pending</button>`;
+          }
         }
 
-        // RENDER CARD VIEW
-        function renderCardView(data) {
-            const container = document.getElementById('cardViewContainer');
-            container.innerHTML = '';
+        const allowance = calculateDailyAllowance(item);
+        let allowanceBadge = allowance < 0 
+          ? `<span class="font-bold text-rose-600 text-sm">- 50,000</span>`
+          : `<span class="px-2 py-0.5 rounded border border-slate-200 bg-slate-50 text-slate-600 font-semibold text-[11px]">Rp 0 (Aman)</span>`;
 
-            data.forEach(emp => {
-                const logoSrc = getCompanyLogo(emp.company);
-                const photoSrc = emp.photo ? emp.photo : getInitialsAvatar(emp.name);
+        return `
+          <tr class="border-t border-slate-200 hover:bg-slate-50 transition">
+            <td class="px-3 py-2 font-semibold text-slate-700 whitespace-nowrap">${formattedDate}</td>
+            <td class="px-3 py-2">
+              <div class="font-bold text-slate-900">${item.user_name || '-'}</div>
+              <div class="text-[10px] text-slate-500">${item.position || '-'}</div>
+            </td>
+            <td class="px-3 py-2 whitespace-nowrap">${employeeCategoryBadge}</td>
+            <td class="px-3 py-2 text-slate-700 font-medium">${item.company_name || '-'}</td>
+            <td class="px-3 py-2 text-slate-600">${item.location_name || '-'}</td>
+            <td class="px-3 py-2 whitespace-nowrap font-medium">${item.check_in_time || '-'} WIB</td>
+            <td class="px-3 py-2 whitespace-nowrap">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] border ${statusBadgeClass}">
+                ${shortStatusText}
+              </span>
+              ${reasonText}
+            </td>
+            <td class="px-3 py-2 text-center">${approvalButton}</td>
+            <td class="px-3 py-2 text-right font-mono">${allowanceBadge}</td>
+            <td class="px-3 py-2 text-center">${isAlpha ? '<span class="text-rose-600 font-bold">- 50,000</span>' : 'Normal'}</td>
+            <td class="px-3 py-2 text-center">
+              ${item.photo_url ? `<button onclick="openModal('${item.photo_url}')" class="text-indigo-600 underline">Foto</button>` : '-'}
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
 
-                const cardHtml = `
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col group relative text-slate-800">
-                        
-                        <!-- Top Banner with Logo & Company Name -->
-                        <div class="bg-slate-50 px-5 py-3 border-b border-slate-200 flex justify-between items-center">
-                            <div class="flex items-center space-x-2 overflow-hidden">
-                                <img src="${logoSrc}" alt="Logo" class="h-5 object-contain max-w-[90px]" onerror="this.style.display='none'">
-                                <span class="text-xs font-bold text-slate-700 tracking-wide truncate">${emp.company}</span>
-                            </div>
-                            <span class="text-[10px] font-mono text-slate-500 bg-slate-200/60 px-2 py-0.5 rounded-full flex-shrink-0">ID: ${String(emp.id).slice(-4)}</span>
-                        </div>
+    function renderMasterEmployees() {
+      const grid = document.getElementById("employeeCardGrid");
+      grid.innerHTML = "";
 
-                        <!-- Card Profile Content -->
-                        <div class="p-6 flex-grow flex flex-col items-center text-center">
-                            <div class="relative mb-4">
-                                <img src="${photoSrc}" alt="${emp.name}" 
-                                     onerror="this.onerror=null; this.src='${getInitialsAvatar(emp.name)}';"
-                                     class="w-20 h-20 rounded-full object-cover border border-slate-200 shadow-sm ring-4 ring-slate-50">
-                                <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></span>
-                            </div>
+      const query = document.getElementById("empSearchInput").value.toLowerCase();
+      const filtered = masterEmployees.filter(emp => {
+        const matchComp = currentMasterCompanyFilter === 'ALL' || emp.company.includes(currentMasterCompanyFilter);
+        const matchQuery = emp.name.toLowerCase().includes(query) || emp.position.toLowerCase().includes(query);
+        return matchComp && matchQuery;
+      });
 
-                            <h3 class="font-bold text-slate-900 text-base group-hover:text-blue-600 transition-colors">${emp.name}</h3>
-                            <p class="text-xs font-medium text-slate-500 mt-1 mb-4">${emp.position}</p>
+      filtered.forEach(emp => {
+        const photoSrc = emp.photo ? emp.photo : getInitialsAvatar(emp.name);
+        const isTraining = emp.status === 'TRAINING';
+        const badgeClass = isTraining ? 'bg-purple-50 text-purple-600 border-purple-200' : 'bg-blue-50 text-blue-600 border-blue-200';
 
-                            <!-- Info Section -->
-                            <div class="w-full bg-slate-50 rounded-xl p-3.5 border border-slate-200 space-y-2 text-xs text-left mb-2">
-                                <div class="flex items-center text-slate-700">
-                                    <i data-lucide="phone" class="w-3.5 h-3.5 mr-2.5 text-blue-600 flex-shrink-0"></i>
-                                    <span class="truncate">${emp.phone}</span>
-                                </div>
-                                <div class="flex items-start text-slate-700">
-                                    <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-2.5 text-blue-600 flex-shrink-0 mt-0.5"></i>
-                                    <span class="line-clamp-2 text-[11px] text-slate-500">${emp.address}</span>
-                                </div>
-                                <div class="flex items-center text-slate-700">
-                                    <i data-lucide="calendar" class="w-3.5 h-3.5 mr-2.5 text-blue-600 flex-shrink-0"></i>
-                                    <span class="text-slate-500">Tahun Masuk: <strong class="text-slate-800">${emp.year}</strong></span>
-                                </div>
-                            </div>
-                        </div>
+        grid.innerHTML += `
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-start mb-3">
+                <img src="${photoSrc}" alt="${emp.name}" onerror="this.src='${getInitialsAvatar(emp.name)}'" class="w-12 h-12 rounded-full object-cover border border-slate-200 shadow-sm">
+                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded border ${badgeClass}">${emp.status}</span>
+              </div>
+              <span class="text-[9px] font-bold px-2 py-0.5 bg-slate-100 text-slate-600 rounded">${emp.company}</span>
+              <h4 class="font-bold text-slate-900 text-sm mt-2">${emp.name}</h4>
+              <p class="text-xs text-slate-500">${emp.position}</p>
+              <p class="text-xs text-slate-400 mt-2">📞 ${emp.phone || '-'}</p>
+            </div>
+            <div class="mt-4 pt-2 border-t border-slate-100 flex justify-end gap-2">
+              <button onclick="openEmployeeModal('${emp.id}')" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800">Edit</button>
+            </div>
+          </div>
+        `;
+      });
+    }
 
-                        <!-- Footer Action Buttons -->
-                        <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end space-x-2">
-                            <button onclick="openModal('${emp.id}')" class="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit Data">
-                                <i data-lucide="edit-3" class="w-4 h-4"></i>
-                            </button>
-                            <button onclick="deleteEmployee('${emp.id}')" class="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Hapus Karyawan">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                container.innerHTML += cardHtml;
-            });
+    function setCompanyFilter(company) {
+      currentMasterCompanyFilter = company;
+      renderMasterEmployees();
+    }
+
+    function openEmployeeModal(id = null) {
+      const form = document.getElementById("employeeForm");
+      form.reset();
+      document.getElementById("empOriginalName").value = "";
+
+      if (id) {
+        const emp = masterEmployees.find(e => String(e.id) === String(id));
+        if (emp) {
+          document.getElementById("empOriginalName").value = emp.name;
+          document.getElementById("empCompany").value = emp.company;
+          document.getElementById("empName").value = emp.name;
+          document.getElementById("empPosition").value = emp.position;
+          document.getElementById("empPhone").value = emp.phone;
+          document.getElementById("empStatus").value = emp.status || "TETAP";
         }
+      }
 
-        // RENDER TABLE VIEW
-        function renderTableView(data) {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
+      document.getElementById("employeeModal").classList.remove("hidden");
+    }
 
-            data.forEach(emp => {
-                const logoSrc = getCompanyLogo(emp.company);
-                const photoSrc = emp.photo ? emp.photo : getInitialsAvatar(emp.name);
+    function closeEmployeeModal() {
+      document.getElementById("employeeModal").classList.add("hidden");
+    }
 
-                const trHtml = `
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="py-3.5 px-6">
-                            <div class="flex items-center space-x-3">
-                                <img src="${photoSrc}" alt="${emp.name}" 
-                                     onerror="this.onerror=null; this.src='${getInitialsAvatar(emp.name)}';"
-                                     class="w-9 h-9 rounded-full object-cover border border-slate-200">
-                                <div>
-                                    <p class="font-bold text-slate-900">${emp.name}</p>
-                                    <p class="text-[10px] text-slate-400 font-mono">ID: ${String(emp.id).slice(-4)}</p>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="py-3.5 px-6">
-                            <div class="flex items-center space-x-2">
-                                <img src="${logoSrc}" alt="Logo" class="h-4 object-contain" onerror="this.style.display='none'">
-                                <span class="text-xs font-semibold text-slate-700">${emp.company}</span>
-                            </div>
-                        </td>
-                        <td class="py-3.5 px-6 font-medium text-slate-700">
-                            ${emp.position}
-                        </td>
-                        <td class="py-3.5 px-6">
-                            <p class="text-xs text-slate-700 flex items-center gap-1.5"><i data-lucide="phone" class="w-3 h-3 text-blue-600"></i> ${emp.phone}</p>
-                            <p class="text-[11px] text-slate-400 truncate max-w-xs mt-0.5">${emp.address}</p>
-                        </td>
-                        <td class="py-3.5 px-6 text-center font-bold text-slate-700">
-                            ${emp.year}
-                        </td>
-                        <td class="py-3.5 px-6 text-right space-x-1">
-                            <button onclick="openModal('${emp.id}')" class="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
-                                <i data-lucide="edit-3" class="w-4 h-4"></i>
-                            </button>
-                            <button onclick="deleteEmployee('${emp.id}')" class="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                tbody.innerHTML += trHtml;
-            });
-        }
+    async function handleEmployeeFormSubmit(e) {
+      e.preventDefault();
+      const originalName = document.getElementById("empOriginalName").value;
+      const newName = document.getElementById("empName").value.trim();
+      const newCompany = document.getElementById("empCompany").value;
+      const newPosition = document.getElementById("empPosition").value;
+      const newPhone = document.getElementById("empPhone").value;
+      const newStatus = document.getElementById("empStatus").value;
 
-        // SWITCH VIEW MODE
-        function switchView(view) {
-            currentView = view;
-            const cardContainer = document.getElementById('cardViewContainer');
-            const tableContainer = document.getElementById('tableViewContainer');
-            const cardBtn = document.getElementById('viewCardBtn');
-            const tableBtn = document.getElementById('viewTableBtn');
+      const targetQueryName = originalName ? originalName : newName;
 
-            if (view === 'card') {
-                cardContainer.classList.remove('hidden');
-                tableContainer.classList.add('hidden');
-                cardBtn.className = "flex-1 sm:flex-none flex items-center justify-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition bg-white text-blue-600 shadow-sm border border-slate-200";
-                tableBtn.className = "flex-1 sm:flex-none flex items-center justify-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition";
-            } else {
-                cardContainer.classList.add('hidden');
-                tableContainer.classList.remove('hidden');
-                tableBtn.className = "flex-1 sm:flex-none flex items-center justify-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition bg-white text-blue-600 shadow-sm border border-slate-200";
-                cardBtn.className = "flex-1 sm:flex-none flex items-center justify-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition";
-            }
-            renderData();
-        }
+      const { error } = await supabaseClient
+        .from("attendances")
+        .update({
+          company_name: newCompany,
+          user_name: newName,
+          position: newPosition,
+          phone: newPhone,
+          status_karyawan: newStatus
+        })
+        .ilike('user_name', targetQueryName);
 
-        function getInitialsAvatar(name) {
-            const initials = name ? name.replace(/[^a-zA-Z\s]/g, '').trim().split(' ').map(n => n[0]).join('').slice(0, 2) : 'HR';
-            return `https://placehold.co/200x200/e2e8f0/475569?text=${initials.toUpperCase()}`;
-        }
+      if (error) {
+        console.error("Gagal mengupdate database:", error);
+        alert("Gagal memperbarui data karyawan: " + error.message);
+      } else {
+        await loadMasterEmployees();
+        closeEmployeeModal();
+        fetchAttendances();
+      }
+    }
 
-        // MODAL HANDLERS
-        function openModal(id = null) {
-            const modal = document.getElementById('employeeModal');
-            const form = document.getElementById('employeeForm');
-            const modalTitle = document.getElementById('modalTitle');
-            
-            form.reset();
-            base64Photo = '';
-            document.getElementById('photoPreview').classList.add('hidden');
-            document.getElementById('photoPlaceholder').classList.remove('hidden');
+    function openModal(url) {
+      document.getElementById("modal-img").src = url;
+      document.getElementById("photo-modal").classList.remove("hidden");
+    }
 
-            if (id) {
-                const emp = employees.find(e => String(e.id) === String(id));
-                if (emp) {
-                    document.getElementById('empId').value = emp.id;
-                    document.getElementById('empCompany').value = emp.company;
-                    document.getElementById('empName').value = emp.name;
-                    document.getElementById('empPosition').value = emp.position;
-                    document.getElementById('empPhone').value = emp.phone;
-                    document.getElementById('empYear').value = emp.year;
-                    document.getElementById('empAddress').value = emp.address;
-                    
-                    if (emp.photo) {
-                        base64Photo = emp.photo;
-                        document.getElementById('photoPreview').src = emp.photo;
-                        document.getElementById('photoPreview').classList.remove('hidden');
-                        document.getElementById('photoPlaceholder').classList.add('hidden');
-                    }
-                    modalTitle.innerText = "Edit Data Karyawan";
-                }
-            } else {
-                document.getElementById('empId').value = '';
-                modalTitle.innerText = "Tambah Karyawan Baru";
-            }
+    function closeModal() {
+      document.getElementById("photo-modal").classList.add("hidden");
+    }
 
-            modal.classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('employeeModal').classList.add('hidden');
-        }
-
-        function previewImage(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    base64Photo = e.target.result;
-                    const preview = document.getElementById('photoPreview');
-                    preview.src = base64Photo;
-                    preview.classList.remove('hidden');
-                    document.getElementById('photoPlaceholder').classList.add('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        // SAVE / SUBMIT FORM
-        async function handleFormSubmit(event) {
-            event.preventDefault();
-
-            const id = document.getElementById('empId').value;
-            const newEmp = {
-                id: id ? id : 'emp-' + Date.now(),
-                company: document.getElementById('empCompany').value,
-                name: document.getElementById('empName').value,
-                position: document.getElementById('empPosition').value,
-                phone: document.getElementById('empPhone').value,
-                year: document.getElementById('empYear').value,
-                address: document.getElementById('empAddress').value,
-                photo: base64Photo || (id ? (employees.find(e => String(e.id) === String(id))?.photo || '') : '')
-            };
-
-            if (id) {
-                const index = employees.findIndex(e => String(e.id) === String(id));
-                if (index !== -1) employees[index] = newEmp;
-                showToast("Data karyawan berhasil diperbarui");
-            } else {
-                employees.unshift(newEmp);
-                showToast("Karyawan baru berhasil ditambahkan");
-            }
-
-            saveLocalBackup();
-            await syncEmployeeToSupabase(newEmp);
-            renderData();
-            closeModal();
-        }
-
-        // DELETE EMPLOYEE
-        async function deleteEmployee(id) {
-            const emp = employees.find(e => String(e.id) === String(id));
-            if (emp && confirm(`Apakah Anda yakin ingin menghapus data karyawan "${emp.name}"?`)) {
-                employees = employees.filter(e => String(e.id) !== String(id));
-                saveLocalBackup();
-                await deleteEmployeeFromSupabase(id);
-                renderData();
-                showToast("Data karyawan telah dihapus");
-            }
-        }
-
-        // EXPORT JSON
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(employees, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `Data_Karyawan_${new Date().toISOString().slice(0,10)}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-            showToast("Data berhasil di-export ke JSON");
-        }
-
-        // IMPORT JSON
-        function importData(event) {
-            const fileReader = new FileReader();
-            fileReader.onload = async function(e) {
-                try {
-                    const imported = JSON.parse(e.target.result);
-                    if (Array.isArray(imported)) {
-                        employees = imported;
-                        saveLocalBackup();
-                        for (let emp of employees) {
-                            await syncEmployeeToSupabase(emp);
-                        }
-                        renderData();
-                        showToast("Data karyawan berhasil di-import!");
-                    } else {
-                        showToast("Format JSON tidak valid!", "error");
-                    }
-                } catch(err) {
-                    showToast("Gagal membaca file JSON!", "error");
-                }
-            };
-            if(event.target.files[0]) {
-                fileReader.readAsText(event.target.files[0]);
-            }
-        }
-
-        // TOAST NOTIFICATION
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toastMsg');
-            const toastIcon = document.getElementById('toastIcon');
-
-            toastMsg.innerText = message;
-            if (type === 'error') {
-                toastIcon.setAttribute('data-lucide', 'alert-circle');
-                toastIcon.className = "w-5 h-5 text-red-400";
-            } else {
-                toastIcon.setAttribute('data-lucide', 'check-circle');
-                toastIcon.className = "w-5 h-5 text-emerald-400";
-            }
-            lucide.createIcons();
-
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
-    </script>
+    function exportToCSV() {
+      if (!currentFilteredData || currentFilteredData.length === 0) return alert("Tidak ada data.");
+      const headers = ["Tanggal", "Nama", "Jabatan", "Perusahaan", "Status", "Potongan"];
+      const rows = currentFilteredData.map(i => [
+        `"${i.created_at ? getLocalDateString(i.created_at) : ''}"`,
+        `"${i.user_name || ''}"`,
+        `"${i.position || ''}"`,
+        `"${i.company_name || ''}"`,
+        `"${i.status || ''}"`,
+        `"${calculateDailyAllowance(i)}"`
+      ]);
+      const csv = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+      const link = document.createElement("a");
+      link.href = encodeURI(csv);
+      link.download = `Report_Absensi_${new Date().toLocaleDateString('en-CA')}.csv`;
+      link.click();
+    }
+  </script>
 </body>
 </html>
