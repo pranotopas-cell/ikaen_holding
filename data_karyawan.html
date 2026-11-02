@@ -313,8 +313,8 @@
             <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Status Karyawan</label>
             <select id="empStatus" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs">
               <option value="KARYAWAN TETAP">KARYAWAN TETAP</option>
-              <option value="MASIH RAINING">MASIH TRAINING</option>
-               <option value="EVALUASI KERJA">EVALUASI KERJA</option>
+              <option value="MASIH TRAINING">MASIH TRAINING</option>
+              <option value="EVALUASI KERJA">EVALUASI KERJA</option>
             </select>
           </div>
         </div>
@@ -464,7 +464,7 @@
             const validPhoto = formatPhotoUrl(item.photo_url || item.photo);
             
             const dbStatus = item.status_karyawan || item.status_pegawai || item.employee_status;
-            const defaultStatus = dbStatus ? dbStatus.toUpperCase() : (isTrainingEmployee(uName, item.phone) ? 'EVALUASI KERJA' : 'MASIH TRAINING' : 'KARYAWAN TETAP');
+            const defaultStatus = dbStatus ? dbStatus.toUpperCase() : (isTrainingEmployee(uName, item.phone) ? 'MASIH TRAINING' : 'KARYAWAN TETAP');
 
             if (!map.has(key)) {
               map.set(key, {
@@ -576,7 +576,7 @@
             position: empObj ? empObj.position : (att.position || '-'),
             company_name: empObj ? empObj.company : (att.company_name || '-'),
             phone: empObj ? empObj.phone : (att.phone || '-'),
-            status_karyawan: empObj ? empObj.status : 'TETAP',
+            status_karyawan: empObj ? empObj.status : 'KARYAWAN TETAP',
             photo_url: formatPhotoUrl(att.photo_url || (empObj ? empObj.photo : ''))
           });
         });
@@ -709,7 +709,10 @@
       const isApproved = (valApp === "APPROVED" || valApp === "TRUE" || valApp === "1");
       
       const empObj = masterEmployees.find(e => e.name.toLowerCase() === name.toLowerCase());
-      const isTraining = item.status_karyawan === 'TRAINING' || (empObj ? empObj.status === 'TRAINING' : isTrainingEmployee(name, phone));
+      const currentStatus = (item.status_karyawan || (empObj ? empObj.status : '')).toUpperCase();
+      
+      // Kategori Training secara eksplisit, EVALUASI KERJA diperlakukan sama persis dengan KARYAWAN TETAP
+      const isTraining = currentStatus.includes('TRAINING') || isTrainingEmployee(name, phone);
 
       const dateObj = item.created_at ? new Date(item.created_at) : null;
       let isHoliday = false;
@@ -736,6 +739,7 @@
         if (isLate || isAlpha || isPermission) return 0;
         return 25000;
       } else {
+        // Berlaku untuk KARYAWAN TETAP & EVALUASI KERJA
         if (isLate || isPermission || isAlpha) {
           return -50000; // Potongan 50rb per hari pelanggaran/alpha
         }
@@ -820,12 +824,15 @@
         const formattedDate = dateObj ? new Date(dateObj.getTime() + (7 * 60 * 60 * 1000)).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
 
         const empObj = masterEmployees.find(e => e.name.toLowerCase() === (item.user_name || '').toLowerCase());
-        const empStatus = item.status_karyawan || (empObj ? empObj.status : 'TETAP');
-        const isTraining = empStatus === 'TRAINING';
-
-        const employeeCategoryBadge = isTraining
-          ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-100 text-purple-700 border border-purple-200">TRAINING</span>`
-          : `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 text-blue-700 border border-blue-200">TETAP</span>`;
+        const empStatus = (item.status_karyawan || (empObj ? empObj.status : 'KARYAWAN TETAP')).toUpperCase();
+        
+        let employeeCategoryBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 text-blue-700 border border-blue-200">TETAP</span>`;
+        
+        if (empStatus.includes('TRAINING')) {
+          employeeCategoryBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-100 text-purple-700 border border-purple-200">TRAINING</span>`;
+        } else if (empStatus.includes('EVALUASI')) {
+          employeeCategoryBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-200">EVALUASI KERJA</span>`;
+        }
 
         const statusText = (item.status || "HADIR").toUpperCase();
         const isAlpha = (statusText.includes("ALPHA") || item.isAlphaGenerated || !item.check_in_time || item.check_in_time === '-') && !statusText.includes("TUGAS LUAR");
@@ -927,8 +934,14 @@
       filtered.forEach(emp => {
         const logoFile = getCompanyLogo(emp.company);
         const photoSrc = emp.photo ? emp.photo : getInitialsAvatar(emp.name);
-        const isTraining = emp.status === 'TRAINING';
-        const badgeClass = isTraining ? 'bg-purple-50 text-purple-600 border-purple-200' : 'bg-blue-50 text-blue-600 border-blue-200';
+        const empStatus = (emp.status || 'KARYAWAN TETAP').toUpperCase();
+        
+        let badgeClass = 'bg-blue-50 text-blue-600 border-blue-200';
+        if (empStatus.includes('TRAINING')) {
+          badgeClass = 'bg-purple-50 text-purple-600 border-purple-200';
+        } else if (empStatus.includes('EVALUASI')) {
+          badgeClass = 'bg-amber-50 text-amber-800 border-amber-200';
+        }
 
         grid.innerHTML += `
           <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
@@ -997,7 +1010,7 @@
           document.getElementById("empName").value = emp.name;
           document.getElementById("empPosition").value = emp.position;
           document.getElementById("empPhone").value = emp.phone;
-          document.getElementById("empStatus").value = emp.status || "TETAP";
+          document.getElementById("empStatus").value = emp.status || "KARYAWAN TETAP";
         }
       }
 
