@@ -16,32 +16,8 @@
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased min-h-screen text-xs">
 
-  <!-- Modal Password Lock Screen -->
-  <div id="auth-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl max-w-sm w-full p-6 shadow-2xl space-y-4 border border-slate-200">
-      <div class="text-center space-y-1">
-        <div class="inline-flex p-2.5 bg-indigo-50 text-indigo-600 rounded-full mb-2">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-        </div>
-        <h2 class="text-base font-bold text-slate-800">Akses Terkunci</h2>
-        <p class="text-[11px] text-slate-500">Kata Sandi untuk melihat data absensi</p>
-      </div>
-
-      <form id="auth-form" onsubmit="unlockDashboard(event)" class="space-y-3">
-        <div>
-          <input type="password" id="auth-password" placeholder="Masukkan Password" required autofocus
-            class="w-full text-center tracking-widest text-sm bg-slate-50 border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-          <p id="auth-error" class="text-[10px] text-rose-500 font-medium mt-1 text-center hidden">Password salah! Silakan coba lagi.</p>
-        </div>
-        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg text-xs transition">
-          Buka Dashboard
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Dashboard Main Content (Hidden Until Unlocked) -->
-  <div id="dashboard-content" class="hidden">
+  <!-- Dashboard Main Content -->
+  <div id="dashboard-content">
     <!-- Top Header Navigation -->
     <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-md">
       <div class="max-w-7xl mx-auto px-4 h-12 flex items-center justify-between">
@@ -61,9 +37,6 @@
           <button id="btn-export" class="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-semibold px-2.5 py-1 rounded transition shadow-sm">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
             Download
-          </button>
-          <button onclick="lockDashboard()" class="inline-flex items-center gap-1 bg-slate-800 hover:bg-rose-900 text-slate-300 hover:text-rose-200 text-[11px] font-medium px-2 py-1 rounded transition border border-slate-700 ml-2" title="Kunci Kembali">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
           </button>
         </div>
       </div>
@@ -258,8 +231,6 @@
   </div>
 
   <script>
-    const DASHBOARD_PASSWORD = "ikaen2027";
-
     // Supabase Configuration
     const SB_URL = "https://qnamtickoteyvydayyor.supabase.co";
     const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuYW10aWNrb3RleXZ5ZGF5eW9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4OTU2MzksImV4cCI6MjA5MzQ3MTYzOX0.VAeN0JVnz4WNPzY5NTGmtGeHD-Da_qkCvy84ZDYZNHo";
@@ -269,36 +240,14 @@
     let currentFilteredData = [];
     let nationalHolidays = [];
 
-    document.addEventListener("DOMContentLoaded", () => {
-      if (sessionStorage.getItem("dashboard_unlocked") === "true") {
-        showDashboard();
-      }
+    document.addEventListener("DOMContentLoaded", async () => {
+      setupMonthDropdown();
+      setupEventListeners();
+      await fetchHolidays();
+      fetchAttendances();
     });
 
-    function unlockDashboard(e) {
-      e.preventDefault();
-      const inputPass = document.getElementById("auth-password").value;
-      const errorMsg = document.getElementById("auth-error");
-
-      if (inputPass === DASHBOARD_PASSWORD) {
-        sessionStorage.setItem("dashboard_unlocked", "true");
-        errorMsg.classList.add("hidden");
-        showDashboard();
-      } else {
-        errorMsg.classList.remove("hidden");
-      }
-    }
-
-    function lockDashboard() {
-      sessionStorage.removeItem("dashboard_unlocked");
-      document.getElementById("dashboard-content").classList.add("hidden");
-      document.getElementById("auth-modal").classList.remove("hidden");
-      document.getElementById("auth-password").value = "";
-    }
-
     async function showDashboard() {
-      document.getElementById("auth-modal").classList.add("hidden");
-      document.getElementById("dashboard-content").classList.remove("hidden");
       setupMonthDropdown();
       setupEventListeners();
       await fetchHolidays();
@@ -441,8 +390,6 @@
         const currentMonth = now.getMonth() + 1;
         const currentDay = now.getDate();
 
-        // Tentukan batas akhir perulangan: jika bulan yang dipilih adalah bulan berjalan, batasi sampai hari ini. 
-        // Jika bulan yang dipilih adalah bulan lalu, gunakan akhir bulan tersebut secara penuh.
         let maxDayToGenerate = new Date(year, month, 0).getDate();
         if (year === currentYear && month === currentMonth) {
           maxDayToGenerate = Math.min(currentDay, maxDayToGenerate);
