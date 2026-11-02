@@ -24,12 +24,13 @@
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased min-h-screen text-xs flex flex-col">
 
-  <!-- TOP NAVIGATION BAR WITH TABS -->
+  <!-- TOP NAVIGATION BAR WITH TABS & COMPANY LOGO -->
   <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40 shadow-md">
     <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="bg-indigo-600 text-white p-1.5 rounded-lg font-extrabold text-xs">
-          HR
+        <!-- Logo Header Dinamis Berdasarkan Filter/Unit -->
+        <div id="header-logo-container" class="bg-white/10 p-1 rounded-lg border border-slate-700 flex items-center justify-center w-9 h-9 overflow-hidden">
+          <img id="header-company-logo" src="ikaen.png" alt="Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/100x100/1e293b/ffffff?text=HR'">
         </div>
         <div>
           <h1 class="text-sm font-bold leading-tight text-slate-100 flex items-center gap-2">
@@ -202,13 +203,13 @@
     <!-- ================================================================= -->
     <div id="tab-employees-content" class="hidden space-y-4">
       
-      <!-- Action Toolbar -->
+      <!-- Action Toolbar (Tombol Filter Unit Diperbaiki) -->
       <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col lg:flex-row gap-4 items-center justify-between">
         <div class="flex flex-wrap items-center gap-2">
-          <button onclick="setCompanyFilter('ALL')" id="filterBtnALL" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-blue-500 bg-blue-50 text-blue-700">Semua Unit</button>
-          <button onclick="setCompanyFilter('Investama Kalimantan Energi')" id="filterBtnIKE" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-slate-50 text-slate-600">IKAEN</button>
-          <button onclick="setCompanyFilter('Khatulistiwa Sinar Energi')" id="filterBtnKSE" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-slate-50 text-slate-600">KSE</button>
-          <button onclick="setCompanyFilter('Indo Dharma Energi')" id="filterBtnIDE" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-slate-50 text-slate-600">IDE</button>
+          <button onclick="setCompanyFilter('ALL')" id="filterBtnALL" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-blue-500 bg-blue-50 text-blue-700 transition">Semua Unit</button>
+          <button onclick="setCompanyFilter('IKAEN')" id="filterBtnIKE" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 transition">IKAEN</button>
+          <button onclick="setCompanyFilter('KSE')" id="filterBtnKSE" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 transition">KSE</button>
+          <button onclick="setCompanyFilter('IDE')" id="filterBtnIDE" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 transition">IDE</button>
         </div>
 
         <div class="flex items-center gap-3 w-full lg:w-auto">
@@ -441,6 +442,14 @@
       return wibDate.toISOString().split('T')[0];
     }
 
+    function getCompanyLogo(companyName) {
+      const comp = (companyName || "").toUpperCase();
+      if (comp.includes("INVESTAMA") || comp.includes("IKAEN")) return "ikaen.png";
+      if (comp.includes("KHATULISTIWA") || comp.includes("KSE")) return "header1.png";
+      if (comp.includes("INDO DHARMA") || comp.includes("IDE")) return "ide1.png";
+      return "ikaen.png";
+    }
+
     async function loadMasterEmployees() {
       try {
         const { data: attData, error: attErr } = await supabaseClient.from("attendances").select("*").order("created_at", { ascending: true });
@@ -648,9 +657,7 @@
       return cleanName.includes("WAHYUDI") || cleanPhone === "085392181645";
     }
 
-    // Fungsi Toggle Approval yang mendukung baris Alpha untuk dimasukkan sebagai Tugas Luar
     async function toggleApproval(recordId, currentlyApproved, isAlphaGen, employeeName, targetDate) {
-      // Jika baris Alpha di-approve, buatkan record baru di tabel attendances sebagai "TUGAS LUAR"
       if (isAlphaGen) {
         if (!currentlyApproved) {
           const confirmLuar = confirm(`Setujui ${employeeName} sebagai Tugas Luar pada tanggal ${targetDate}?`);
@@ -677,7 +684,6 @@
         return;
       }
 
-      // Untuk data absensi biasa di database
       const newStatus = currentlyApproved ? "PENDING" : "APPROVED";
 
       const { error } = await supabaseClient
@@ -692,6 +698,7 @@
       }
     }
 
+    // Perhitungan Nominal & Potongan (Karyawan Training mendapat tambahan +25.000 saat hadir)
     function calculateDailyAllowance(item) {
       const name = item.user_name || "";
       const phone = item.phone || "";
@@ -720,12 +727,13 @@
 
       if (isHoliday && !isAlpha) return 50000;
 
-      // Jika sudah di-approve atau status Tugas Luar, bebas potongan (0)
-      if (isApproved || statusText.includes("TUGAS LUAR")) return 0;
+      if (isApproved || statusText.includes("TUGAS LUAR")) {
+        return isTraining ? 25000 : 0;
+      }
 
       if (isTraining) {
         if (isLate || isAlpha || isPermission) return 0;
-        return 25000;
+        return 25000; // Tambahan 25.000 untuk training yang hadir
       } else {
         if (isLate || isPermission || isAlpha) {
           return -50000;
@@ -787,7 +795,12 @@
       document.getElementById("stat-rate").textContent = `${Math.min(Math.max(rate, 0), 100)}%`;
       document.getElementById("stat-punctuality").textContent = `${punctualityRate}%`;
 
-      const totalText = totalAllowance < 0 ? `- 50,000` : `+Rp ${totalAllowance.toLocaleString('id-ID')}`;
+      let totalText = `Rp 0`;
+      if (totalAllowance < 0) {
+        totalText = `- 50,000`;
+      } else if (totalAllowance > 0) {
+        totalText = `+Rp ${totalAllowance.toLocaleString('id-ID')}`;
+      }
       document.getElementById("stat-allowance").textContent = totalText;
     }
 
@@ -840,7 +853,6 @@
 
         const reasonText = item.reason ? `<div class="text-[10px] text-slate-500 italic mt-0.5">"${item.reason}"</div>` : '';
 
-        // Render Tombol Approval (Alpha sekarang bisa diklik untuk di-approve menjadi Tugas Luar)
         let approvalButton = `<span class="text-slate-400 font-medium">-</span>`;
 
         if (isLate || isPermission || isAlpha || isTugasLuar) {
@@ -852,9 +864,14 @@
         }
 
         const allowance = calculateDailyAllowance(item);
-        let allowanceBadge = allowance < 0 
-          ? `<span class="font-bold text-rose-600 text-sm">- 50,000</span>`
-          : `<span class="px-2 py-0.5 rounded border border-slate-200 bg-slate-50 text-slate-600 font-semibold text-[11px]">Rp 0 (Aman)</span>`;
+        let allowanceBadge = ``;
+        if (allowance < 0) {
+          allowanceBadge = `<span class="font-bold text-rose-600 text-sm">- 50,000</span>`;
+        } else if (allowance > 0) {
+          allowanceBadge = `<span class="px-2 py-0.5 rounded border border-purple-200 bg-purple-50 text-purple-700 font-semibold text-[11px]">+Rp ${allowance.toLocaleString('id-ID')} (Bonus Training)</span>`;
+        } else {
+          allowanceBadge = `<span class="px-2 py-0.5 rounded border border-slate-200 bg-slate-50 text-slate-600 font-semibold text-[11px]">Rp 0 (Aman)</span>`;
+        }
 
         return `
           <tr class="border-t border-slate-200 hover:bg-slate-50 transition">
@@ -890,12 +907,23 @@
 
       const query = document.getElementById("empSearchInput").value.toLowerCase();
       const filtered = masterEmployees.filter(emp => {
-        const matchComp = currentMasterCompanyFilter === 'ALL' || emp.company.includes(currentMasterCompanyFilter);
+        const comp = (emp.company || "").toUpperCase();
+        let matchComp = true;
+
+        if (currentMasterCompanyFilter === 'IKAEN') {
+          matchComp = comp.includes("INVESTAMA") || comp.includes("IKAEN");
+        } else if (currentMasterCompanyFilter === 'KSE') {
+          matchComp = comp.includes("KHATULISTIWA") || comp.includes("KSE");
+        } else if (currentMasterCompanyFilter === 'IDE') {
+          matchComp = comp.includes("INDO DHARMA") || comp.includes("IDE");
+        }
+
         const matchQuery = emp.name.toLowerCase().includes(query) || emp.position.toLowerCase().includes(query);
         return matchComp && matchQuery;
       });
 
       filtered.forEach(emp => {
+        const logoFile = getCompanyLogo(emp.company);
         const photoSrc = emp.photo ? emp.photo : getInitialsAvatar(emp.name);
         const isTraining = emp.status === 'TRAINING';
         const badgeClass = isTraining ? 'bg-purple-50 text-purple-600 border-purple-200' : 'bg-blue-50 text-blue-600 border-blue-200';
@@ -907,7 +935,10 @@
                 <img src="${photoSrc}" alt="${emp.name}" onerror="this.src='${getInitialsAvatar(emp.name)}'" class="w-12 h-12 rounded-full object-cover border border-slate-200 shadow-sm">
                 <span class="text-[9px] font-bold px-1.5 py-0.5 rounded border ${badgeClass}">${emp.status}</span>
               </div>
-              <span class="text-[9px] font-bold px-2 py-0.5 bg-slate-100 text-slate-600 rounded">${emp.company}</span>
+              <div class="flex items-center gap-2 mb-1">
+                <img src="${logoFile}" alt="Logo" class="w-5 h-5 object-contain" onerror="this.style.display='none'">
+                <span class="text-[9px] font-bold px-2 py-0.5 bg-slate-100 text-slate-600 rounded">${emp.company}</span>
+              </div>
               <h4 class="font-bold text-slate-900 text-sm mt-2">${emp.name}</h4>
               <p class="text-xs text-slate-500">${emp.position}</p>
               <p class="text-xs text-slate-400 mt-2">📞 ${emp.phone || '-'}</p>
@@ -920,8 +951,35 @@
       });
     }
 
+    // Fungsi Filter Unit yang Diperbarui dan Lebih Fleksibel
     function setCompanyFilter(company) {
       currentMasterCompanyFilter = company;
+      
+      const btnAll = document.getElementById("filterBtnALL");
+      const btnIKE = document.getElementById("filterBtnIKE");
+      const btnKSE = document.getElementById("filterBtnKSE");
+      const btnIDE = document.getElementById("filterBtnIDE");
+
+      [btnAll, btnIKE, btnKSE, btnIDE].forEach(btn => {
+        btn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 transition";
+      });
+
+      let logoTarget = "ikaen.png";
+      if (company === 'IKAEN') {
+        btnIKE.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-blue-500 bg-blue-50 text-blue-700 transition";
+        logoTarget = "ikaen.png";
+      } else if (company === 'KSE') {
+        btnKSE.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-blue-500 bg-blue-50 text-blue-700 transition";
+        logoTarget = "header1.png";
+      } else if (company === 'IDE') {
+        btnIDE.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-blue-500 bg-blue-50 text-blue-700 transition";
+        logoTarget = "ide1.png";
+      } else {
+        btnAll.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-blue-500 bg-blue-50 text-blue-700 transition";
+        logoTarget = "ikaen.png";
+      }
+
+      document.getElementById("header-company-logo").src = logoTarget;
       renderMasterEmployees();
     }
 
