@@ -698,7 +698,7 @@
       }
     }
 
-    // Perhitungan Nominal & Potongan (Karyawan Training mendapat tambahan +25.000 saat hadir)
+    // Fungsi Hitung Potongan per Baris
     function calculateDailyAllowance(item) {
       const name = item.user_name || "";
       const phone = item.phone || "";
@@ -733,10 +733,10 @@
 
       if (isTraining) {
         if (isLate || isAlpha || isPermission) return 0;
-        return 25000; // Tambahan 25.000 untuk training yang hadir
+        return 25000;
       } else {
         if (isLate || isPermission || isAlpha) {
-          return -50000;
+          return -50000; // Potongan 50rb per hari pelanggaran/alpha
         }
         return 0;
       }
@@ -795,9 +795,10 @@
       document.getElementById("stat-rate").textContent = `${Math.min(Math.max(rate, 0), 100)}%`;
       document.getElementById("stat-punctuality").textContent = `${punctualityRate}%`;
 
+      // Update Tampilan Total Akumulasi Nominal / Potongan
       let totalText = `Rp 0`;
       if (totalAllowance < 0) {
-        totalText = `- 50,000`;
+        totalText = `-Rp ${Math.abs(totalAllowance).toLocaleString('id-ID')}`;
       } else if (totalAllowance > 0) {
         totalText = `+Rp ${totalAllowance.toLocaleString('id-ID')}`;
       }
@@ -868,7 +869,7 @@
         if (allowance < 0) {
           allowanceBadge = `<span class="font-bold text-rose-600 text-sm">- 50,000</span>`;
         } else if (allowance > 0) {
-          allowanceBadge = `<span class="px-2 py-0.5 rounded border border-purple-200 bg-purple-50 text-purple-700 font-semibold text-[11px]">+Rp ${allowance.toLocaleString('id-ID')} (Bonus Training)</span>`;
+          allowanceBadge = `<span class="px-2 py-0.5 rounded border border-purple-200 bg-purple-50 text-purple-700 font-semibold text-[11px]">+Rp ${allowance.toLocaleString('id-ID')}</span>`;
         } else {
           allowanceBadge = `<span class="px-2 py-0.5 rounded border border-slate-200 bg-slate-50 text-slate-600 font-semibold text-[11px]">Rp 0 (Aman)</span>`;
         }
@@ -951,7 +952,6 @@
       });
     }
 
-    // Fungsi Filter Unit yang Diperbarui dan Lebih Fleksibel
     function setCompanyFilter(company) {
       currentMasterCompanyFilter = company;
       
