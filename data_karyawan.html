@@ -464,7 +464,7 @@
             const validPhoto = formatPhotoUrl(item.photo_url || item.photo);
             
             const dbStatus = item.status_karyawan || item.status_pegawai || item.employee_status;
-            const defaultStatus = dbStatus ? dbStatus.toUpperCase() : (isTrainingEmployee(uName, item.phone) ? 'TRAINING' : 'TETAP');
+            const defaultStatus = dbStatus ? dbStatus.toUpperCase() : (isTrainingEmployee(uName, item.phone) ? 'EVALUASI KERJA' : 'MASIH TRAINING' : 'KARYAWAN TETAP');
 
             if (!map.has(key)) {
               map.set(key, {
