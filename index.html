@@ -281,7 +281,10 @@ Operasional`;
             photoUrl: localStorage.getItem('holding_user_photo') || ''
         };
         
-        window.selectedMonthFilter = '-10-';
+        // INISIALISASI OTOMATIS BULAN BERJALAN
+        const _initNow = new Date();
+        const _initMonthNum = String(_initNow.getMonth() + 1).padStart(2, '0');
+        window.selectedMonthFilter = `-${_initMonthNum}-`;
 
         const companiesData = {
             holding: {
@@ -438,18 +441,17 @@ Operasional`;
         }
 
         async function fetchAdminPhotoFromAttendances(adminName) {
-    try {
-        // Menggunakan kolom 'user_name' dan diurutkan berdasarkan baris terbaru (descending)
-        const { data, error } = await _supabaseAttendances
-            .from('attendances')
-            .select('photo_url, user_name, check_in_time')
-            .ilike('user_name', `%${adminName}%`)
-            .order('check_in_time', { ascending: false })
-            .limit(1);
+            try {
+                const { data, error } = await _supabaseAttendances
+                    .from('attendances')
+                    .select('photo_url, user_name, check_in_time')
+                    .ilike('user_name', `%${adminName}%`)
+                    .order('check_in_time', { ascending: false })
+                    .limit(1);
 
-            if (!error && data && data.length > 0 && data[0].photo_url) {
-            return data[0].photo_url;
-            }
+                if (!error && data && data.length > 0 && data[0].photo_url) {
+                    return data[0].photo_url;
+                }
             } catch (err) {
                 console.log("Gagal mengambil foto dari attendances:", err);
             }
@@ -459,7 +461,6 @@ Operasional`;
         async function renderAuthUI() {
             const authArea = document.getElementById('authArea');
             if (isLoggedIn) {
-                // Cek jika photoUrl belum ada di currentAdmin, coba fetch dari Supabase attendances
                 if (!currentAdmin.photoUrl) {
                     const fetchedPhoto = await fetchAdminPhotoFromAttendances(currentAdmin.name);
                     if (fetchedPhoto) {
@@ -468,7 +469,6 @@ Operasional`;
                     }
                 }
 
-                // Default fallback icon jika foto tidak ditemukan di database
                 let avatarHTML = currentAdmin.photoUrl ? 
                     `<img src="${currentAdmin.photoUrl}" alt="Profile" class="w-10 h-10 rounded-full object-cover border-2 border-emerald-500 shadow-sm">` :
                     `<div class="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs border-2 border-slate-700 shadow-sm"><i class="fa-solid fa-user"></i></div>`;
@@ -512,7 +512,6 @@ Operasional`;
             }
         }
 
-        // Tutup dropdown jika klik di luar
         window.addEventListener('click', () => {
             const menu = document.getElementById('profileDropdownMenu');
             if (menu && !menu.classList.contains('hidden')) {
@@ -544,7 +543,6 @@ Operasional`;
             const matchedUser = authorizedUsers.find(u => u.username.toLowerCase() === usernameInput && u.phone === passwordInput);
 
             if (matchedUser) {
-                // Cek foto profil dari tabel attendances Supabase saat login
                 let userPhoto = '';
                 try {
                     const { data } = await _supabaseAttendances
@@ -586,7 +584,10 @@ Operasional`;
             localStorage.removeItem('holding_user_email');
             localStorage.removeItem('holding_user_photo');
             activeTab = 'holding'; 
-            window.selectedMonthFilter = '-10-'; 
+            
+            const _outNow = new Date();
+            window.selectedMonthFilter = `-${String(_outNow.getMonth() + 1).padStart(2, '0')}-`; 
+            
             renderNav(); 
             renderAuthUI(); 
             renderContent(); 
@@ -596,16 +597,36 @@ Operasional`;
         document.getElementById('mobileMenuBtn').addEventListener('click', toggleMobileMenu);
         function switchTab(tabId) { activeTab = tabId; renderNav(); renderContent(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
+        // FUNGSI RENDER FILTER BULAN DINAMIS OTOMATIS BERJALAN
         function renderMonthFilterHTML(callbackName) {
+            const now = new Date();
+            const currentMonthNum = String(now.getMonth() + 1).padStart(2, '0');
+            const currentMonthValue = `-${currentMonthNum}-`;
+
+            const monthNames = [
+                "Januari", "Februari", "Maret", "April", "Mei", "Juni", 
+                "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+            ];
+            const currentMonthName = monthNames[now.getMonth()];
+
             const months = [
                 { val: '', label: 'Semua Bulan' },
                 { val: '-01-', label: 'Januari' }, { val: '-02-', label: 'Februari' }, { val: '-03-', label: 'Maret' },
                 { val: '-04-', label: 'April' }, { val: '-05-', label: 'Mei' }, { val: '-06-', label: 'Juni' },
                 { val: '-07-', label: 'Juli' }, { val: '-08-', label: 'Agustus' }, { val: '-09-', label: 'September' },
-                { val: '-10-', label: 'Oktober (Berjalan)' }, { val: '-11-', label: 'November' }, { val: '-12-', label: 'Desember' }
+                { val: '-10-', label: 'Oktober' }, { val: '-11-', label: 'November' }, { val: '-12-', label: 'Desember' }
             ];
-            const currentMonthFilter = window.selectedMonthFilter !== undefined ? window.selectedMonthFilter : '-10-';
-            let options = months.map(m => `<option value="${m.val}" ${currentMonthFilter === m.val ? 'selected' : ''}>${m.label}</option>`).join('');
+
+            const currentMonthFilter = window.selectedMonthFilter !== undefined ? window.selectedMonthFilter : currentMonthValue;
+
+            let options = months.map(m => {
+                let labelDisplay = m.label;
+                if (m.val === currentMonthValue) {
+                    labelDisplay = `${currentMonthName} (Berjalan)`;
+                }
+                return `<option value="${m.val}" ${currentMonthFilter === m.val ? 'selected' : ''}>${labelDisplay}</option>`;
+            }).join('');
+
             return `
                 <div class="flex items-center gap-2 mb-3">
                     <label class="text-xs text-slate-600 font-semibold"><i class="fa-solid fa-filter text-slate-400 mr-1"></i> Pilih Bulan:</label>
@@ -648,7 +669,9 @@ Operasional`;
                 if (error) throw error;
                 
                 let filteredData = data || [];
-                const selectedMonth = window.selectedMonthFilter !== undefined ? window.selectedMonthFilter : '-10-';
+                const now = new Date();
+                const defaultCurr = `-${String(now.getMonth() + 1).padStart(2, '0')}-`;
+                const selectedMonth = window.selectedMonthFilter !== undefined ? window.selectedMonthFilter : defaultCurr;
                 if (selectedMonth !== '') {
                     filteredData = filteredData.filter(item => item.tanggal && item.tanggal.includes(selectedMonth));
                 }
@@ -1132,7 +1155,9 @@ Operasional`;
 
                 let savedFaktur = data || [];
                 let filteredFaktur = savedFaktur;
-                const selectedMonth = window.selectedMonthFilter !== undefined ? window.selectedMonthFilter : '-10-';
+                const now = new Date();
+                const defaultCurr = `-${String(now.getMonth() + 1).padStart(2, '0')}-`;
+                const selectedMonth = window.selectedMonthFilter !== undefined ? window.selectedMonthFilter : defaultCurr;
                 if (selectedMonth !== '') {
                     filteredFaktur = filteredFaktur.filter(item => item.tanggal && item.tanggal.includes(selectedMonth));
                 }
@@ -1621,6 +1646,9 @@ Operasional`;
                     <button onclick="handleActionRedirect('invoice_transport')" class="w-full text-left font-semibold ${accentClass} rounded transition hover:bg-current/10">&bull; Buat Invoice Transport</button>
                 ` : '';
 
+                // PENYESUAIAN PANGGILAN TOMBOL SHORTCUT MENERAPKAN BULAN BERJALAN DINAMIS
+                const dynamicAutoMonthCode = `const _m = String(new Date().getMonth() + 1).padStart(2, '0'); window.selectedMonthFilter = '-' + _m + '-';`;
+
                 let transactionMenusHTML = isLoggedIn ? `
                     <div class="space-y-4">
                         <div class="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
@@ -1641,8 +1669,8 @@ Operasional`;
                             <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-sm">
                                 <div class="${accentClass} font-bold text-xs"><i class="fa-solid fa-cash-register mr-1"></i> DATA PENJUALAN & PO</div>
                                 <div class="space-y-1.5 pt-1 text-[12px]">
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenjualanData();" class="w-full text-left font-bold text-black rounded transition hover:bg-slate-200/80">&bull; Buka All Delivery</button>
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadPurchaseOrdersData();" class="w-full text-left font-bold text-black rounded transition hover:bg-slate-200/80">&bull; Buka Semua Purchase Order</button>
+                                    <button onclick="${dynamicAutoMonthCode} loadPenjualanData();" class="w-full text-left font-bold text-black rounded transition hover:bg-slate-200/80">&bull; Buka All Delivery</button>
+                                    <button onclick="${dynamicAutoMonthCode} loadPurchaseOrdersData();" class="w-full text-left font-bold text-black rounded transition hover:bg-slate-200/80">&bull; Buka Semua Purchase Order</button>
                                     <button onclick="handleActionRedirect('po')" class="w-full text-left font-semibold ${accentClass} rounded transition hover:bg-slate-200/80">&bull; Buat Purchase Order BBM</button>
                                     <button onclick="handleActionRedirect('po_transport')" class="w-full text-left font-semibold ${accentClass} rounded transition hover:bg-slate-200/80">&bull; Buat Purchase Order Transport</button>
                                 </div>
@@ -1650,7 +1678,7 @@ Operasional`;
                             <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-sm">
                                 <div class="${accentClass} font-bold text-xs"><i class="fa-solid fa-file-lines mr-1"></i> PENAWARAN - QUOTATION</div>
                                 <div class="space-y-1.5 pt-1 text-[12px]">
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadPenawaranData('Penawaran Biasa');" class="w-full text-left font-bold text-black rounded transition hover:bg-slate-200/80">&bull; Buka All Quotation</button>
+                                    <button onclick="${dynamicAutoMonthCode} loadPenawaranData('Penawaran Biasa');" class="w-full text-left font-bold text-black rounded transition hover:bg-slate-200/80">&bull; Buka All Quotation</button>
                                     <button onclick="handleActionRedirect('penawaran')" class="w-full text-left font-semibold ${accentClass} rounded transition hover:bg-slate-200/80">&bull; Buat Quotation</button>
                                     <button onclick="handleActionRedirect('penawaran_multi')" class="w-full text-left font-semibold ${accentClass} rounded transition hover:bg-slate-200/80">&bull; Buat Quotation Multi</button>
                                     <button onclick="handleActionRedirect('penawaran_diskon')" class="w-full text-left font-semibold ${accentClass} rounded transition hover:bg-slate-200/80">&bull; Buat Quotation Discount</button>
@@ -1659,7 +1687,7 @@ Operasional`;
                             <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-sm">
                                 <div class="text-red-600 font-bold text-xs"><i class="fa-solid fa-receipt mr-1"></i> INVOICE-FAKTUR PENJUALAN</div>
                                 <div class="space-y-1.5 pt-1 text-[12px]">
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadInvoiceData('Buka Invoice');" class="w-full text-left font-bold text-black rounded transition hover:bg-slate-200/80">&bull; Buka Semua Invoice</button>
+                                    <button onclick="${dynamicAutoMonthCode} loadInvoiceData('Buka Invoice');" class="w-full text-left font-bold text-black rounded transition hover:bg-slate-200/80">&bull; Buka Semua Invoice</button>
                                     <button onclick="handleActionRedirect('Buat Invoice BRI')" class="w-full text-left font-semibold ${accentClass} rounded transition hover:bg-slate-200/80">&bull; Buat Invoice BRI-MANDIRI</button>
                                     <button onclick="handleActionRedirect('Buat Invoice BCA')" class="w-full text-left font-semibold ${accentClass} rounded transition hover:bg-slate-200/80">&bull; Buat Invoice BCA</button>
                                     ${transportInvoiceMenuHTML}
@@ -1668,7 +1696,7 @@ Operasional`;
                             <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2 shadow-sm">
                                 <div class="${accentClass} font-bold text-xs"><i class="fa-solid fa-file-invoice-dollar mr-1"></i> DATA FAKTUR PAJAK MASUKAN</div>
                                 <div class="space-y-1.5 pt-1 text-[12px]">
-                                    <button onclick="window.selectedMonthFilter='-10-'; loadFakturPajakData();" class="w-full text-left font-bold text-black rounded transition hover:bg-slate-200/80">&bull; Rekap Faktur Pajak Masukan</button>
+                                    <button onclick="${dynamicAutoMonthCode} loadFakturPajakData();" class="w-full text-left font-bold text-black rounded transition hover:bg-slate-200/80">&bull; Rekap Faktur Pajak Masukan</button>
                                     <button onclick="renderUploadFakturForm();" class="w-full text-left font-semibold ${accentClass} rounded transition hover:bg-slate-200/80">&bull; Upload Faktur Pajak Masukan</button>
                                     <span class="block text-[10px] text-slate-400 italic mt-2">Sinkronisasi pajak & pratinjau PDF.</span>
                                 </div>
