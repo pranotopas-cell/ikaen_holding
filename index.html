@@ -1345,31 +1345,30 @@ Regards, Operasional`;
     const area = document.getElementById('pdfContentArea');
     const printUserSignature = document.getElementById('printUserSignature');
     
+    // Tanda tangan pencetak sistem di bagian footer modal
     printUserSignature.innerText = `${currentAdmin.name} (${currentAdmin.role} - Telp: ${currentAdmin.phone})`;
 
+    // Ambil data entitas pembeli (PT Khatulistiwa Sinar Energi / PT aktif)
     const currentPkp = companyPkpInfo[activeTab] || companyPkpInfo.holding;
-    let hargaJualVal = (hargaJual !== undefined && hargaJual !== null) ? Number(hargaJual) : Number(dpp);
-    let totalDpp = Number(dpp);
+    
+    // Nilai Perhitungan Pajak
+    let hargaJualVal = (hargaJual !== undefined && hargaJual !== null && hargaJual > 0) ? Number(hargaJual) : Number(dpp);
+    let totalDpp = Number(dpp) > 0 ? Number(dpp) : hargaJualVal;
     let totalPpn = Number(ppn);
-    let totalFaktur = hargaJualVal + totalPpn;
 
-    // Format tanggal cetak (misal: 03 November 2026)
+    // Format Tanggal Indonesia
     let dObj = new Date(tanggal);
     let formattedDate = !isNaN(dObj) ? dObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) : tanggal;
+
+    // Nama Penjual/PKP Penerbit dari data lawan transaksi (misal: PT OCEAN INDONESIA ENERGY)
+    let namaPkpPenjual = lawan || "PT OCEAN INDONESIA ENERGY";
+    let npwpPkpPenjual = npwp || "07.338.908.0-001.000";
 
     area.innerHTML = `
         <div class="bg-white text-slate-900 p-4 border border-slate-400 font-sans space-y-3 text-[11px]">
             <!-- Header Faktur Pajak -->
-            <div class="border border-slate-400 p-3 text-center font-bold text-sm tracking-wide bg-slate-50">
-                FAKTUR PAJAK
-            </div>
-
-            <!-- Identitas Penerbit / PKP Penjual -->
-            <div class="border border-slate-400 p-2.5 space-y-1 text-[10px]">
-                <div class="font-bold border-b border-slate-300 pb-1 text-slate-800">Pengusaha Kena Pajak (PKP)</div>
-                <div><strong>Nama :</strong> ${currentPkp.name}</div>
-                <div><strong>Alamat :</strong> Jl. H.M. Rafi'i Perum Bambu Kuning Gang Utama, Madurejo, Arut Selatan, Kab. Kotawaringin Barat</div>
-                <div><strong>NPWP :</strong> ${currentPkp.npwp}</div>
+            <div class="border border-slate-400 p-2.5 text-center font-bold text-sm tracking-wide bg-slate-50 uppercase">
+                FAKTUR PAJAK (PAJAK MASUKAN)
             </div>
 
             <!-- Kode dan Nomor Seri Faktur Pajak -->
@@ -1377,11 +1376,18 @@ Regards, Operasional`;
                 <strong>Kode dan Nomor Seri Faktur Pajak :</strong> <span class="font-mono font-bold text-blue-900">${noFaktur}</span>
             </div>
 
-            <!-- Identitas Pembeli -->
+            <!-- Identitas PKP Penjual / Penerbit (PT OCEAN INDONESIA ENERGY) -->
             <div class="border border-slate-400 p-2.5 space-y-1 text-[10px]">
-                <div class="font-bold border-b border-slate-300 pb-1 text-slate-800">Pembeli Barang Kena Pajak / Penerima Jasa Kena Pajak</div>
-                <div><strong>Nama :</strong> ${lawan}</div>
-                <div><strong>NPWP / NIK :</strong> ${npwp}</div>
+                <div class="font-bold border-b border-slate-300 pb-1 text-slate-800 uppercase"><i class="fa-solid fa-building mr-1"></i> Pengusaha Kena Pajak (PKP Penjual / Menerbitkan)</div>
+                <div><strong>Nama :</strong> <span class="font-bold text-slate-900">${namaPkpPenjual}</span></div>
+                <div><strong>NPWP / NIK :</strong> <span class="font-mono">${npwpPkpPenjual}</span></div>
+            </div>
+
+            <!-- Identitas Pembeli (PT KHATULISTIWA SINAR ENERGI) -->
+            <div class="border border-slate-400 p-2.5 space-y-1 text-[10px]">
+                <div class="font-bold border-b border-slate-300 pb-1 text-slate-800 uppercase"><i class="fa-solid fa-user-check mr-1"></i> Pembeli Barang Kena Pajak / Penerima Jasa Kena Pajak</div>
+                <div><strong>Nama :</strong> <span class="font-bold text-blue-900">${currentPkp.name}</span></div>
+                <div><strong>NPWP :</strong> <span class="font-mono text-blue-800">${currentPkp.npwp}</span></div>
             </div>
 
             <!-- Tabel Rincian Barang / Jasa -->
@@ -1398,14 +1404,14 @@ Regards, Operasional`;
                         <td class="border border-slate-400 p-1.5 text-center align-top">1</td>
                         <td class="border border-slate-400 p-1.5">
                             <strong>BIO SOLAR (B50)</strong><br>
-                            <span class="text-slate-600 text-[9px]">Pengiriman Industri / Komersial Tepat Waktu</span>
+                            <span class="text-slate-600 text-[9px]">Pasokan BBM Industri Solar B50</span>
                         </td>
                         <td class="border border-slate-400 p-1.5 text-right align-top font-mono">${hargaJualVal.toLocaleString('id-ID', {minimumFractionDigits: 2})}</td>
                     </tr>
                 </tbody>
             </table>
 
-            <!-- Rekapitulasi Harga & Pajak -->
+            <!-- Perhitungan Rekapitulasi Harga & Pajak Masukan -->
             <table class="w-full border-collapse border border-slate-400 text-[10px]">
                 <tr>
                     <td class="border border-slate-400 p-1.5">Harga Jual / Penggantian / Uang Muka / Termin</td>
@@ -1420,8 +1426,8 @@ Regards, Operasional`;
                     <td class="border border-slate-400 p-1.5 text-right font-mono font-bold">${totalDpp.toLocaleString('id-ID', {minimumFractionDigits: 2})}</td>
                 </tr>
                 <tr>
-                    <td class="border border-slate-400 p-1.5">Jumlah PPN (Pajak Pertambahan Nilai) 11% / 12%</td>
-                    <td class="border border-slate-400 p-1.5 text-right font-mono font-bold">${totalPpn.toLocaleString('id-ID', {minimumFractionDigits: 2})}</td>
+                    <td class="border border-slate-400 p-1.5">Jumlah PPN (Pajak Pertambahan Nilai)</td>
+                    <td class="border border-slate-400 p-1.5 text-right font-mono font-bold text-blue-900">${totalPpn.toLocaleString('id-ID', {minimumFractionDigits: 2})}</td>
                 </tr>
                 <tr>
                     <td class="border border-slate-400 p-1.5">Jumlah PPnBM (Pajak Penjualan atas Barang Mewah)</td>
@@ -1429,18 +1435,19 @@ Regards, Operasional`;
                 </tr>
             </table>
 
-            <!-- Catatan & Tanda Tangan Digital / QR -->
+            <!-- Bagian Tanda Tangan PKP Penjual (PT OCEAN INDONESIA ENERGY) -->
             <div class="border border-slate-400 p-3 flex justify-between items-center text-[9px]">
-                <div class="space-y-1 max-w-[65%] text-slate-600">
-                    <p>Sesuai dengan ketentuan yang berlaku, Direktorat Jenderal Pajak mengatur bahwa Faktur Pajak ini telah ditandatangani secara elektronik sehingga tidak diperlukan tanda tangan basah.</p>
-                    <p class="italic text-[8px] pt-1">Ref: Coretax DJP & Energy Holding Group Integration System.</p>
+                <div class="space-y-1 max-w-[60%] text-slate-600">
+                    <p>Sesuai dengan ketentuan yang berlaku, Direktorat Jenderal Pajak mengatur bahwa Faktur Pajak ini telah ditandatangani secara elektronik oleh Pengusaha Kena Pajak Penjual.</p>
+                    <p class="italic text-[8px] pt-1 text-slate-400">Verifikasi Sistem DJP & Integration Energy Holding Group.</p>
                 </div>
                 <div class="text-center space-y-1">
-                    <div>KAB. KOTAWARINGIN BARAT, <br><strong>${formattedDate}</strong></div>
-                    <div class="inline-block p-1 bg-white border border-slate-300">
+                    <div>Ditandatangani secara elektronik oleh:</div>
+                    <div class="font-bold text-slate-900 uppercase">${namaPkpPenjual}</div>
+                    <div class="inline-block p-1 bg-white border border-slate-300 my-0.5">
                         <i class="fa-solid fa-qrcode text-3xl text-slate-800"></i>
                     </div>
-                    <div class="font-bold text-[9px] text-slate-900 uppercase">${currentAdmin.name}</div>
+                    <div class="text-[8px] text-slate-500">${formattedDate}</div>
                 </div>
             </div>
         </div>
