@@ -1341,51 +1341,112 @@ Regards, Operasional`;
     }
 
     function previewFakturPdf(noFaktur, tanggal, lawan, npwp, hargaJual, dpp, ppn) {
-        const modal = document.getElementById('pdfModal');
-        const area = document.getElementById('pdfContentArea');
-        const printUserSignature = document.getElementById('printUserSignature');
-        
-        printUserSignature.innerText = `${currentAdmin.name} (${currentAdmin.role} - Telp: ${currentAdmin.phone})`;
+    const modal = document.getElementById('pdfModal');
+    const area = document.getElementById('pdfContentArea');
+    const printUserSignature = document.getElementById('printUserSignature');
+    
+    printUserSignature.innerText = `${currentAdmin.name} (${currentAdmin.role} - Telp: ${currentAdmin.phone})`;
 
-        const currentPkp = companyPkpInfo[activeTab] || companyPkpInfo.holding;
-        let hargaJualVal = (hargaJual !== undefined && hargaJual !== null) ? Number(hargaJual) : Number(dpp);
-        let total = Number(hargaJualVal) + Number(ppn);
+    const currentPkp = companyPkpInfo[activeTab] || companyPkpInfo.holding;
+    let hargaJualVal = (hargaJual !== undefined && hargaJual !== null) ? Number(hargaJual) : Number(dpp);
+    let totalDpp = Number(dpp);
+    let totalPpn = Number(ppn);
+    let totalFaktur = hargaJualVal + totalPpn;
 
-        area.innerHTML = `
-            <div class="border-b border-slate-200 pb-3 text-center">
-                <h2 class="text-sm font-bold text-slate-900 uppercase">KEMENTERIAN KEUANGAN REPUBLIK INDONESIA</h2>
-                <h3 class="text-xs font-semibold text-slate-700">FAKTUR PAJAK ELEKTRONIK (CORETAX DJP)</h3>
+    // Format tanggal cetak (misal: 03 November 2026)
+    let dObj = new Date(tanggal);
+    let formattedDate = !isNaN(dObj) ? dObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) : tanggal;
+
+    area.innerHTML = `
+        <div class="bg-white text-slate-900 p-4 border border-slate-400 font-sans space-y-3 text-[11px]">
+            <!-- Header Faktur Pajak -->
+            <div class="border border-slate-400 p-3 text-center font-bold text-sm tracking-wide bg-slate-50">
+                FAKTUR PAJAK
             </div>
-            <div class="grid grid-cols-2 gap-2 pt-2">
-                <div><strong>Nomor Faktur:</strong> ${noFaktur}</div>
-                <div><strong>Tanggal:</strong> ${tanggal}</div>
+
+            <!-- Identitas Penerbit / PKP Penjual -->
+            <div class="border border-slate-400 p-2.5 space-y-1 text-[10px]">
+                <div class="font-bold border-b border-slate-300 pb-1 text-slate-800">Pengusaha Kena Pajak (PKP)</div>
+                <div><strong>Nama :</strong> ${currentPkp.name}</div>
+                <div><strong>Alamat :</strong> Jl. H.M. Rafi'i Perum Bambu Kuning Gang Utama, Madurejo, Arut Selatan, Kab. Kotawaringin Barat</div>
+                <div><strong>NPWP :</strong> ${currentPkp.npwp}</div>
             </div>
-            <div class="pt-2 border-t border-slate-200">
-            <p class="text-blue-700 font-bold mb-1">Pembeli Barang Kena Pajak / Penerima Jasa Kena Pajak:</p>
-            <p class="text-blue-900 font-extrabold"><strong>${currentPkp.name}</strong> <span class="text-blue-700 font-normal">(NPWP: ${currentPkp.npwp})</span></p>
+
+            <!-- Kode dan Nomor Seri Faktur Pajak -->
+            <div class="border border-slate-400 p-2 text-[10px] bg-slate-50">
+                <strong>Kode dan Nomor Seri Faktur Pajak :</strong> <span class="font-mono font-bold text-blue-900">${noFaktur}</span>
             </div>
-            <div class="pt-2 border-t border-slate-200">
-            <p class="text-blue-700 font-bold mb-1">Pengusaha Kena Pajak (PKP):</p>
-            <p class="text-blue-950"><strong>Nama:</strong> <span class="font-bold text-blue-900">${lawan}</span></p>
-            <p class="text-blue-800"><strong>NPWP:</strong> ${npwp}</p>
+
+            <!-- Identitas Pembeli -->
+            <div class="border border-slate-400 p-2.5 space-y-1 text-[10px]">
+                <div class="font-bold border-b border-slate-300 pb-1 text-slate-800">Pembeli Barang Kena Pajak / Penerima Jasa Kena Pajak</div>
+                <div><strong>Nama :</strong> ${lawan}</div>
+                <div><strong>NPWP / NIK :</strong> ${npwp}</div>
             </div>
-            <div class="pt-3 border-t border-slate-200 space-y-1">
-                <div class="flex justify-between"><span>Harga Jual:</span> <span class="font-bold text-slate-900">Rp ${hargaJualVal.toLocaleString('id-ID')}</span></div>
-                <div class="flex justify-between"><span>Dasar Pengenaan Pajak (DPP):</span> <span class="font-bold text-slate-900">Rp ${Number(dpp).toLocaleString('id-ID')}</span></div>
-                <div class="flex justify-between"><span>PPN (11%):</span> <span class="font-bold text-slate-900">Rp ${Number(ppn).toLocaleString('id-ID')}</span></div>
-                <div class="flex justify-between border-t border-slate-200 pt-1 font-bold text-slate-900"><span>Total Faktur:</span> <span class="text-slate-900">Rp ${Number(total).toLocaleString('id-ID')}</span></div>
+
+            <!-- Tabel Rincian Barang / Jasa -->
+            <table class="w-full border-collapse border border-slate-400 text-[10px] text-left">
+                <thead>
+                    <tr class="bg-slate-100 border-b border-slate-400 text-center">
+                        <th class="border border-slate-400 p-1.5 w-10">No.</th>
+                        <th class="border border-slate-400 p-1.5">Nama Barang Kena Pajak / Jasa Kena Pajak</th>
+                        <th class="border border-slate-400 p-1.5 text-right w-36">Harga Jual / Penggantian (Rp)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="border border-slate-400 p-1.5 text-center align-top">1</td>
+                        <td class="border border-slate-400 p-1.5">
+                            <strong>BIO SOLAR (B50)</strong><br>
+                            <span class="text-slate-600 text-[9px]">Pengiriman Industri / Komersial Tepat Waktu</span>
+                        </td>
+                        <td class="border border-slate-400 p-1.5 text-right align-top font-mono">${hargaJualVal.toLocaleString('id-ID', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Rekapitulasi Harga & Pajak -->
+            <table class="w-full border-collapse border border-slate-400 text-[10px]">
+                <tr>
+                    <td class="border border-slate-400 p-1.5">Harga Jual / Penggantian / Uang Muka / Termin</td>
+                    <td class="border border-slate-400 p-1.5 text-right font-mono w-36">${hargaJualVal.toLocaleString('id-ID', {minimumFractionDigits: 2})}</td>
+                </tr>
+                <tr>
+                    <td class="border border-slate-400 p-1.5">Dikurangi Potongan Harga</td>
+                    <td class="border border-slate-400 p-1.5 text-right font-mono">0,00</td>
+                </tr>
+                <tr>
+                    <td class="border border-slate-400 p-1.5">Dasar Pengenaan Pajak (DPP)</td>
+                    <td class="border border-slate-400 p-1.5 text-right font-mono font-bold">${totalDpp.toLocaleString('id-ID', {minimumFractionDigits: 2})}</td>
+                </tr>
+                <tr>
+                    <td class="border border-slate-400 p-1.5">Jumlah PPN (Pajak Pertambahan Nilai) 11% / 12%</td>
+                    <td class="border border-slate-400 p-1.5 text-right font-mono font-bold">${totalPpn.toLocaleString('id-ID', {minimumFractionDigits: 2})}</td>
+                </tr>
+                <tr>
+                    <td class="border border-slate-400 p-1.5">Jumlah PPnBM (Pajak Penjualan atas Barang Mewah)</td>
+                    <td class="border border-slate-400 p-1.5 text-right font-mono">0,00</td>
+                </tr>
+            </table>
+
+            <!-- Catatan & Tanda Tangan Digital / QR -->
+            <div class="border border-slate-400 p-3 flex justify-between items-center text-[9px]">
+                <div class="space-y-1 max-w-[65%] text-slate-600">
+                    <p>Sesuai dengan ketentuan yang berlaku, Direktorat Jenderal Pajak mengatur bahwa Faktur Pajak ini telah ditandatangani secara elektronik sehingga tidak diperlukan tanda tangan basah.</p>
+                    <p class="italic text-[8px] pt-1">Ref: Coretax DJP & Energy Holding Group Integration System.</p>
+                </div>
+                <div class="text-center space-y-1">
+                    <div>KAB. KOTAWARINGIN BARAT, <br><strong>${formattedDate}</strong></div>
+                    <div class="inline-block p-1 bg-white border border-slate-300">
+                        <i class="fa-solid fa-qrcode text-3xl text-slate-800"></i>
+                    </div>
+                    <div class="font-bold text-[9px] text-slate-900 uppercase">${currentAdmin.name}</div>
+                </div>
             </div>
-            <div class="pt-3 border-t border-slate-200 mt-2 text-[11px] text-slate-800">
-                <div><strong>Divalidasi & Dicetak Oleh:</strong> ${currentAdmin.name}</div>
-                <div><strong>Jabatan/Role:</strong> ${currentAdmin.role}</div>
-                <div><strong>Kontak Verifikasi:</strong> ${currentAdmin.phone}</div>
-            </div>
-            <div class="text-center pt-2 text-[10px] text-slate-400 italic">
-                Dokumen Elektronik ini sah dan telah diverifikasi melalui sistem Coretax DJP & Energy Holding Group.
-            </div>
-        `;
-        modal.classList.remove('hidden');
-    }
+        </div>
+    `;
+    modal.classList.remove('hidden');
+}
 
     function closePdfModal() {
         document.getElementById('pdfModal').classList.add('hidden');
