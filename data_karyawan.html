@@ -661,23 +661,54 @@
     async function toggleApproval(recordId, currentlyApproved, isAlphaGen, employeeName, targetDate) {
       if (isAlphaGen) {
         if (!currentlyApproved) {
-          const confirmLuar = confirm(`Setujui ${employeeName} sebagai Tugas Luar pada tanggal ${targetDate}?`);
-          if (!confirmLuar) return;
+          // Dialog pilihan Alasan untuk Karyawan yang Alpha/Tidak Masuk
+          const choicePrompt = prompt(
+            `Approval Karyawan Alpha: ${employeeName} (${targetDate})\n\n` +
+            `Pilih nomor alasan persetujuan:\n` +
+            `1. Izin\n` +
+            `2. Tugas Luar\n` +
+            `3. Lupa Absen\n\n` +
+            `Ketik angka 1, 2, atau 3 (Batal jika kosong/salah):`
+          );
+
+          if (!choicePrompt) return;
+
+          const choice = choicePrompt.trim();
+          let statusChoice = '';
+          let reasonText = '';
+          let locationText = 'Luar Kantor / Lapangan';
+
+          if (choice === '1') {
+            statusChoice = 'IZIN';
+            reasonText = 'Disetujui sebagai Izin oleh Admin';
+            locationText = 'Izin (Tercatat Admin)';
+          } else if (choice === '2') {
+            statusChoice = 'TUGAS LUAR';
+            reasonText = 'Disetujui sebagai Tugas Luar oleh Admin';
+            locationText = 'Luar Kantor / Lapangan';
+          } else if (choice === '3') {
+            statusChoice = 'HADIR (LUPA ABSEN)';
+            reasonText = 'Disetujui sebagai Hadir (Lupa Absen) oleh Admin';
+            locationText = 'Kantor (Lupa Absen)';
+          } else {
+            alert("Pilihan tidak valid. Proses pembatalan.");
+            return;
+          }
 
           const { error } = await supabaseClient
             .from("attendances")
             .insert([{
               user_name: employeeName,
-              status: 'TUGAS LUAR',
-              reason: 'Disetujui sebagai Tugas Luar oleh Admin',
+              status: statusChoice,
+              reason: reasonText,
               is_approved: 'APPROVED',
-              location_name: 'Luar Kantor / Lapangan',
+              location_name: locationText,
               check_in_time: '-',
               created_at: `${targetDate}T08:00:00.000Z`
             }]);
 
           if (error) {
-            alert("Gagal menyimpan tugas luar: " + error.message);
+            alert("Gagal menyimpan persetujuan: " + error.message);
           } else {
             await fetchAttendances();
           }
@@ -727,11 +758,11 @@
 
       const isLate = statusText.includes("TERLAMBAT") || statusText.includes("LATE");
       const isPermission = statusText.includes("IZIN") || statusText.includes("SAKIT") || statusText.includes("DINAS") || statusText.includes("TUGAS LUAR");
-      const isAlpha = (statusText.includes("ALPHA") || !item.check_in_time || item.check_in_time === '-') && !statusText.includes("TUGAS LUAR");
+      const isAlpha = (statusText.includes("ALPHA") || !item.check_in_time || item.check_in_time === '-') && !statusText.includes("TUGAS LUAR") && !statusText.includes("LUPA ABSEN");
 
       if (isHoliday && !isAlpha) return 50000;
 
-      if (isApproved || statusText.includes("TUGAS LUAR")) {
+      if (isApproved || statusText.includes("TUGAS LUAR") || statusText.includes("LUPA ABSEN")) {
         return isTraining ? 25000 : 0;
       }
 
@@ -777,7 +808,7 @@
 
       data.forEach(item => {
         const st = (item.status || "HADIR").toUpperCase();
-        const isAlpha = (st.includes("ALPHA") || !item.check_in_time || item.check_in_time === '-') && !st.includes("TUGAS LUAR");
+        const isAlpha = (st.includes("ALPHA") || !item.check_in_time || item.check_in_time === '-') && !st.includes("TUGAS LUAR") && !st.includes("LUPA ABSEN");
 
         if (isAlpha || st.includes("TERLAMBAT") || st.includes("LATE")) {
           lateCount++;
@@ -835,13 +866,14 @@
         }
 
         const statusText = (item.status || "HADIR").toUpperCase();
-        const isAlpha = (statusText.includes("ALPHA") || item.isAlphaGenerated || !item.check_in_time || item.check_in_time === '-') && !statusText.includes("TUGAS LUAR");
+        const isAlpha = (statusText.includes("ALPHA") || item.isAlphaGenerated || !item.check_in_time || item.check_in_time === '-') && !statusText.includes("TUGAS LUAR") && !statusText.includes("LUPA ABSEN");
         const isLate = statusText.includes("TERLAMBAT") || statusText.includes("LATE");
         const isPermission = statusText.includes("IZIN") || statusText.includes("SAKIT") || statusText.includes("DINAS");
         const isTugasLuar = statusText.includes("TUGAS LUAR");
+        const isLupaAbsen = statusText.includes("LUPA ABSEN");
         
         const valApp = String(item.is_approved || "").trim().toUpperCase();
-        const isApproved = (valApp === "APPROVED" || valApp === "TRUE" || valApp === "1" || isTugasLuar);
+        const isApproved = (valApp === "APPROVED" || valApp === "TRUE" || valApp === "1" || isTugasLuar || isLupaAbsen);
 
         let statusBadgeClass = "bg-emerald-50 text-emerald-600 border-emerald-200 font-bold";
         let shortStatusText = "TEPAT WAKTU";
@@ -858,17 +890,20 @@
         } else if (isTugasLuar) {
           statusBadgeClass = "bg-teal-50 text-teal-700 border-teal-200 font-bold";
           shortStatusText = "TUGAS LUAR";
+        } else if (isLupaAbsen) {
+          statusBadgeClass = "bg-indigo-50 text-indigo-700 border-indigo-200 font-bold";
+          shortStatusText = "LUPA ABSEN";
         }
 
         const reasonText = item.reason ? `<div class="text-[10px] text-slate-500 italic mt-0.5">"${item.reason}"</div>` : '';
 
         let approvalButton = `<span class="text-slate-400 font-medium">-</span>`;
 
-        if (isLate || isPermission || isAlpha || isTugasLuar) {
+        if (isLate || isPermission || isAlpha || isTugasLuar || isLupaAbsen) {
           if (isApproved) {
             approvalButton = `<span onclick="toggleApproval('${item.id}', true, ${!!item.isAlphaGenerated}, '${item.user_name}', '${item.targetDate || getLocalDateString(item.created_at)}')" class="cursor-pointer inline-block px-3 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300 font-semibold text-[11px] shadow-sm" title="Klik untuk ubah status">Approved</span>`;
           } else {
-            approvalButton = `<button onclick="toggleApproval('${item.id}', false, ${!!item.isAlphaGenerated}, '${item.user_name}', '${item.targetDate || getLocalDateString(item.created_at)}')" class="px-3 py-0.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-300 text-[11px] font-medium transition" title="Klik untuk approve sebagai Tugas Luar">Pending</button>`;
+            approvalButton = `<button onclick="toggleApproval('${item.id}', false, ${!!item.isAlphaGenerated}, '${item.user_name}', '${item.targetDate || getLocalDateString(item.created_at)}')" class="px-3 py-0.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-300 text-[11px] font-medium transition" title="Klik untuk approve">Pending</button>`;
           }
         }
 
