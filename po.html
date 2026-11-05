@@ -220,25 +220,26 @@
             </div>
         </div>
 
-        <!-- 2. REALISASI PENJUALAN (LEBIH LEBAR) -->
+        <!-- 2. REALISASI PENJUALAN -->
         <div class="w-[55%]">
             <div class="section-label"><span class="dot"></span> 2. REALISASI PENJUALAN </div>
             <div class="table-scroll-container">
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 60px;">DATE</th>
+                            <th style="width: 55px;">DATE</th>
+                            <th style="width: 50px;">SELLER</th>
                             <th>DELIVERY</th>
-                            <th style="width: 135px;">SOPIR</th>
+                            <th style="width: 110px;">SOPIR</th>
                             <th style="width: 35px;">QTY</th>
-                            <th style="width: 90px;">SO</th>
-                            <th style="width: 90px;">DO</th>
+                            <th style="width: 80px;">SO</th>
+                            <th style="width: 80px;">DO</th>
                         </tr>
                     </thead>
                     <tbody id="body-out"></tbody>
                     <tfoot>
                         <tr class="bg-footer">
-                            <td colspan="3" class="text-right pr-2 py-1">TOTAL OUT</td>
+                            <td colspan="4" class="text-right pr-2 py-1">TOTAL OUT</td>
                             <td id="total-del" class="text-center">0</td>
                             <td colspan="2"></td>
                         </tr>
@@ -275,7 +276,6 @@
             const namaBulan = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
             const currentYear = new Date().getFullYear();
 
-            // Melakukan looping dari bulan Januari (0) sampai Desember (11) untuk tahun berjalan
             for (let i = 0; i < 12; i++) {
                 const opt = document.createElement('option');
                 const monthStr = String(i + 1).padStart(2, '0');
@@ -284,7 +284,6 @@
                 select.appendChild(opt);
             }
 
-            // Opsional: Set pilihan default ke bulan saat ini
             const currentMonthStr = `${currentYear}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
             select.value = currentMonthStr;
         }
@@ -353,13 +352,13 @@
                     qty_in: parseFloat(d.qty) || 0, qty_sisa: 0, isDeficit: false
                 }));
 
-                // Filter data pengiriman: abaikan jika qty 0 atau kosong, serta abaikan supplier tertentu
                 dataOut = (resLog.data || []).filter(d => {
                     const s = (d.supplier || '').toLowerCase();
                     const qtyVal = parseFloat(d.jumlah_keluar) || 0;
                     const isValidSupplier = !s.includes('petro') && !s.includes('pan') && !s.includes('transport');
                     return qtyVal > 0 && isValidSupplier;
                 }).map(d => ({ 
+                    seller: d.seller || '',
                     tujuan: d.delivery_to || '', 
                     out: parseFloat(d.jumlah_keluar) || 0, 
                     supp: d.supplier || '', 
@@ -389,20 +388,20 @@
 
             dataOut.forEach(o => {
                 const supplierKey = (o.supp || '').toLowerCase().trim();
+                const sellerKey = (o.seller || '').toLowerCase().trim();
                 let remainingOut = o.out;
                 
                 o.so = '';
                 o.do = '';
                 o.supp_row_index = -1;
                 
-                // PRIORITAS KHUSUS QTY = 8
-                if (remainingOut === 8) {
+                // ATURAN KHUSUS 1: Penjualan tgl 01/11/26 ambil PO 01-OKT
+                if (o.tgl === '01/11/26' && remainingOut === 8) {
                     for (let i = 0; i < suppPool.length; i++) {
                         const s = suppPool[i];
+                        const nopoKey = (s.nopo || '').toUpperCase();
                         const inuKey = (s.inu || '').toLowerCase().trim();
-                        const targetQty = [8, 16, 24, 32];
-                        
-                        if (inuKey === supplierKey && s.temp_sisa >= remainingOut && targetQty.includes(s.qty_in)) {
+                        if (nopoKey.includes('01-OKT') && s.temp_sisa >= remainingOut && inuKey === supplierKey) {
                             o.so = s.so || '';
                             o.do = s.do || '';
                             o.supp_row_index = s.original_index;
@@ -414,13 +413,60 @@
                     }
                 }
 
-                // ALOKASI FIFO STANDAR
-                if (remainingOut > 0) {
+                // ATURAN KHUSUS 2: Penjualan tgl 04/11/26 ambil PO 02-NOV
+                if (o.tgl === '04/11/26' && remainingOut === 8) {
+                    for (let i = 0; i < suppPool.length; i++) {
+                        const s = suppPool[i];
+                        const nopoKey = (s.nopo || '').toUpperCase();
+                        const inuKey = (s.inu || '').toLowerCase().trim();
+                        if (nopoKey.includes('02-NOV') && s.temp_sisa >= remainingOut && inuKey === supplierKey) {
+                            o.so = s.so || '';
+                            o.do = s.do || '';
+                            o.supp_row_index = s.original_index;
+                            
+                            s.temp_sisa -= remainingOut;
+                            remainingOut = 0;
+                            break;
+                        }
+                    }
+                }
+
+                // LOGIKA BARU: JIKA QTY IN 8, 16, 24, 32 HANYA BISA DIAMBIL OLEH QTY KELUAR 8
+                if (remainingOut > 0 && remainingOut === 8) {
                     for (let i = 0; i < suppPool.length; i++) {
                         const s = suppPool[i];
                         const inuKey = (s.inu || '').toLowerCase().trim();
+                        const unitKey = (s.unit || '').toLowerCase().trim();
                         
-                        if (inuKey === supplierKey && s.temp_sisa > 0) {
+                        const isSellerMatch = sellerKey ? (unitKey === sellerKey) : true;
+                        const isTargetQtyIn = [8, 16, 24, 32].includes(s.qty_in);
+
+                        if (isSellerMatch && inuKey === supplierKey && s.temp_sisa >= remainingOut && isTargetQtyIn) {
+                            o.so = s.so || '';
+                            o.do = s.do || '';
+                            o.supp_row_index = s.original_index;
+                            
+                            s.temp_sisa -= remainingOut;
+                            remainingOut = 0;
+                            break;
+                        }
+                    }
+                }
+
+                // JIKA QTY KELUAR SELAIN 8, ATAU QTY IN BUKAN [8,16,24,32], JANGAN GUNAKAN STOK TERSEBUT UNTUK QTY KELUAR 8
+                if (remainingOut > 0 && remainingOut !== 8) {
+                    for (let i = 0; i < suppPool.length; i++) {
+                        const s = suppPool[i];
+                        const inuKey = (s.inu || '').toLowerCase().trim();
+                        const unitKey = (s.unit || '').toLowerCase().trim();
+                        
+                        const isSellerMatch = sellerKey ? (unitKey === sellerKey) : true;
+                        const isTargetQtyIn = [8, 16, 24, 32].includes(s.qty_in);
+
+                        // Lewati baris PO yang qty_in nya 8, 16, 24, 32 jika pengeluaran bukan 8
+                        if (isTargetQtyIn) continue;
+
+                        if (isSellerMatch && inuKey === supplierKey && s.temp_sisa > 0) {
                             if (!o.so && !o.do) {
                                 o.so = s.so || '';
                                 o.do = s.do || '';
@@ -435,6 +481,32 @@
                         }
                     }
                 }
+
+                // ALOKASI FIFO STANDAR SELEBIHNYA (jika masih ada sisa)
+                if (remainingOut > 0) {
+                    for (let i = 0; i < suppPool.length; i++) {
+                        const s = suppPool[i];
+                        const inuKey = (s.inu || '').toLowerCase().trim();
+                        const unitKey = (s.unit || '').toLowerCase().trim();
+                        
+                        const isSellerMatch = sellerKey ? (unitKey === sellerKey) : true;
+
+                        if (isSellerMatch && inuKey === supplierKey && s.temp_sisa > 0) {
+                            if (!o.so && !o.do) {
+                                o.so = s.so || '';
+                                o.do = s.do || '';
+                                o.supp_row_index = s.original_index; 
+                            }
+                            
+                            const take = Math.min(remainingOut, s.temp_sisa);
+                            s.temp_sisa -= take;
+                            remainingOut -= take;
+                            
+                            if (remainingOut <= 0) break;
+                        }
+                    }
+                }
+
                 o.deficit_qty = remainingOut; 
             });
 
@@ -485,7 +557,7 @@
             let htmlStr = '';
 
             for(let i=0; i < maxRows; i++) {
-                const o = filteredOut[i] || {tujuan:'', out:'', supp:'', sopir:'', tgl:'', so:'', do:'', supp_row_index: -1};
+                const o = filteredOut[i] || {seller:'', tujuan:'', out:'', supp:'', sopir:'', tgl:'', so:'', do:'', supp_row_index: -1};
                 
                 let rowBg = "bg-white";
                 if (o.tgl) {
@@ -502,6 +574,7 @@
                 
                 htmlStr += `<tr class="${rowBg}">
                     <td><input type="text" value="${o.tgl}" readonly style="font-size:8px; color:#1e293b; font-weight:700;"></td>
+                    <td><input type="text" value="${o.seller || ''}" readonly style="font-size:8px; font-weight:700;"></td>
                     <td><input type="text" value="${o.tujuan}" readonly></td>
                     <td><input type="text" value="${o.sopir || ''}" readonly></td>
                     <td><input type="text" value="${o.out || ''}" readonly class="text-blue-700 font-bold"></td>
