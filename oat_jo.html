@@ -967,7 +967,7 @@
         allowedNopolList.forEach(nopol => {
             const data = rekapNopol[nopol];
             const pengisianHarianLtr = mapPengisianHarianBbm[nopol] || 0;
-            const plusMinusLtr = pengisianHarianLtr - data.bbmLiter;
+            const plusMinusLtr = data.bbmLiter - pengisianHarianLtr;
 
             grandOatKotor += data.oatKotor;
             grandBbmLtr += data.bbmLiter;
