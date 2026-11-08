@@ -88,7 +88,7 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-1 border-b border-slate-200 pb-1 gap-1">
             <div>
                 <h2 class="text-xs font-bold text-slate-800 tracking-wide uppercase flex items-center gap-1">
-                    🚚 DATA JASA TRANSPORT INDO DHARMA GROUP
+                    JASA TRANSPORT INDO DHARMA GROUP
                 </h2>
                 <p class="text-[9px] text-slate-500" id="periode-text">Periode: Menghitung...</p>
             </div>
@@ -201,7 +201,7 @@
         <div class="flex justify-between items-center mb-1 border-b border-slate-200 pb-0.5">
             <div>
                 <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wide flex items-center gap-1">
-                    📊 RESUME PER UNIT 
+                    RESUME PENDAPATAN ALL UNIT 
                 </h3>
                 <p class="text-[8px] text-slate-500">Ringkasan total OAT kotor, biaya operasional, BBM perjalanan, pengisian harian, selisih BBM (plus/minus), potongan, hingga OAT bersih per armada.</p>
             </div>
@@ -213,8 +213,8 @@
                     <tr>
                         <th class="px-1 py-1 text-center font-bold w-[10%]">Nopol Unit</th>
                         <th class="px-1 py-1 text-right font-bold w-[9%]">OAT Kotor</th>
-                        <th class="px-1 py-1 text-center w-[8%]">BBM Perjalanan (L)</th>
-                        <th class="px-1 py-1 text-center w-[8%]">Pengisian Harian (L)</th>
+                        <th class="px-1 py-1 text-center w-[8%]">Estimasi BBM (L)</th>
+                        <th class="px-1 py-1 text-center w-[8%]">Pengisian Unit(L)</th>
                         <th class="px-1 py-1 text-center w-[8%] font-bold">Plus / Minus (L)</th>
                         <th class="px-1 py-1 text-right w-[9%]">BBM (Rp)</th>
                         <th class="px-1 py-1 text-right w-[10%]">Premi</th>
@@ -236,7 +236,7 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-1 border-b border-slate-200 pb-1 gap-1">
             <div>
                 <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wide flex items-center gap-1">
-                    📋 TABEL RITASE MOBIL
+                    TABEL PENDAPATAN PER UNIT
                 </h3>
                 <p class="text-[8px] text-slate-500">Rincian detail per ritase/perjalanan armada berdasarkan unit nopol yang dipilih.</p>
             </div>
@@ -252,13 +252,13 @@
                 <thead class="bg-slate-900 text-white uppercase tracking-wider text-[7.5px]">
                     <tr>
                         <th class="p-0.5 text-center w-[5%]">TANGGAL</th>
-                        <th class="p-0.5 w-[11%]">SHIP TO</th>
-                        <th class="p-0.5 w-[14%]">DESTINATION</th>
-                        <th class="p-0.5 text-center w-[5%]">QUANTITY</th>
+                        <th class="p-0.5 w-[11%]">SUPPLIER</th>
+                        <th class="p-0.5 w-[14%]">TUJUAN</th>
+                        <th class="p-0.5 text-center w-[5%]">QTY</th>
                         <th class="p-0.5 w-[9%]">DRIVER</th>
                         <th class="p-0.5 w-[9%]">HELPER</th>
-                        <th class="p-0.5 text-center w-[5%]">PER TANKI</th>
-                        <th class="p-0.5 text-center w-[5%]">PER LITER</th>
+                        <th class="p-0.5 text-center w-[5%]">OAT/TANGKI</th>
+                        <th class="p-0.5 text-center w-[5%]">OAT/LTR</th>
                         <th class="p-0.5 text-right w-[6.5%]">PREMI DRIVER</th>
                         <th class="p-0.5 text-right w-[6.5%]">PREMI HELPER</th>
                         <th class="p-0.5 text-right w-[6.5%]">UANG MAKAN DRIVER</th>
@@ -281,16 +281,16 @@
     <!-- FLOATING ACTION MENU -->
     <div id="floating-action-menu" class="fixed bottom-3 right-3 z-50 bg-slate-900/90 backdrop-blur p-1.5 rounded-xl border border-slate-600 shadow-xl flex items-center gap-2">
         <button onclick="window.location.href='index.html'" class="bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs py-1.5 px-3 rounded-lg shadow transition flex items-center gap-1 cursor-pointer">
-            🏠 HOME
+            HOME
         </button>
         <button onclick="exportToExcel()" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs py-1.5 px-3 rounded-lg shadow transition flex items-center gap-1 cursor-pointer">
-            📊 EXCEL (.XLSX)
+            EXCEL
         </button>
         <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-1.5 px-3 rounded-lg shadow transition flex items-center gap-1 cursor-pointer">
-            🖨️ PRINT
+            PRINT
         </button>
         <button onclick="simpanSemuaKeSupabase()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-1.5 px-3.5 rounded-lg shadow-md transition flex items-center gap-1 ring-2 ring-emerald-400 animate-pulse hover:animate-none cursor-pointer">
-            💾 SAVE DATA
+            SAVE 
         </button>
     </div>
 
