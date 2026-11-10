@@ -43,12 +43,11 @@
         }
     </script>
     <style>
-        /* Mencegah scroll berlebih & Fit to Screen */
+        /* Tampilan Satu Layar Tanpa Scroll */
         html, body {
-            overflow-x: hidden;
-            overflow-y: hidden; /* <-- Bagian ini awalnya tersembunyi */
+            overflow: hidden; /* Mencegah semua scroll di halaman utama */
             height: 100vh;
-            max-width: 100vw;
+            width: 100vw;
             margin: 0;
             padding: 0;
         }
@@ -56,12 +55,14 @@
     body {
         display: flex;
         flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
     }
 
     main {
         flex-grow: 1;
-        overflow-y: auto; /* <-- Bagian ini membuat main bisa di-scroll */
-        max-height: calc(100vh - 80px - 56px);
+        overflow: hidden; /* Mencegah scroll di dalam konten utama */
+        height: 100%;
     }
 
     .fade-in { animation: fadeIn 0.4s ease-in-out forwards; }
