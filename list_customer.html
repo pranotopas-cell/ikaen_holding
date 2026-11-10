@@ -8,30 +8,33 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 10px;
-            padding-top: 50px; /* Memberikan ruang atas agar tabel tidak tertutup tombol melayang */
-            background-color: #f4f4f9;
+            padding-top: 60px; /* Ruang agar tabel tidak tertutup tombol melayang */
+            background-color: #f4f6f9;
         }
         .table-container {
             max-width: 100%;
             overflow-x: auto;
             background: #fff;
-            padding: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
         }
-        /* Desain Judul Tabel */
+        /* Desain Judul Tabel (Diubah ke Biru Tua) */
         .table-title {
-            background-color: #d32f2f;
+            background-color: #0D47A1;
             color: white;
             text-align: center;
             font-weight: bold;
             font-size: 15px;
-            padding: 6px;
-            border: 1px solid #000;
+            padding: 10px;
+            border: 1px solid #0D47A1;
             border-bottom: none;
-            letter-spacing: 1px;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            letter-spacing: 1.2px;
         }
         
         /* Tombol Aksi Melayang di Kiri Atas */
@@ -42,9 +45,11 @@
             display: flex;
             gap: 8px;
             z-index: 9999;
-            background: transparent;
-            padding: 0;
-            box-shadow: none;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 6px 10px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            backdrop-filter: blur(4px);
         }
 
         table {
@@ -53,17 +58,19 @@
             table-layout: fixed;
         }
         th, td {
-            border: 1px solid #000;
-            padding: 3px 4px;
+            border: 1px solid #cfd8dc;
+            padding: 5px 6px;
             text-align: left;
             font-size: 11px;
             word-wrap: break-word;
         }
         th {
-            background-color: #d32f2f;
+            background-color: #1565C0;
             color: white;
             text-align: center;
             font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
         td input {
             width: 100%;
@@ -73,14 +80,15 @@
             outline: none;
             padding: 2px 0;
             box-sizing: border-box;
+            font-family: inherit;
         }
         /* Membuat Nama Perusahaan menjadi Bold */
         .nama-perusahaan-input {
             font-weight: bold !important;
         }
         td input:focus {
-            background: #fffde7;
-            box-shadow: inset 0 0 0 1px #2196F3; /* Garis fokus ala Excel */
+            background: #e3f2fd;
+            box-shadow: inset 0 0 0 1px #1565C0; /* Garis fokus selaras */
         }
         .text-center {
             text-align: center;
@@ -95,7 +103,7 @@
             border: none;
             border-radius: 4px;
             font-size: 12px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
             transition: transform 0.1s ease, opacity 0.2s ease;
         }
         .btn:active {
@@ -105,27 +113,27 @@
             opacity: 0.9;
         }
         .btn-add {
-            background-color: #4CAF50;
+            background-color: #2e7d32;
             color: white;
         }
         .btn-save {
-            background-color: #2196F3;
+            background-color: #1565C0;
             color: white;
         }
         .btn-print {
-            background-color: #ff9800;
+            background-color: #ef6c00;
             color: white;
         }
         .btn-delete {
-            background-color: #f44336;
+            background-color: #c62828;
             color: white;
-            padding: 2px 4px;
+            padding: 2px 6px;
             font-size: 11px;
             border-radius: 3px;
             box-shadow: none;
         }
         .btn-delete:hover {
-            background-color: #da190b;
+            background-color: #b71c1c;
         }
 
         /* Pengaturan khusus saat dicetak (Print) */
@@ -141,6 +149,18 @@
             .table-container {
                 box-shadow: none;
                 padding: 0;
+                border: none;
+            }
+            .table-title {
+                border: 1px solid #000;
+                background-color: #0D47A1 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            th {
+                background-color: #1565C0 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
             td input {
                 border: none;
@@ -153,14 +173,14 @@
 
     <!-- Tombol Aksi Melayang di Kiri Atas -->
     <div class="action-bar">
-        <button class="btn btn-add" onclick="tambahBarisDiAtas()">&#43; Tambah </button>
-        <button class="btn btn-save" onclick="saveKeSupabase()">💾 Save </button>
-        <button class="btn btn-print" onclick="window.print()">🖨️ Print</button>
+        <button class="btn btn-add" onclick="tambahBarisDiAtas()">&#43; Tambah</button>
+        <button class="btn btn-save" onclick="saveKeSupabase()">Save</button>
+        <button class="btn btn-print" onclick="window.print()">Print</button>
     </div>
 
     <div class="table-container">
         <!-- Judul Tabel -->
-        <div class="table-title">DATA LIST CUSTOMER </div>
+        <div class="table-title">DAFTAR LIST CUSTOMER</div>
 
         <table id="customerTable">
             <thead>
@@ -184,7 +204,7 @@
                 <!-- Data akan dimuat otomatis dari Supabase -->
             </tbody>
             <tfoot>
-                <tr style="background-color: #f1f1f1; font-weight: bold;">
+                <tr style="background-color: #eceff1; font-weight: bold;">
                     <td colspan="8" class="text-right" style="padding-right: 10px;">TOTAL VOL/KL :</td>
                     <td id="totalVolume" class="text-right" style="padding-right: 6px;">0</td>
                     <td colspan="4"></td>
@@ -295,7 +315,6 @@
                 } else if (rowIndex < tbody.children.length - 1) {
                     nextInput = tbody.children[rowIndex + 1].children[1].querySelector("input");
                 } else {
-                    // Jika di baris paling bawah, buat baris baru di bawah
                     const newRow = tambahBaris();
                     nextInput = newRow.children[1].querySelector("input");
                 }
@@ -363,7 +382,7 @@
             }
         }
 
-        // Fungsi Tarik Data (Load) dari Supabase saat halaman dibuka (disort A-Z otomatis saat diload)
+        // Fungsi Tarik Data (Load) dari Supabase
         async function loadDataDariSupabase() {
             try {
                 const { data, error } = await supabaseClient
@@ -411,7 +430,7 @@
 
                     dataAwalDefault.forEach(item => tambahBaris(item));
                 }
-                sortRows(); // Urutkan saat awal dimuat
+                sortRows();
             } catch (err) {
                 console.error(err);
                 alert("Gagal memuat data dari Supabase.");
@@ -419,7 +438,7 @@
             }
         }
 
-        // Fungsi Save / Upsert + Otomatis Sortir A-Z Berdasarkan Nama Perusahaan
+        // Fungsi Save / Upsert + Otomatis Sortir A-Z
         async function saveKeSupabase() {
             const rows = document.querySelectorAll("#tableBody tr");
             const dataToUpsert = [];
@@ -448,9 +467,7 @@
 
                 if (error) throw error;
                 
-                // Urutkan kembali baris tabel secara abjad setelah disimpan
                 sortRows();
-                
                 alert("Data berhasil disimpan / diperbarui dan diurutkan sesuai abjad di Supabase!");
             } catch (err) {
                 console.error(err);
@@ -458,9 +475,9 @@
             }
         }
 
-        // Jalankan saat halaman selesai dimuat untuk menarik data dari Supabase
+        // Jalankan saat halaman selesai dimuat
         window.onload = function() {
-            loadDataDitarget = loadDataDariSupabase();
+            loadDataDariSupabase();
         };
     </script>
 </body>
