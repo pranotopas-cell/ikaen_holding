@@ -521,31 +521,28 @@
             data.forEach(item => {
                 const npClean = cleanNopol(item.no_polisi);
                 
-                // Fungsi helper untuk membersihkan format angka string (jika ada titik sebagai pemisah ribuan)
-                const parseCleanNumber = (val) => {
+                // --- PARSER ANGKA YANG LEBIH AMAN ---
+                const parseBbmSafe = (val) => {
                     if (val === null || val === undefined) return 0;
                     if (typeof val === 'number') return val;
-                    // Ubah string, hilangkan titik pemisah ribuan jika formatnya Indonesia (misal: "1.100" -> "1100")
-                    let cleanStr = String(val).trim();
-                    // Jika mengandung koma sebagai desimal dan titik sebagai ribuan:
-                    if (cleanStr.includes('.') && cleanStr.includes(',')) {
-                        cleanStr = cleanStr.replace(/\./g, '').replace(',', '.');
-                    } else if ((cleanStr.match(/\./g) || []).length > 1) {
-                        // Jika titik lebih dari satu, anggap sebagai pemisah ribuan
-                        cleanStr = cleanStr.replace(/\./g, '');
-                    } else if (cleanStr.length > 4 && cleanStr.includes('.')) {
-                        // Contoh: "1100.00" aman, tapi kalau "1.100" tanpa desimal di belakang:
-                        // Cek apakah titik tersebut pemisah ribuan (biasanya diikuti 3 digit)
-                        if (/\.\d{3}$/.test(cleanStr)) {
-                            cleanStr = cleanStr.replace(/\./g, '');
-                        }
+                    
+                    let str = String(val).trim();
+                    
+                    // Jika formatnya menggunakan titik sebagai pemisah ribuan (contoh: "1.100" atau "1.250,50")
+                    // Kita hilangkan titik pemisah ribuan jika setelah titik ada 3 angka persis tanpa koma di belakangnya
+                    if (/^\d{1,3}(\.\d{3})+([.,]\d+)?$/.test(str)) {
+                        str = str.replace(/\./g, '').replace(',', '.');
+                    } else {
+                        // Jika berupa string biasa, ganti koma dengan titik desimal standar JS
+                        str = str.replace(',', '.');
                     }
-                    return parseFloat(cleanStr) || 0;
+                    
+                    return parseFloat(str) || 0;
                 };
 
-                const kmVal = parseCleanNumber(item.total_perjalanan_km);
-                const bbmVal = parseCleanNumber(item.total_bbm_liter);
-                const kmlVal = parseCleanNumber(item.km_per_liter) || (bbmVal > 0 ? kmVal / bbmVal : 0);
+                const kmVal = parseBbmSafe(item.total_perjalanan_km);
+                const bbmVal = parseBbmSafe(item.total_bbm_liter);
+                const kmlVal = parseBbmSafe(item.km_per_liter) || (bbmVal > 0 ? kmVal / bbmVal : 0);
 
                 allowedNopolList.forEach(targetNopol => {
                     if (cleanNopol(targetNopol) === npClean) {
