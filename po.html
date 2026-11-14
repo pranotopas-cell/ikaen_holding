@@ -379,7 +379,10 @@
                         manual_do: savedDo,
                         is_manual: isLocked,
                         supp_row_index: -1,
-                        deficit_qty: 0
+                        deficit_qty: 0,
+                        // Simpan nilai awal dari database untuk deteksi perubahan
+                        db_so: savedSo,
+                        db_do: savedDo
                     };
                 });
 
@@ -811,37 +814,47 @@
                     throw new Error("Kolom ID pada tabel data_pengiriman tidak ditemukan. Pastikan tabel memiliki primary key.");
                 }
 
-                // Kirim bertahap per 15 baris langsung ke kolom no_so dan no_do di tabel data_pengiriman
-                const batchSize = 15;
-                for (let i = 0; i < validRows.length; i += batchSize) {
-                    const batch = validRows.slice(i, i + batchSize);
-                    btn.innerText = `SAVING (${Math.min(i + batchSize, validRows.length)}/${validRows.length})...`;
+                // OPTIMASI: Hanya ambil baris data pengiriman yang mengalami perubahan (SO atau DO berbeda dari database)
+                const changedRows = validRows.filter(o => {
+                    const currentSo = (o.so || '').trim();
+                    const currentDo = (o.do || '').trim();
+                    const initialSo = (o.db_so || '').trim();
+                    const initialDo = (o.db_do || '').trim();
+                    return currentSo !== initialSo || currentDo !== initialDo;
+                });
 
-                    const batchPromises = batch.map(o => {
-                        const finalSo = (o.so || '').trim();
-                        const finalDo = (o.do || '').trim();
+                if (changedRows.length > 0) {
+                    const batchSize = 15;
+                    for (let i = 0; i < changedRows.length; i += batchSize) {
+                        const batch = changedRows.slice(i, i + batchSize);
+                        btn.innerText = `SAVING (${Math.min(i + batchSize, changedRows.length)}/${changedRows.length})...`;
 
-                        return _client
-                            .from('data_pengiriman')
-                            .update({ 
-                                no_so: finalSo, 
-                                no_do: finalDo
-                            })
-                            .eq(o.pk_col, o.id)
-                            .select(o.pk_col);
-                    });
+                        const batchPromises = batch.map(o => {
+                            const finalSo = (o.so || '').trim();
+                            const finalDo = (o.do || '').trim();
 
-                    const results = await Promise.all(batchPromises);
-                    const errRes = results.find(r => r.error);
-                    if (errRes) throw errRes.error;
+                            return _client
+                                .from('data_pengiriman')
+                                .update({ 
+                                    no_so: finalSo, 
+                                    no_do: finalDo
+                                })
+                                .eq(o.pk_col, o.id)
+                                .select(o.pk_col);
+                        });
 
-                    const emptyRes = results.find(r => !r.data || r.data.length === 0);
-                    if (emptyRes) {
-                        throw new Error("Update ke data_pengiriman ditolak oleh RLS Policy Supabase.");
+                        const results = await Promise.all(batchPromises);
+                        const errRes = results.find(r => r.error);
+                        if (errRes) throw errRes.error;
+
+                        const emptyRes = results.find(r => !r.data || r.data.length === 0);
+                        if (emptyRes) {
+                            throw new Error("Update ke data_pengiriman ditolak oleh RLS Policy Supabase.");
+                        }
                     }
                 }
 
-                alert(`Berhasil Tersimpan! (${validRows.length} data pengiriman diperbarui)`);
+                alert(`Berhasil Tersimpan! (${changedRows.length} data pengiriman yang berubah diperbarui)`);
                 await loadInitialData();
 
             } catch (err) { 
