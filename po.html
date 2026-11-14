@@ -342,7 +342,7 @@
 
                 const [resSupp, resLog] = await Promise.all([
                     _client.from('purchase_orders').select('*').gte('tgl_po', range.start).lte('tgl_po', range.end).order('id', { ascending: true }),
-                    _client.from('data_pengiriman').select('*').gte('tanggal', range.start).lte('tanggal', range.end).order('tanggal', { ascending: true })
+                    _client.from('data_pengiriman').select('*').gte('tanggal', range.start).lte('tanggal', range.end).order('tanggal', { ascending: true }).order('id', { ascending: true })
                 ]);
 
                 dataSupp = (resSupp.data || []).map(d => ({ 
@@ -358,10 +358,16 @@
                     const isValidSupplier = !s.includes('petro') && !s.includes('pan') && !s.includes('transport');
                     return qtyVal > 0 && isValidSupplier;
                 }).map(d => {
-                    const savedSo = d.no_so || '';
-                    const savedDo = d.no_do || '';
+                    const savedSo = (d.no_so !== null && d.no_so !== undefined) ? String(d.no_so).trim() : '';
+                    const savedDo = (d.no_do !== null && d.no_do !== undefined) ? String(d.no_do).trim() : '';
+                    const isLocked = Boolean(savedSo || savedDo);
+
+                    // Deteksi otomatis nama kolom primary key (id, id_pengiriman, uuid, dll)
+                    const pkKey = Object.keys(d).find(k => k === 'id' || k.startsWith('id_') || k.endsWith('_id')) || 'id';
+
                     return {
-                        id: d.id,
+                        pk_col: pkKey,
+                        id: d[pkKey],
                         tujuan: d.delivery_to || '', 
                         out: parseFloat(d.jumlah_keluar) || 0, 
                         supp: d.supplier || '', 
@@ -371,7 +377,7 @@
                         do: savedDo,
                         manual_so: savedSo,
                         manual_do: savedDo,
-                        is_manual: Boolean(savedSo.trim() || savedDo.trim()),
+                        is_manual: isLocked,
                         supp_row_index: -1,
                         deficit_qty: 0
                     };
@@ -390,8 +396,16 @@
             const o = dataOut[realIdx];
             if (!o) return;
 
-            if (field === 'so') o.manual_so = value;
-            if (field === 'do') o.manual_do = value;
+            const cleanVal = (value || '').trim();
+
+            if (field === 'so') {
+                o.manual_so = cleanVal;
+                if (!o.is_manual) o.manual_do = o.do || '';
+            }
+            if (field === 'do') {
+                o.manual_do = cleanVal;
+                if (!o.is_manual) o.manual_so = o.so || '';
+            }
 
             const hasManualSo = (o.manual_so || '').trim() !== '';
             const hasManualDo = (o.manual_do || '').trim() !== '';
@@ -403,26 +417,25 @@
                 o.manual_do = '';
             } else {
                 o.is_manual = true;
-                // Jika user hanya mengisi salah satu (misal SO saja), otomatis lengkapi DO dari PO yang cocok
                 const mSo = (o.manual_so || '').trim().toLowerCase();
                 const mDo = (o.manual_do || '').trim().toLowerCase();
                 const suppKey = (o.supp || '').toLowerCase().trim();
 
+                // Jika user mengubah SO saja (atau mengisi salah satu), otomatis sesuaikan pasangan DO/SO dari PO yang cocok
                 const matchedSupp = dataSupp.find(s => {
                     if (s.isDeficit) return false;
                     const inuKey = (s.inu || '').toLowerCase().trim();
                     if (inuKey !== suppKey) return false;
                     const sSo = (s.so || '').trim().toLowerCase();
                     const sDo = (s.do || '').trim().toLowerCase();
-                    if (mSo && mDo) return sSo === mSo && sDo === mDo;
-                    if (mSo) return sSo === mSo;
-                    if (mDo) return sDo === mDo;
+                    if (field === 'so' && mSo) return sSo === mSo;
+                    if (field === 'do' && mDo) return sDo === mDo;
                     return false;
                 });
 
                 if (matchedSupp) {
-                    if (!hasManualSo && matchedSupp.so) o.manual_so = matchedSupp.so;
-                    if (!hasManualDo && matchedSupp.do) o.manual_do = matchedSupp.do;
+                    if (field === 'so' && matchedSupp.do) o.manual_do = matchedSupp.do;
+                    if (field === 'do' && matchedSupp.so) o.manual_so = matchedSupp.so;
                 }
             }
 
@@ -440,7 +453,7 @@
                 original_ref: s
             }));
 
-            // TAHAP 1: PRIORITAS ALOKASI UNTUK BARIS PENJUALAN DENGAN SO / DO MANUAL
+            // TAHAP 1: PRIORITAS ALOKASI UNTUK BARIS PENJUALAN DENGAN SO / DO YANG DIKUNCI / DIEDIT
             dataOut.forEach(o => {
                 o.deficit_qty = 0;
                 if (!o.is_manual) return;
@@ -504,7 +517,7 @@
                 o.deficit_qty = remainingOut;
             });
 
-            // TAHAP 2: ALOKASI OTOMATIS (PRIORITAS QTY 8 & FIFO STANDAR) UNTUK BARIS NON-MANUAL
+            // TAHAP 2: ALOKASI OTOMATIS (PRIORITAS QTY 8 & FIFO STANDAR) UNTUK BARIS YANG BELUM ADA SO/DO
             dataOut.forEach(o => {
                 if (o.is_manual) return;
 
@@ -627,10 +640,10 @@
 
                 const isEditable = realIdx !== -1;
                 const soAttrs = isEditable 
-                    ? `onchange="handleManualSoDo(${realIdx}, 'so', this.value)" onkeydown="if(event.key==='Enter'){this.blur();}"` 
+                    ? `oninput="dataOut[${realIdx}].so = this.value; dataOut[${realIdx}].manual_so = this.value; dataOut[${realIdx}].is_manual = true;" onchange="handleManualSoDo(${realIdx}, 'so', this.value)" onkeydown="if(event.key==='Enter'){this.blur();}"` 
                     : `readonly`;
                 const doAttrs = isEditable 
-                    ? `onchange="handleManualSoDo(${realIdx}, 'do', this.value)" onkeydown="if(event.key==='Enter'){this.blur();}"` 
+                    ? `oninput="dataOut[${realIdx}].do = this.value; dataOut[${realIdx}].manual_do = this.value; dataOut[${realIdx}].is_manual = true;" onchange="handleManualSoDo(${realIdx}, 'do', this.value)" onkeydown="if(event.key==='Enter'){this.blur();}"` 
                     : `readonly`;
                 
                 htmlStr += `<tr class="${rowBg}">
@@ -763,6 +776,8 @@
 
             try {
                 btn.innerText = "SAVING...";
+                processLogic();
+
                 const range = getSelectedDateRange();
 
                 const s = dataSupp
@@ -790,30 +805,43 @@
                     if (insSupp.error) throw insSupp.error;
                 }
 
-                // Simpan perubahan manual SO / DO ke kolom no_so_do di tabel data_pengiriman
-                const outUpdates = dataOut
-                    .filter(o => o.id !== undefined && o.id !== null)
-                    .map(o => {
-                        const soVal = o.manual_so || '';
-                        const doVal = o.manual_do || '';
-                        // Format gabungan atau sesuaikan dengan kebutuhan kolom no_so_do Anda
-                        const combinedSoDo = (soVal || doVal) ? `SO: ${soVal} | DO: ${doVal}` : '';
+                // Cek apakah dataOut memiliki ID yang valid
+                const validRows = dataOut.filter(o => o.id !== undefined && o.id !== null);
+                if (dataOut.length > 0 && validRows.length === 0) {
+                    throw new Error("Kolom ID pada tabel data_pengiriman tidak ditemukan. Pastikan tabel memiliki primary key.");
+                }
+
+                // Kirim bertahap per 15 baris langsung ke kolom no_so dan no_do di tabel data_pengiriman
+                const batchSize = 15;
+                for (let i = 0; i < validRows.length; i += batchSize) {
+                    const batch = validRows.slice(i, i + batchSize);
+                    btn.innerText = `SAVING (${Math.min(i + batchSize, validRows.length)}/${validRows.length})...`;
+
+                    const batchPromises = batch.map(o => {
+                        const finalSo = (o.so || '').trim();
+                        const finalDo = (o.do || '').trim();
 
                         return _client
                             .from('data_pengiriman')
                             .update({ 
-                                no_so_do: o.is_manual ? combinedSoDo : null 
+                                no_so: finalSo, 
+                                no_do: finalDo
                             })
-                            .eq('id', o.id);
+                            .eq(o.pk_col, o.id)
+                            .select(o.pk_col);
                     });
 
-                if (outUpdates.length > 0) {
-                    const results = await Promise.all(outUpdates);
+                    const results = await Promise.all(batchPromises);
                     const errRes = results.find(r => r.error);
                     if (errRes) throw errRes.error;
+
+                    const emptyRes = results.find(r => !r.data || r.data.length === 0);
+                    if (emptyRes) {
+                        throw new Error("Update ke data_pengiriman ditolak oleh RLS Policy Supabase.");
+                    }
                 }
 
-                alert("Berhasil Tersimpan!");
+                alert(`Berhasil Tersimpan! (${validRows.length} data pengiriman diperbarui)`);
                 await loadInitialData();
 
             } catch (err) { 
