@@ -111,13 +111,14 @@
         .status-oper { background-color: #fd7e14 !important; color: #ffffff !important; }
         
         .input-combo { width: 92%; font-size: 11px; padding: 3px 1px; border: 1px solid #ced4da; border-radius: 2px; text-align: center; color: #495057; font-weight: bold; margin: 1px 0; background: #fff; }
-        .no-sj-display { font-size: 9px; font-weight: bold; color: var(--accent-red); background: #e8f4fd; border: 1px dashed #b6d4fe; border-radius: 2px; padding: 1px 2px; margin-top: 2px; word-break: break-all; min-height: 14px; }
-        .no-po-display { font-size: 8px; font-weight: bold; color: #004080; background: #eef2f7; border: 1px dashed #9bc0e6; border-radius: 2px; padding: 1px 2px; margin-top: 2px; word-break: break-all; min-height: 14px; }
+        .no-sj-display { font-size: 9.5px; font-weight: bold; color: var(--accent-red); background: #e8f4fd; border: 1px dashed #b6d4fe; border-radius: 2px; padding: 1px 2px; margin-top: 2px; word-break: break-all; min-height: 14px; }
+        .no-po-display { font-size: 9px; font-weight: bold; color: #004080; background: #eef2f7; border: 1px dashed #9bc0e6; border-radius: 2px; padding: 1px 2px; margin-top: 2px; word-break: break-all; min-height: 14px; }
         
-        /* Kotak SO & DO otomatis dan bisa diedit manual */
-        .no-po-supplier-display { font-size: 8px; font-weight: bold; color: #1e7e34; background: #e6f4ea; border: 1px dashed #a8dab5; border-radius: 2px; padding: 2px; margin-top: 2px; word-break: break-all; min-height: 14px; outline: none; cursor: text; }
+        /* Kotak SO & DO di kolom Supplier */
+        .no-so-supplier-display { font-size: 8.5px; font-weight: bold; color: #004080; background: #eef2f7; border: 1px dashed #9bc0e6; border-radius: 2px; padding: 2px; margin-top: 2px; word-break: break-all; min-height: 14px; outline: none; cursor: text; }
+        .no-do-supplier-display { font-size: 8.5px; font-weight: bold; color: #1e7e34; background: #e6f4ea; border: 1px dashed #a8dab5; border-radius: 2px; padding: 2px; margin-top: 2px; word-break: break-all; min-height: 14px; outline: none; cursor: text; }
 
-        .no-rangka-display { font-size: 8px; font-weight: bold; color: #bd2130 ; background: #e9ecef; border-radius: 2px; padding: 1px 2px; margin-top: 2px; word-break: break-all; }
+        .no-rangka-display { font-size: 10px; font-weight: bold; color: #bd2130 ; background: #e9ecef; border-radius: 2px; padding: 1px 2px; margin-top: 2px; word-break: break-all; }
         .action-cell { display: flex; gap: 3px; justify-content: center; align-items: center; height: 100%; }
         .btn-add, .btn-del { border: 1px solid #ced4da; background: #fff; border-radius: 3px; width: 24px; height: 24px; cursor: pointer; font-size: 16px; font-weight: bold; color: var(--primary); display: flex; align-items: center; justify-content: center; }
         
@@ -480,7 +481,7 @@
 
             displayDates.forEach(dateStr => {
                 const dayRows = data ? data.filter(r => r.tanggal === dateStr) : [];
-                const finalRows = dayRows.length > 0 ? dayRows : [{ seller: '', no_po_customer: '', supplier: '', jumlah_masuk: '', delivery_to: '', no_sj: '', lokasi: '', nopol: '', sopir: '', jumlah_keluar: '', status: '', no_so_do: '' }];
+                const finalRows = dayRows.length > 0 ? dayRows : [{ seller: '', no_po_customer: '', supplier: '', jumlah_masuk: '', delivery_to: '', no_sj: '', lokasi: '', nopol: '', sopir: '', jumlah_keluar: '', status: '', no_so: '', no_do: '' }];
                 finalRows.forEach((item, i) => {
                     const tr = createRow(dateStr, item, i, finalRows.length, todayStr);
                     tbody.appendChild(tr);
@@ -502,8 +503,9 @@
 
             const noRangka = getNoRangka(item.nopol);
 
-            // Langsung ambil nilai no_so_do dari kolom tabel data_pengiriman
-            let initialSoDo = item.no_so_do || '';
+            // Ambil nilai no_so dan no_do dari kolom tabel data_pengiriman
+            let initialSo = item.no_so || '';
+            let initialDo = item.no_do || '';
 
             tr.innerHTML = `
                 ${dateHtml}
@@ -513,7 +515,8 @@
                 </td>
                 <td>
                     <div contenteditable="true" class="cell-data cell-supplier">${item.supplier || ''}</div>
-                    <div contenteditable="true" class="no-po-supplier-display" placeholder="SO & DO">${initialSoDo}</div>
+                    <div contenteditable="true" class="no-so-supplier-display" placeholder="NO SO">${initialSo}</div>
+                    <div contenteditable="true" class="no-do-supplier-display" placeholder="NO DO">${initialDo}</div>
                 </td>
                 <td contenteditable="true" class="cell-data cell-in">${item.jumlah_masuk || ''}</td>
                 <td>
@@ -571,10 +574,10 @@
                     if(el.tagName === 'INPUT') el.value = ''; else el.innerText = '';
                 });
                 currentRow.querySelector('.no-rangka-display').innerText = '';
-                const poSupp = currentRow.querySelector('.no-po-supplier-display');
-                if(poSupp) {
-                    poSupp.innerText = '';
-                }
+                const soSupp = currentRow.querySelector('.no-so-supplier-display');
+                if(soSupp) soSupp.innerText = '';
+                const doSupp = currentRow.querySelector('.no-do-supplier-display');
+                if(doSupp) doSupp.innerText = '';
             }
             updateDateRowspan(tgl);
             processCalculations(false);
@@ -804,11 +807,13 @@
                 const jumlah_keluar = parseFloat(r.querySelector('.cell-out').innerText) || null;
                 const status = r.querySelector('.cell-status').innerText.trim();
                 const no_rangka = getNoRangka(nopol);
-                // Simpan langsung nilai dari kotak SO & DO ke kolom no_so_do
-                const no_so_do = r.querySelector('.no-po-supplier-display').innerText.trim();
+                
+                // Ambil nilai dari kotak SO (atas) dan DO (bawah) di kolom Supplier
+                const no_so = r.querySelector('.no-so-supplier-display').innerText.trim();
+                const no_do = r.querySelector('.no-do-supplier-display').innerText.trim();
 
-                if(seller || no_po_customer || supplier || jumlah_masuk || delivery_to || no_sj || lokasi || nopol || sopir || jumlah_keluar || status || no_so_do) {
-                    records.push({ tanggal, seller, no_po_customer, supplier, jumlah_masuk, delivery_to, no_sj, lokasi, nopol, sopir, jumlah_keluar, status, no_rangka, no_so_do });
+                if(seller || no_po_customer || supplier || jumlah_masuk || delivery_to || no_sj || lokasi || nopol || sopir || jumlah_keluar || status || no_so || no_do) {
+                    records.push({ tanggal, seller, no_po_customer, supplier, jumlah_masuk, delivery_to, no_sj, lokasi, nopol, sopir, jumlah_keluar, status, no_rangka, no_so, no_do });
                 }
             });
 
