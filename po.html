@@ -346,12 +346,12 @@
                 ]);
 
                 dataSupp = (resSupp.data || []).map(d => ({ 
+                    id: d.id,
                     unit: d.po_code || '', tgl: convertToDisplay(d.tgl_po), nopo: d.no_po || '', 
                     so: d.no_so || '', do: d.no_do || '', inu: d.tujuan || '', 
                     qty_in: parseFloat(d.qty) || 0, qty_sisa: 0, isDeficit: false
                 }));
 
-                // Filter data pengiriman: abaikan jika qty 0 atau kosong, serta abaikan supplier tertentu
                 dataOut = (resLog.data || []).filter(d => {
                     const s = (d.supplier || '').toLowerCase();
                     const qtyVal = parseFloat(d.jumlah_keluar) || 0;
@@ -362,7 +362,6 @@
                     const savedDo = (d.no_do !== null && d.no_do !== undefined) ? String(d.no_do).trim() : '';
                     const isLocked = Boolean(savedSo || savedDo);
 
-                    // Deteksi otomatis nama kolom primary key (id, id_pengiriman, uuid, dll)
                     const pkKey = Object.keys(d).find(k => k === 'id' || k.startsWith('id_') || k.endsWith('_id')) || 'id';
 
                     return {
@@ -379,17 +378,14 @@
                         manual_do: savedDo,
                         is_manual: isLocked,
                         supp_row_index: -1,
-                        deficit_qty: 0,
-                        // Simpan nilai awal dari database untuk deteksi perubahan
-                        db_so: savedSo,
-                        db_do: savedDo
+                        deficit_qty: 0
                     };
                 });
 
                 processLogic();
 
                 const targetLength = Math.max(15, dataOut.length);
-                if(dataSupp.length < targetLength) while(dataSupp.length < targetLength) dataSupp.push({unit:'', tgl:'', nopo:'', so:'', do:'', inu:'', qty_in:0, qty_sisa:0, isDeficit: false});
+                if(dataSupp.length < targetLength) while(dataSupp.length < targetLength) dataSupp.push({id: null, unit:'', tgl:'', nopo:'', so:'', do:'', inu:'', qty_in:0, qty_sisa:0, isDeficit: false});
 
                 renderTable();
             } catch (err) { console.error(err); }
@@ -413,7 +409,6 @@
             const hasManualSo = (o.manual_so || '').trim() !== '';
             const hasManualDo = (o.manual_do || '').trim() !== '';
 
-            // Jika kedua kolom dikosongkan, kembali ke mode otomatis FIFO
             if (!hasManualSo && !hasManualDo) {
                 o.is_manual = false;
                 o.manual_so = '';
@@ -424,7 +419,6 @@
                 const mDo = (o.manual_do || '').trim().toLowerCase();
                 const suppKey = (o.supp || '').toLowerCase().trim();
 
-                // Jika user mengubah SO saja (atau mengisi salah satu), otomatis sesuaikan pasangan DO/SO dari PO yang cocok
                 const matchedSupp = dataSupp.find(s => {
                     if (s.isDeficit) return false;
                     const inuKey = (s.inu || '').toLowerCase().trim();
@@ -456,7 +450,6 @@
                 original_ref: s
             }));
 
-            // TAHAP 1: PRIORITAS ALOKASI UNTUK BARIS PENJUALAN DENGAN SO / DO YANG DIKUNCI / DIEDIT
             dataOut.forEach(o => {
                 o.deficit_qty = 0;
                 if (!o.is_manual) return;
@@ -470,7 +463,6 @@
                 const targetDo = o.do.toLowerCase().trim();
                 let remainingOut = o.out;
 
-                // Cari PO dengan supplier & nomor SO/DO yang cocok (utamakan yang masih ada sisa kuota)
                 for (let pass = 0; pass < 2; pass++) {
                     for (let i = 0; i < suppPool.length; i++) {
                         const s = suppPool[i];
@@ -502,7 +494,6 @@
                     if (remainingOut <= 0 || o.supp_row_index !== -1) break;
                 }
 
-                // Jika PO pasangan manual tidak cukup kuotanya, lanjut potong FIFO dari PO supplier yang sama
                 if (remainingOut > 0) {
                     for (let i = 0; i < suppPool.length; i++) {
                         const s = suppPool[i];
@@ -520,7 +511,6 @@
                 o.deficit_qty = remainingOut;
             });
 
-            // TAHAP 2: ALOKASI OTOMATIS (PRIORITAS QTY 8 & FIFO STANDAR) UNTUK BARIS YANG BELUM ADA SO/DO
             dataOut.forEach(o => {
                 if (o.is_manual) return;
 
@@ -531,7 +521,6 @@
                 o.do = '';
                 o.supp_row_index = -1;
                 
-                // PRIORITAS KHUSUS QTY = 8
                 if (remainingOut === 8) {
                     for (let i = 0; i < suppPool.length; i++) {
                         const s = suppPool[i];
@@ -550,7 +539,6 @@
                     }
                 }
 
-                // ALOKASI FIFO STANDAR
                 if (remainingOut > 0) {
                     for (let i = 0; i < suppPool.length; i++) {
                         const s = suppPool[i];
@@ -589,7 +577,7 @@
             Object.keys(remainingUsage).forEach(key => {
                 if (remainingUsage[key] > 0) {
                     dataSupp.push({
-                        unit: 'DEFISIT', tgl: '', nopo: 'OVERFLOW', so: '', do: '',
+                        id: null, unit: 'DEFISIT', tgl: '', nopo: 'OVERFLOW', so: '', do: '',
                         inu: key.toUpperCase(), qty_in: 0, qty_sisa: -remainingUsage[key], isDeficit: true
                     });
                 }
@@ -759,15 +747,46 @@
 
         function addRow(t, idx) {
             if(t==='supp') {
-                dataSupp.splice(idx+1, 0, {unit:'', tgl:'', nopo:'', so:'', do:'', inu:'', qty_in:0, qty_sisa:0, isDeficit: false});
+                dataSupp.splice(idx+1, 0, {id: null, unit:'', tgl:'', nopo:'', so:'', do:'', inu:'', qty_in:0, qty_sisa:0, isDeficit: false});
             }
             processLogic();
             renderTable();
         }
 
-        function removeRow(t, idx) {
-            if(t==='supp' && dataSupp.length > 1) {
-                dataSupp.splice(idx, 1);
+        // FUNGSI REMOVEROW YANG DIUPDATE DENGAN KONEKSI DATABASE SUPABASE
+        async function removeRow(t, idx) {
+            if (t === 'supp') {
+                const item = dataSupp[idx];
+                if (!item) return;
+
+                // Jika baris sudah tersimpan di database (memiliki ID atau Nomor PO), hapus juga dari Supabase
+                if (item.id || item.nopo) {
+                    if (!confirm(`Hapus PO "${item.nopo || 'Baris ini'}" dari database Supabase?`)) return;
+
+                    try {
+                        let query = _client.from('purchase_orders').delete();
+                        if (item.id) {
+                            query = query.eq('id', item.id);
+                        } else if (item.nopo) {
+                            query = query.eq('no_po', item.nopo);
+                        }
+
+                        const { error } = await query;
+                        if (error) throw error;
+                    } catch (err) {
+                        console.error("Gagal menghapus dari database:", err.message);
+                        alert("Gagal menghapus dari database: " + err.message);
+                        return;
+                    }
+                }
+
+                // Hapus dari array lokal jika baris lebih dari 1
+                if (dataSupp.length > 1) {
+                    dataSupp.splice(idx, 1);
+                } else {
+                    // Kosongkan jika sisa 1 baris terakhir
+                    dataSupp[0] = {id: null, unit:'', tgl:'', nopo:'', so:'', do:'', inu:'', qty_in:0, qty_sisa:0, isDeficit: false};
+                }
             }
             processLogic();
             renderTable();
@@ -792,7 +811,7 @@
                         no_so: x.so || '', 
                         no_do: x.do || '', 
                         tujuan: x.inu || '', 
-                        qty: parseFloat(x.qty_in) || 0 
+                        qty: parseFloat(x.qty) || 0 
                     }));
 
                 const delSupp = await _client
@@ -808,53 +827,41 @@
                     if (insSupp.error) throw insSupp.error;
                 }
 
-                // Cek apakah dataOut memiliki ID yang valid
                 const validRows = dataOut.filter(o => o.id !== undefined && o.id !== null);
                 if (dataOut.length > 0 && validRows.length === 0) {
                     throw new Error("Kolom ID pada tabel data_pengiriman tidak ditemukan. Pastikan tabel memiliki primary key.");
                 }
 
-                // OPTIMASI: Hanya ambil baris data pengiriman yang mengalami perubahan (SO atau DO berbeda dari database)
-                const changedRows = validRows.filter(o => {
-                    const currentSo = (o.so || '').trim();
-                    const currentDo = (o.do || '').trim();
-                    const initialSo = (o.db_so || '').trim();
-                    const initialDo = (o.db_do || '').trim();
-                    return currentSo !== initialSo || currentDo !== initialDo;
-                });
+                const batchSize = 15;
+                for (let i = 0; i < validRows.length; i += batchSize) {
+                    const batch = validRows.slice(i, i + batchSize);
+                    btn.innerText = `SAVING (${Math.min(i + batchSize, validRows.length)}/${validRows.length})...`;
 
-                if (changedRows.length > 0) {
-                    const batchSize = 15;
-                    for (let i = 0; i < changedRows.length; i += batchSize) {
-                        const batch = changedRows.slice(i, i + batchSize);
-                        btn.innerText = `SAVING (${Math.min(i + batchSize, changedRows.length)}/${changedRows.length})...`;
+                    const batchPromises = batch.map(o => {
+                        const finalSo = (o.so || '').trim();
+                        const finalDo = (o.do || '').trim();
 
-                        const batchPromises = batch.map(o => {
-                            const finalSo = (o.so || '').trim();
-                            const finalDo = (o.do || '').trim();
+                        return _client
+                            .from('data_pengiriman')
+                            .update({ 
+                                no_so: finalSo, 
+                                no_do: finalDo
+                            })
+                            .eq(o.pk_col, o.id)
+                            .select(o.pk_col);
+                    });
 
-                            return _client
-                                .from('data_pengiriman')
-                                .update({ 
-                                    no_so: finalSo, 
-                                    no_do: finalDo
-                                })
-                                .eq(o.pk_col, o.id)
-                                .select(o.pk_col);
-                        });
+                    const results = await Promise.all(batchPromises);
+                    const errRes = results.find(r => r.error);
+                    if (errRes) throw errRes.error;
 
-                        const results = await Promise.all(batchPromises);
-                        const errRes = results.find(r => r.error);
-                        if (errRes) throw errRes.error;
-
-                        const emptyRes = results.find(r => !r.data || r.data.length === 0);
-                        if (emptyRes) {
-                            throw new Error("Update ke data_pengiriman ditolak oleh RLS Policy Supabase.");
-                        }
+                    const emptyRes = results.find(r => !r.data || r.data.length === 0);
+                    if (emptyRes) {
+                        throw new Error("Update ke data_pengiriman ditolak oleh RLS Policy Supabase.");
                     }
                 }
 
-                alert(`Berhasil Tersimpan! (${changedRows.length} data pengiriman yang berubah diperbarui)`);
+                alert(`Berhasil Tersimpan! (${validRows.length} data pengiriman diperbarui)`);
                 await loadInitialData();
 
             } catch (err) { 
