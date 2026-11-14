@@ -220,26 +220,25 @@
             </div>
         </div>
 
-        <!-- 2. REALISASI PENJUALAN -->
+        <!-- 2. REALISASI PENJUALAN (LEBIH LEBAR) -->
         <div class="w-[55%]">
             <div class="section-label"><span class="dot"></span> 2. REALISASI PENJUALAN </div>
             <div class="table-scroll-container">
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 55px;">DATE</th>
-                            <th style="width: 50px;">SELLER</th>
+                            <th style="width: 60px;">DATE</th>
                             <th>DELIVERY</th>
-                            <th style="width: 110px;">SOPIR</th>
+                            <th style="width: 135px;">SOPIR</th>
                             <th style="width: 35px;">QTY</th>
-                            <th style="width: 80px;">SO</th>
-                            <th style="width: 80px;">DO</th>
+                            <th style="width: 90px;">SO</th>
+                            <th style="width: 90px;">DO</th>
                         </tr>
                     </thead>
                     <tbody id="body-out"></tbody>
                     <tfoot>
                         <tr class="bg-footer">
-                            <td colspan="4" class="text-right pr-2 py-1">TOTAL OUT</td>
+                            <td colspan="3" class="text-right pr-2 py-1">TOTAL OUT</td>
                             <td id="total-del" class="text-center">0</td>
                             <td colspan="2"></td>
                         </tr>
@@ -352,20 +351,31 @@
                     qty_in: parseFloat(d.qty) || 0, qty_sisa: 0, isDeficit: false
                 }));
 
+                // Filter data pengiriman: abaikan jika qty 0 atau kosong, serta abaikan supplier tertentu
                 dataOut = (resLog.data || []).filter(d => {
                     const s = (d.supplier || '').toLowerCase();
                     const qtyVal = parseFloat(d.jumlah_keluar) || 0;
                     const isValidSupplier = !s.includes('petro') && !s.includes('pan') && !s.includes('transport');
                     return qtyVal > 0 && isValidSupplier;
-                }).map(d => ({ 
-                    seller: d.seller || '',
-                    tujuan: d.delivery_to || '', 
-                    out: parseFloat(d.jumlah_keluar) || 0, 
-                    supp: d.supplier || '', 
-                    sopir: d.sopir || '', 
-                    tgl: convertToDisplay(d.tanggal),
-                    so: '', do: '', supp_row_index: -1 
-                }));
+                }).map(d => {
+                    const savedSo = d.no_so || '';
+                    const savedDo = d.no_do || '';
+                    return {
+                        id: d.id,
+                        tujuan: d.delivery_to || '', 
+                        out: parseFloat(d.jumlah_keluar) || 0, 
+                        supp: d.supplier || '', 
+                        sopir: d.sopir || '', 
+                        tgl: convertToDisplay(d.tanggal),
+                        so: savedSo, 
+                        do: savedDo,
+                        manual_so: savedSo,
+                        manual_do: savedDo,
+                        is_manual: Boolean(savedSo.trim() || savedDo.trim()),
+                        supp_row_index: -1,
+                        deficit_qty: 0
+                    };
+                });
 
                 processLogic();
 
@@ -374,6 +384,50 @@
 
                 renderTable();
             } catch (err) { console.error(err); }
+        }
+
+        function handleManualSoDo(realIdx, field, value) {
+            const o = dataOut[realIdx];
+            if (!o) return;
+
+            if (field === 'so') o.manual_so = value;
+            if (field === 'do') o.manual_do = value;
+
+            const hasManualSo = (o.manual_so || '').trim() !== '';
+            const hasManualDo = (o.manual_do || '').trim() !== '';
+
+            // Jika kedua kolom dikosongkan, kembali ke mode otomatis FIFO
+            if (!hasManualSo && !hasManualDo) {
+                o.is_manual = false;
+                o.manual_so = '';
+                o.manual_do = '';
+            } else {
+                o.is_manual = true;
+                // Jika user hanya mengisi salah satu (misal SO saja), otomatis lengkapi DO dari PO yang cocok
+                const mSo = (o.manual_so || '').trim().toLowerCase();
+                const mDo = (o.manual_do || '').trim().toLowerCase();
+                const suppKey = (o.supp || '').toLowerCase().trim();
+
+                const matchedSupp = dataSupp.find(s => {
+                    if (s.isDeficit) return false;
+                    const inuKey = (s.inu || '').toLowerCase().trim();
+                    if (inuKey !== suppKey) return false;
+                    const sSo = (s.so || '').trim().toLowerCase();
+                    const sDo = (s.do || '').trim().toLowerCase();
+                    if (mSo && mDo) return sSo === mSo && sDo === mDo;
+                    if (mSo) return sSo === mSo;
+                    if (mDo) return sDo === mDo;
+                    return false;
+                });
+
+                if (matchedSupp) {
+                    if (!hasManualSo && matchedSupp.so) o.manual_so = matchedSupp.so;
+                    if (!hasManualDo && matchedSupp.do) o.manual_do = matchedSupp.do;
+                }
+            }
+
+            processLogic();
+            renderTable();
         }
 
         function processLogic() {
@@ -386,62 +440,89 @@
                 original_ref: s
             }));
 
+            // TAHAP 1: PRIORITAS ALOKASI UNTUK BARIS PENJUALAN DENGAN SO / DO MANUAL
             dataOut.forEach(o => {
+                o.deficit_qty = 0;
+                if (!o.is_manual) return;
+
+                o.so = o.manual_so || '';
+                o.do = o.manual_do || '';
+                o.supp_row_index = -1;
+
                 const supplierKey = (o.supp || '').toLowerCase().trim();
-                const sellerKey = (o.seller || '').toLowerCase().trim();
+                const targetSo = o.so.toLowerCase().trim();
+                const targetDo = o.do.toLowerCase().trim();
+                let remainingOut = o.out;
+
+                // Cari PO dengan supplier & nomor SO/DO yang cocok (utamakan yang masih ada sisa kuota)
+                for (let pass = 0; pass < 2; pass++) {
+                    for (let i = 0; i < suppPool.length; i++) {
+                        const s = suppPool[i];
+                        const inuKey = (s.inu || '').toLowerCase().trim();
+                        if (inuKey !== supplierKey) continue;
+
+                        const sSo = (s.so || '').toLowerCase().trim();
+                        const sDo = (s.do || '').toLowerCase().trim();
+
+                        const matchSo = targetSo ? (sSo === targetSo) : true;
+                        const matchDo = targetDo ? (sDo === targetDo) : true;
+                        const hasAnyMatch = (targetSo && sSo === targetSo) || (targetDo && sDo === targetDo);
+
+                        if (matchSo && matchDo && hasAnyMatch) {
+                            if (pass === 0 && s.temp_sisa <= 0) continue;
+
+                            if (o.supp_row_index === -1) {
+                                o.supp_row_index = s.original_index;
+                            }
+
+                            if (pass === 0 && remainingOut > 0) {
+                                const take = Math.min(remainingOut, s.temp_sisa);
+                                s.temp_sisa -= take;
+                                remainingOut -= take;
+                                if (remainingOut <= 0) break;
+                            }
+                        }
+                    }
+                    if (remainingOut <= 0 || o.supp_row_index !== -1) break;
+                }
+
+                // Jika PO pasangan manual tidak cukup kuotanya, lanjut potong FIFO dari PO supplier yang sama
+                if (remainingOut > 0) {
+                    for (let i = 0; i < suppPool.length; i++) {
+                        const s = suppPool[i];
+                        const inuKey = (s.inu || '').toLowerCase().trim();
+                        if (inuKey === supplierKey && s.temp_sisa > 0) {
+                            if (o.supp_row_index === -1) o.supp_row_index = s.original_index;
+                            const take = Math.min(remainingOut, s.temp_sisa);
+                            s.temp_sisa -= take;
+                            remainingOut -= take;
+                            if (remainingOut <= 0) break;
+                        }
+                    }
+                }
+
+                o.deficit_qty = remainingOut;
+            });
+
+            // TAHAP 2: ALOKASI OTOMATIS (PRIORITAS QTY 8 & FIFO STANDAR) UNTUK BARIS NON-MANUAL
+            dataOut.forEach(o => {
+                if (o.is_manual) return;
+
+                const supplierKey = (o.supp || '').toLowerCase().trim();
                 let remainingOut = o.out;
                 
                 o.so = '';
                 o.do = '';
                 o.supp_row_index = -1;
                 
-                // ATURAN KHUSUS 1: Penjualan tgl 01/11/26 ambil PO 01-OKT
-                if (o.tgl === '01/11/26' && remainingOut === 8) {
-                    for (let i = 0; i < suppPool.length; i++) {
-                        const s = suppPool[i];
-                        const nopoKey = (s.nopo || '').toUpperCase();
-                        const inuKey = (s.inu || '').toLowerCase().trim();
-                        if (nopoKey.includes('01-OKT') && s.temp_sisa >= remainingOut && inuKey === supplierKey) {
-                            o.so = s.so || '';
-                            o.do = s.do || '';
-                            o.supp_row_index = s.original_index;
-                            
-                            s.temp_sisa -= remainingOut;
-                            remainingOut = 0;
-                            break;
-                        }
-                    }
-                }
-
-                // ATURAN KHUSUS 2: Penjualan tgl 04/11/26 ambil PO 02-NOV
-                if (o.tgl === '04/11/26' && remainingOut === 8) {
-                    for (let i = 0; i < suppPool.length; i++) {
-                        const s = suppPool[i];
-                        const nopoKey = (s.nopo || '').toUpperCase();
-                        const inuKey = (s.inu || '').toLowerCase().trim();
-                        if (nopoKey.includes('02-NOV') && s.temp_sisa >= remainingOut && inuKey === supplierKey) {
-                            o.so = s.so || '';
-                            o.do = s.do || '';
-                            o.supp_row_index = s.original_index;
-                            
-                            s.temp_sisa -= remainingOut;
-                            remainingOut = 0;
-                            break;
-                        }
-                    }
-                }
-
-                // LOGIKA BARU: JIKA QTY IN 8, 16, 24, 32 HANYA BISA DIAMBIL OLEH QTY KELUAR 8
-                if (remainingOut > 0 && remainingOut === 8) {
+                // PRIORITAS KHUSUS QTY = 8
+                if (remainingOut === 8) {
                     for (let i = 0; i < suppPool.length; i++) {
                         const s = suppPool[i];
                         const inuKey = (s.inu || '').toLowerCase().trim();
-                        const unitKey = (s.unit || '').toLowerCase().trim();
+                        const targetQty = [8, 16, 24, 32];
                         
-                        const isSellerMatch = sellerKey ? (unitKey === sellerKey) : true;
-                        const isTargetQtyIn = [8, 16, 24, 32].includes(s.qty_in);
-
-                        if (isSellerMatch && inuKey === supplierKey && s.temp_sisa >= remainingOut && isTargetQtyIn) {
+                        if (inuKey === supplierKey && s.temp_sisa >= remainingOut && targetQty.includes(s.qty_in)) {
                             o.so = s.so || '';
                             o.do = s.do || '';
                             o.supp_row_index = s.original_index;
@@ -453,45 +534,13 @@
                     }
                 }
 
-                // JIKA QTY KELUAR SELAIN 8, ATAU QTY IN BUKAN [8,16,24,32], JANGAN GUNAKAN STOK TERSEBUT UNTUK QTY KELUAR 8
-                if (remainingOut > 0 && remainingOut !== 8) {
-                    for (let i = 0; i < suppPool.length; i++) {
-                        const s = suppPool[i];
-                        const inuKey = (s.inu || '').toLowerCase().trim();
-                        const unitKey = (s.unit || '').toLowerCase().trim();
-                        
-                        const isSellerMatch = sellerKey ? (unitKey === sellerKey) : true;
-                        const isTargetQtyIn = [8, 16, 24, 32].includes(s.qty_in);
-
-                        // Lewati baris PO yang qty_in nya 8, 16, 24, 32 jika pengeluaran bukan 8
-                        if (isTargetQtyIn) continue;
-
-                        if (isSellerMatch && inuKey === supplierKey && s.temp_sisa > 0) {
-                            if (!o.so && !o.do) {
-                                o.so = s.so || '';
-                                o.do = s.do || '';
-                                o.supp_row_index = s.original_index; 
-                            }
-                            
-                            const take = Math.min(remainingOut, s.temp_sisa);
-                            s.temp_sisa -= take;
-                            remainingOut -= take;
-                            
-                            if (remainingOut <= 0) break;
-                        }
-                    }
-                }
-
-                // ALOKASI FIFO STANDAR SELEBIHNYA (jika masih ada sisa)
+                // ALOKASI FIFO STANDAR
                 if (remainingOut > 0) {
                     for (let i = 0; i < suppPool.length; i++) {
                         const s = suppPool[i];
                         const inuKey = (s.inu || '').toLowerCase().trim();
-                        const unitKey = (s.unit || '').toLowerCase().trim();
                         
-                        const isSellerMatch = sellerKey ? (unitKey === sellerKey) : true;
-
-                        if (isSellerMatch && inuKey === supplierKey && s.temp_sisa > 0) {
+                        if (inuKey === supplierKey && s.temp_sisa > 0) {
                             if (!o.so && !o.do) {
                                 o.so = s.so || '';
                                 o.do = s.do || '';
@@ -506,7 +555,6 @@
                         }
                     }
                 }
-
                 o.deficit_qty = remainingOut; 
             });
 
@@ -536,13 +584,16 @@
             const filterDelivery = document.getElementById('filter-delivery') ? document.getElementById('filter-delivery').value.toLowerCase().trim() : '';
             const filterSupplier = document.getElementById('filter-supplier') ? document.getElementById('filter-supplier').value.toLowerCase().trim() : '';
 
-            const filteredOut = dataOut.filter(o => {
+            const filteredItems = [];
+            dataOut.forEach((o, idx) => {
                 const matchDelivery = !filterDelivery || (o.tujuan || '').toLowerCase().includes(filterDelivery);
                 const matchSupplier = !filterSupplier || (o.supp || '').toLowerCase().includes(filterSupplier);
-                return matchDelivery && matchSupplier;
+                if (matchDelivery && matchSupplier) {
+                    filteredItems.push({ item: o, realIdx: idx });
+                }
             });
 
-            const totalOutFiltered = filteredOut.reduce((sum, item) => sum + (parseFloat(item.out) || 0), 0);
+            const totalOutFiltered = filteredItems.reduce((sum, entry) => sum + (parseFloat(entry.item.out) || 0), 0);
             const totalDelEl = document.getElementById('total-del');
             if (totalDelEl) {
                 totalDelEl.innerText = totalOutFiltered.toLocaleString('id-ID');
@@ -553,11 +604,13 @@
             
             const dateColors = { 0: "bg-white", 1: "bg-blue-50", 2: "bg-emerald-50", 3: "bg-amber-50", 4: "bg-purple-50", 5: "bg-rose-50", 6: "bg-slate-100" };
 
-            const maxRows = Math.max(dataSupp.length, filteredOut.length);
+            const maxRows = Math.max(dataSupp.length, filteredItems.length);
             let htmlStr = '';
 
             for(let i=0; i < maxRows; i++) {
-                const o = filteredOut[i] || {seller:'', tujuan:'', out:'', supp:'', sopir:'', tgl:'', so:'', do:'', supp_row_index: -1};
+                const entry = filteredItems[i];
+                const o = entry ? entry.item : {tujuan:'', out:'', supp:'', sopir:'', tgl:'', so:'', do:'', supp_row_index: -1};
+                const realIdx = entry ? entry.realIdx : -1;
                 
                 let rowBg = "bg-white";
                 if (o.tgl) {
@@ -571,15 +624,22 @@
                     const colorIdx = o.supp_row_index % dynamicTextColors.length;
                     txtStyle = dynamicTextColors[colorIdx];
                 }
+
+                const isEditable = realIdx !== -1;
+                const soAttrs = isEditable 
+                    ? `onchange="handleManualSoDo(${realIdx}, 'so', this.value)" onkeydown="if(event.key==='Enter'){this.blur();}"` 
+                    : `readonly`;
+                const doAttrs = isEditable 
+                    ? `onchange="handleManualSoDo(${realIdx}, 'do', this.value)" onkeydown="if(event.key==='Enter'){this.blur();}"` 
+                    : `readonly`;
                 
                 htmlStr += `<tr class="${rowBg}">
                     <td><input type="text" value="${o.tgl}" readonly style="font-size:8px; color:#1e293b; font-weight:700;"></td>
-                    <td><input type="text" value="${o.seller || ''}" readonly style="font-size:8px; font-weight:700;"></td>
                     <td><input type="text" value="${o.tujuan}" readonly></td>
                     <td><input type="text" value="${o.sopir || ''}" readonly></td>
                     <td><input type="text" value="${o.out || ''}" readonly class="text-blue-700 font-bold"></td>
-                    <td><input type="text" value="${o.so || ''}" readonly style="${txtStyle} font-weight: 800;"></td>
-                    <td><input type="text" value="${o.do || ''}" readonly style="${txtStyle} font-weight: 800;"></td>
+                    <td><input type="text" value="${o.so || ''}" ${soAttrs} style="${txtStyle} font-weight: 800;"></td>
+                    <td><input type="text" value="${o.do || ''}" ${doAttrs} style="${txtStyle} font-weight: 800;"></td>
                 </tr>`;
             }
             bOut.innerHTML = htmlStr;
@@ -728,6 +788,29 @@
                 if (s.length > 0) {
                     const insSupp = await _client.from('purchase_orders').insert(s);
                     if (insSupp.error) throw insSupp.error;
+                }
+
+                // Simpan perubahan manual SO / DO ke kolom no_so_do di tabel data_pengiriman
+                const outUpdates = dataOut
+                    .filter(o => o.id !== undefined && o.id !== null)
+                    .map(o => {
+                        const soVal = o.manual_so || '';
+                        const doVal = o.manual_do || '';
+                        // Format gabungan atau sesuaikan dengan kebutuhan kolom no_so_do Anda
+                        const combinedSoDo = (soVal || doVal) ? `SO: ${soVal} | DO: ${doVal}` : '';
+
+                        return _client
+                            .from('data_pengiriman')
+                            .update({ 
+                                no_so_do: o.is_manual ? combinedSoDo : null 
+                            })
+                            .eq('id', o.id);
+                    });
+
+                if (outUpdates.length > 0) {
+                    const results = await Promise.all(outUpdates);
+                    const errRes = results.find(r => r.error);
+                    if (errRes) throw errRes.error;
                 }
 
                 alert("Berhasil Tersimpan!");
