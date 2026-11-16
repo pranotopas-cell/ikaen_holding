@@ -72,7 +72,6 @@
 
         .main-container { padding: 10px; display: flex; gap: 10px; align-items: start; }
         
-        /* Pembungkus tabel agar bisa scroll dengan judul tetap */
         .table-scroll-container {
             max-height: calc(100vh - 150px);
             overflow-y: auto;
@@ -144,8 +143,7 @@
                         <input type="text" id="filter-delivery" placeholder="Filter Delivery..." oninput="onFilterChange()" class="pdf-hide input-filter-header">
                         <input type="text" id="filter-supplier" placeholder="Filter Supplier..." oninput="onFilterChange()" class="pdf-hide input-filter-header mr-2">
                         
-                        <select id="select-bulan" class="select-bulan mr-2" onchange="loadInitialData()">
-                        </select>
+                        <select id="select-bulan" class="select-bulan mr-2" onchange="loadInitialData()"></select>
                         <button class="btn-ui" onclick="window.location.href='index.html'">HOME</button>
                         <button class="btn-ui btn-save" onclick="saveToCloud()">SAVE</button>
                         <button class="btn-ui" onclick="window.print()">PRINT</button>
@@ -220,7 +218,7 @@
             </div>
         </div>
 
-        <!-- 2. REALISASI PENJUALAN (LEBIH LEBAR) -->
+        <!-- 2. REALISASI PENJUALAN -->
         <div class="w-[55%]">
             <div class="section-label"><span class="dot"></span> 2. REALISASI PENJUALAN </div>
             <div class="table-scroll-container">
@@ -342,11 +340,10 @@
 
                 const [resSupp, resLog] = await Promise.all([
                     _client.from('purchase_orders').select('*').gte('tgl_po', range.start).lte('tgl_po', range.end).order('id', { ascending: true }),
-                    _client.from('data_pengiriman').select('*').gte('tanggal', range.start).lte('tanggal', range.end).order('tanggal', { ascending: true }).order('id', { ascending: true })
+                    _client.from('data_pengiriman').select('*').gte('tanggal', range.start).lte('tanggal', range.end).order('tanggal', { ascending: true })
                 ]);
 
                 dataSupp = (resSupp.data || []).map(d => ({ 
-                    id: d.id,
                     unit: d.po_code || '', tgl: convertToDisplay(d.tgl_po), nopo: d.no_po || '', 
                     so: d.no_so || '', do: d.no_do || '', inu: d.tujuan || '', 
                     qty_in: parseFloat(d.qty) || 0, qty_sisa: 0, isDeficit: false
@@ -358,15 +355,10 @@
                     const isValidSupplier = !s.includes('petro') && !s.includes('pan') && !s.includes('transport');
                     return qtyVal > 0 && isValidSupplier;
                 }).map(d => {
-                    const savedSo = (d.no_so !== null && d.no_so !== undefined) ? String(d.no_so).trim() : '';
-                    const savedDo = (d.no_do !== null && d.no_do !== undefined) ? String(d.no_do).trim() : '';
-                    const isLocked = Boolean(savedSo || savedDo);
-
-                    const pkKey = Object.keys(d).find(k => k === 'id' || k.startsWith('id_') || k.endsWith('_id')) || 'id';
-
+                    const savedSo = d.no_so || '';
+                    const savedDo = d.no_do || '';
                     return {
-                        pk_col: pkKey,
-                        id: d[pkKey],
+                        id: d.id,
                         tujuan: d.delivery_to || '', 
                         out: parseFloat(d.jumlah_keluar) || 0, 
                         supp: d.supplier || '', 
@@ -376,7 +368,7 @@
                         do: savedDo,
                         manual_so: savedSo,
                         manual_do: savedDo,
-                        is_manual: isLocked,
+                        is_manual: Boolean(savedSo.trim() || savedDo.trim()),
                         supp_row_index: -1,
                         deficit_qty: 0
                     };
@@ -385,7 +377,11 @@
                 processLogic();
 
                 const targetLength = Math.max(15, dataOut.length);
-                if(dataSupp.length < targetLength) while(dataSupp.length < targetLength) dataSupp.push({id: null, unit:'', tgl:'', nopo:'', so:'', do:'', inu:'', qty_in:0, qty_sisa:0, isDeficit: false});
+                if(dataSupp.length < targetLength) {
+                    while(dataSupp.length < targetLength) {
+                        dataSupp.push({unit:'', tgl:'', nopo:'', so:'', do:'', inu:'', qty_in:0, qty_sisa:0, isDeficit: false});
+                    }
+                }
 
                 renderTable();
             } catch (err) { console.error(err); }
@@ -395,16 +391,8 @@
             const o = dataOut[realIdx];
             if (!o) return;
 
-            const cleanVal = (value || '').trim();
-
-            if (field === 'so') {
-                o.manual_so = cleanVal;
-                if (!o.is_manual) o.manual_do = o.do || '';
-            }
-            if (field === 'do') {
-                o.manual_do = cleanVal;
-                if (!o.is_manual) o.manual_so = o.so || '';
-            }
+            if (field === 'so') o.manual_so = value;
+            if (field === 'do') o.manual_do = value;
 
             const hasManualSo = (o.manual_so || '').trim() !== '';
             const hasManualDo = (o.manual_do || '').trim() !== '';
@@ -425,14 +413,15 @@
                     if (inuKey !== suppKey) return false;
                     const sSo = (s.so || '').trim().toLowerCase();
                     const sDo = (s.do || '').trim().toLowerCase();
-                    if (field === 'so' && mSo) return sSo === mSo;
-                    if (field === 'do' && mDo) return sDo === mDo;
+                    if (mSo && mDo) return sSo === mSo && sDo === mDo;
+                    if (mSo) return sSo === mSo;
+                    if (mDo) return sDo === mDo;
                     return false;
                 });
 
                 if (matchedSupp) {
-                    if (field === 'so' && matchedSupp.do) o.manual_do = matchedSupp.do;
-                    if (field === 'do' && matchedSupp.so) o.manual_so = matchedSupp.so;
+                    if (!hasManualSo && matchedSupp.so) o.manual_so = matchedSupp.so;
+                    if (!hasManualDo && matchedSupp.do) o.manual_do = matchedSupp.do;
                 }
             }
 
@@ -577,7 +566,7 @@
             Object.keys(remainingUsage).forEach(key => {
                 if (remainingUsage[key] > 0) {
                     dataSupp.push({
-                        id: null, unit: 'DEFISIT', tgl: '', nopo: 'OVERFLOW', so: '', do: '',
+                        unit: 'DEFISIT', tgl: '', nopo: 'OVERFLOW', so: '', do: '',
                         inu: key.toUpperCase(), qty_in: 0, qty_sisa: -remainingUsage[key], isDeficit: true
                     });
                 }
@@ -611,7 +600,7 @@
             const maxRows = Math.max(dataSupp.length, filteredItems.length);
             let htmlStr = '';
 
-            for(let i=0; i < maxRows; i++) {
+            for(let i = 0; i < maxRows; i++) {
                 const entry = filteredItems[i];
                 const o = entry ? entry.item : {tujuan:'', out:'', supp:'', sopir:'', tgl:'', so:'', do:'', supp_row_index: -1};
                 const realIdx = entry ? entry.realIdx : -1;
@@ -631,10 +620,10 @@
 
                 const isEditable = realIdx !== -1;
                 const soAttrs = isEditable 
-                    ? `oninput="dataOut[${realIdx}].so = this.value; dataOut[${realIdx}].manual_so = this.value; dataOut[${realIdx}].is_manual = true;" onchange="handleManualSoDo(${realIdx}, 'so', this.value)" onkeydown="if(event.key==='Enter'){this.blur();}"` 
+                    ? `onchange="handleManualSoDo(${realIdx}, 'so', this.value)" onkeydown="if(event.key==='Enter'){this.blur();}"` 
                     : `readonly`;
                 const doAttrs = isEditable 
-                    ? `oninput="dataOut[${realIdx}].do = this.value; dataOut[${realIdx}].manual_do = this.value; dataOut[${realIdx}].is_manual = true;" onchange="handleManualSoDo(${realIdx}, 'do', this.value)" onkeydown="if(event.key==='Enter'){this.blur();}"` 
+                    ? `onchange="handleManualSoDo(${realIdx}, 'do', this.value)" onkeydown="if(event.key==='Enter'){this.blur();}"` 
                     : `readonly`;
                 
                 htmlStr += `<tr class="${rowBg}">
@@ -747,46 +736,15 @@
 
         function addRow(t, idx) {
             if(t==='supp') {
-                dataSupp.splice(idx+1, 0, {id: null, unit:'', tgl:'', nopo:'', so:'', do:'', inu:'', qty_in:0, qty_sisa:0, isDeficit: false});
+                dataSupp.splice(idx+1, 0, {unit:'', tgl:'', nopo:'', so:'', do:'', inu:'', qty_in:0, qty_sisa:0, isDeficit: false});
             }
             processLogic();
             renderTable();
         }
 
-        // FUNGSI REMOVEROW YANG DIUPDATE DENGAN KONEKSI DATABASE SUPABASE
-        async function removeRow(t, idx) {
-            if (t === 'supp') {
-                const item = dataSupp[idx];
-                if (!item) return;
-
-                // Jika baris sudah tersimpan di database (memiliki ID atau Nomor PO), hapus juga dari Supabase
-                if (item.id || item.nopo) {
-                    if (!confirm(`Hapus PO "${item.nopo || 'Baris ini'}" dari database Supabase?`)) return;
-
-                    try {
-                        let query = _client.from('purchase_orders').delete();
-                        if (item.id) {
-                            query = query.eq('id', item.id);
-                        } else if (item.nopo) {
-                            query = query.eq('no_po', item.nopo);
-                        }
-
-                        const { error } = await query;
-                        if (error) throw error;
-                    } catch (err) {
-                        console.error("Gagal menghapus dari database:", err.message);
-                        alert("Gagal menghapus dari database: " + err.message);
-                        return;
-                    }
-                }
-
-                // Hapus dari array lokal jika baris lebih dari 1
-                if (dataSupp.length > 1) {
-                    dataSupp.splice(idx, 1);
-                } else {
-                    // Kosongkan jika sisa 1 baris terakhir
-                    dataSupp[0] = {id: null, unit:'', tgl:'', nopo:'', so:'', do:'', inu:'', qty_in:0, qty_sisa:0, isDeficit: false};
-                }
+        function removeRow(t, idx) {
+            if(t==='supp' && dataSupp.length > 1) {
+                dataSupp.splice(idx, 1);
             }
             processLogic();
             renderTable();
@@ -798,8 +756,6 @@
 
             try {
                 btn.innerText = "SAVING...";
-                processLogic();
-
                 const range = getSelectedDateRange();
 
                 const s = dataSupp
@@ -811,7 +767,7 @@
                         no_so: x.so || '', 
                         no_do: x.do || '', 
                         tujuan: x.inu || '', 
-                        qty: parseFloat(x.qty) || 0 
+                        qty: parseFloat(x.qty_in) || 0 
                     }));
 
                 const delSupp = await _client
@@ -827,41 +783,24 @@
                     if (insSupp.error) throw insSupp.error;
                 }
 
-                const validRows = dataOut.filter(o => o.id !== undefined && o.id !== null);
-                if (dataOut.length > 0 && validRows.length === 0) {
-                    throw new Error("Kolom ID pada tabel data_pengiriman tidak ditemukan. Pastikan tabel memiliki primary key.");
-                }
+                const outUpdates = dataOut
+                    .filter(o => o.id !== undefined && o.id !== null)
+                    .map(o => _client
+                        .from('data_pengiriman')
+                        .update({ 
+                            no_so: o.is_manual ? (o.manual_so || '') : '', 
+                            no_do: o.is_manual ? (o.manual_do || '') : '' 
+                        })
+                        .eq('id', o.id)
+                    );
 
-                const batchSize = 15;
-                for (let i = 0; i < validRows.length; i += batchSize) {
-                    const batch = validRows.slice(i, i + batchSize);
-                    btn.innerText = `SAVING (${Math.min(i + batchSize, validRows.length)}/${validRows.length})...`;
-
-                    const batchPromises = batch.map(o => {
-                        const finalSo = (o.so || '').trim();
-                        const finalDo = (o.do || '').trim();
-
-                        return _client
-                            .from('data_pengiriman')
-                            .update({ 
-                                no_so: finalSo, 
-                                no_do: finalDo
-                            })
-                            .eq(o.pk_col, o.id)
-                            .select(o.pk_col);
-                    });
-
-                    const results = await Promise.all(batchPromises);
+                if (outUpdates.length > 0) {
+                    const results = await Promise.all(outUpdates);
                     const errRes = results.find(r => r.error);
                     if (errRes) throw errRes.error;
-
-                    const emptyRes = results.find(r => !r.data || r.data.length === 0);
-                    if (emptyRes) {
-                        throw new Error("Update ke data_pengiriman ditolak oleh RLS Policy Supabase.");
-                    }
                 }
 
-                alert(`Berhasil Tersimpan! (${validRows.length} data pengiriman diperbarui)`);
+                alert("Berhasil Tersimpan!");
                 await loadInitialData();
 
             } catch (err) { 
