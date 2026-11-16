@@ -225,18 +225,19 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 60px;">DATE</th>
+                            <th style="width: 50px;">DATE</th>
                             <th>DELIVERY</th>
-                            <th style="width: 135px;">SOPIR</th>
-                            <th style="width: 35px;">QTY</th>
-                            <th style="width: 90px;">SO</th>
-                            <th style="width: 90px;">DO</th>
+                            <th style="width: 90px;">SOPIR</th>
+                            <th style="width: 60px;">SELLER</th>
+                            <th style="width: 30px;">QTY</th>
+                            <th style="width: 80px;">SO</th>
+                            <th style="width: 80px;">DO</th>
                         </tr>
                     </thead>
                     <tbody id="body-out"></tbody>
                     <tfoot>
                         <tr class="bg-footer">
-                            <td colspan="3" class="text-right pr-2 py-1">TOTAL OUT</td>
+                            <td colspan="4" class="text-right pr-2 py-1">TOTAL OUT</td>
                             <td id="total-del" class="text-center">0</td>
                             <td colspan="2"></td>
                         </tr>
@@ -363,6 +364,7 @@
                         out: parseFloat(d.jumlah_keluar) || 0, 
                         supp: d.supplier || '', 
                         sopir: d.sopir || '', 
+                        seller: d.seller || '', 
                         tgl: convertToDisplay(d.tanggal),
                         so: savedSo, 
                         do: savedDo,
@@ -397,7 +399,6 @@
             const hasManualSo = (o.manual_so || '') !== '';
             const hasManualDo = (o.manual_do || '') !== '';
 
-            // Jika kedua kolom dikosongkan user, kembalikan baris ke mode alokasi otomatis FIFO
             if (!hasManualSo && !hasManualDo) {
                 o.is_manual = false;
                 o.manual_so = '';
@@ -408,7 +409,6 @@
                 const mDo = (o.manual_do || '').toLowerCase();
                 const suppKey = (o.supp || '').toLowerCase().trim();
 
-                // Lengkapi otomatis pasangan SO/DO jika salah satu diisi dan cocok dengan PO supplier terkait
                 const matchedSupp = dataSupp.find(s => {
                     if (s.isDeficit) return false;
                     const inuKey = (s.inu || '').toLowerCase().trim();
@@ -441,7 +441,6 @@
                 original_ref: s
             }));
 
-            // TAHAP 1: PRIORITAS ALOKASI BARIS TERKUNCI / INPUT MANUAL
             dataOut.forEach(o => {
                 o.deficit_qty = 0;
                 if (!o.is_manual) return;
@@ -486,7 +485,6 @@
                     if (remainingOut <= 0 || o.supp_row_index !== -1) break;
                 }
 
-                // Jika PO pasangan manual kuotanya tidak cukup, ambil kekurangannya dari PO FIFO supplier yang sama
                 if (remainingOut > 0) {
                     for (let i = 0; i < suppPool.length; i++) {
                         const s = suppPool[i];
@@ -504,7 +502,6 @@
                 o.deficit_qty = remainingOut;
             });
 
-            // TAHAP 2: ALOKASI OTOMATIS FIFO UNTUK BARIS YANG BELUM PUNYA SO/DO
             dataOut.forEach(o => {
                 if (o.is_manual) return;
 
@@ -607,7 +604,7 @@
 
             for(let i = 0; i < maxRows; i++) {
                 const entry = filteredItems[i];
-                const o = entry ? entry.item : {tujuan:'', out:'', supp:'', sopir:'', tgl:'', so:'', do:'', is_manual: false, supp_row_index: -1};
+                const o = entry ? entry.item : {tujuan:'', out:'', supp:'', sopir:'', seller:'', tgl:'', so:'', do:'', is_manual: false, supp_row_index: -1};
                 const realIdx = entry ? entry.realIdx : -1;
                 
                 let rowBg = "bg-white";
@@ -636,6 +633,7 @@
                     <td><input type="text" value="${o.tgl}" readonly style="font-size:8px; color:#1e293b; font-weight:700;"></td>
                     <td><input type="text" value="${o.tujuan}" readonly></td>
                     <td><input type="text" value="${o.sopir || ''}" readonly></td>
+                    <td><input type="text" value="${o.seller || ''}" readonly style="color: #475569;"></td>
                     <td><input type="text" value="${o.out || ''}" readonly class="text-blue-700 font-bold"></td>
                     <td><input type="text" value="${o.so || ''}" class="${manualClass}" ${soAttrs} style="${txtStyle} font-weight: 800;"></td>
                     <td><input type="text" value="${o.do || ''}" class="${manualClass}" ${doAttrs} style="${txtStyle} font-weight: 800;"></td>
