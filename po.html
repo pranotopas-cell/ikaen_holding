@@ -227,11 +227,11 @@
                         <tr>
                             <th style="width: 50px;">DATE</th>
                             <th>DELIVERY</th>
-                            <th style="width: 90px;">SOPIR</th>
-                            <th style="width: 60px;">SELLER</th>
+                            <th style="width: 100px;">SOPIR</th>
+                            <th style="width: 70px;">SELLER</th>
                             <th style="width: 30px;">QTY</th>
-                            <th style="width: 80px;">SO</th>
-                            <th style="width: 80px;">DO</th>
+                            <th style="width: 75px;">SO</th>
+                            <th style="width: 75px;">DO</th>
                         </tr>
                     </thead>
                     <tbody id="body-out"></tbody>
@@ -443,114 +443,96 @@
 
             dataOut.forEach(o => {
                 o.deficit_qty = 0;
-                if (!o.is_manual) return;
-
-                o.so = o.manual_so || '';
-                o.do = o.manual_do || '';
                 o.supp_row_index = -1;
 
                 const supplierKey = (o.supp || '').toLowerCase().trim();
-                const targetSo = o.so.toLowerCase().trim();
-                const targetDo = o.do.toLowerCase().trim();
+                let targetSo = (o.is_manual ? o.manual_so : o.so).toLowerCase().trim();
+                let targetDo = (o.is_manual ? o.manual_do : o.do).toLowerCase().trim();
                 let remainingOut = o.out;
 
-                for (let pass = 0; pass < 2; pass++) {
-                    for (let i = 0; i < suppPool.length; i++) {
-                        const s = suppPool[i];
-                        const inuKey = (s.inu || '').toLowerCase().trim();
-                        if (inuKey !== supplierKey) continue;
+                if (o.is_manual && (targetSo || targetDo)) {
+                    for (let pass = 0; pass < 2; pass++) {
+                        for (let i = 0; i < suppPool.length; i++) {
+                            const s = suppPool[i];
+                            const inuKey = (s.inu || '').toLowerCase().trim();
+                            if (inuKey !== supplierKey) continue;
 
-                        const sSo = (s.so || '').toLowerCase().trim();
-                        const sDo = (s.do || '').toLowerCase().trim();
+                            const sSo = (s.so || '').toLowerCase().trim();
+                            const sDo = (s.do || '').toLowerCase().trim();
 
-                        const matchSo = targetSo ? (sSo === targetSo) : true;
-                        const matchDo = targetDo ? (sDo === targetDo) : true;
-                        const hasAnyMatch = (targetSo && sSo === targetSo) || (targetDo && sDo === targetDo);
+                            const matchSo = targetSo ? (sSo === targetSo) : true;
+                            const matchDo = targetDo ? (sDo === targetDo) : true;
+                            const hasAnyMatch = (targetSo && sSo === targetSo) || (targetDo && sDo === targetDo);
 
-                        if (matchSo && matchDo && hasAnyMatch) {
-                            if (pass === 0 && s.temp_sisa <= 0) continue;
+                            if (matchSo && matchDo && hasAnyMatch) {
+                                if (pass === 0 && s.temp_sisa <= 0) continue;
 
-                            if (o.supp_row_index === -1) {
-                                o.supp_row_index = s.original_index;
+                                if (o.supp_row_index === -1) {
+                                    o.supp_row_index = s.original_index;
+                                }
+
+                                if (pass === 0 && remainingOut > 0) {
+                                    const take = Math.min(remainingOut, s.temp_sisa);
+                                    s.temp_sisa -= take;
+                                    remainingOut -= take;
+                                    if (remainingOut <= 0) break;
+                                }
                             }
+                        }
+                        if (remainingOut <= 0 || o.supp_row_index !== -1) break;
+                    }
+                }
 
-                            if (pass === 0 && remainingOut > 0) {
+                if (!o.is_manual || remainingOut > 0 || o.supp_row_index === -1) {
+                    if (remainingOut === 8 && !o.is_manual) {
+                        for (let i = 0; i < suppPool.length; i++) {
+                            const s = suppPool[i];
+                            const inuKey = (s.inu || '').toLowerCase().trim();
+                            const targetQty = [8, 16, 24, 32];
+                            
+                            if (inuKey === supplierKey && s.temp_sisa >= remainingOut && targetQty.includes(s.qty_in)) {
+                                if (o.supp_row_index === -1) {
+                                    o.supp_row_index = s.original_index;
+                                    o.so = s.so || '';
+                                    o.do = s.do || '';
+                                }
+                                s.temp_sisa -= remainingOut;
+                                remainingOut = 0;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (remainingOut > 0) {
+                        for (let i = 0; i < suppPool.length; i++) {
+                            const s = suppPool[i];
+                            const inuKey = (s.inu || '').toLowerCase().trim();
+                            
+                            if (inuKey === supplierKey && s.temp_sisa > 0) {
+                                if (o.supp_row_index === -1) {
+                                    o.supp_row_index = s.original_index;
+                                    if (!o.is_manual) {
+                                        o.so = s.so || '';
+                                        o.do = s.do || '';
+                                    }
+                                }
+                                
                                 const take = Math.min(remainingOut, s.temp_sisa);
                                 s.temp_sisa -= take;
                                 remainingOut -= take;
+                                
                                 if (remainingOut <= 0) break;
                             }
                         }
                     }
-                    if (remainingOut <= 0 || o.supp_row_index !== -1) break;
                 }
 
-                if (remainingOut > 0) {
-                    for (let i = 0; i < suppPool.length; i++) {
-                        const s = suppPool[i];
-                        const inuKey = (s.inu || '').toLowerCase().trim();
-                        if (inuKey === supplierKey && s.temp_sisa > 0) {
-                            if (o.supp_row_index === -1) o.supp_row_index = s.original_index;
-                            const take = Math.min(remainingOut, s.temp_sisa);
-                            s.temp_sisa -= take;
-                            remainingOut -= take;
-                            if (remainingOut <= 0) break;
-                        }
-                    }
+                if (o.is_manual) {
+                    o.so = o.manual_so || '';
+                    o.do = o.manual_do || '';
                 }
 
                 o.deficit_qty = remainingOut;
-            });
-
-            dataOut.forEach(o => {
-                if (o.is_manual) return;
-
-                const supplierKey = (o.supp || '').toLowerCase().trim();
-                let remainingOut = o.out;
-                
-                o.so = '';
-                o.do = '';
-                o.supp_row_index = -1;
-                
-                if (remainingOut === 8) {
-                    for (let i = 0; i < suppPool.length; i++) {
-                        const s = suppPool[i];
-                        const inuKey = (s.inu || '').toLowerCase().trim();
-                        const targetQty = [8, 16, 24, 32];
-                        
-                        if (inuKey === supplierKey && s.temp_sisa >= remainingOut && targetQty.includes(s.qty_in)) {
-                            o.so = s.so || '';
-                            o.do = s.do || '';
-                            o.supp_row_index = s.original_index;
-                            
-                            s.temp_sisa -= remainingOut;
-                            remainingOut = 0;
-                            break;
-                        }
-                    }
-                }
-
-                if (remainingOut > 0) {
-                    for (let i = 0; i < suppPool.length; i++) {
-                        const s = suppPool[i];
-                        const inuKey = (s.inu || '').toLowerCase().trim();
-                        
-                        if (inuKey === supplierKey && s.temp_sisa > 0) {
-                            if (!o.so && !o.do) {
-                                o.so = s.so || '';
-                                o.do = s.do || '';
-                                o.supp_row_index = s.original_index; 
-                            }
-                            
-                            const take = Math.min(remainingOut, s.temp_sisa);
-                            s.temp_sisa -= take;
-                            remainingOut -= take;
-                            
-                            if (remainingOut <= 0) break;
-                        }
-                    }
-                }
-                o.deficit_qty = remainingOut; 
             });
 
             suppPool.forEach(s => {
@@ -621,7 +603,6 @@
                 }
 
                 const isEditable = realIdx !== -1;
-                const manualClass = (isEditable && o.is_manual) ? 'border-b border-dashed border-slate-400' : '';
                 const soAttrs = isEditable 
                     ? `onchange="handleManualSoDo(${realIdx}, 'so', this.value)" onkeydown="if(event.key==='Enter'){this.blur();}"` 
                     : `readonly`;
@@ -635,8 +616,8 @@
                     <td><input type="text" value="${o.sopir || ''}" readonly></td>
                     <td><input type="text" value="${o.seller || ''}" readonly style="color: #475569;"></td>
                     <td><input type="text" value="${o.out || ''}" readonly class="text-blue-700 font-bold"></td>
-                    <td><input type="text" value="${o.so || ''}" class="${manualClass}" ${soAttrs} style="${txtStyle} font-weight: 800;"></td>
-                    <td><input type="text" value="${o.do || ''}" class="${manualClass}" ${doAttrs} style="${txtStyle} font-weight: 800;"></td>
+                    <td><input type="text" value="${o.so || ''}" ${soAttrs} style="${txtStyle} font-weight: 800;"></td>
+                    <td><input type="text" value="${o.do || ''}" ${doAttrs} style="${txtStyle} font-weight: 800;"></td>
                 </tr>`;
             }
             bOut.innerHTML = htmlStr;
