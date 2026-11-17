@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IKAEN - INVOICE BRI</title>
+    <title>IKAEN - INVOICE BCA</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -222,12 +222,23 @@
                         <input type="number" id="in_subtotal" class="form-control form-control-sm border-danger" step="0.01" oninput="manualTaxCalc()">
                     </div>
                 </div>
-                <div class="row g-2">
+                <div class="row g-2 mb-2">
                     <div class="col-6"><label class="small fw-bold">DPP Nilai Lain</label><input type="number" id="in_dpp_lain" class="form-control form-control-sm bg-light" step="0.01" oninput="syncAll()"></div>
                     <div class="col-6"><label class="small fw-bold">PPN</label><input type="number" id="in_ppn" class="form-control form-control-sm bg-light" step="0.01" oninput="syncAll()"></div>
                 </div>
-                <label class="small fw-bold mt-2">Penyesuaian (+/-)</label>
-                <input type="number" id="in_adjust" class="form-control form-control-sm" value="0" step="0.01" oninput="syncAll()">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="in_use_pbbkb" onchange="calculateFromBasic()">
+                            <label class="form-check-label small fw-bold" for="in_use_pbbkb">PBBKB (7,5%)</label>
+                        </div>
+                        <input type="number" id="in_pbbkb" class="form-control form-control-sm bg-light" step="0.01" oninput="syncAll()">
+                    </div>
+                    <div class="col-6">
+                        <label class="small fw-bold">Penyesuaian (+/-)</label>
+                        <input type="number" id="in_adjust" class="form-control form-control-sm" value="0" step="0.01" oninput="syncAll()">
+                    </div>
+                </div>
             </div>
             <datalist id="list_barang">
                 <option value="BBM SOLAR INDUSTRI ">
@@ -325,6 +336,7 @@
                                     <tr><td class="p-2 border-bottom border-end" width="55%">Sub Total</td><td class="p-2 border-bottom text-end fw-bold" id="out_subtotal_display">0,00</td></tr>
                                     <tr><td class="p-2 border-bottom border-end"><i>DPP Nilai Lain</i></td><td class="p-2 border-bottom text-end" id="out_dpp_val">0,00</td></tr>
                                     <tr><td class="p-2 border-bottom border-end"><i>PPN</i></td><td class="p-2 border-bottom text-end" id="out_ppn_val">0,00</td></tr>
+                                    <tr id="row_pbbkb"><td class="p-2 border-bottom border-end"><i>PBBKB</i></td><td class="p-2 border-bottom text-end" id="out_pbbkb_val">0,00</td></tr>
                                     <tr><td class="p-2 border-end"><i>Penyesuaian</i></td><td class="p-2 text-end" id="out_adjust_val">0,00</td></tr>
                                 </table>
                             </td>
@@ -424,39 +436,49 @@
     function calculateFromBasic() {
         const qtyRaw = document.getElementById('in_qty_text').value.replace(/\./g, '').replace(',', '.');
         const hNettRaw = document.getElementById('in_h_nett_text').value.replace(/\./g, '').replace(',', '.');
+        const usePbbkb = document.getElementById('in_use_pbbkb').checked;
         const qty = parseFloat(qtyRaw) || 0;
         const hNett = parseFloat(hNettRaw) || 0;
-        let hTax = Math.ceil((hNett / 1.11) * 100) / 100; 
+        const pembagi = usePbbkb ? 1.185 : 1.11;
+        let hTax = Math.ceil((hNett / pembagi) * 100) / 100; 
         const subtotal = qty * hTax;
         document.getElementById('in_h_tax_text').value = hTax.toFixed(2).replace('.', ',');
         document.getElementById('in_subtotal').value = subtotal.toFixed(2);
         const dppLain = roundKSE(subtotal * (11 / 12));
         const ppn = roundKSE(dppLain * 0.12);
+        const pbbkb = usePbbkb ? roundKSE(subtotal * 0.075) : 0;
         document.getElementById('in_dpp_lain').value = dppLain.toFixed(2);
         document.getElementById('in_ppn').value = ppn.toFixed(2);
+        document.getElementById('in_pbbkb').value = pbbkb.toFixed(2);
         syncAll();
     }
 
     function calculateFromDPPUnit() {
         const qtyRaw = document.getElementById('in_qty_text').value.replace(/\./g, '').replace(',', '.');
         const dppUnitRaw = document.getElementById('in_h_tax_text').value.replace(/\./g, '').replace(',', '.');
+        const usePbbkb = document.getElementById('in_use_pbbkb').checked;
         const qty = parseFloat(qtyRaw) || 0;
         const dppUnit = parseFloat(dppUnitRaw) || 0;
         const subtotal = qty * dppUnit;
         document.getElementById('in_subtotal').value = subtotal.toFixed(2);
         const dppLain = roundKSE(subtotal * (11 / 12));
         const ppn = roundKSE(dppLain * 0.12);
+        const pbbkb = usePbbkb ? roundKSE(subtotal * 0.075) : 0;
         document.getElementById('in_dpp_lain').value = dppLain.toFixed(2);
         document.getElementById('in_ppn').value = ppn.toFixed(2);
+        document.getElementById('in_pbbkb').value = pbbkb.toFixed(2);
         syncAll();
     }
 
     function manualTaxCalc() {
         const sub = parseFloat(document.getElementById('in_subtotal').value) || 0;
+        const usePbbkb = document.getElementById('in_use_pbbkb').checked;
         const dppLain = roundKSE(sub * (11 / 12));
         const ppn = roundKSE(dppLain * 0.12);
+        const pbbkb = usePbbkb ? roundKSE(sub * 0.075) : 0;
         document.getElementById('in_dpp_lain').value = dppLain.toFixed(2);
         document.getElementById('in_ppn').value = ppn.toFixed(2);
+        document.getElementById('in_pbbkb').value = pbbkb.toFixed(2);
         syncAll();
     }
 
@@ -504,14 +526,20 @@
         const sub = parseFloat(document.getElementById('in_subtotal').value) || 0;
         const dppLain = parseFloat(document.getElementById('in_dpp_lain').value) || 0;
         const ppn = parseFloat(document.getElementById('in_ppn').value) || 0;
+        const pbbkb = parseFloat(document.getElementById('in_pbbkb').value) || 0;
         const adj = parseFloat(document.getElementById('in_adjust').value) || 0;
         
-        const grandTotalFinal = roundKSE(sub + ppn + adj);
+        const grandTotalFinal = roundKSE(sub + ppn + pbbkb + adj);
         
         document.getElementById('out_subtotal_top').innerText = formatIDR(sub);
         document.getElementById('out_subtotal_display').innerText = formatIDR(sub);
         document.getElementById('out_dpp_val').innerText = formatIDR(dppLain);
         document.getElementById('out_ppn_val').innerText = formatIDR(ppn);
+        document.getElementById('out_pbbkb_val').innerText = formatIDR(pbbkb);
+        const rowPbbkb = document.getElementById('row_pbbkb');
+        if (rowPbbkb) {
+            rowPbbkb.style.display = document.getElementById('in_use_pbbkb').checked ? '' : 'none';
+        }
         document.getElementById('out_adjust_val').innerText = formatIDR(adj);
         document.getElementById('out_grand_val').innerText = formatIDR(grandTotalFinal);
         document.getElementById('out_terbilang').innerText = grandTotalFinal != 0 ? "# " + terbilang(grandTotalFinal) + " Rupiah #" : "-";
@@ -522,7 +550,7 @@
         const custValue = document.getElementById('in_cust').value;
         const addrField = document.getElementById('in_addr');
         const daftarAlamat = {
-         "PT. SILIKA INTI GEMILANG": "Jl.Raya Darmo Permai Block 3 No.26 RT.002 RW.001 \nTanjungsari, Sukomanunggal, \nKota Surabaya – Jawa Timur 60187",
+          "PT. SILIKA INTI GEMILANG": "Jl.Raya Darmo Permai Block 3 No.26 RT.002 RW.001 \nTanjungsari, Sukomanunggal, \nKota Surabaya – Jawa Timur 60187",
           "PT. LAUTAN PERMATA SENTOSA": "Jl. jend.Sudirman Km.01 Mentawa Baru Hulu, Mentawa Baru ketapang \nKab.Kotawaringin Timur - Kalimantan Tengah 74322",  
           "PT. INDOTRUBA TIMUR": "Gedung Indofood Tower lt.11 Sudirman Plaza \nJL.Jend Sudirman kav 76-78 rt.003 RW.003 \nSetia Budi, Setabudi \nKota Adm.Jakarta Selatan - DKI Jakarta 12910",  
           "CV. DWI SUKSES": "Jl. Kasan Rejo No.209 RT.21 RW.000,\nSidorejo, Arut Selatan \n Kab.Kotawaringin Barat - Kalimantan Tengah 74111",
