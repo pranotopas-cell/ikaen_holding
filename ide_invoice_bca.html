@@ -211,12 +211,23 @@
                         <input type="number" id="in_subtotal" class="form-control form-control-sm border-danger" step="0.01" oninput="manualTaxCalc()">
                     </div>
                 </div>
-                <div class="row g-2">
+                <div class="row g-2 mb-2">
                     <div class="col-6"><label class="small fw-bold">DPP Nilai Lain</label><input type="number" id="in_dpp_lain" class="form-control form-control-sm bg-light" step="0.01" oninput="syncAll()"></div>
                     <div class="col-6"><label class="small fw-bold">PPN</label><input type="number" id="in_ppn" class="form-control form-control-sm bg-light" step="0.01" oninput="syncAll()"></div>
                 </div>
-                <label class="small fw-bold mt-2">Penyesuaian (+/-)</label>
-                <input type="number" id="in_adjust" class="form-control form-control-sm" value="0" step="0.01" oninput="syncAll()">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="in_use_pbbkb" checked onchange="calculateFromBasic()">
+                            <label class="form-check-label small fw-bold" for="in_use_pbbkb">PBBKB (7,5%)</label>
+                        </div>
+                        <input type="number" id="in_pbbkb" class="form-control form-control-sm bg-light" step="0.01" oninput="syncAll()">
+                    </div>
+                    <div class="col-6">
+                        <label class="small fw-bold">Penyesuaian (+/-)</label>
+                        <input type="number" id="in_adjust" class="form-control form-control-sm" value="0" step="0.01" oninput="syncAll()">
+                    </div>
+                </div>
             </div>
             <datalist id="list_barang">
                 <option value="BBM SOLAR INDUSTRI ">
@@ -314,6 +325,7 @@
                                     <tr><td class="p-2 border-bottom border-end" width="55%">Sub Total</td><td class="p-2 border-bottom text-end fw-bold" id="out_subtotal_display">0,00</td></tr>
                                     <tr><td class="p-2 border-bottom border-end"><i>DPP Nilai Lain</i></td><td class="p-2 border-bottom text-end" id="out_dpp_val">0,00</td></tr>
                                     <tr><td class="p-2 border-bottom border-end"><i>PPN</i></td><td class="p-2 border-bottom text-end" id="out_ppn_val">0,00</td></tr>
+                                    <tr id="row_pbbkb"><td class="p-2 border-bottom border-end"><i>PBBKB</i></td><td class="p-2 border-bottom text-end" id="out_pbbkb_val">0,00</td></tr>
                                     <tr><td class="p-2 border-end"><i>Penyesuaian</i></td><td class="p-2 text-end" id="out_adjust_val">0,00</td></tr>
                                 </table>
                             </td>
@@ -410,39 +422,49 @@
     function calculateFromBasic() {
         const qtyRaw = document.getElementById('in_qty_text').value.replace(/\./g, '').replace(',', '.');
         const hNettRaw = document.getElementById('in_h_nett_text').value.replace(/\./g, '').replace(',', '.');
+        const usePbbkb = document.getElementById('in_use_pbbkb').checked;
         const qty = parseFloat(qtyRaw) || 0;
         const hNett = parseFloat(hNettRaw) || 0;
-        let hTax = Math.ceil((hNett / 1.11) * 100) / 100; 
+        const pembagi = usePbbkb ? 1.185 : 1.11;
+        let hTax = Math.ceil((hNett / pembagi) * 100) / 100; 
         const subtotal = qty * hTax;
         document.getElementById('in_h_tax_text').value = hTax.toFixed(2).replace('.', ',');
         document.getElementById('in_subtotal').value = subtotal.toFixed(2);
         const dppLain = roundKSE(subtotal * (11 / 12));
         const ppn = roundKSE(dppLain * 0.12);
+        const pbbkb = usePbbkb ? roundKSE(subtotal * 0.075) : 0;
         document.getElementById('in_dpp_lain').value = dppLain.toFixed(2);
         document.getElementById('in_ppn').value = ppn.toFixed(2);
+        document.getElementById('in_pbbkb').value = pbbkb.toFixed(2);
         syncAll();
     }
 
     function calculateFromDPPUnit() {
         const qtyRaw = document.getElementById('in_qty_text').value.replace(/\./g, '').replace(',', '.');
         const dppUnitRaw = document.getElementById('in_h_tax_text').value.replace(/\./g, '').replace(',', '.');
+        const usePbbkb = document.getElementById('in_use_pbbkb').checked;
         const qty = parseFloat(qtyRaw) || 0;
         const dppUnit = parseFloat(dppUnitRaw) || 0;
         const subtotal = qty * dppUnit;
         document.getElementById('in_subtotal').value = subtotal.toFixed(2);
         const dppLain = roundKSE(subtotal * (11 / 12));
         const ppn = roundKSE(dppLain * 0.12);
+        const pbbkb = usePbbkb ? roundKSE(subtotal * 0.075) : 0;
         document.getElementById('in_dpp_lain').value = dppLain.toFixed(2);
         document.getElementById('in_ppn').value = ppn.toFixed(2);
+        document.getElementById('in_pbbkb').value = pbbkb.toFixed(2);
         syncAll();
     }
 
     function manualTaxCalc() {
         const sub = parseFloat(document.getElementById('in_subtotal').value) || 0;
+        const usePbbkb = document.getElementById('in_use_pbbkb').checked;
         const dppLain = roundKSE(sub * (11 / 12));
         const ppn = roundKSE(dppLain * 0.12);
+        const pbbkb = usePbbkb ? roundKSE(sub * 0.075) : 0;
         document.getElementById('in_dpp_lain').value = dppLain.toFixed(2);
         document.getElementById('in_ppn').value = ppn.toFixed(2);
+        document.getElementById('in_pbbkb').value = pbbkb.toFixed(2);
         syncAll();
     }
 
@@ -491,14 +513,20 @@
         const sub = parseFloat(document.getElementById('in_subtotal').value) || 0;
         const dppLain = parseFloat(document.getElementById('in_dpp_lain').value) || 0;
         const ppn = parseFloat(document.getElementById('in_ppn').value) || 0;
+        const pbbkb = parseFloat(document.getElementById('in_pbbkb').value) || 0;
         const adj = parseFloat(document.getElementById('in_adjust').value) || 0;
         
-        const grandTotalFinal = roundKSE(sub + ppn + adj);
+        const grandTotalFinal = roundKSE(sub + ppn + pbbkb + adj);
         
         document.getElementById('out_subtotal_top').innerText = formatIDR(sub);
         document.getElementById('out_subtotal_display').innerText = formatIDR(sub);
         document.getElementById('out_dpp_val').innerText = formatIDR(dppLain);
         document.getElementById('out_ppn_val').innerText = formatIDR(ppn);
+        document.getElementById('out_pbbkb_val').innerText = formatIDR(pbbkb);
+        const rowPbbkb = document.getElementById('row_pbbkb');
+        if (rowPbbkb) {
+            rowPbbkb.style.display = document.getElementById('in_use_pbbkb').checked ? '' : 'none';
+        }
         document.getElementById('out_adjust_val').innerText = formatIDR(adj);
         document.getElementById('out_grand_val').innerText = formatIDR(grandTotalFinal);
         document.getElementById('out_terbilang').innerText = grandTotalFinal != 0 ?"# " + terbilang(grandTotalFinal) + " Rupiah #" : "-";
@@ -530,7 +558,7 @@
           "PT. BORNEO ARMADA PERKASA": "Jl. A.Yani Km.40 RT.021 RW.007 Pandu Sanjaya, Pangkalan Bun, Kab.Kotwringin Barat - Kalimantan Tengah 74184",
           "CV. BORNEO ARMADA PERKASA": "Jl. A.Yani Km.40 RT.021 RW.007 Pandu Sanjaya, Pangkalan Bun, Kab.Kotwringin Barat - Kalimantan Tengah 74184",
           "PT. GERBANG PERKASA PRATAMA": "Jl.Raya Darmo Permai Block 3 No.26 Kel.Tanjungsari Kec.Sukomanunggal, \nKota Surabaya – Jawa Timur 60187",
-          "PT. NEW WAHYU BAROKAH": "Jl. A.Yani Km.38 RT.030 RW.008 Pandu Sanjaya, Pangkalan Lada, Kab.Kotawringin Barat - Kalimantan Tengah 74184",
+          "PT. NEW WAHYU BAROKAH": "Jl. A.Yani Km.38 RT.030 RW.008 Pandu Sanjaya, Pangkalan Lada, Kab.Kotwringin Barat - Kalimantan Tengah 74184",
           "CV. ANUGERAH BERKAH ABADI BERSAMA": "DS.Karangan 5 No.35 RT.010 RW.003, Babatan Wiyung, Kota Surabaya - Jawa Timur 60227",
           "PT. TRIDEA SENADA": "JL.Gatot Subroto No.14 Kota Tinggi, Pekan Baru Kota, Kota Pekan Baru - Riau 28112",
           "PT. ENSBURY KALTENG MINING": "Kirana Boutique Office JL.Boulevard Raya F No.2 Kelapa Gading Timur, Kelapa Gading Kota Adm.Jakarta Utara - DKI Jakarta 14240",
