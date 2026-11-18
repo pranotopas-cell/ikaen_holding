@@ -1460,26 +1460,28 @@ Regards, Operasional`;
     }
 
     function handleActionRedirect(actionType) {
-        const prefix = activeTab;
-        if (actionType === 'po') {
-            window.location.href = `${prefix}_po.html`;
-        } else if (actionType === 'penawaran') {
-            window.location.href = `${prefix}_penawaran.html`;
-        } else if (actionType === 'penawaran_diskon') {
-            window.location.href = `${prefix}_penawaran_diskon.html`;
-        } else if (actionType === 'penawaran_multi') {
-            window.location.href = `${prefix}_penawaran_multi.html`;
-        } else if (actionType === 'invoice_transport') {
-            window.location.href = `${prefix}_invoice_transport.html`;
-        } else if (actionType.includes('Invoice BRI')) {
-            window.location.href = `${prefix}_invoice_bri.html`;
-        } else if (actionType.includes('Invoice BCA')) {
-            window.location.href = `${prefix}_invoice_bca.html`;
-        } else {
-            window.location.href = `${prefix}_${actionType}.html`;
+            const prefix = activeTab;
+            if (actionType === 'po') {
+                window.location.href = `${prefix}_po.html`;
+            } else if (actionType === 'penawaran') {
+                window.location.href = `${prefix}_penawaran.html`;
+            } else if (actionType === 'penawaran_diskon') {
+                window.location.href = `${prefix}_penawaran_diskon.html`;
+            } else if (actionType === 'penawaran_transport') {
+                window.location.href = 'ide_transport.html'; // Langsung buka halaman transport IDE
+            } else if (actionType === 'penawaran_multi') {
+                window.location.href = `${prefix}_penawaran_multi.html`;
+            } else if (actionType === 'invoice_transport') {
+                window.location.href = `${prefix}_invoice_transport.html`;
+            } else if (actionType.includes('Invoice BRI')) {
+                window.location.href = `${prefix}_invoice_bri.html`;
+            } else if (actionType.includes('Invoice BCA')) {
+                window.location.href = `${prefix}_invoice_bca.html`;
+            } else {
+                window.location.href = `${prefix}_${actionType}.html`;
+            }
         }
-    }
-
+    
     function renderContent() {
         const container = document.getElementById('contentArea');
         if (activeTab === 'holding') {
