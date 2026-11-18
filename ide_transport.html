@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDE - Penawaran Harga Transport System Cloud</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root { 
+            --ikaen-dark: #1e3a8a; 
+            --ikaen-primary: #0284c7; /* Biru IDE */
+            --ikaen-accent: #16a34a; /* Hijau IDE */
+            --doc-font: 'Courier Prime', Courier, monospace, sans-serif;
+        }
+        body { background-color: #f4f7f6; font-family: 'Courier Prime', Courier, monospace; font-size: 13px; margin: 0; padding: 0; }
+        .control-nav { background: #fff; border-bottom: 2px solid #ddd; padding: 10px 20px; position: sticky; top: 0; z-index: 1000; }
+        
+        .input-sidebar { 
+            background: #fff; 
+            height: calc(100vh - 60px); 
+            max-height: calc(100vh - 60px);
+            overflow-y: auto !important; 
+            padding: 15px 15px 120px 15px;
+            border-right: 1px solid #ddd; 
+            box-sizing: border-box;
+        }
+        
+        #pdf-area { background: #f4f7f6; padding: 20px 0; }
+        .document-canvas { 
+            background: white; width: 210mm; min-height: 296mm; margin: 0 auto; 
+            padding: 10mm 15mm 10mm 15mm; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.1); 
+            box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden;
+            font-family: 'Courier Prime', Courier, monospace;
+        }
+
+        /* Watermark Logo IDE Transparan */
+        .watermark-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            max-width: 600px;
+            opacity: 0.06;
+            filter: grayscale(100%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .header-section, .row, p, table, .mt-2, .mt-3, .signature-row, .footer-ikaen, .doc-body-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-section { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; }
+        .logo-container { display: flex; align-items: center; gap: 12px; }
+        .logo-img { height: 55px; width: auto; }
+        .brand-text { display: flex; flex-direction: column; line-height: 1.1; }
+        .brand-text .main-brand { font-size: 24px; font-weight: 900; color: var(--ikaen-dark); letter-spacing: 0.5px; }
+        .brand-text .sub-brand { font-size: 15px; font-weight: 700; color: var(--ikaen-primary); letter-spacing: 1px; margin-top: 2px; }
+        
+        .doc-identity { text-align: right; }
+        .doc-identity h2 { font-weight: 900; font-style: italic; font-size: 22px; color: var(--ikaen-primary); margin: 0; line-height: 1; }
+        .doc-identity .sub-title-en { font-size: 13px; color: #666; font-style: italic; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        
+        /* Tabel Utama Transport */
+        .table-transport { width: 100%; border-collapse: collapse; margin-top: 8px; border: 1.5px solid #000; font-size: 11px; }
+        .table-transport th { 
+            background-color: var(--ikaen-primary) !important; 
+            color: white !important; 
+            padding: 6px; 
+            border: 1.5px solid #000; 
+            text-align: center; 
+            font-weight: bold;
+        }
+        .table-transport td { border: 1px solid #000; padding: 4px 8px; vertical-align: middle; }
+        .table-transport tr.row-group-end td { border-bottom: 1.5px solid #000 !important; }
+        .nowrap-cell { white-space: nowrap; }
+        
+        .info-list-table { width: 100%; border-collapse: collapse; font-size: 11.5px; line-height: 1.35; }
+        .info-list-table td { padding: 1.5px 0; vertical-align: top; }
+
+        /* Meta Table di sebelah kanan agar Nomor tidak turun */
+        .meta-table { width: 100%; border-collapse: collapse; }
+        .meta-table td { border: none !important; padding: 2px 0; font-size: 11px; vertical-align: top; }
+        .meta-table td.label-col { white-space: nowrap; width: 1%; padding-right: 6px; }
+        .meta-table td.value-col { font-weight: bold; text-align: right; }
+        .meta-table td.no-wrap-val { white-space: nowrap; }
+        .lang-en { font-style: italic; font-size: 8px; color: #666; display: block; margin-top: -1px; }
+
+        .footer-ikaen { margin-top: auto; padding-top: 10px; border-top: 2px solid #0284c7; }
+
+        @media print {
+            .control-nav, .input-sidebar { display: none !important; }
+            .col-lg-9 { width: 100% !important; margin: 0 !important; }
+            #pdf-area { padding: 0 !important; }
+            .document-canvas { box-shadow: none !important; margin: 0 !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="control-nav shadow-sm d-flex justify-content-between align-items-center">
+    <div class="d-flex gap-2">
+        <a href="index.html" class="btn btn-outline-primary btn-sm fw-bold"><i class="bi bi-house"></i> HOME</a>
+        <button class="btn btn-outline-secondary btn-sm" onclick="syncAutoNumber()"><i class="bi bi-arrow-clockwise"></i> REFRESH NO</button>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-dark btn-sm fw-bold" onclick="window.print()"><i class="bi bi-printer"></i> PRINT</button>
+        <button class="btn btn-primary btn-sm fw-bold px-3" onclick="saveToSupabase()" id="btn-save-sb">
+            <i class="bi bi-cloud-arrow-up"></i> SIMPAN 
+        </button>
+        <button class="btn btn-outline-primary btn-sm fw-bold px-3" onclick="downloadPDF()"><i class="bi bi-download"></i> DOWNLOAD </button>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- PANEL INPUT SIDEBAR -->
+        <div class="col-lg-3 input-sidebar">
+            <h6 class="fw-bold mb-3 text-primary border-bottom pb-2"><i class="bi bi-pencil-square"></i> PANEL PENAWARAN TRANSPORT</h6>
+            
+            <div class="mb-2">
+                <label class="fw-bold small">Nomor Urut (Auto)</label>
+                <div class="input-group input-group-sm">
+                    <input type="number" id="in_no_urut" class="form-control fw-bold border-primary" oninput="formatFullNumber()">
+                </div>
+                <input type="hidden" id="in_no">
+            </div>
+            
+            <div class="mb-2">
+                <label class="fw-bold small">Tanggal Surat</label>
+                <input type="date" id="in_tgl_raw" class="form-control form-control-sm" oninput="handleDateChange()">
+            </div>
+
+            <div class="mb-2">
+                <label class="fw-bold small">Periode Penawaran</label>
+                <input type="text" id="in_prd" class="form-control form-control-sm" oninput="syncAll()">
+            </div>
+
+            <div class="mb-3">
+                <label class="fw-bold small">Perihal</label>
+                <input type="text" id="in_perihal" class="form-control form-control-sm" oninput="syncAll()">
+            </div>
+
+            <div class="card p-2 mb-3 bg-light border-0">
+                <label class="fw-bold small">Tujuan Perusahaan (Kepada)</label>
+                <input type="text" id="in_cust" class="form-control form-control-sm" list="list_customers" placeholder="Ketik atau pilih perusahaan..." oninput="syncAll()" onchange="handleCustInput()">
+                <datalist id="list_customers"></datalist>
+
+                <label class="fw-bold small mt-1">Alamat / Lokasi</label>
+                <textarea id="in_addr" class="form-control form-control-sm" rows="2" oninput="syncAll()">di tempat,</textarea>
+            </div>
+
+            <div class="card p-2 mb-3 border-secondary">
+                <label class="fw-bold small text-dark text-center">DESKRIPSI & KETENTUAN</label>
+                <hr class="my-1">
+                <label class="small fw-bold">Produk</label>
+                <input type="text" id="in_produk_desc" class="form-control form-control-sm mb-2" oninput="syncAll()">
+                
+                <label class="small fw-bold">Toleransi</label>
+                <input type="text" id="in_tol" class="form-control form-control-sm mb-2" oninput="syncAll()">
+
+                <label class="small fw-bold">Sistem Pembayaran</label>
+                <input type="text" list="list_pay" id="in_pay" class="form-control form-control-sm mb-2" oninput="syncAll()">
+                <datalist id="list_pay">
+                    <option value="Cash on Delivery (COD)">
+                    <option value="CBD (Cash Before Delivery)">
+                </datalist>
+
+                <label class="small fw-bold">Supply Point</label>
+                <input type="text" id="in_supply_point" class="form-control form-control-sm mb-2" oninput="syncAll()">
+                
+                <label class="small fw-bold">Contact Person</label>
+                <input type="text" id="in_contact" class="form-control form-control-sm" oninput="syncAll()">
+            </div>
+
+            <!-- CONTAINER DINAMIS ITEM TABEL -->
+            <div id="sidebar-items-container"></div>
+
+            <!-- TOMBOL TAMBAH BARIS TABEL -->
+            <button class="btn btn-outline-success btn-sm w-100 fw-bold mb-4" onclick="addTableItem()">
+                <i class="bi bi-plus-circle"></i> TAMBAH BARIS TABEL
+            </button>
+        </div>
+
+        <!-- AREA DOKUMEN PREVIEW / PDF -->
+        <div class="col-lg-9 p-0" id="pdf-area">
+            <div class="document-canvas" id="main-doc">
+                <img src="ide1.png" class="watermark-bg" alt="Watermark IDE" onerror="this.style.display='none'">
+
+                <!-- HEADER / KOP SURAT TETAP -->
+                <div class="header-section">
+                    <div class="logo-container">
+                        <img src="ide1.png" class="logo-img" onerror="this.src='https://via.placeholder.com/200x60?text=LOGO+IDE'">
+                        <div class="brand-text">
+                            <span class="main-brand">INDO DHARMA</span>
+                            <span class="sub-brand">ENERGI</span>
+                        </div>
+                    </div>
+                    <div class="doc-identity">
+                        <h2>PENAWARAN HARGA</h2>
+                        <div class="sub-title-en">TRANSPORT QUOTATION</div>
+                    </div>
+                </div>
+
+                <!-- ISI SURAT -->
+                <div class="doc-body-content" style="font-size: 11.5px;">
+                    <div class="row mb-2">
+                        <div class="col-6">
+                            <div>Kepada :</div>
+                            <div class="fw-bold text-uppercase" id="out_cust" style="font-size: 12.5px;"></div>
+                            <div id="out_addr" style="white-space: pre-line;"></div>
+                        </div>
+                        <div class="col-6">
+                            <table class="meta-table">
+                                <tr>
+                                    <td class="label-col">NOMOR<span class="lang-en">Number</span></td>
+                                    <td width="3%">:</td>
+                                    <td id="out_no" class="value-col no-wrap-val"></td>
+                                </tr>
+                                <tr>
+                                    <td class="label-col">TANGGAL<span class="lang-en">Date</span></td>
+                                    <td>:</td>
+                                    <td id="out_tgl" class="value-col no-wrap-val"></td>
+                                </tr>
+                                <tr>
+                                    <td class="label-col">PERIHAL<span class="lang-en">Subject</span></td>
+                                    <td>:</td>
+                                    <td id="out_perihal" class="value-col"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <p class="mb-2" style="text-align: justify; line-height: 1.4;">
+                        Dengan Hormat,<br>Bersama ini kami <strong>PT. INDO DHARMA ENERGI</strong> Transportir BBM Industri mengajukan penawaran Ongkos Angkut (OAT) kepada perusahaan Bapak/ ibu untuk periode <span id="out_prd" class="fw-bold"></span>, dengan rincian sebagai berikut :
+                    </p>
+
+                    <!-- TABEL RINCIAN HARGA -->
+                    <table class="table-transport">
+                        <thead>
+                            <tr>
+                                <th width="5%">No</th>
+                                <th width="24%">Unit</th>
+                                <th width="27%">Tujuan Pengiriman</th>
+                                <th width="25%">Harga / Liter (IDR)</th>
+                                <th width="19%">TOTAL (IDR)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="document-table-body">
+                            <!-- Baris tabel dirender secara dinamis via JavaScript -->
+                        </tbody>
+                    </table>
+
+                    <!-- KETERANGAN PRODUK, TOLERANSI DLL DI BAWAH TABEL -->
+                    <table class="info-list-table mt-2 mb-2">
+                        <tr><td width="24%">Produk</td><td width="2%">&nbsp;:&nbsp;</td><td id="out_produk_desc"></td></tr>
+                        <tr><td>Toleransi</td><td>&nbsp;:&nbsp;</td><td id="out_tol"></td></tr>
+                        <tr><td>Sistem Pembayaran</td><td>&nbsp;:&nbsp;</td><td id="out_pay"></td></tr>
+                        <tr><td>Supply Point</td><td>&nbsp;:&nbsp;</td><td id="out_supply_point"></td></tr>
+                        <tr><td>Contact Person</td><td>&nbsp;:&nbsp;</td><td id="out_contact"></td></tr>
+                    </table>
+
+                    <p class="mt-2 mb-2" style="text-align: justify; line-height: 1.4;">
+                        Demikian Pengajuan Penawaran di atas kami sampaikan, besar harapan kami agar dapat menjalin hubungan sebagai mitra kerja yang baik bagi Perusahaan Bapak/Ibu. Atas perhatian dan kerja samanya kami ucapkan terima kasih.
+                    </p>
+                </div>
+
+                <!-- TANDA TANGAN TETAP -->
+                <div class="signature-row mt-2" style="font-size: 12px;">
+                    <p class="mb-0">Regard,</p>
+                    <p class="fw-bold mb-0">PT. INDO DHARMA ENERGI</p>
+                    <div style="height: 60px;"><img src="ida.png" style="height: 60px;" onerror="this.style.display='none'"></div>
+                    <p class="fw-bold text-decoration-underline mb-0 text-uppercase" style="font-size: 13px;">MISRO</p>
+                    <p class="mb-0 small">Operasional</p>
+                </div>
+
+                <!-- FOOTER QR VERIFIED SYSTEM TETAP -->
+                <div class="footer-ikaen">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <img id="qr_footer" src="" width="40" style="border: 1px solid #eee; padding: 2px;">
+                            <div style="font-size: 8px; line-height: 1.2;">
+                                <strong style="color: var(--ikaen-primary); font-size: 9px; display: block;">IDE-DIGITAL VERIFIED SYSTEM</strong>
+                                <span class="text-muted">Scan QR untuk validasi Quotation<br></span>
+                                <span>Issued By: <strong id="footer_issued_by" style="color: #000;">-</strong></span><br>
+                                <span id="qr_timestamp" style="font-size: 7px; color: #888;"></span>
+                            </div>
+                        </div>
+                        <div class="text-end" style="font-size: 9px;">
+                            <b style="color: var(--ikaen-dark);">PT. INDO DHARMA ENERGI</b><br>
+                            Jl. Ahmad Yani KM 7 Kel.Baru Pangkalan Bun<br>
+                            0852-2586-2649 | indodharmaenergi@gmail.com 
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SB_URL = "https://qlsvvxfykteqxzcppnfv.supabase.co"; 
+    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsc3Z2eGZ5a3RlcXh6Y3BwbmZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0MDc5OTMsImV4cCI6MjEwNzk4Mzk5M30.jpxErPZSL0sJ4PakUSt8tCxHKHXpmA6CFL9sirbLV2I";
+    const _supabase = supabase.createClient(SB_URL, SB_KEY);
+    
+    const monthRomawi = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+    const monthsIndo = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+    function loadIssuerInfo() {
+        let issuerName = localStorage.getItem('holding_user_name');
+        let isLoggedIn = localStorage.getItem('holding_is_logged_in');
+
+        if (!isLoggedIn || !issuerName) {
+            issuerName = "Nurhamida";
+        }
+
+        const issuerEl = document.getElementById('footer_issued_by');
+        if (issuerEl) {
+            issuerEl.innerText = issuerName;
+        }
+        return issuerName;
+    }
+
+    const databaseCust = {
+          "-": "di tempat,",
+          "PT. HUTANINDO LESTARI RAYA TIMBER": "Jl. Malijo No.00 Kel. Madurejo \nPangkalan Bun - Kalimantan Tengah",
+          "PT. SILIKA INTI GEMILANG": "Raya Darmo Permai Block 3 No.26 RT.002 RW.001 \nTanjungsari, Sukomanunggal, \nKota Surabaya – Jawa Timur 60187",
+          "PT. LAUTAN PERMATA SENTOSA": "Jl. jend.Sudirman Km.01 Mentawa Baru Hulu, Mentawa Baru ketapang \nKab.Kotawaringin Timur - Kalimantan Tengah 74322"
+    };
+
+    let tableItems = [
+        { id: 1, label: "Unit 5.000 Liter", dest: "-", qty: 5000, rate: 0, ppn: true, pph: true },
+        { id: 2, label: "Unit 10.000 Liter", dest: "-", qty: 10000, rate: 0, ppn: true, pph: true }
+    ];
+    let nextItemId = 3;
+
+    function toTitleCaseCompany(str) {
+        if (!str || str === "-") return "-";
+        return str.toLowerCase().replace(/\b\w/g, l => l.toUpperCase()).replace(/\bPt\./g, 'PT.').replace(/\bCv\./g, 'CV.').replace(/\bTbk\b/g, 'Tbk');
+    }
+
+    function formatAngkaBulat(val) {
+        return Math.round(val).toLocaleString('id-ID');
+    }
+
+    async function syncAutoNumber() {
+        try {
+            const tglVal = document.getElementById('in_tgl_raw').value;
+            const refDate = tglVal ? new Date(tglVal) : new Date();
+            
+            const year = refDate.getFullYear();
+            const month = refDate.getMonth();
+            
+            const firstDay = new Date(year, month, 1).toLocaleDateString('en-CA');
+            const lastDay = new Date(year, month + 1, 0).toLocaleDateString('en-CA');
+
+            const { data, error } = await _supabase
+                .from('eforms')
+                .select('nomor')
+                .eq('jenis', 'SPH-TRANSPORT')
+                .gte('tanggal', firstDay)
+                .lte('tanggal', lastDay);
+
+            if (error) throw error;
+
+            let nextNum = 1;
+
+            if (data && data.length > 0) {
+                const numbers = data.map(item => {
+                    if (item.nomor) {
+                        const parts = item.nomor.split('/');
+                        return parseInt(parts[0], 10) || 0;
+                    }
+                    return 0;
+                });
+
+                const maxNum = Math.max(...numbers);
+                nextNum = maxNum + 1;
+            }
+
+            document.getElementById('in_no_urut').value = nextNum;
+            formatFullNumber();
+            updatePeriode(refDate);
+        } catch (err) { 
+            console.error("Gagal Sync Penomoran:", err); 
+            formatFullNumber();
+        }
+    }
+
+    function formatFullNumber() {
+        const urut = document.getElementById('in_no_urut').value || "1";
+        const tglVal = document.getElementById('in_tgl_raw').value;
+        const d = tglVal ? new Date(tglVal) : new Date();
+        
+        const m = d.getMonth();
+        const y = d.getFullYear();
+        const noPadded = urut.toString().padStart(3, '0');
+        const fullNo = `${noPadded}/SPH-TRANSPORT/IDE/${monthRomawi[m]}/${y}`;
+        
+        document.getElementById('in_no').value = fullNo;
+        syncAll();
+    }
+
+    function updatePeriode(d) {
+        const m = d.getMonth();
+        const y = d.getFullYear();
+        const prdInput = document.getElementById('in_prd');
+        if (prdInput) {
+            prdInput.value = `${monthsIndo[m]} ${y}`;
+        }
+    }
+
+    function handleDateChange() {
+        const val = document.getElementById('in_tgl_raw').value;
+        if (!val) return;
+        const d = new Date(val);
+        document.getElementById('out_tgl').innerText = `${d.getDate().toString().padStart(2, '0')} ${monthsIndo[d.getMonth()]} ${d.getFullYear()}`;
+        syncAutoNumber();
+    }
+
+    function handleCustInput() {
+        const name = document.getElementById('in_cust').value;
+        if (databaseCust[name]) {
+            document.getElementById('in_addr').value = databaseCust[name];
+        }
+        if (name && name !== "-") {
+            document.getElementById('in_perihal').value = `Penawaran Harga Transport`;
+        }
+        syncAll();
+    }
+
+    function hitungItemTransport(qty, rate, usePpn, usePph) {
+        const subtotal = qty * rate;
+        const ppn = usePpn ? (subtotal * 0.11) : 0;
+        const pph = usePph ? (subtotal * 0.02) : 0;
+        const total = subtotal + ppn - pph;
+        return { subtotal, ppn, pph, total };
+    }
+
+    function renderSidebarItems() {
+        const container = document.getElementById('sidebar-items-container');
+        container.innerHTML = "";
+
+        tableItems.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = `card p-2 mb-3 border-${index % 2 === 0 ? 'primary' : 'success'}`;
+            card.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <label class="fw-bold small text-primary mb-0">ITEM ${index + 1}</label>
+                    ${tableItems.length > 1 ? `<button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="removeTableItem(${item.id})"><i class="bi bi-trash"></i> Hapus</button>` : ''}
+                </div>
+                <hr class="my-1">
+                <label class="small fw-bold">Label Produk / Unit</label>
+                <input type="text" id="input_item_${item.id}_label" class="form-control form-control-sm mb-1" value="${item.label}" oninput="updateItemData(${item.id})">
+
+                <label class="small fw-bold">Tujuan Pengiriman</label>
+                <input type="text" id="input_item_${item.id}_dest" class="form-control form-control-sm mb-1" value="${item.dest}" placeholder="Ketik lokasi pengiriman..." oninput="updateItemData(${item.id})">
+
+                <div class="row g-1 mb-1">
+                    <div class="col-6">
+                        <label class="small fw-bold">Qty (Liter)</label>
+                        <select id="input_item_${item.id}_qty" class="form-select form-select-sm border-primary" onchange="updateItemData(${item.id})">
+                            <option value="5000" ${item.qty == 5000 ? 'selected' : ''}>5.000</option>
+                            <option value="8000" ${item.qty == 8000 ? 'selected' : ''}>8.000</option>
+                            <option value="10000" ${item.qty == 10000 ? 'selected' : ''}>10.000</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="small fw-bold">Harga / Liter</label>
+                        <input type="number" id="input_item_${item.id}_rate" class="form-control form-control-sm border-primary" value="${item.rate}" oninput="updateItemData(${item.id})">
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between mt-1">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="input_item_${item.id}_ppn" ${item.ppn ? 'checked' : ''} onchange="updateItemData(${item.id})">
+                        <label class="form-check-label small fw-bold" for="input_item_${item.id}_ppn">PPN 11%</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="input_item_${item.id}_pph" ${item.pph ? 'checked' : ''} onchange="updateItemData(${item.id})">
+                        <label class="form-check-label small fw-bold" for="input_item_${item.id}_pph">PPh 23 (2%)</label>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function updateItemData(id) {
+        const item = tableItems.find(i => i.id === id);
+        if (!item) return;
+
+        item.label = document.getElementById(`input_item_${id}_label`).value;
+        item.dest = document.getElementById(`input_item_${id}_dest`).value;
+        item.qty = parseFloat(document.getElementById(`input_item_${id}_qty`).value) || 0;
+        item.rate = parseFloat(document.getElementById(`input_item_${id}_rate`).value) || 0;
+        item.ppn = document.getElementById(`input_item_${id}_ppn`).checked;
+        item.pph = document.getElementById(`input_item_${id}_pph`).checked;
+
+        syncAll();
+    }
+
+    function addTableItem() {
+        const newId = nextItemId++;
+        tableItems.push({
+            id: newId,
+            label: `Unit 5.000 Liter`,
+            dest: "-",
+            qty: 5000,
+            rate: 0,
+            ppn: true,
+            pph: true
+        });
+        renderSidebarItems();
+        syncAll();
+    }
+
+    function removeTableItem(id) {
+        if (tableItems.length <= 1) {
+            alert("Minimal harus ada 1 baris item dalam tabel.");
+            return;
+        }
+        tableItems = tableItems.filter(i => i.id !== id);
+        renderSidebarItems();
+        syncAll();
+    }
+
+    function syncAll() {
+        const noSurat = document.getElementById('in_no').value || "001/SPH-TRANSPORT/IDE/XI/2026";
+        const customer = document.getElementById('in_cust').value || "";
+
+        // Header & Metadata Surat di Sebelah Kanan
+        document.getElementById('out_no').innerText = noSurat;
+        document.getElementById('out_perihal').innerText = document.getElementById('in_perihal').value;
+        document.getElementById('out_cust').innerText = customer;
+        document.getElementById('out_addr').innerText = document.getElementById('in_addr').value;
+        
+        const prdEl = document.getElementById('out_prd');
+        if (prdEl) {
+            prdEl.innerText = document.getElementById('in_prd').value;
+        }
+
+        // Deskripsi & Ketentuan (Di Bawah Tabel)
+        document.getElementById('out_produk_desc').innerText = document.getElementById('in_produk_desc').value;
+        document.getElementById('out_tol').innerText = document.getElementById('in_tol').value;
+        document.getElementById('out_pay').innerText = document.getElementById('in_pay').value;
+        document.getElementById('out_supply_point').innerText = document.getElementById('in_supply_point').value;
+        document.getElementById('out_contact').innerText = document.getElementById('in_contact').value;
+
+        // Render Tabel Dokumen Canvas secara Dinamis
+        const tbody = document.getElementById('document-table-body');
+        tbody.innerHTML = "";
+
+        let totalRateSum = 0;
+
+        tableItems.forEach((item, index) => {
+            const res = hitungItemTransport(item.qty, item.rate, item.ppn, item.pph);
+            totalRateSum += item.rate;
+
+            const trSubtotal = document.createElement('tr');
+            trSubtotal.innerHTML = `
+                <td rowspan="4" class="text-center fw-bold">${index + 1}</td>
+                <td rowspan="4" class="text-center" style="white-space: pre-line;" id="out_item_${item.id}_label">${item.label}</td>
+                <td rowspan="4" class="text-center" id="out_item_${item.id}_dest">${item.dest}</td>
+                <td class="text-end nowrap-cell" id="out_item_${item.id}_rate">${formatAngkaBulat(item.rate)},-</td>
+                <td class="text-end nowrap-cell" id="out_item_${item.id}_subtotal">${formatAngkaBulat(res.subtotal)},-</td>
+            `;
+            tbody.appendChild(trSubtotal);
+
+            const trPpn = document.createElement('tr');
+            trPpn.innerHTML = `
+                <td class="text-end nowrap-cell">PPN</td>
+                <td class="text-end nowrap-cell" id="out_item_${item.id}_ppn">${formatAngkaBulat(res.ppn)},-</td>
+            `;
+            tbody.appendChild(trPpn);
+
+            const trPph = document.createElement('tr');
+            trPph.innerHTML = `
+                <td class="text-end nowrap-cell">PPh 23</td>
+                <td class="text-end nowrap-cell" id="out_item_${item.id}_pph">(${formatAngkaBulat(res.pph)},-)</td>
+            `;
+            tbody.appendChild(trPph);
+
+            const trTotal = document.createElement('tr');
+            trTotal.className = "row-group-end";
+            trTotal.innerHTML = `
+                <td class="text-end fw-bold nowrap-cell">TOTAL</td>
+                <td class="text-end fw-bold nowrap-cell" id="out_item_${item.id}_total">${formatAngkaBulat(res.total)},-</td>
+            `;
+            tbody.appendChild(trTotal);
+        });
+
+        // QR Code Validasi
+        const qrContent = `VALID-IDE-TRANSPORT|NO:${noSurat}|CUST:${customer}|ITEMS:${tableItems.length}|SUM_RATE:${totalRateSum}`;
+        document.getElementById('qr_footer').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrContent)}`;
+        document.getElementById('qr_timestamp').innerText = `Generated: ${new Date().toLocaleString('id-ID')}`;
+    }
+
+    async function saveToSupabase() {
+        const btn = document.getElementById('btn-save-sb');
+        const activeIssuer = loadIssuerInfo();
+        const destPengiriman = tableItems.length > 0 ? tableItems[0].dest : "";
+
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> SAVING...'; 
+        btn.disabled = true;
+        
+        try {
+            const noSurat = document.getElementById('in_no').value;
+            const element = document.getElementById('main-doc');
+            const opt = { 
+                margin: 0, 
+                filename: `SPH-TRANSPORT-${noSurat.replace(/\//g, '-')}.pdf`, 
+                image: { type: 'jpeg', quality: 0.98 }, 
+                html2canvas: { scale: 2, useCORS: true }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+            };
+
+            const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+            const fileName = `penawaran/SPH_TRANSPORT_${Date.now()}_${noSurat.replace(/\//g, '_')}.pdf`;
+            await _supabase.storage.from('documents').upload(fileName, pdfBlob);
+            const { data: urlData } = _supabase.storage.from('documents').getPublicUrl(fileName);
+
+            let totalNominal = 0;
+            if (tableItems.length > 0) {
+                const res = hitungItemTransport(tableItems[0].qty, tableItems[0].rate, tableItems[0].ppn, tableItems[0].pph);
+                totalNominal = res.total;
+            }
+
+            const { error: insertError } = await _supabase.from('eforms').insert([{
+                jenis: "SPH-TRANSPORT", 
+                nomor: noSurat, 
+                tanggal: document.getElementById('in_tgl_raw').value,
+                tujuan: document.getElementById('in_cust').value, 
+                pdf_url: urlData.publicUrl,
+                nominal: Math.round(totalNominal),
+                issued_by: activeIssuer,
+                tujuan_pengiriman: destPengiriman
+            }]);
+
+            if (insertError) throw insertError;
+            
+            alert("Sukses Tersimpan!");
+            syncAutoNumber();
+        } catch (e) { 
+            alert("Gagal: " + e.message); 
+            console.error("Error Detail:", e);
+        }
+        
+        btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> SIMPAN'; 
+        btn.disabled = false;
+    }
+
+    function downloadPDF() {
+        const element = document.getElementById('main-doc');
+        const noSurat = document.getElementById('in_no').value.replace(/\//g, '-');
+        html2pdf().set({ 
+            margin: 0, 
+            filename: `SPH-TRANSPORT-${noSurat}.pdf`, 
+            html2canvas: { scale: 2, useCORS: true }, 
+            jsPDF: { unit: 'mm', format: 'a4' } 
+        }).from(element).save();
+    }
+
+    window.onload = () => {
+        const datalistCust = document.getElementById('list_customers');
+        Object.keys(databaseCust).forEach(key => {
+            const opt = document.createElement('option');
+            opt.value = key;
+            datalistCust.appendChild(opt);
+        });
+
+        document.getElementById('in_tgl_raw').value = new Date().toISOString().split('T')[0];
+        loadIssuerInfo();
+        
+        // Set Nilai Default Form Sidebar
+        document.getElementById('in_cust').value = "-";
+        document.getElementById('in_addr').value = databaseCust["-"];
+        document.getElementById('in_perihal').value = "Penawaran Harga Transport";
+        
+        document.getElementById('in_produk_desc').value = "Jasa Transportasi BBM Solar Industri";
+        document.getElementById('in_tol').value = "+/- 0,3%";
+        document.getElementById('in_pay').value = "Cash on Delivery (COD)";
+        document.getElementById('in_supply_point').value = "Depo PT. Petro Andalan Nusantara, Kumai.";
+        document.getElementById('in_contact').value = "0852-2586-2649 ( Nurhamida )";
+
+        // Render Sidebar dan Dokumen
+        renderSidebarItems();
+        handleDateChange();
+        syncAutoNumber();
+        syncAll(); 
+    };
+</script>
+</body>
+</html>
