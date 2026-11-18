@@ -278,7 +278,7 @@
                 <div class="signature-row mt-2" style="font-size: 12px;">
                     <p class="mb-0">Regard,</p>
                     <p class="fw-bold mb-0">PT. INDO DHARMA ENERGI</p>
-                    <div style="height: 60px;"><img src="ida.png" style="height: 60px;" onerror="this.style.display='none'"></div>
+                    <div style="height: 60px;"><img src="ida.png" style="height: 80px;" onerror="this.style.display='none'"></div>
                     <p class="fw-bold text-decoration-underline mb-0 text-uppercase" style="font-size: 13px;">MISRO</p>
                     <p class="mb-0 small">Operasional</p>
                 </div>
@@ -332,9 +332,9 @@
 
     const databaseCust = {
           "-": "di tempat,",
-          "PT. HUTANINDO LESTARI RAYA TIMBER": "Jl. Malijo No.00 Kel. Madurejo \nPangkalan Bun - Kalimantan Tengah",
-          "PT. SILIKA INTI GEMILANG": "Raya Darmo Permai Block 3 No.26 RT.002 RW.001 \nTanjungsari, Sukomanunggal, \nKota Surabaya – Jawa Timur 60187",
-          "PT. LAUTAN PERMATA SENTOSA": "Jl. jend.Sudirman Km.01 Mentawa Baru Hulu, Mentawa Baru ketapang \nKab.Kotawaringin Timur - Kalimantan Tengah 74322"
+          "PT. HUTANINDO LESTARI RAYA TIMBER": "Jl. Malijo No.00 Kel. Madurejo,Arut Selatan \nKotawaringin Barat - Kalimantan Tengah 74181",
+          "PT. FORTUNA LANCAR ADIMAKMUR": "JL.Raya Bypass Pandaan No.88 \nMacanan, Petungasri, \nPasuruhan – Jawa Timur 67156",
+          "GROUP BEST AGRO": "Up.Ibu Lily \nDi Tempat"
     };
 
     let tableItems = [
@@ -681,8 +681,8 @@
         loadIssuerInfo();
         
         // Set Nilai Default Form Sidebar
-        document.getElementById('in_cust').value = "-";
-        document.getElementById('in_addr').value = databaseCust["-"];
+        document.getElementById('in_cust').value = "";
+        document.getElementById('in_addr').value = databaseCust[""];
         document.getElementById('in_perihal').value = "Penawaran Harga Transport";
         
         document.getElementById('in_produk_desc').value = "Jasa Transportasi BBM Solar Industri";
