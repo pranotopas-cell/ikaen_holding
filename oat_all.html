@@ -254,33 +254,23 @@
             const nopolTd = row.querySelector('td:nth-child(6)');
             const amtTd = row.querySelector('td:nth-child(10)');
             
+            if (!supplierTd || !nopolTd) return;
+
             let matchSupplier = false, matchNopol = false, matchAmt = false;
 
-            if (supplierTd) {
-                const txt = supplierTd.innerText.toLowerCase().trim();
-                if (selectedSupplier === "" || txt.includes(selectedSupplier)) matchSupplier = true;
-            }
-            if (nopolTd) {
-                const txt = nopolTd.innerText.toLowerCase().trim();
-                if (selectedNopol === "" || txt === selectedNopol) matchNopol = true;
-            }
+            const txtSup = supplierTd.innerText.toLowerCase().trim();
+            if (selectedSupplier === "" || txtSup.includes(selectedSupplier)) matchSupplier = true;
+
+            const txtNop = nopolTd.innerText.toLowerCase().trim();
+            if (selectedNopol === "" || txtNop === selectedNopol) matchNopol = true;
             
             const barisCache = cacheDataBaris[index];
-            const key = barisCache ? barisCache.id : '';
 
             if (amtTd) {
                 const dataAsli = barisCache ? (barisCache.rawSopirAsli || amtTd.innerText) : amtTd.innerText;
-                
                 if (barisCache && !barisCache.rawSopirAsli) {
                     barisCache.rawSopirAsli = amtTd.innerText;
                 }
-
-                const inputP_Sopir = document.getElementById(`premi-sopir-${key}`);
-                const inputP_Helper = document.getElementById(`premi-helper-${key}`);
-                const inputUM_Sopir = document.getElementById(`um-sopir-${key}`);
-                const inputUM_Helper = document.getElementById(`um-helper-${key}`);
-
-                const txt = dataAsli.toLowerCase().trim();
                 
                 if (selectedAmt === "") {
                     matchAmt = true;
@@ -296,11 +286,6 @@
                         matchAmt = false;
                     }
                 }
-                
-                // Pastikan nilai input premi & uang makan dihitung ulang berdasarkan master rute yang aktif
-                if (barisCache) {
-                    hitungSisa(barisCache.id);
-                }
             } else {
                 matchAmt = (selectedAmt === "");
             }
@@ -314,26 +299,13 @@
             }
         });
         
-        // Terapkan ulang master agar nilai premi/makan tidak 0 saat difilter
-        aplikasikanMasterKeTabelUtamaTanpaReset();
         hitungRingkasanTotalTabel();
-    }
-
-    function aplikasikanMasterKeTabelUtamaTanpaReset() {
-        // Fungsi aman untuk memastikan baris yang tampil tetap mengambil nilai master rute jika inputannya masih 0
-        cacheDataBaris.forEach(baris => {
-            const inputP_Sopir = document.getElementById(`premi-sopir-${baris.id}`);
-            if (inputP_Sopir && parseFloat(inputP_Sopir.value) === 0) {
-                // Panggil ulang pencocokan master rute agar premi & um terisi otomatis
-                aplikasikanMasterKeTabelUtama();
-            }
-        });
     }
     
     function populateDropdownsUploader(dataPengiriman) {
         const dropdownNopol = document.getElementById('filter-nopol');
         dropdownNopol.innerHTML = '<option value="">-- ALL --</option>';
-        const listNopolUnik = [...new Set(dataPengiriman.map(item => (item.nopol || '').trim().toUpperCase()))].filter(n=>n!=='').sort();
+        const listNopolUnik = [...new Set(dataPengiriman.map(item => (item.nopol || '').trim().toUpperCase()))].filter(n => n !== '').sort();
         listNopolUnik.forEach(nopol => {
             const op = document.createElement('option');
             op.value = nopol.toLowerCase(); op.innerText = nopol;
@@ -357,12 +329,32 @@
         });
 
         const listAmtUnik = [...new Set(semuaSopir)].sort();
-        
         listAmtUnik.forEach(sopir => {
             const op = document.createElement('option');
             op.value = sopir.toLowerCase(); op.innerText = sopir;
             dropdownAmt.appendChild(op);
         });
+    }
+
+    // Fungsi pembantu pencocokan master OAT yang cepat & akurat
+    function cariMasterCocok(databaseMaster, tujuanBaris, lokasiBaris, qtyBaris) {
+        if (!tujuanBaris || databaseMaster.length === 0) return null;
+
+        // 1. Prioritas Utama: Tujuan + Lokasi + Qty (Exact / Includes pada lokasi yang terisi)
+        let exactLocMatch = databaseMaster.find(m => {
+            if (!m.lokasi || m.qty !== qtyBaris) return false;
+            const matchTujuan = m.tujuan === tujuanBaris || tujuanBaris.includes(m.tujuan) || m.tujuan.includes(tujuanBaris);
+            const matchLokasi = m.lokasi === lokasiBaris || lokasiBaris.includes(m.lokasi) || m.lokasi.includes(lokasiBaris);
+            return matchTujuan && matchLokasi;
+        });
+        if (exactLocMatch) return exactLocMatch;
+
+        // 2. Prioritas Kedua: Tujuan + Qty (dengan lokasi master kosong)
+        let noLocMatch = databaseMaster.find(m => {
+            if (m.lokasi !== '' || m.qty !== qtyBaris) return false;
+            return m.tujuan === tujuanBaris || tujuanBaris.includes(m.tujuan) || m.tujuan.includes(tujuanBaris);
+        });
+        return noLocMatch || null;
     }
 
     async function fetchAllData() {
@@ -371,132 +363,134 @@
             document.getElementById('master-harga-bbm').value = localHargaBbm;
         }
 
-        // Tentukan kunci bulan aktif (Format: YYYY-MM)
-        const bulanDipilihIndex = parseInt(document.getElementById('filter-bulan').value) + 1;
-        const tahunSkarang = 2026; 
-        const formatBulanKey = `${tahunSkarang}-${String(bulanDipilihIndex).padStart(2, '0')}`;
+        const tbody = document.getElementById('tabel-body');
+        const mBody = document.getElementById('master-rute-body');
+        tbody.innerHTML = `<tr><td colspan="20" class="text-center py-4 text-slate-500 italic animate-pulse">Memuat data aktual dari database Supabase...</td></tr>`;
+        mBody.innerHTML = `<tr><td colspan="12" class="text-center py-3 text-slate-400 italic">Memuat master data...</td></tr>`;
 
-        // Load data transaksi pengiriman terlebih dahulu untuk evaluasi master rute terpakai
-        await fetchDeliveryData();
+        const tahun = 2026; 
+        const bulanDipilih = parseInt(document.getElementById('filter-bulan').value);
+        const bulanStr = String(bulanDipilih + 1).padStart(2, '0');
+        const formatBulanKey = `${tahun}-${bulanStr}`;
+
+        const tanggalAwal = `${tahun}-${bulanStr}-01`;
+        const hariTerakhir = new Date(tahun, bulanDipilih + 1, 0).getDate();
+        const tanggalEnding = `${tahun}-${bulanStr}-${String(hariTerakhir).padStart(2, '0')}`;
+
+        document.getElementById('periode-text').innerText = `Periode: 01/${bulanStr} s/d ${hariTerakhir}/${bulanStr}`;
 
         try {
-            // 1. Cari master_oat khusus bulan yang sedang aktif
-            let { data: master_oat, error } = await supabaseBaru
-                .from('master_oat')
-                .select('*')
-                .eq('bulan', formatBulanKey)
-                .order('id', { ascending: true });
-
-            if (error) throw error;
-            
-            let isInherited = false;
-
-            // 2. LOGIKA OTOMATIS WARISAN: Jika bulan ini belum ada data master OAT,
-            // tarik otomatis seluruh master OAT dari bulan-bulan sebelumnya
-            if (!master_oat || master_oat.length === 0) {
-                let { data: masterSemua } = await supabaseBaru
+            // 1. TARIK DATA PENGIRIMAN & MASTER OAT SECARA PARALEL (JAUH LEBIH CEPAT)
+            const [resPengiriman, resMasterBulanIni] = await Promise.all([
+                _supabase
+                    .from('data_pengiriman')
+                    .select('id, tanggal, supplier, delivery_to, lokasi, nopol, jumlah_masuk, sopir')
+                    .gte('tanggal', tanggalAwal)
+                    .lte('tanggal', tanggalEnding)
+                    .order('tanggal', { ascending: true }),
+                supabaseBaru
                     .from('master_oat')
                     .select('*')
-                    .order('id', { ascending: false });
+                    .eq('bulan', formatBulanKey)
+                    .order('id', { ascending: true })
+            ]);
+
+            if (resPengiriman.error) throw resPengiriman.error;
+            if (resMasterBulanIni.error) throw resMasterBulanIni.error;
+
+            // Filter Nopol Pengiriman
+            const allowedNopol = new Set(["KH 8141 GM", "KH 8942 GN", "KH 8943 GN", "KH 8068 GR", "KH 8734 GH", "L 9761 UJ"]);
+            const data_pengiriman = (resPengiriman.data || []).filter(item => 
+                allowedNopol.has((item.nopol || '').trim().toUpperCase())
+            );
+            globalDataPengiriman = data_pengiriman;
+
+            // 2. LOGIKA MASTER OAT (BULAN INI ATAU WARISAN)
+            let master_oat = resMasterBulanIni.data || [];
+            let isInherited = false;
+
+            if (master_oat.length === 0) {
+                const { data: masterSemua, error: errSemua } = await supabaseBaru
+                    .from('master_oat')
+                    .select('*')
+                    .order('id', { ascending: false })
+                    .limit(500);
+
+                if (errSemua) throw errSemua;
 
                 if (masterSemua && masterSemua.length > 0) {
-                    const petaUnik = {};
+                    const petaUnik = new Map();
                     masterSemua.forEach(m => {
-                        const key = `${m.tujuan}_${m.lokasi}_${m.qty}`.toLowerCase();
-                        if (!petaUnik[key]) petaUnik[key] = m;
+                        const key = `${(m.tujuan || '').trim().toLowerCase()}_${(m.lokasi || '').trim().toLowerCase()}_${m.qty}`;
+                        if (!petaUnik.has(key)) petaUnik.set(key, m);
                     });
-                    master_oat = Object.values(petaUnik).reverse();
-                    isInherited = true; // Tandai bahwa ini data tiruan dari bulan lalu
+                    master_oat = Array.from(petaUnik.values()).reverse();
+                    isInherited = true;
                 }
             }
-            
-            const mBody = document.getElementById('master-rute-body');
+
+            // 3. TARIK DATA BBM_LOSIS HANYA UNTUK ID PENGIRIMAN BULAN INI (BUKAN SELURUH TABEL)
+            const mapBbmLosis = {};
+            if (data_pengiriman.length > 0) {
+                const listDbIds = data_pengiriman.map(item => item.id);
+                const { data: bbmLosisSaved } = await _supabase
+                    .from('bbm_losis')
+                    .select('*')
+                    .in('id_pengiriman', listDbIds);
+
+                if (bbmLosisSaved) {
+                    bbmLosisSaved.forEach(item => { mapBbmLosis[item.id_pengiriman] = item; });
+                }
+            }
+
+            // 4. RENDER TABEL MASTER OAT SEKALIGUS (DocumentFragment)
             mBody.innerHTML = "";
             masterDataList = [];
+            const fragMaster = document.createDocumentFragment();
 
-            if (master_oat && master_oat.length > 0) {
+            // Siapkan index transaksi pengiriman untuk cek "terpakai" secara instan O(N)
+            const listTransaksiNorm = data_pengiriman.map(item => ({
+                tujuan: (item.delivery_to || '').trim().toLowerCase(),
+                lokasi: (item.lokasi || '').trim().toLowerCase(),
+                qty: parseFloat(item.jumlah_masuk) || 0
+            }));
+
+            if (master_oat.length > 0) {
                 master_oat.forEach(m => {
                     const idUntukRender = isInherited ? '' : m.id;
-                    
-                    if (!isInherited) {
-                        masterDataList.push(m.id);
-                    }
-                    
-                    // Cek apakah master rute ini terpakai di data pengiriman bulan ini
+                    if (!isInherited) masterDataList.push(m.id);
+
                     let terpakai = true;
-                    if (globalDataPengiriman && globalDataPengiriman.length > 0) {
+                    if (listTransaksiNorm.length > 0) {
                         const mTujuan = (m.tujuan || '').trim().toLowerCase();
                         const mLokasi = (m.lokasi || '').trim().toLowerCase();
                         const mQty = parseFloat(m.qty) || 0;
 
-                        const matchCount = globalDataPengiriman.filter(item => {
-                            const itemTujuan = (item.delivery_to || '').trim().toLowerCase();
-                            const itemLokasi = (item.lokasi || '').trim().toLowerCase();
-                            const itemQty = parseFloat(item.jumlah_masuk) || 0;
+                        const adaTransaksi = listTransaksiNorm.some(t => {
+                            if (t.qty !== mQty) return false;
+                            const matchTujuan = t.tujuan.includes(mTujuan) || mTujuan.includes(t.tujuan);
+                            const matchLokasi = mLokasi === '' || t.lokasi.includes(mLokasi) || mLokasi.includes(t.lokasi);
+                            return matchTujuan && matchLokasi;
+                        });
 
-                            const matchTujuan = itemTujuan.includes(mTujuan) || mTujuan.includes(itemTujuan);
-                            const matchQty = itemQty === mQty;
-                            const matchLokasi = mLokasi === '' || itemLokasi.includes(mLokasi) || mLokasi.includes(itemLokasi);
-
-                            return matchTujuan && matchQty && matchLokasi;
-                        }).length;
-
-                        if (matchCount === 0) {
-                            terpakai = false; // Tandai tidak terpakai jika 0 transaksi
-                        }
+                        if (!adaTransaksi) terpakai = false;
                     }
 
-                    renderBarisMaster(
+                    const trMaster = buatElemenBarisMaster(
                         idUntukRender, m.tujuan, m.lokasi, m.qty, m.oat, 
                         m.premi_sopir, m.premi_helper, m.um_sopir, m.um_helper, 
                         m.lembur, m.portal, m.jarak, terpakai
                     );
+                    fragMaster.appendChild(trMaster);
                 });
             } else {
-                renderBarisMaster('', '', '', 10, 0, 0, 0, 0, 0, 0, 0, 0, true);
+                fragMaster.appendChild(buatElemenBarisMaster('', '', '', 10, 0, 0, 0, 0, 0, 0, 0, 0, true));
             }
-        } catch(e) {
-            console.error("Gagal memuat master_oat:", e);
-        }
+            mBody.appendChild(fragMaster);
 
-        aplikasikanMasterKeTabelUtama();
-    }
-
-    async function fetchDeliveryData() {
-        const tbody = document.getElementById('tabel-body');
-        tbody.innerHTML = `<tr><td colspan="20" class="text-center py-4 text-slate-500 italic animate-pulse">Memuat data aktual dari database Supabase...</td></tr>`;
-        
-        listIdBaris = [];
-        cacheDataBaris = [];
-        globalDataPengiriman = [];
-        
-        try {
-            const tahun = 2026; 
-            const bulanDipilih = parseInt(document.getElementById('filter-bulan').value);
-
-            const tanggalAwal = `${tahun}-${String(bulanDipilih + 1).padStart(2, '0')}-01`;
-            const hariTerakhir = new Date(tahun, bulanDipilih + 1, 0).getDate();
-            const tanggalEnding = `${tahun}-${String(bulanDipilih + 1).padStart(2, '0')}-${String(hariTerakhir).padStart(2, '0')}`;
-
-            document.getElementById('periode-text').innerText = `Periode: 01/${String(bulanDipilih + 1).padStart(2, '0')} s/d ${hariTerakhir}/${String(bulanDipilih + 1).padStart(2, '0')}`;
-
-            let { data: raw_pengiriman, error } = await _supabase
-                .from('data_pengiriman')
-                .select('id, tanggal, supplier, delivery_to, lokasi, nopol, jumlah_masuk, sopir')
-                .gte('tanggal', tanggalAwal)
-                .lte('tanggal', tanggalEnding)
-                .order('tanggal', { ascending: true });
-
-            if (error) throw error;
-
-            const allowedNopol = ["KH 8141 GM", "KH 8942 GN", "KH 8943 GN", "KH 8068 GR", "KH 8734 GH", "L 9761 UJ"];
-
-            const data_pengiriman = (raw_pengiriman || []).filter(item => {
-                const np = (item.nopol || '').trim().toUpperCase();
-                return allowedNopol.includes(np);
-            });
-
-            globalDataPengiriman = data_pengiriman; // Simpan secara global untuk deteksi master terpakai
+            // 5. RENDER TABEL UTAMA PENGIRIMAN SEKALIGUS (DocumentFragment)
+            listIdBaris = [];
+            cacheDataBaris = [];
             tbody.innerHTML = "";
 
             if (data_pengiriman.length === 0) {
@@ -508,30 +502,22 @@
 
             populateDropdownsUploader(data_pengiriman);
             const defaultHargaBbm = parseFloat(document.getElementById('master-harga-bbm').value) || 0;
-
-            let { data: bbmLosisSaved } = await _supabase.from('bbm_losis').select('*');
-            const mapBbmLosis = {};
-            if (bbmLosisSaved) {
-                bbmLosisSaved.forEach(item => { mapBbmLosis[item.id_pengiriman] = item; });
-            }
+            const fragUtama = document.createDocumentFragment();
 
             data_pengiriman.forEach((row, index) => {
                 const dbId = row.id; 
-                const qty = row.jumlah_masuk || 0; 
+                const qty = parseFloat(row.jumlah_masuk) || 0; 
                 const textNopol = (row.nopol || '').trim();
                 const rawSopir = (row.sopir || '').trim();
                 
                 const isDuaOrang = /[\/,]|(&)|( dan )/i.test(rawSopir);
                 const uniqueKey = `${index}_${dbId}`;
-                
                 const saved = mapBbmLosis[dbId] || {}; 
 
                 let isHariMinggu = false;
                 if (row.tanggal) {
                     const tglObj = new Date(row.tanggal);
-                    if (tglObj.getDay() === 0) {
-                        isHariMinggu = true;
-                    }
+                    if (tglObj.getDay() === 0) isHariMinggu = true;
                 }
 
                 const defaultLosis = (saved.losis !== undefined && saved.losis !== null) ? saved.losis : 0;
@@ -595,22 +581,22 @@
                     
                     <td class="px-1 py-0.5 text-right font-bold text-emerald-800 bg-emerald-50/40 font-mono" id="sisa-oat-${uniqueKey}" data-value="0">Rp 0</td>
                 `;
-                tbody.appendChild(tr);
+                fragUtama.appendChild(tr);
             });
+            tbody.appendChild(fragUtama);
 
-            jalankanFilterGabungan(); 
+            // 6. APLIKASIKAN MASTER OAT KE TABEL UTAMA & TERAPKAN FILTER AKTIF SEKALI SAJA
+            aplikasikanMasterKeTabelUtama();
+            jalankanFilterGabungan();
 
         } catch (err) {
-            console.error(err);
+            console.error("Gagal memuat data:", err);
             tbody.innerHTML = `<tr><td colspan="20" class="text-center py-4 text-red-500 font-semibold text-xs">Gagal mengambil data pengiriman: ${err.message}</td></tr>`;
         }
     }
 
-    function renderBarisMaster(id = '', tujuan = '', lokasi = '', qty = '10', oat = 0, premS = 0, premH = 0, umS = 0, umH = 0, lemb = 0, port = 0, jarak = 0, isTerpakai = true) {
-        const mBody = document.getElementById('master-rute-body');
+    function buatElemenBarisMaster(id = '', tujuan = '', lokasi = '', qty = '10', oat = 0, premS = 0, premH = 0, umS = 0, umH = 0, lemb = 0, port = 0, jarak = 0, isTerpakai = true) {
         const tr = document.createElement('tr');
-        
-        // Tambahkan class penanda jika tidak ada transaksi
         tr.className = `master-row text-[10px] ${!isTerpakai ? 'tidak-terpakai' : ''}`;
         tr.setAttribute('data-id', id); 
         
@@ -638,8 +624,14 @@
             <td class="px-0.5 py-0.5"><input type="number" class="w-full p-0.5 text-center border border-slate-300 rounded ref-portal font-medium text-[9.5px] h-5 navigation-input" value="${port}" onchange="aplikasikanMasterKeTabelUtama()"></td>
             <td class="px-0.5 py-0.5 text-center"><button onclick="hapusBarisMaster(this)" class="text-red-500 hover:text-red-700 font-bold text-[10px]" title="Hapus Master Rute Ini">❌</button></td>
         `;
-        mBody.appendChild(tr);
         tambahkanListenerNavigasiKeyboard(tr);
+        return tr;
+    }
+
+    function renderBarisMaster(id = '', tujuan = '', lokasi = '', qty = '10', oat = 0, premS = 0, premH = 0, umS = 0, umH = 0, lemb = 0, port = 0, jarak = 0, isTerpakai = true) {
+        const mBody = document.getElementById('master-rute-body');
+        const tr = buatElemenBarisMaster(id, tujuan, lokasi, qty, oat, premS, premH, umS, umH, lemb, port, jarak, isTerpakai);
+        mBody.appendChild(tr);
         return tr;
     }
 
@@ -687,7 +679,7 @@
 
     function aplikasikanMasterKeTabelUtama() {
         const masterRows = document.querySelectorAll('.master-row');
-        let databaseMaster = [];
+        const databaseMaster = [];
         
         masterRows.forEach(row => {
             const tujuanText = (row.querySelector('.target-tujuan').value || '').trim().toLowerCase();
@@ -710,23 +702,7 @@
         });
 
         cacheDataBaris.forEach(baris => {
-            let match = databaseMaster.find(m => {
-                if (!m.lokasi) return false;
-                
-                const matchTujuan = baris.tujuan.includes(m.tujuan) || m.tujuan.includes(baris.tujuan);
-                const matchQty = baris.qty === m.qty;
-                const matchLokasi = baris.lokasi.includes(m.lokasi) || m.lokasi.includes(baris.lokasi);
-                
-                return matchTujuan && matchQty && matchLokasi;
-            });
-
-            if (!match) {
-                match = databaseMaster.find(m => {
-                    const matchTujuan = baris.tujuan.includes(m.tujuan) || m.tujuan.includes(baris.tujuan);
-                    const matchQty = baris.qty === m.qty;
-                    return matchTujuan && matchQty && (!m.lokasi || m.lokasi === '');
-                });
-            }
+            const match = cariMasterCocok(databaseMaster, baris.tujuan, baris.lokasi, baris.qty);
             
             const inputOat = document.getElementById(`oat-liter-${baris.id}`);
             const inputP_Sopir = document.getElementById(`premi-sopir-${baris.id}`);
@@ -760,9 +736,11 @@
                 }
 
                 if (inputBbm && inputBbm.value === '') {
-                    if (baris.qty === 5 || baris.qty === 4) inputBbm.placeholder = (match.jarak / 6).toFixed(1);
-                    else if (baris.qty === 8) inputBbm.placeholder = (match.jarak / 6).toFixed(1);
-                    else inputBbm.placeholder = (match.jarak / 4.5).toFixed(1);
+                    if (baris.qty === 5 || baris.qty === 4 || baris.qty === 8) {
+                        inputBbm.placeholder = (match.jarak / 6).toFixed(1);
+                    } else {
+                        inputBbm.placeholder = (match.jarak / 4.5).toFixed(1);
+                    }
                 }
             } else {
                 if (inputOat) inputOat.value = 0;
@@ -776,15 +754,20 @@
                 }
             }
 
-            const qty = parseFloat(document.getElementById(`qty-${baris.id}`).innerText) || 0;
+            const qty = baris.qty || 0;
             const oatLiter = parseFloat(inputOat ? inputOat.value : 0) || 0;
             const totalOat = oatLiter * qty * 1000;
             
-            document.getElementById(`total-oat-text-${baris.id}`).innerText = formatNumber(totalOat);
-            document.getElementById(`total-oat-text-${baris.id}`).setAttribute('data-value', totalOat);
+            const totalOatEl = document.getElementById(`total-oat-text-${baris.id}`);
+            if (totalOatEl) {
+                totalOatEl.innerText = formatNumber(totalOat);
+                totalOatEl.setAttribute('data-value', totalOat);
+            }
 
-            hitungSisa(baris.id);
+            hitungSisa(baris.id, false);
         });
+
+        hitungRingkasanTotalTabel();
     }
 
     function updateSemuaHargaBbm() {
@@ -792,11 +775,15 @@
         localStorage.setItem('master_harga_bbm', nilaiMaster);
         listIdBaris.forEach(id => {
             const el = document.getElementById(`harga-bbm-${id}`);
-            if(el) { el.value = nilaiMaster; hitungSisa(id); }
+            if (el) { 
+                el.value = nilaiMaster; 
+                hitungSisa(id, false); 
+            }
         });
+        hitungRingkasanTotalTabel();
     }
 
-    function hitungSisa(id) {
+    function hitungSisa(id, updateGrandTotal = true) {
         const totalOat = parseFloat(document.getElementById(`total-oat-text-${id}`).getAttribute('data-value')) || 0;
         const hargaBbm = parseFloat(document.getElementById(`harga-bbm-${id}`).value) || 0;
         
@@ -820,7 +807,9 @@
         sisaOatEl.innerText = "Rp " + formatNumber(Math.round(sisaOat));
         sisaOatEl.setAttribute('data-value', Math.round(sisaOat));
 
-        hitungRingkasanTotalTabel();
+        if (updateGrandTotal) {
+            hitungRingkasanTotalTabel();
+        }
     }
 
     function hitungRingkasanTotalTabel() {
@@ -866,7 +855,6 @@
             let dataMasterInsert = []; 
             let currentMasterIds = [];
 
-            // Periode bulan aktif di dropdown
             const bulanDipilihIndex = parseInt(document.getElementById('filter-bulan').value) + 1;
             const formatBulanKey = `2026-${String(bulanDipilihIndex).padStart(2, '0')}`;
 
