@@ -1921,6 +1921,7 @@ Regards, Operasional`;
                                         <button onclick="handleActionRedirect('Buat Invoice BRI')" class="w-full text-left font-semibold ${accentClass} hover:bg-slate-100 p-2 rounded-xl transition flex items-center gap-2"><i class="fa-solid fa-angle-right text-[10px]"></i> Buat Invoice BRI-MANDIRI</button>
                                         <button onclick="handleActionRedirect('Buat Invoice BCA')" class="w-full text-left font-semibold ${accentClass} hover:bg-slate-100 p-2 rounded-xl transition flex items-center gap-2"><i class="fa-solid fa-angle-right text-[10px]"></i> Buat Invoice BCA</button>
                                         ${transportInvoiceMenuHTML || ''}
+                                        ${activeTab === 'ide' ? `<button onclick="handleActionRedirect('invoice_petro')" class="w-full text-left font-semibold ${accentClass} hover:bg-slate-100 p-2 rounded-xl transition flex items-center gap-2"><i class="fa-solid fa-angle-right text-[10px]"></i> Buat Invoice Transport Petro</button>` : ''}
                                     </div>
                                 </div>
         
