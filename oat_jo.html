@@ -301,7 +301,7 @@
                 <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wide flex items-center gap-1">
                     KM PERJALANAN UNIT
                 </h3>
-                <span class="text-[8px] text-slate-500 font-medium">(Total Perjalanan = KM Akhir - KM Awal | Sumber Tujuan: data_pengiriman)</span>
+                <span class="text-[8px] text-slate-500 font-medium">(Total Perjalanan = KM Akhir - KM Awal | Sumber Tujuan & Lokasi: data_pengiriman)</span>
             </div>
 
             <div class="flex flex-wrap items-center gap-1 no-print">
@@ -320,29 +320,41 @@
                         <option value="L 9761 UJ">L 9761 UJ</option>
                     </select>
                 </div>
+
+                <div class="flex items-center gap-1 bg-slate-100 border border-slate-300 px-1 py-0.5 rounded text-[8.5px]">
+                    <label for="km-tgl-dari" class="font-bold text-slate-700">TGL:</label>
+                    <input type="date" id="km-tgl-dari" onchange="renderTabelKmPerjalanan()" class="p-0.5 font-semibold border border-slate-300 rounded bg-white text-[8px] focus:outline-none focus:border-blue-500">
+                    <span class="font-bold text-slate-500">-</span>
+                    <input type="date" id="km-tgl-sampai" onchange="renderTabelKmPerjalanan()" class="p-0.5 font-semibold border border-slate-300 rounded bg-white text-[8px] focus:outline-none focus:border-blue-500">
+                </div>
+
+                <button type="button" onclick="kirimWhatsAppKmPerjalanan()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[8.5px] py-0.5 px-2 rounded shadow-2xs transition flex items-center gap-1 cursor-pointer">
+                    WHATSAPP
+                </button>
             </div>
         </div>
 
         <div class="w-full overflow-hidden rounded border border-slate-300">
-            <table class="w-full text-[8.5px] text-left custom-table" id="tabel-km-perjalanan">
+            <table class="w-full text-[9px] text-left custom-table" id="tabel-km-perjalanan">
                 <thead class="bg-slate-200 text-slate-900 font-bold border-b border-slate-400 text-[8px] uppercase">
                     <tr>
-                        <th class="px-1.5 py-1 text-center border-r border-slate-300 w-[9%] uppercase">TANGGAL</th>
-                        <th class="px-1.5 py-1 text-center border-r border-slate-300 w-[11%] uppercase">NOPOL</th>
-                        <th class="px-1.5 py-1 text-center border-r border-slate-300 w-[22%] uppercase">TUJUAN</th>
-                        <th class="px-1.5 py-1 text-center bg-slate-300/70 border-r border-slate-400 w-[11.5%] uppercase">KM AWAL ( PULL )</th>
+                        <th class="px-1.5 py-1 text-center border-r border-slate-300 w-[7%] uppercase">TANGGAL</th>
+                        <th class="px-1.5 py-1 text-center border-r border-slate-300 w-[9%] uppercase">NOPOL</th>
+                        <th class="px-1.5 py-1 text-center border-r border-slate-300 w-[16%] uppercase">TUJUAN</th>
+                        <th class="px-1.5 py-1 text-center border-r border-slate-300 w-[12%] uppercase">LOKASI</th>
+                        <th class="px-1.5 py-1 text-center bg-slate-300/70 border-r border-slate-400 w-[10.5%] uppercase">KM AWAL ( PULL )</th>
                         <th class="px-1.5 py-1 text-center bg-slate-300/70 border-r border-slate-400 w-[11.5%] uppercase">KM PENGISIAN</th>
                         <th class="px-1.5 py-1 text-center bg-slate-300/70 border-r border-slate-400 w-[11.5%] uppercase">KM BONGKAR( LOKASI)</th>
-                        <th class="px-1.5 py-1 text-center bg-slate-300/70 border-r border-slate-400 w-[11.5%] uppercase">KM AKHIR ( PULL)</th>
-                        <th class="px-1.5 py-1 text-center bg-slate-300/70 w-[12%] uppercase">TOTAL PERJALANAN</th>
+                        <th class="px-1.5 py-1 text-center bg-slate-300/70 border-r border-slate-400 w-[10.5%] uppercase">KM AKHIR ( PULL)</th>
+                        <th class="px-1.5 py-1 text-center bg-slate-300/70 w-[11.5%] uppercase">TOTAL PERJALANAN</th>
                     </tr>
                 </thead>
-                <tbody id="km-perjalanan-body" class="divide-y divide-slate-200 bg-white font-medium text-[8.5px]">
+                <tbody id="km-perjalanan-body" class="divide-y divide-slate-200 bg-white font-medium text-[9px]">
                     <tr>
-                        <td colspan="8" class="text-center py-3 text-slate-400 italic text-xs">Memuat data KM perjalanan unit...</td>
+                        <td colspan="9" class="text-center py-3 text-slate-400 italic text-xs">Memuat data KM perjalanan unit...</td>
                     </tr>
                 </tbody>
-                <tfoot id="km-perjalanan-foot" class="bg-slate-100 font-bold border-t-2 border-slate-400 text-slate-900 text-[8.5px]">
+                <tfoot id="km-perjalanan-foot" class="bg-slate-100 font-bold border-t-2 border-slate-400 text-slate-900 text-[9.5px]">
                     <!-- Total KM dinamis -->
                 </tfoot>
             </table>
@@ -1471,6 +1483,12 @@
         }
     }
 
+    function ekstrakTanggalIso(tglStr) {
+        if (!tglStr) return '';
+        const match = String(tglStr).match(/\d{4}-\d{2}-\d{2}/);
+        return match ? match[0] : String(tglStr).slice(0, 10);
+    }
+
     /* RENDER TABEL KM PERJALANAN UNIT KHUSUS (KH 8734 GH, KH 8068 GR, L 9761 UJ) */
     function renderTabelKmPerjalanan() {
         const tbody = document.getElementById('km-perjalanan-body');
@@ -1478,6 +1496,8 @@
         if (!tbody || !tfoot) return;
 
         const filterNopol = document.getElementById('km-filter-nopol')?.value || 'ALL';
+        const tglDari = document.getElementById('km-tgl-dari')?.value || '';
+        const tglSampai = document.getElementById('km-tgl-sampai')?.value || '';
         tbody.innerHTML = "";
         tfoot.innerHTML = "";
 
@@ -1485,11 +1505,14 @@
             const isAllowed = allowedNopolList.some(np => cleanNopol(np) === cleanNopol(b.nopol));
             if (!isAllowed) return false;
             if (filterNopol !== 'ALL' && cleanNopol(filterNopol) !== cleanNopol(b.nopol)) return false;
+            const tglIso = ekstrakTanggalIso(b.tanggal);
+            if (tglDari && tglIso && tglIso < tglDari) return false;
+            if (tglSampai && tglIso && tglIso > tglSampai) return false;
             return true;
         });
 
         if (rowsFiltered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-3 text-slate-400 text-xs">Tidak ada data pengiriman pada periode ini untuk unit terpilih.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center py-3 text-slate-400 text-xs">Tidak ada data pengiriman pada periode/rentang tanggal ini untuk unit terpilih.</td></tr>`;
             return;
         }
 
@@ -1535,46 +1558,48 @@
             const totalPerjalanan = (hasAwal && hasAkhir) ? (akhirNum - awalNum) : 0;
 
             const tr = document.createElement('tr');
-            tr.className = "hover:bg-slate-50 transition-colors text-[8.5px]";
+            tr.className = "hover:bg-slate-50 transition-colors text-[9px]";
             tr.dataset.dbId = dbId;
             tr.dataset.nopol = baris.nopol;
             tr.dataset.nopolClean = npKey;
             tr.dataset.tanggal = baris.tanggal || '';
             tr.dataset.tujuan = baris.tujuan || '';
+            tr.dataset.lokasi = baris.lokasi || '';
 
             tr.innerHTML = `
-                <td class="px-1.5 py-0.5 text-center border-r border-slate-200 font-mono">${formatDate(baris.tanggal)}</td>
-                <td class="px-1.5 py-0.5 text-center border-r border-slate-200 font-mono font-bold text-slate-800">${baris.nopol}</td>
+                <td class="px-1.5 py-0.5 text-center border-r border-slate-200 font-mono text-[9.5px]">${formatDate(baris.tanggal)}</td>
+                <td class="px-1.5 py-0.5 text-center border-r border-slate-200 font-mono font-bold text-slate-800 text-[9.5px]">${baris.nopol}</td>
                 <td class="px-1.5 py-0.5 border-r border-slate-200 font-semibold text-slate-900 truncate" title="${baris.tujuan || ''}">${baris.tujuan || '-'}</td>
+                <td class="px-1.5 py-0.5 border-r border-slate-200 font-medium text-slate-700 truncate" title="${baris.lokasi || ''}">${baris.lokasi || '-'}</td>
                 <td class="px-0.5 py-0.5 border-r border-slate-200 bg-sky-50/40">
                     <input type="number" step="1" id="km-awal-${dbId}" value="${kmAwalVal}" placeholder="0"
                         data-manual-edited="${savedKm.km_awal !== undefined && savedKm.km_awal !== null ? 'true' : 'false'}"
                         oninput="onManualEditKmAwal(${dbId})"
-                        class="w-full px-1 text-right font-mono font-semibold text-slate-900 bg-white border border-slate-200 rounded h-4 text-[8.5px] focus:outline-none focus:border-blue-500"
+                        class="w-full px-1 text-right font-mono font-bold text-slate-900 bg-white border border-slate-200 rounded h-5 text-[10px] focus:outline-none focus:border-blue-500"
                         title="${isAutoAwal ? 'Otomatis dari KM Akhir sebelumnya (bisa diedit)' : 'KM Awal (Pull)'}">
                 </td>
                 <td class="px-0.5 py-0.5 border-r border-slate-200 bg-slate-50/40">
                     <div class="flex items-center gap-1">
                         <input type="number" step="1" id="km-pengisian-${dbId}" value="${kmPengisianVal}" placeholder="0"
                             oninput="hitungTotalKmBaris(${dbId})"
-                            class="w-full px-1 text-right font-mono text-slate-800 bg-white border border-slate-200 rounded h-4 text-[8.5px] focus:outline-none focus:border-blue-500">
-                        <span class="font-mono font-bold text-red-600 text-[8px] whitespace-nowrap shrink-0" id="km-diff-pengisian-${dbId}" title="KM Pengisian - KM Awal">/ ${formatKmTanpaKoma(jarakPengisian)} km</span>
+                            class="w-full px-1 text-right font-mono font-semibold text-slate-800 bg-white border border-slate-200 rounded h-5 text-[10px] focus:outline-none focus:border-blue-500">
+                        <span class="font-mono font-bold text-red-600 text-[9.5px] whitespace-nowrap shrink-0" id="km-diff-pengisian-${dbId}" title="KM Pengisian - KM Awal">/ ${formatKmTanpaKoma(jarakPengisian)} km</span>
                     </div>
                 </td>
                 <td class="px-0.5 py-0.5 border-r border-slate-200 bg-slate-50/40">
                     <div class="flex items-center gap-1">
                         <input type="number" step="1" id="km-bongkar-${dbId}" value="${kmBongkarVal}" placeholder="0"
                             oninput="hitungTotalKmBaris(${dbId})"
-                            class="w-full px-1 text-right font-mono text-slate-800 bg-white border border-slate-200 rounded h-4 text-[8.5px] focus:outline-none focus:border-blue-500">
-                        <span class="font-mono font-bold text-red-600 text-[8px] whitespace-nowrap shrink-0" id="km-diff-bongkar-${dbId}" title="KM Bongkar - KM Pengisian">/ ${formatKmTanpaKoma(jarakBongkar)} km</span>
+                            class="w-full px-1 text-right font-mono font-semibold text-slate-800 bg-white border border-slate-200 rounded h-5 text-[10px] focus:outline-none focus:border-blue-500">
+                        <span class="font-mono font-bold text-red-600 text-[9.5px] whitespace-nowrap shrink-0" id="km-diff-bongkar-${dbId}" title="KM Bongkar - KM Pengisian">/ ${formatKmTanpaKoma(jarakBongkar)} km</span>
                     </div>
                 </td>
                 <td class="px-0.5 py-0.5 border-r border-slate-200 bg-sky-50/40">
                     <input type="number" step="1" id="km-akhir-${dbId}" value="${kmAkhirVal}" placeholder="0"
                         oninput="onInputKmAkhir(${dbId})"
-                        class="w-full px-1 text-right font-mono font-semibold text-slate-900 bg-white border border-slate-200 rounded h-4 text-[8.5px] focus:outline-none focus:border-blue-500">
+                        class="w-full px-1 text-right font-mono font-bold text-slate-900 bg-white border border-slate-200 rounded h-5 text-[10px] focus:outline-none focus:border-blue-500">
                 </td>
-                <td class="px-1.5 py-0.5 text-right font-mono font-bold text-red-600 bg-red-50/40" id="km-total-${dbId}" data-value="${totalPerjalanan}">
+                <td class="px-1.5 py-0.5 text-right font-mono font-bold text-red-600 bg-red-50/40 text-[10px]" id="km-total-${dbId}" data-value="${totalPerjalanan}">
                     ${formatKmTanpaKoma(totalPerjalanan)} km
                 </td>
             `;
@@ -1582,6 +1607,62 @@
         });
 
         hitungTotalKmKeseluruhan();
+    }
+
+    function kirimWhatsAppKmPerjalanan() {
+        const rows = Array.from(document.querySelectorAll('#km-perjalanan-body tr[data-db-id]'));
+        if (rows.length === 0) {
+            alert("⚠️ Tidak ada data KM perjalanan unit untuk dilaporkan pada rentang tanggal ini.");
+            return;
+        }
+
+        const tglDari = document.getElementById('km-tgl-dari')?.value || '';
+        const tglSampai = document.getElementById('km-tgl-sampai')?.value || '';
+        const filterNopol = document.getElementById('km-filter-nopol')?.value || 'ALL';
+
+        let headerRentang = "";
+        if (tglDari && tglSampai) {
+            headerRentang = ` (${formatDate(tglDari)} s/d ${formatDate(tglSampai)})`;
+        } else if (tglDari) {
+            headerRentang = ` (Dari ${formatDate(tglDari)})`;
+        } else if (tglSampai) {
+            headerRentang = ` (s/d ${formatDate(tglSampai)})`;
+        }
+
+        const blokPesan = rows.map(tr => {
+            const dbId = tr.dataset.dbId;
+            const tglFormatted = formatDate(tr.dataset.tanggal);
+            const nopol = tr.dataset.nopol || '-';
+            const tujuan = tr.dataset.tujuan || '-';
+            const lokasi = tr.dataset.lokasi || '-';
+
+            const awalRaw = document.getElementById(`km-awal-${dbId}`)?.value;
+            const pengisianRaw = document.getElementById(`km-pengisian-${dbId}`)?.value;
+            const bongkarRaw = document.getElementById(`km-bongkar-${dbId}`)?.value;
+            const akhirRaw = document.getElementById(`km-akhir-${dbId}`)?.value;
+
+            const awalStr = awalRaw !== '' && awalRaw !== undefined ? formatKmTanpaKoma(parseFloat(awalRaw)) : '-';
+            const pengisianStr = pengisianRaw !== '' && pengisianRaw !== undefined ? formatKmTanpaKoma(parseFloat(pengisianRaw)) : '-';
+            const bongkarStr = bongkarRaw !== '' && bongkarRaw !== undefined ? formatKmTanpaKoma(parseFloat(bongkarRaw)) : '-';
+            const akhirStr = akhirRaw !== '' && akhirRaw !== undefined ? formatKmTanpaKoma(parseFloat(akhirRaw)) : '-';
+
+            return [
+                `tanggal : ${tglFormatted}`,
+                `Unit : ${nopol}`,
+                `dari : ${tujuan}`,
+                `tujuan : ${tujuan}`,
+                `lokasi : ${lokasi}`,
+                `km awal : ${awalStr}`,
+                `km Pengisian : ${pengisianStr}`,
+                `km bongkar : ${bongkarStr}`,
+                `km akhir : ${akhirStr}`
+            ].join('\n');
+        });
+
+        const judul = `*LAPORAN KM PERJALANAN UNIT${filterNopol !== 'ALL' ? ' - ' + filterNopol : ''}${headerRentang}*`;
+        const teksPesan = `${judul}\n\n${blokPesan.join('\n\n')}`;
+        const waUrl = `https://wa.me/?text=${encodeURIComponent(teksPesan)}`;
+        window.open(waUrl, '_blank');
     }
 
     function onManualEditKmAwal(dbId) {
@@ -1699,8 +1780,8 @@
 
         tfoot.innerHTML = `
             <tr>
-                <td colspan="7" class="px-1.5 py-1 text-right uppercase tracking-wider">TOTAL KM PERJALANAN:</td>
-                <td class="px-1.5 py-1 text-right font-mono font-bold text-red-600 bg-red-100/70">${formatKmTanpaKoma(sumTotal)} km</td>
+                <td colspan="8" class="px-1.5 py-1 text-right uppercase tracking-wider">TOTAL KM PERJALANAN:</td>
+                <td class="px-1.5 py-1 text-right font-mono font-bold text-red-600 bg-red-100/70 text-[10.5px]">${formatKmTanpaKoma(sumTotal)} km</td>
             </tr>
         `;
     }
