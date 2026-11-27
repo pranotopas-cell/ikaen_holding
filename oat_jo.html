@@ -1609,68 +1609,73 @@
         hitungTotalKmKeseluruhan();
     }
 
-    function kirimWhatsAppKmPerjalanan() {
+   function kirimWhatsAppKmPerjalanan() {
     const rows = Array.from(document.querySelectorAll('#km-perjalanan-body tr[data-db-id]'));
     if (rows.length === 0) {
         alert("⚠️ Tidak ada data KM perjalanan unit untuk dilaporkan pada rentang tanggal ini.");
         return;
     }
 
-    const safeFormatDate = (val) => {
+    const formatTanggalIndo = (val) => {
         if (!val) return '-';
-        return typeof formatDate === 'function' ? formatDate(val) : val;
+        const d = new Date(val);
+        if (!Number.isNaN(d.getTime())) {
+            const bulan = [
+                'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+            ];
+            return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
+        }
+        return typeof formatDate === 'function' ? formatDate(val) : String(val);
     };
 
     const safeFormatKm = (raw) => {
-        if (raw === undefined || raw === null) return '-';
+        if (raw === undefined || raw === null) return '';
         const trimmed = String(raw).trim();
-        if (trimmed === '') return '-';
+        if (trimmed === '') return '';
         const num = Number(trimmed);
-        if (Number.isNaN(num)) return '-';
+        if (Number.isNaN(num)) return '';
         return typeof formatKmTanpaKoma === 'function' ? formatKmTanpaKoma(num) : String(num);
     };
 
-    const tglDari = document.getElementById('km-tgl-dari')?.value || '';
-    const tglSampai = document.getElementById('km-tgl-sampai')?.value || '';
-    const filterNopol = document.getElementById('km-filter-nopol')?.value || 'ALL';
-
-    let headerRentang = "";
-    if (tglDari && tglSampai) {
-        headerRentang = ` (${safeFormatDate(tglDari)} s/d ${safeFormatDate(tglSampai)})`;
-    } else if (tglDari) {
-        headerRentang = ` (Dari ${safeFormatDate(tglDari)})`;
-    } else if (tglSampai) {
-        headerRentang = ` (s/d ${safeFormatDate(tglSampai)})`;
-    }
-
     const blokPesan = rows.map(tr => {
         const dbId = tr.dataset.dbId;
-        const tglFormatted = safeFormatDate(tr.dataset.tanggal);
+        const tglFormatted = formatTanggalIndo(tr.dataset.tanggal);
         const nopol = tr.dataset.nopol?.trim() || '-';
+        const kapasitasUnit = tr.dataset.kapasitas?.trim() || tr.dataset.unitKet?.trim() || '';
+        const unitLine = kapasitasUnit ? `${nopol}  ( ${kapasitasUnit} )` : nopol;
+
         const dari = tr.dataset.dari?.trim() || tr.dataset.tujuan?.trim() || '-';
         const tujuan = tr.dataset.tujuan?.trim() || '-';
-        const lokasi = tr.dataset.lokasi?.trim() || '-';
+        const jumlah = tr.dataset.jumlah?.trim() || tr.dataset.liter?.trim() || kapasitasUnit || '-';
+        const catatan = tr.dataset.keterangan?.trim() || tr.dataset.catatan?.trim() || tr.dataset.lokasi?.trim() || '';
 
         const awalStr = safeFormatKm(document.getElementById(`km-awal-${dbId}`)?.value);
         const pengisianStr = safeFormatKm(document.getElementById(`km-pengisian-${dbId}`)?.value);
         const bongkarStr = safeFormatKm(document.getElementById(`km-bongkar-${dbId}`)?.value);
         const akhirStr = safeFormatKm(document.getElementById(`km-akhir-${dbId}`)?.value);
 
+        const detailLines = [
+            `Dari        = ${dari}`,
+            `Tujuan      = ${tujuan}`,
+            `Jumlah.     = ${jumlah}`
+        ];
+
+        if (awalStr) detailLines.push(`Km Awal     = ${awalStr}`);
+        if (pengisianStr) detailLines.push(`Km petro    = ${pengisianStr}`);
+        if (bongkarStr) detailLines.push(`Km Bongkar  = ${bongkarStr}`);
+        if (akhirStr) detailLines.push(`Km Akhir.   = ${akhirStr}`);
+        if (catatan) detailLines.push(`( ${catatan} )`);
+
         return [
-            `tanggal : ${tglFormatted}`,
-            `Unit : ${nopol}`,
-            `dari : ${dari}`,
-            `tujuan : ${tujuan}`,
-            `lokasi : ${lokasi}`,
-            `km awal : ${awalStr}`,
-            `km Pengisian : ${pengisianStr}`,
-            `km bongkar : ${bongkarStr}`,
-            `km akhir : ${akhirStr}`
+            `Tanggal ${tglFormatted}`,
+            unitLine,
+            '',
+            ...detailLines
         ].join('\n');
     });
 
-    const judul = `*LAPORAN KM PERJALANAN UNIT${filterNopol !== 'ALL' ? ' - ' + filterNopol : ''}${headerRentang}*`;
-    const teksPesan = `${judul}\n\n${blokPesan.join('\n\n')}`;
+    const teksPesan = blokPesan.join('\n\n');
     const encodedText = encodeURIComponent(teksPesan);
 
     if (encodedText.length > 6000) {
