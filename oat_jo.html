@@ -1610,60 +1610,81 @@
     }
 
     function kirimWhatsAppKmPerjalanan() {
-        const rows = Array.from(document.querySelectorAll('#km-perjalanan-body tr[data-db-id]'));
-        if (rows.length === 0) {
-            alert("⚠️ Tidak ada data KM perjalanan unit untuk dilaporkan pada rentang tanggal ini.");
-            return;
-        }
-
-        const tglDari = document.getElementById('km-tgl-dari')?.value || '';
-        const tglSampai = document.getElementById('km-tgl-sampai')?.value || '';
-        const filterNopol = document.getElementById('km-filter-nopol')?.value || 'ALL';
-
-        let headerRentang = "";
-        if (tglDari && tglSampai) {
-            headerRentang = ` (${formatDate(tglDari)} s/d ${formatDate(tglSampai)})`;
-        } else if (tglDari) {
-            headerRentang = ` (Dari ${formatDate(tglDari)})`;
-        } else if (tglSampai) {
-            headerRentang = ` (s/d ${formatDate(tglSampai)})`;
-        }
-
-        const blokPesan = rows.map(tr => {
-            const dbId = tr.dataset.dbId;
-            const tglFormatted = formatDate(tr.dataset.tanggal);
-            const nopol = tr.dataset.nopol || '-';
-            const tujuan = tr.dataset.tujuan || '-';
-            const lokasi = tr.dataset.lokasi || '-';
-
-            const awalRaw = document.getElementById(`km-awal-${dbId}`)?.value;
-            const pengisianRaw = document.getElementById(`km-pengisian-${dbId}`)?.value;
-            const bongkarRaw = document.getElementById(`km-bongkar-${dbId}`)?.value;
-            const akhirRaw = document.getElementById(`km-akhir-${dbId}`)?.value;
-
-            const awalStr = awalRaw !== '' && awalRaw !== undefined ? formatKmTanpaKoma(parseFloat(awalRaw)) : '-';
-            const pengisianStr = pengisianRaw !== '' && pengisianRaw !== undefined ? formatKmTanpaKoma(parseFloat(pengisianRaw)) : '-';
-            const bongkarStr = bongkarRaw !== '' && bongkarRaw !== undefined ? formatKmTanpaKoma(parseFloat(bongkarRaw)) : '-';
-            const akhirStr = akhirRaw !== '' && akhirRaw !== undefined ? formatKmTanpaKoma(parseFloat(akhirRaw)) : '-';
-
-            return [
-                `tanggal : ${tglFormatted}`,
-                `Unit : ${nopol}`,
-                `dari : ${tujuan}`,
-                `tujuan : ${tujuan}`,
-                `lokasi : ${lokasi}`,
-                `km awal : ${awalStr}`,
-                `km Pengisian : ${pengisianStr}`,
-                `km bongkar : ${bongkarStr}`,
-                `km akhir : ${akhirStr}`
-            ].join('\n');
-        });
-
-        const judul = `*LAPORAN KM PERJALANAN UNIT${filterNopol !== 'ALL' ? ' - ' + filterNopol : ''}${headerRentang}*`;
-        const teksPesan = `${judul}\n\n${blokPesan.join('\n\n')}`;
-        const waUrl = `https://wa.me/?text=${encodeURIComponent(teksPesan)}`;
-        window.open(waUrl, '_blank');
+    const rows = Array.from(document.querySelectorAll('#km-perjalanan-body tr[data-db-id]'));
+    if (rows.length === 0) {
+        alert("⚠️ Tidak ada data KM perjalanan unit untuk dilaporkan pada rentang tanggal ini.");
+        return;
     }
+
+    const safeFormatDate = (val) => {
+        if (!val) return '-';
+        return typeof formatDate === 'function' ? formatDate(val) : val;
+    };
+
+    const safeFormatKm = (raw) => {
+        if (raw === undefined || raw === null) return '-';
+        const trimmed = String(raw).trim();
+        if (trimmed === '') return '-';
+        const num = Number(trimmed);
+        if (Number.isNaN(num)) return '-';
+        return typeof formatKmTanpaKoma === 'function' ? formatKmTanpaKoma(num) : String(num);
+    };
+
+    const tglDari = document.getElementById('km-tgl-dari')?.value || '';
+    const tglSampai = document.getElementById('km-tgl-sampai')?.value || '';
+    const filterNopol = document.getElementById('km-filter-nopol')?.value || 'ALL';
+
+    let headerRentang = "";
+    if (tglDari && tglSampai) {
+        headerRentang = ` (${safeFormatDate(tglDari)} s/d ${safeFormatDate(tglSampai)})`;
+    } else if (tglDari) {
+        headerRentang = ` (Dari ${safeFormatDate(tglDari)})`;
+    } else if (tglSampai) {
+        headerRentang = ` (s/d ${safeFormatDate(tglSampai)})`;
+    }
+
+    const blokPesan = rows.map(tr => {
+        const dbId = tr.dataset.dbId;
+        const tglFormatted = safeFormatDate(tr.dataset.tanggal);
+        const nopol = tr.dataset.nopol?.trim() || '-';
+        const dari = tr.dataset.dari?.trim() || tr.dataset.tujuan?.trim() || '-';
+        const tujuan = tr.dataset.tujuan?.trim() || '-';
+        const lokasi = tr.dataset.lokasi?.trim() || '-';
+
+        const awalStr = safeFormatKm(document.getElementById(`km-awal-${dbId}`)?.value);
+        const pengisianStr = safeFormatKm(document.getElementById(`km-pengisian-${dbId}`)?.value);
+        const bongkarStr = safeFormatKm(document.getElementById(`km-bongkar-${dbId}`)?.value);
+        const akhirStr = safeFormatKm(document.getElementById(`km-akhir-${dbId}`)?.value);
+
+        return [
+            `tanggal : ${tglFormatted}`,
+            `Unit : ${nopol}`,
+            `dari : ${dari}`,
+            `tujuan : ${tujuan}`,
+            `lokasi : ${lokasi}`,
+            `km awal : ${awalStr}`,
+            `km Pengisian : ${pengisianStr}`,
+            `km bongkar : ${bongkarStr}`,
+            `km akhir : ${akhirStr}`
+        ].join('\n');
+    });
+
+    const judul = `*LAPORAN KM PERJALANAN UNIT${filterNopol !== 'ALL' ? ' - ' + filterNopol : ''}${headerRentang}*`;
+    const teksPesan = `${judul}\n\n${blokPesan.join('\n\n')}`;
+    const encodedText = encodeURIComponent(teksPesan);
+
+    if (encodedText.length > 6000) {
+        alert("⚠️ Data terlalu panjang untuk dikirim otomatis ke WhatsApp. Silakan perkecil rentang tanggal atau filter nomor polisi.");
+        return;
+    }
+
+    const waUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
+    const win = window.open(waUrl, '_blank', 'noopener,noreferrer');
+
+    if (!win || win.closed || typeof win.closed === 'undefined') {
+        window.location.href = waUrl;
+    }
+}
 
     function onManualEditKmAwal(dbId) {
         const awalEl = document.getElementById(`km-awal-${dbId}`);
