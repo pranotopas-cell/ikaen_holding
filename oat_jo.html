@@ -1609,7 +1609,7 @@
         hitungTotalKmKeseluruhan();
     }
 
-   function kirimWhatsAppKmPerjalanan() {
+   function openWaModalKmPerjalanan() {
     const rows = Array.from(document.querySelectorAll('#km-perjalanan-body tr[data-db-id]'));
     if (rows.length === 0) {
         alert("⚠️ Tidak ada data KM perjalanan unit untuk dilaporkan pada rentang tanggal ini.");
@@ -1675,19 +1675,23 @@
         ].join('\n');
     });
 
-    const teksPesan = blokPesan.join('\n\n');
-    const encodedText = encodeURIComponent(teksPesan);
+    const txt = blokPesan.join('\n\n');
+    document.getElementById('waTextEditor').value = txt;
+    document.getElementById('waModal').style.display = 'block';
+}
 
-    if (encodedText.length > 6000) {
-        alert("⚠️ Data terlalu panjang untuk dikirim otomatis ke WhatsApp. Silakan perkecil rentang tanggal atau filter nomor polisi.");
+function sendToWhatsApp() {
+    const teks = document.getElementById('waTextEditor')?.value || '';
+    if (!teks.trim()) {
+        alert("⚠️ Teks laporan masih kosong.");
         return;
     }
-
-    const waUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
-    const win = window.open(waUrl, '_blank', 'noopener,noreferrer');
-
-    if (!win || win.closed || typeof win.closed === 'undefined') {
-        window.location.href = waUrl;
+    window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(teks), "_blank");
+    if (typeof closeWaModal === 'function') {
+        closeWaModal();
+    } else {
+        const modal = document.getElementById('waModal');
+        if (modal) modal.style.display = 'none';
     }
 }
 
