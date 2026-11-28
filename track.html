@@ -220,18 +220,25 @@
                     return;
                 }
 
-                // Urutkan data dari yang paling baru ke paling lama
                 const sortedData = [...data].sort((a, b) => getTimestamp(b) - getTimestamp(a));
-
                 let activeData = null;
+                const isLockedById = Boolean(idParam);
 
-                // Jika link membawa parameter ?id=..., gunakan baris spesifik tersebut
-                if (idParam) {
+                // 1. Jika link memiliki parameter ?id=..., kunci ke baris pengiriman spesifik tersebut
+                if (isLockedById) {
                     activeData = sortedData.find(item => String(item.id || item.id_pengiriman || '').trim() === idParam) || null;
-                }
-
-                // Jika tidak pakai ?id=... (atau id tidak ketemu), cocokkan berdasarkan nopol
-                if (!activeData && nopolClean) {
+                    if (!activeData) {
+                        card.innerHTML = `
+                            <div class="py-3">
+                                <i class="fas fa-lock text-warning fs-1 mb-3"></i>
+                                <h5 class="fw-bold">Tautan Tidak Berlaku</h5>
+                                <p class="text-muted small mb-0">Data pengiriman untuk ID <strong>${idParam}</strong> tidak ditemukan atau sudah berakhir.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                } else if (nopolClean) {
+                    // 2. Jika link lama (hanya ?nopol=...), cari baris untuk unit tersebut
                     const matchedRows = sortedData.filter(item => {
                         const dbNopol = (item.nopol || item.Nopol || item.unit || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
                         return dbNopol === nopolClean;
@@ -261,25 +268,12 @@
                         return dateFormatted === todayStr || dateFormatted === tomorrowStr;
                     };
 
-                    // 1. Prioritas utama: status PROSES terbaru (khususnya hari ini / besok)
                     activeData =
                         matchedRows.find(item => isProsesRow(item) && isTodayOrTomorrow(item)) ||
                         matchedRows.find(item => isProsesRow(item)) ||
-                        // 2. Jika tidak ada PROSES, baru cek DELIVERED hari ini / besok atau yang paling baru
                         matchedRows.find(item => isDeliveredRow(item) && isTodayOrTomorrow(item)) ||
                         matchedRows.find(item => isDeliveredRow(item)) ||
                         matchedRows[0];
-                }
-
-                if (!activeData) {
-                    card.innerHTML = `
-                        <div class="py-3">
-                            <i class="fas fa-search text-warning fs-1 mb-3"></i>
-                            <h5 class="fw-bold">Pengiriman Tidak Ditemukan</h5>
-                            <p class="text-muted small mb-0">Data pengiriman untuk unit <strong>${nopolRaw}</strong> tidak tersedia.</p>
-                        </div>
-                    `;
-                    return;
                 }
 
                 const delivered = isDeliveredRow(activeData);
@@ -314,6 +308,7 @@
                     const transportir = activeData.transportir || activeData.Transportir || 'PT. INDO DHARMA ENERGI';
                     const qtyVal = activeData.jumlah_keluar || activeData.jumlah_masuk || activeData.qty || '0';
                     const tujuanVal = activeData.delivery_to || activeData.Tujuan || activeData.lokasi || '-';
+                    const tglTrip = activeData.tanggal || activeData.Tanggal || activeData.tgl_pengiriman || '-';
 
                     if (!isHinoUnit && databaseLinkCartrack[resolvedNopol]) {
                         card.innerHTML = `
@@ -345,6 +340,10 @@
                         </div>
 
                         <div class="info-container mb-3 text-start">
+                            <div class="info-item">
+                                <span class="info-label"><i class="fas fa-calendar-day me-1"></i> Tanggal Trip</span>
+                                <span class="info-value">${tglTrip}</span>
+                            </div>
                             <div class="info-item">
                                 <span class="info-label"><i class="fas fa-truck me-1"></i> Nomor Unit</span>
                                 <span class="info-value">${nopolUnit}</span>
