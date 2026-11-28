@@ -196,7 +196,7 @@
             white-space: nowrap;
         }
 
-        /* Bagian Tanda Tangan */
+        /* Bagian Tanda Tangan menyatu dengan teks & latar belakang */
         .signature-section {
             margin-top: 22px;
             font-size: 12px;
@@ -204,13 +204,13 @@
             position: relative;
         }
 
-        /* Ruang tanda tangan menggunakan overlay */
         .signature-container {
             position: relative;
-            display: inline-block;
-            margin: 10px 0;
-            height: 100px; /* Menyesuaikan tinggi dengan ukuran gambar */
-            width: 250px; /* Menyesuaikan lebar tanda tangan */
+            display: block;
+            margin: -6px 0 -8px -6px;
+            height: 92px;
+            width: 240px;
+            background: transparent;
         }
 
         .signature-image {
@@ -218,6 +218,8 @@
             width: auto;
             display: block;
             object-fit: contain;
+            background: transparent;
+            mix-blend-mode: multiply; /* Menyatu halus dengan latar putih/kertas dan elemen di sekitarnya */
         }
 
         .director-name {
@@ -252,6 +254,9 @@
                 padding: 0;
                 max-width: 100%;
                 width: 100%;
+            }
+            .signature-image {
+                mix-blend-mode: multiply;
             }
             table.report-table th {
                 font-size: 9.5px;
@@ -363,14 +368,15 @@
 
         <!-- Tanda Tangan -->
         <div class="signature-section">
-        <div id="tanggalTTD">Pangkalan Bun, </div>
-        <div>Best Regard</div>
-        <div><strong>PT. INVESTAMA KALIMANTAN ENERGI</strong></div>
-        <div class="signature-container">
-            <img src="real.png" alt="Tanda Tangan & Stempel" class="signature-image">
+            <div id="tanggalTTD">Pangkalan Bun, </div>
+            <div>Best Regard</div>
+            <div><strong>PT. INVESTAMA KALIMANTAN ENERGI</strong></div>
+            <div class="signature-container">
+                <img src="real.png" alt="Tanda Tangan & Stempel" class="signature-image">
+            </div>
+            <div class="director-name">YAYUK WIJAYANTI</div>
+            <div>Direktur</div>
         </div>
-        <div class="director-name">YAYUK WIJAYANTI</div>
-        <div>Direktur</div>
     </div>
 
     <script>
