@@ -1913,39 +1913,45 @@
     }
 
     function kumpulkanPayloadKmPerjalanan() {
-        const rows = document.querySelectorAll('#km-perjalanan-body tr[data-db-id]');
-        const payloadUpsert = [];
+    const rows = document.querySelectorAll('#km-perjalanan-body tr[data-db-id]');
+    const payloadUpsert = [];
 
-        rows.forEach(tr => {
-            const rawId = tr.dataset.dbId;
-            const dbId = /^\d+$/.test(rawId) ? Number(rawId) : rawId;
-            const nopol = tr.dataset.nopol || null;
-            const tanggal = tr.dataset.tanggal || null;
-            const tujuan = tr.dataset.tujuan || null;
+    rows.forEach(tr => {
+        const rawId = tr.dataset.dbId;
+        const dbId = /^\d+$/.test(rawId) ? Number(rawId) : rawId;
+        const nopol = tr.dataset.nopol || null;
+        const tanggal = tr.dataset.tanggal || null;
+        const tujuan = tr.dataset.tujuan || null;
 
-            const kmAwal = parseKmNumber(document.getElementById(`km-awal-${rawId}`)?.value);
-            const kmPengisian = parseKmNumber(document.getElementById(`km-pengisian-${rawId}`)?.value);
-            const kmBongkar = parseKmNumber(document.getElementById(`km-bongkar-${rawId}`)?.value);
-            const kmAkhir = parseKmNumber(document.getElementById(`km-akhir-${rawId}`)?.value);
-            const totalPerjalanan = (kmAwal !== null && kmAkhir !== null) ? (kmAkhir - kmAwal) : 0;
+        const kmAwal = parseKmNumber(document.getElementById(`km-awal-${rawId}`)?.value);
+        const kmPengisian = parseKmNumber(document.getElementById(`km-pengisian-${rawId}`)?.value);
+        const kmBongkar = parseKmNumber(document.getElementById(`km-bongkar-${rawId}`)?.value);
+        const kmAkhir = parseKmNumber(document.getElementById(`km-akhir-${rawId}`)?.value);
 
-            payloadUpsert.push({
-                id_pengiriman: dbId,
-                periode_bulan: currentPeriodeStr,
-                tanggal: tanggal,
-                nopol: nopol,
-                tujuan: tujuan,
-                km_awal: kmAwal,
-                km_pengisian: kmPengisian,
-                km_bongkar: kmBongkar,
-                km_akhir: kmAkhir,
-                total_perjalanan: totalPerjalanan,
-                updated_at: new Date().toISOString()
-            });
+        // Lewati baris yang seluruh input KM-nya kosong
+        if (kmAwal === null && kmPengisian === null && kmBongkar === null && kmAkhir === null) {
+            return;
+        }
+
+        const totalPerjalanan = (kmAwal !== null && kmAkhir !== null) ? (kmAkhir - kmAwal) : 0;
+
+        payloadUpsert.push({
+            id_pengiriman: dbId,
+            periode_bulan: currentPeriodeStr,
+            tanggal: tanggal,
+            nopol: nopol,
+            tujuan: tujuan,
+            km_awal: kmAwal,
+            km_pengisian: kmPengisian,
+            km_bongkar: kmBongkar,
+            km_akhir: kmAkhir,
+            total_perjalanan: totalPerjalanan,
+            updated_at: new Date().toISOString()
         });
+    });
 
-        return payloadUpsert;
-    }
+    return payloadUpsert;
+}
 
     function exportToExcel() {
         const table = document.getElementById("tabel-utama");
