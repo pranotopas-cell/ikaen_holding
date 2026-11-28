@@ -1609,7 +1609,7 @@
         hitungTotalKmKeseluruhan();
     }
 
-   function openWaModalKmPerjalanan() {
+    function openWaModalKmPerjalanan() {
     const rows = Array.from(document.querySelectorAll('#km-perjalanan-body tr[data-db-id]'));
     if (rows.length === 0) {
         alert("⚠️ Tidak ada data KM perjalanan unit untuk dilaporkan pada rentang tanggal ini.");
@@ -1638,6 +1638,74 @@
         return typeof formatKmTanpaKoma === 'function' ? formatKmTanpaKoma(num) : String(num);
     };
 
+    const formatJumlahMasuk = (raw) => {
+        if (raw === undefined || raw === null) return '-';
+        const trimmed = String(raw).trim();
+        if (trimmed === '') return '-';
+
+        // Jika sudah ada satuan/teks non-angka murni, pertahankan
+        if (/[a-zA-Z]/.test(trimmed)) return trimmed;
+
+        const normalized = trimmed.replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.');
+        const num = Number(normalized);
+        if (Number.isNaN(num)) return trimmed;
+
+        const formattedNum = num.toLocaleString('id-ID', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 3
+        });
+        return `${formattedNum} L`;
+    };
+
+    // Helper untuk mencari record di data_pengiriman (mendukung Array, Map, atau Object)
+    const cariDiDataPengiriman = (tr, dbId, nopol, tanggal) => {
+        const sumber =
+            (typeof data_pengiriman !== 'undefined' && data_pengiriman) ||
+            window.data_pengiriman ||
+            null;
+
+        if (!sumber) return null;
+
+        const pengirimanId =
+            tr.dataset.pengirimanId ||
+            tr.dataset.pengiriman_id ||
+            tr.dataset.idPengiriman ||
+            '';
+
+        if (sumber instanceof Map) {
+            return sumber.get(pengirimanId) || sumber.get(dbId) || null;
+        }
+
+        if (Array.isArray(sumber)) {
+            if (pengirimanId) {
+                const byPengirimanId = sumber.find(item =>
+                    String(item?.id ?? item?.pengiriman_id ?? '') === String(pengirimanId)
+                );
+                if (byPengirimanId) return byPengirimanId;
+            }
+
+            const byKmId = sumber.find(item =>
+                String(item?.km_id ?? item?.km_perjalanan_id ?? item?.id ?? '') === String(dbId)
+            );
+            if (byKmId) return byKmId;
+
+            if (nopol && tanggal) {
+                const tglKey = String(tanggal).slice(0, 10);
+                return sumber.find(item => {
+                    const itemNopol = String(item?.nopol ?? item?.no_polisi ?? item?.plat ?? '').trim().toUpperCase();
+                    const itemTgl = String(item?.tanggal ?? item?.tgl_pengiriman ?? item?.created_at ?? '').slice(0, 10);
+                    return itemNopol === nopol.toUpperCase() && itemTgl === tglKey;
+                }) || null;
+            }
+        }
+
+        if (typeof sumber === 'object') {
+            return sumber[pengirimanId] || sumber[dbId] || null;
+        }
+
+        return null;
+    };
+
     const blokPesan = rows.map(tr => {
         const dbId = tr.dataset.dbId;
         const tglFormatted = formatTanggalIndo(tr.dataset.tanggal);
@@ -1645,10 +1713,31 @@
         const kapasitasUnit = tr.dataset.kapasitas?.trim() || tr.dataset.unitKet?.trim() || '';
         const unitLine = kapasitasUnit ? `${nopol}  ( ${kapasitasUnit} )` : nopol;
 
-        const dari = tr.dataset.dari?.trim() || tr.dataset.tujuan?.trim() || '-';
-        const tujuan = tr.dataset.tujuan?.trim() || '-';
-        const jumlah = tr.dataset.jumlah?.trim() || tr.dataset.liter?.trim() || kapasitasUnit || '-';
-        const catatan = tr.dataset.keterangan?.trim() || tr.dataset.catatan?.trim() || tr.dataset.lokasi?.trim() || '';
+        const recordPengiriman = cariDiDataPengiriman(tr, dbId, nopol, tr.dataset.tanggal);
+
+        // Dari selalu diarahkan ke workshop
+        const dari = 'workshop';
+        const tujuan =
+            tr.dataset.tujuan?.trim() ||
+            recordPengiriman?.tujuan?.trim() ||
+            recordPengiriman?.nama_customer?.trim() ||
+            '-';
+
+        // Jumlah diambil dari jumlah_masuk pada data_pengiriman
+        const rawJumlahMasuk =
+            tr.dataset.jumlahMasuk ??
+            tr.dataset.jumlah_masuk ??
+            recordPengiriman?.jumlah_masuk ??
+            recordPengiriman?.jumlahMasuk ??
+            '';
+        const jumlah = formatJumlahMasuk(rawJumlahMasuk);
+
+        const catatan =
+            tr.dataset.keterangan?.trim() ||
+            tr.dataset.catatan?.trim() ||
+            tr.dataset.lokasi?.trim() ||
+            recordPengiriman?.keterangan?.trim() ||
+            '';
 
         const awalStr = safeFormatKm(document.getElementById(`km-awal-${dbId}`)?.value);
         const pengisianStr = safeFormatKm(document.getElementById(`km-pengisian-${dbId}`)?.value);
@@ -1771,7 +1860,7 @@ function sendToWhatsApp() {
         if (modal) modal.style.display = 'none';
     }
 }
-
+        
     function onManualEditKmAwal(dbId) {
         const awalEl = document.getElementById(`km-awal-${dbId}`);
         if (awalEl) {
