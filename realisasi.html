@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Realisasi Penjualan - PT. Investama Kalimantan Energi</title>
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f0f2f5;
+            color: #000;
+            padding: 20px;
+            font-size: 12px;
+        }
+
+        /* Toolbar Atas (Tidak ikut tercetak) */
+        .toolbar {
+            max-width: 1140px;
+            margin: 0 auto 15px auto;
+            background: #ffffff;
+            padding: 12px 18px;
+            border-radius: 6px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .btn-home {
+            background-color: #34495e;
+            color: #fff;
+        }
+        .btn-home:hover { background-color: #2c3e50; }
+
+        .btn-print {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+        .btn-print:hover { background-color: #0b5ed7; }
+
+        .btn-refresh {
+            background-color: #198754;
+            color: #fff;
+        }
+        .btn-refresh:hover { background-color: #157347; }
+
+        select {
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Lembar Kertas Laporan */
+        .paper {
+            max-width: 1140px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 26px 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Header Laporan */
+        .report-header {
+            text-align: center;
+            margin-bottom: 16px;
+            line-height: 1.55;
+        }
+
+        .report-header h1 {
+            font-size: 15px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .report-header h2 {
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .report-header h3 {
+            font-size: 13px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        /* Tabel Utama */
+        table.report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 6px;
+            table-layout: fixed;
+        }
+
+        table.report-table th {
+            border-top: 1.5px solid #0d2b52;
+            border-bottom: 1.5px solid #0d2b52;
+            border-left: 1px solid #23497a;
+            border-right: 1px solid #23497a;
+            padding: 6px 5px;
+            font-weight: bold;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 10.5px;
+            background-color: #0d2b52;
+            color: #ffffff;
+            white-space: nowrap;
+        }
+
+        table.report-table td {
+            border-left: 1px solid #000;
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #c8d0d8;
+            padding: 4px 5px;
+            font-size: 10px;
+            line-height: 1.25;
+            vertical-align: middle;
+            height: 21px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Garis penutup bawah tabel sebelum JUMLAH */
+        table.report-table tbody tr:last-child td {
+            border-bottom: 1.5px solid #000;
+        }
+
+        /* Baris JUMLAH */
+        table.report-table tfoot td {
+            border: none;
+            padding: 6px 5px;
+            font-weight: bold;
+            font-size: 11px;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .text-left { text-align: left; }
+
+        /* Bagian Ringkasan PO */
+        .summary-section {
+            margin-top: 14px;
+            margin-bottom: 26px;
+        }
+
+        .summary-table {
+            border-collapse: collapse;
+            width: 460px;
+        }
+
+        .summary-table td {
+            padding: 4px 6px;
+            font-weight: bold;
+            font-size: 11.5px;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        /* Bagian Tanda Tangan */
+        .signature-section {
+            margin-top: 22px;
+            font-size: 12px;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        /* Ruang tanda tangan menggunakan overlay */
+        .signature-container {
+            position: relative;
+            display: inline-block;
+            margin: 10px 0;
+            height: 80px; /* Menyesuaikan tinggi dengan ukuran gambar */
+            width: 250px; /* Menyesuaikan lebar tanda tangan */
+        }
+
+        .signature-image {
+            height: 100%;
+            width: auto;
+            display: block;
+            object-fit: contain;
+        }
+
+        .director-name {
+            font-weight: bold;
+            text-decoration: underline;
+            text-transform: uppercase;
+        }
+
+        .status-badge {
+            font-size: 11px;
+            color: #555;
+            font-style: italic;
+        }
+
+        .status-error {
+            color: #c0392b;
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        /* Pengaturan Cetak / Print */
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .paper {
+                box-shadow: none;
+                padding: 0;
+                max-width: 100%;
+                width: 100%;
+            }
+            table.report-table th {
+                font-size: 9.5px;
+                padding: 5px 4px;
+            }
+            table.report-table td {
+                font-size: 9px;
+                padding: 3px 4px;
+                height: 19px;
+            }
+            @page {
+                size: A4 landscape;
+                margin: 10mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toolbar Navigasi & Filter -->
+    <div class="toolbar no-print">
+        <div class="toolbar-group">
+            <a href="index.html" class="btn btn-home" title="Kembali ke Halaman Utama">🏠 Home</a>
+            <button onclick="window.print()" class="btn btn-print">🖨️ Print Laporan</button>
+            <button onclick="loadData()" class="btn btn-refresh">🔄 Refresh Data</button>
+        </div>
+
+        <div class="toolbar-group">
+            <label for="filterBulan"><strong>Pilih Bulan:</strong></label>
+            <select id="filterBulan" onchange="renderTable()">
+                <option value="ALL">Semua Bulan</option>
+                <option value="01">JANUARI</option>
+                <option value="02">FEBRUARI</option>
+                <option value="03">MARET</option>
+                <option value="04">APRIL</option>
+                <option value="05">MEI</option>
+                <option value="06">JUNI</option>
+                <option value="07">JULI</option>
+                <option value="08">AGUSTUS</option>
+                <option value="09">SEPTEMBER</option>
+                <option value="10">OKTOBER</option>
+                <option value="11">NOVEMBER</option>
+                <option value="12">DESEMBER</option>
+            </select>
+
+            <label for="filterTahun"><strong>Tahun:</strong></label>
+            <select id="filterTahun" onchange="renderTable()">
+                <option value="ALL">Semua Tahun</option>
+            </select>
+
+            <span id="statusText" class="status-badge">Memuat data...</span>
+        </div>
+    </div>
+
+    <!-- Area Kertas Laporan -->
+    <div class="paper">
+        <div class="report-header">
+            <h1>LAPORAN REALISASI PENJUALAN</h1>
+            <h2>PT. INVESTAMA KALIMANTAN ENERGI</h2>
+            <h3>BULAN : <span id="judulBulan">SEMUA PERIODE</span></h3>
+        </div>
+
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th style="width: 8%;">DATE</th>
+                    <th style="width: 9%;">NOPOL</th>
+                    <th style="width: 24%;">Tujuan</th>
+                    <th style="width: 17%;">LOKASI</th>
+                    <th style="width: 9%;">LAT</th>
+                    <th style="width: 9%;">LON</th>
+                    <th style="width: 9%;">No SO</th>
+                    <th style="width: 10%;">No DO</th>
+                    <th style="width: 7%;">QTY</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Baris data akan diisi otomatis oleh JavaScript -->
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="7"></td>
+                    <td class="text-right" style="padding-right: 8px;">JUMLAH :</td>
+                    <td class="text-center" id="totalQtyCell">0</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <!-- Ringkasan PO -->
+        <div class="summary-section">
+            <table class="summary-table">
+                <tr>
+                    <td style="width: 260px;">TOTAL PEMBUKAAN PURCHASE ORDER</td>
+                    <td style="width: 15px;">:</td>
+                    <td class="text-right" style="padding-right: 4px;" id="textTotalPO">0</td>
+                </tr>
+                <tr>
+                    <td>TOTAL REALISASI PENGAMBILAN</td>
+                    <td>:</td>
+                    <td class="text-right" style="padding-right: 4px;" id="textRealisasi">0</td>
+                </tr>
+                <tr>
+                    <td style="padding-left: 110px;">SISA PO</td>
+                    <td>:</td>
+                    <td class="text-right" style="padding-right: 4px;" id="textSisaPO">0</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Tanda Tangan -->
+        <div class="signature-section">
+            <div id="tanggalTTD">Pangkalan Bun, </div>
+            <div>Best Regard</div>
+            <div><strong>PT. INVESTAMA KALIMANTAN ENERGI</strong></div>
+            <div class="signature-container">
+                <!-- Gambar tanda tangan (Latar belakang sudah transparan, menyisakan tanda tangan & stempel) -->
+                <img src="https://i.ibb.co/3ykXvB2/signature-stamped.png" alt="Tanda Tangan & Stempel" class="signature-image">
+            </div>
+            <div class="director-name">YAYUK WIJAYANTI</div>
+            <div>Direktur</div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://ntaectphgoelmhzrkatp.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YWVjdHBoZ29lbG1oenJrYXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzExNDYsImV4cCI6MjA4ODE0NzE0Nn0.-8E98wpkzHBARRhW6PKhBtf2XKhWFjq7idAzw9jlcKg';
+        const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const NAMA_TABEL = 'data_pengiriman';
+
+        let allPengiriman = [];
+        let allPurchaseOrders = [];
+        let poiMap = {};
+
+        const DATE_COLORS = [
+            '#ffffff', // Putih
+            '#e8f4fd', // Biru muda
+            '#eafaf1', // Hijau muda
+            '#fef9e7', // Kuning muda
+            '#f5eef8', // Ungu muda
+            '#fdedec', // Merah muda
+            '#e8f8f5'  // Tosca muda
+        ];
+
+        const NAMA_BULAN = {
+            '01': 'JANUARI', '02': 'FEBRUARI', '03': 'MARET', '04': 'APRIL',
+            '05': 'MEI', '06': 'JUNI', '07': 'JULI', '08': 'AGUSTUS',
+            '09': 'SEPTEMBER', '10': 'OKTOBER', '11': 'NOVEMBER', '12': 'DESEMBER'
+        };
+
+        function normalizeNamaPT(str) {
+            if (!str || typeof str !== 'string') return '';
+            return str
+                .toLowerCase()
+                .replace(/\./g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function extractDatePart(row) {
+            const rawDate =
+                row.tgl_po || row.tanggal || row.tgl || row.date ||
+                row.tanggal_po || row.po_date || row.created_at || '';
+            if (!rawDate) return '';
+            return String(rawDate).split('T')[0].trim();
+        }
+
+        function getSupplierText(row) {
+            return String(
+                row.supplier ?? row.nama_supplier ?? row.vendor ?? row.sumber ?? ''
+            ).toLowerCase();
+        }
+
+        function isAndalanPO(row) {
+            const tujuan = String(row.tujuan ?? '').toLowerCase();
+            const poCode = String(row.po_code ?? '').toLowerCase();
+            const supplier = getSupplierText(row);
+            return tujuan.includes('andalan') || poCode.includes('andalan') || supplier.includes('andalan');
+        }
+
+        function parseQtyNumber(val) {
+            if (typeof val === 'number') return isNaN(val) ? 0 : val;
+            if (!val) return 0;
+            const cleaned = String(val).replace(/,/g, '').trim();
+            const parsed = parseFloat(cleaned);
+            return isNaN(parsed) ? 0 : parsed;
+        }
+
+        function initFilterDefaults() {
+            const now = new Date();
+            const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
+            const currentYear = String(now.getFullYear());
+
+            const tahunSelect = document.getElementById('filterTahun');
+            tahunSelect.innerHTML = '<option value="ALL">Semua Tahun</option>';
+            for (let y = now.getFullYear() + 1; y >= 2023; y--) {
+                const opt = document.createElement('option');
+                opt.value = String(y);
+                opt.textContent = String(y);
+                tahunSelect.appendChild(opt);
+            }
+
+            document.getElementById('filterBulan').value = currentMonth;
+            tahunSelect.value = currentYear;
+
+            const tglStr = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            document.getElementById('tanggalTTD').textContent = `Pangkalan Bun, ${tglStr}`;
+        }
+
+        async function fetchTableSafe(tableName) {
+            const { data, error } = await _supabase.from(tableName).select('*');
+            if (error) {
+                throw new Error(`[${tableName}] ${error.message}`);
+            }
+            return data || [];
+        }
+
+        async function loadData() {
+            const statusEl = document.getElementById('statusText');
+            statusEl.className = 'status-badge';
+            statusEl.textContent = 'Memuat data dari Supabase...';
+
+            const errors = [];
+
+            // 1. Ambil poi_lokasi
+            try {
+                const poiData = await fetchTableSafe('poi_lokasi');
+                poiMap = {};
+                poiData.forEach(item => {
+                    const possiblePTKeys = [
+                        item.nama_pt, item.pt, item.perusahaan, item.nama_perusahaan,
+                        item.customer, item.nama_customer, item.delivery_to, item.tujuan,
+                        item.nama_poi, item.nama, item.name, item.lokasi
+                    ];
+                    possiblePTKeys.forEach(k => {
+                        const normKey = normalizeNamaPT(k);
+                        if (normKey) {
+                            poiMap[normKey] = {
+                                lat: item.lat ?? item.latitude ?? '',
+                                lon: item.lon ?? item.lng ?? item.longitude ?? ''
+                            };
+                        }
+                    });
+                });
+            } catch (err) {
+                console.error(err);
+                errors.push(err.message);
+            }
+
+            // 2. Ambil data_pengiriman & filter supplier Andalan
+            try {
+                const pengirimanData = await fetchTableSafe(NAMA_TABEL);
+                allPengiriman = pengirimanData
+                    .filter(row => getSupplierText(row).includes('andalan'))
+                    .sort((a, b) => extractDatePart(a).localeCompare(extractDatePart(b)));
+            } catch (err) {
+                console.error(err);
+                allPengiriman = [];
+                errors.push(err.message);
+            }
+
+            // 3. Ambil purchase_orders & filter tujuan/po_code/supplier ANDALAN
+            try {
+                const poData = await fetchTableSafe('purchase_orders');
+                allPurchaseOrders = poData.filter(row => isAndalanPO(row));
+            } catch (err) {
+                console.error(err);
+                allPurchaseOrders = [];
+                errors.push(err.message);
+            }
+
+            if (errors.length > 0) {
+                statusEl.className = 'status-badge status-error';
+                statusEl.textContent = errors.join(' | ');
+            } else {
+                statusEl.textContent = `Andalan: ${allPengiriman.length} pengiriman | ${allPurchaseOrders.length} PO`;
+            }
+
+            renderTable();
+        }
+
+        function getKoordinatByPT(row) {
+            const candidates = [
+                row.delivery_to, row.nama_pt, row.pt, row.perusahaan,
+                row.customer, row.tujuan, row.lokasi
+            ];
+
+            for (const c of candidates) {
+                const norm = normalizeNamaPT(c);
+                if (norm && poiMap[norm]) {
+                    return poiMap[norm];
+                }
+            }
+
+            for (const c of candidates) {
+                const norm = normalizeNamaPT(c);
+                if (!norm) continue;
+                for (const poiKey in poiMap) {
+                    if (poiKey.includes(norm) || norm.includes(poiKey)) {
+                        return poiMap[poiKey];
+                    }
+                }
+            }
+
+            return { lat: '', lon: '' };
+        }
+
+        function formatTanggal(tglStr) {
+            const clean = extractDatePart({ tanggal: tglStr });
+            if (!clean) return '';
+            const parts = clean.split('-');
+            if (parts.length === 3) {
+                return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+            return clean;
+        }
+
+        function renderTable() {
+            const bulan = document.getElementById('filterBulan').value;
+            const tahun = document.getElementById('filterTahun').value;
+            const judulBulanEl = document.getElementById('judulBulan');
+
+            if (bulan === 'ALL' && tahun === 'ALL') {
+                judulBulanEl.textContent = 'SEMUA PERIODE';
+            } else if (bulan !== 'ALL' && tahun !== 'ALL') {
+                judulBulanEl.textContent = `${NAMA_BULAN[bulan]} ${tahun}`;
+            } else if (bulan !== 'ALL') {
+                judulBulanEl.textContent = `${NAMA_BULAN[bulan]}`;
+            } else {
+                judulBulanEl.textContent = `TAHUN ${tahun}`;
+            }
+
+            const filteredPengiriman = allPengiriman.filter(row => {
+                const datePart = extractDatePart(row);
+                if (!datePart) return false;
+                const [y, m] = datePart.split('-');
+                const matchBulan = (bulan === 'ALL') || (m === bulan);
+                const matchTahun = (tahun === 'ALL') || (y === tahun);
+                return matchBulan && matchTahun;
+            });
+
+            const filteredPO = allPurchaseOrders.filter(row => {
+                const datePart = extractDatePart(row);
+                if (!datePart) return false;
+                const [y, m] = datePart.split('-');
+                const matchBulan = (bulan === 'ALL') || (m === bulan);
+                const matchTahun = (tahun === 'ALL') || (y === tahun);
+                return matchBulan && matchTahun;
+            });
+
+            const totalPembukaanPO = filteredPO.reduce((sum, item) => {
+                return sum + parseQtyNumber(item.qty);
+            }, 0);
+
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            let totalRealisasi = 0;
+
+            const dateColorMap = {};
+            let colorIndex = 0;
+
+            filteredPengiriman.forEach(row => {
+                const dateKey = extractDatePart(row);
+                if (!dateColorMap[dateKey]) {
+                    dateColorMap[dateKey] = DATE_COLORS[colorIndex % DATE_COLORS.length];
+                    colorIndex++;
+                }
+                const rowBgColor = dateColorMap[dateKey];
+
+                const koord = getKoordinatByPT(row);
+                const qtyVal = parseQtyNumber(row.jumlah_keluar);
+                totalRealisasi += qtyVal;
+
+                const nopol = (row.nopol || row.no_pol || row.plat || '').toString().trim();
+                const noSo = (row.no_so || row.noso || row.so || '').toString().trim();
+                const noDo = (row.no_do || row.nodo || row.do || '').toString().trim();
+                const tujuanDisplay = (row.delivery_to || '').toString().trim();
+                const lokasiDisplay = (row.lokasi || '').toString().trim();
+
+                const tr = document.createElement('tr');
+                tr.style.backgroundColor = rowBgColor;
+                tr.innerHTML = `
+                    <td class="text-center" title="${formatTanggal(dateKey)}">${formatTanggal(dateKey)}</td>
+                    <td class="text-center" title="${nopol}">${nopol}</td>
+                    <td class="text-left" title="${tujuanDisplay}">${tujuanDisplay}</td>
+                    <td class="text-left" title="${lokasiDisplay}">${lokasiDisplay}</td>
+                    <td class="text-center" title="${koord.lat}">${koord.lat}</td>
+                    <td class="text-center" title="${koord.lon}">${koord.lon}</td>
+                    <td class="text-center" title="${noSo}">${noSo}</td>
+                    <td class="text-center" title="${noDo}">${noDo}</td>
+                    <td class="text-center" title="${qtyVal.toLocaleString('id-ID')}">${qtyVal.toLocaleString('id-ID')}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const minRows = 10;
+            if (filteredPengiriman.length < minRows) {
+                renderEmptyRows(minRows - filteredPengiriman.length, true);
+            }
+
+            const sisaPO = totalPembukaanPO - totalRealisasi;
+            document.getElementById('totalQtyCell').textContent = totalRealisasi.toLocaleString('id-ID');
+            document.getElementById('textTotalPO').textContent = totalPembukaanPO.toLocaleString('id-ID');
+            document.getElementById('textRealisasi').textContent = totalRealisasi.toLocaleString('id-ID');
+            document.getElementById('textSisaPO').textContent = sisaPO.toLocaleString('id-ID');
+        }
+
+        function renderEmptyRows(count, append = false) {
+            const tbody = document.getElementById('tableBody');
+            if (!append) tbody.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                const tr = document.createElement('tr');
+                tr.style.backgroundColor = '#ffffff';
+                tr.innerHTML = `<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>`;
+                tbody.appendChild(tr);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initFilterDefaults();
+            loadData();
+        });
+    </script>
+</body>
+</html>
