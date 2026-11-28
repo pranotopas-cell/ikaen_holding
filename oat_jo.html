@@ -79,11 +79,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        /* Izinkan elemen input di tabel KM tetap terlihat jelas */
-        #tabel-km-perjalanan td.km-input-cell {
-            overflow: visible;
-            text-overflow: clip;
-        }
     </style>
 </head>
 <body class="bg-slate-100 p-1.5 pb-20 space-y-2 transition-all duration-200" id="main-body">
@@ -230,12 +225,13 @@
                     </tr>
                 </thead>
                 <tbody id="resume-unit-body" class="divide-y divide-slate-200 bg-slate-50 font-medium">
+                    <!-- Ditampilkan secara dinamis oleh JS -->
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- TABEL RITASE MOBIL PER UNIT -->
+    <!-- TABEL RITASE MOBIL PER UNIT (SESUAI GAMBAR PDF) -->
     <div id="ritase-unit-panel" class="w-full mx-auto bg-white p-2 rounded-lg shadow-sm border border-slate-300 border-t-2 overflow-hidden">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-1 border-b border-slate-200 pb-1 gap-1">
             <div>
@@ -273,14 +269,16 @@
                     </tr>
                 </thead>
                 <tbody id="ritase-unit-body" class="divide-y divide-slate-200 bg-white font-medium text-[8px]">
+                    <!-- Ditampilkan secara dinamis oleh JS -->
                 </tbody>
                 <tfoot id="ritase-unit-foot" class="bg-slate-100 font-bold border-t-2 border-slate-400 text-slate-900 text-[8px]">
+                    <!-- Total ritase dinamis -->
                 </tfoot>
             </table>
         </div>
     </div>
 
-    <!-- PANEL PORSI HITUNGAN & BRUTO PER UNIT -->
+    <!-- PANEL PORSI HITUNGAN & BRUTO PER UNIT (SESUAI FOTO) -->
     <div id="porsi-hitungan-panel" class="w-full mx-auto bg-white p-2 rounded-lg shadow-sm border border-slate-300 border-t-2 overflow-hidden">
         <div class="flex justify-between items-center mb-1.5 border-b border-slate-200 pb-1">
             <div>
@@ -292,10 +290,11 @@
         </div>
 
         <div id="porsi-unit-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-2">
+            <!-- Dirender secara dinamis untuk KH 8734 GH, L 9761 UJ, KH 8068 GR -->
         </div>
     </div>
 
-    <!-- PANEL KM PERJALANAN UNIT KHUSUS -->
+    <!-- PANEL KM PERJALANAN UNIT KHUSUS (DI BAWAH ANALISIS PORSI HITUNGAN) -->
     <div id="km-perjalanan-panel" class="w-full mx-auto bg-white p-2 rounded-lg shadow-sm border border-slate-300 border-t-2 overflow-hidden">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-1.5 border-b border-slate-200 pb-1 gap-1">
             <div class="flex flex-wrap items-center gap-2">
@@ -335,19 +334,19 @@
             </div>
         </div>
 
-        <div class="w-full overflow-x-auto rounded border border-slate-300">
-            <table class="w-full min-w-[920px] text-[9px] text-left custom-table" id="tabel-km-perjalanan">
+        <div class="w-full overflow-hidden rounded border border-slate-300">
+            <table class="w-full text-[9px] text-left custom-table" id="tabel-km-perjalanan">
                 <thead class="bg-slate-200 text-slate-900 font-bold border-b border-slate-400 text-[8px] uppercase">
                     <tr>
-                        <th class="px-1.5 py-1 text-center border-r border-slate-300 w-[6.5%] uppercase">TANGGAL</th>
-                        <th class="px-1.5 py-1 text-center border-r border-slate-300 w-[8.5%] uppercase">NOPOL</th>
-                        <th class="px-1.5 py-1 text-center border-r border-slate-300 w-[14%] uppercase">TUJUAN</th>
-                        <th class="px-1.5 py-1 text-center border-r border-slate-300 w-[11%] uppercase">LOKASI</th>
-                        <th class="px-1.5 py-1 text-center bg-slate-300/70 border-r border-slate-400 w-[11%] uppercase">KM AWAL ( PULL )</th>
-                        <th class="px-1.5 py-1 text-center bg-slate-300/70 border-r border-slate-400 w-[13.5%] uppercase">KM PENGISIAN</th>
-                        <th class="px-1.5 py-1 text-center bg-slate-300/70 border-r border-slate-400 w-[13.5%] uppercase">KM BONGKAR( LOKASI)</th>
-                        <th class="px-1.5 py-1 text-center bg-slate-300/70 border-r border-slate-400 w-[11%] uppercase">KM AKHIR ( PULL)</th>
-                        <th class="px-1.5 py-1 text-center bg-slate-300/70 w-[11%] uppercase">TOTAL PERJALANAN</th>
+                        <th class="px-1.5 py-1 text-center border-r border-slate-300 w-[7%] uppercase">TANGGAL</th>
+                        <th class="px-1.5 py-1 text-center border-r border-slate-300 w-[9%] uppercase">NOPOL</th>
+                        <th class="px-1.5 py-1 text-center border-r border-slate-300 w-[16%] uppercase">TUJUAN</th>
+                        <th class="px-1.5 py-1 text-center border-r border-slate-300 w-[12%] uppercase">LOKASI</th>
+                        <th class="px-1.5 py-1 text-center bg-slate-300/70 border-r border-slate-400 w-[10.5%] uppercase">KM AWAL ( PULL )</th>
+                        <th class="px-1.5 py-1 text-center bg-slate-300/70 border-r border-slate-400 w-[11.5%] uppercase">KM PENGISIAN</th>
+                        <th class="px-1.5 py-1 text-center bg-slate-300/70 border-r border-slate-400 w-[11.5%] uppercase">KM BONGKAR( LOKASI)</th>
+                        <th class="px-1.5 py-1 text-center bg-slate-300/70 border-r border-slate-400 w-[10.5%] uppercase">KM AKHIR ( PULL)</th>
+                        <th class="px-1.5 py-1 text-center bg-slate-300/70 w-[11.5%] uppercase">TOTAL PERJALANAN</th>
                     </tr>
                 </thead>
                 <tbody id="km-perjalanan-body" class="divide-y divide-slate-200 bg-white font-medium text-[9px]">
@@ -356,6 +355,7 @@
                     </tr>
                 </tbody>
                 <tfoot id="km-perjalanan-foot" class="bg-slate-100 font-bold border-t-2 border-slate-400 text-slate-900 text-[9.5px]">
+                    <!-- Total KM dinamis -->
                 </tfoot>
             </table>
         </div>
@@ -398,6 +398,7 @@
 
     const allowedNopolList = ["KH 8734 GH", "KH 8068 GR", "L 9761 UJ"];
 
+    // Konfigurasi kolom kartu Porsi Unit sesuai urutan dan spesifikasi foto
     const porsiUnitConfigs = [
         { nopol: "KH 8734 GH", kapasitas: 10000, rasioKmLiter: 4.5, labelJarak: "BBM/JARAK" },
         { nopol: "L 9761 UJ",  kapasitas: 8000,  rasioKmLiter: 6,   labelJarak: "BBM/JARAK" },
@@ -431,21 +432,38 @@
 
     function cleanNopol(str) {
         const cleaned = (str || '').replace(/\s+/g, '').toUpperCase();
+        // Normalisasi typo umum KH8743GH -> KH8734GH agar tetap terhubung ke unit 10.000L
         if (cleaned === "KH8743GH") return "KH8734GH";
         return cleaned;
     }
 
     function parseKmNumber(val) {
-        if (val === null || val === undefined || val === '') return null;
-        if (typeof val === 'number') return Number.isFinite(val) ? val : null;
+        if (val === null || val === undefined || val === '') return 0;
+        if (typeof val === 'number') return Number.isFinite(val) ? val : 0;
         const cleaned = String(val).trim().replace(/\s+/g, '');
-        if (cleaned === '') return null;
-        // Jika format ribuan titik Indonesia seperti 12.345 -> 12345
+        if (cleaned === '') return 0;
         const normalized = /^\d{1,3}(\.\d{3})+$/.test(cleaned)
             ? cleaned.replace(/\./g, '')
             : cleaned.replace(',', '.');
         const num = Number(normalized);
-        return Number.isFinite(num) ? num : null;
+        return Number.isFinite(num) ? num : 0;
+    }
+
+    function normalizeKmKeys(id) {
+        if (id === null || id === undefined || id === '') return [];
+        const str = String(id).trim();
+        const keys = [str];
+        if (/^\d+$/.test(str)) {
+            keys.push(String(Number(str)));
+        }
+        return [...new Set(keys)];
+    }
+
+    function getSavedKmRecord(id) {
+        for (const k of normalizeKmKeys(id)) {
+            if (mapKmPerjalananSaved[k]) return mapKmPerjalananSaved[k];
+        }
+        return {};
     }
 
     function inisialisasiDropdownBulan() {
@@ -632,6 +650,7 @@
         await fetchDeliveryData();
     }
 
+    /* MENGAMBIL DATA DARI TABEL 'resume_perjalanan_unit' DENGAN FILTER PERIODE BULAN & NOPOL */
     async function fetchPengisianHarianDariSupabase(periodeStr) {
         const mapHasil = {};
         allowedNopolList.forEach(np => {
@@ -648,13 +667,33 @@
             }
 
             let { data, error } = await query;
+
             if (error) throw error;
 
             if (data) {
                 data.forEach(item => {
                     const npClean = cleanNopol(item.no_polisi);
-                    const kmVal = parseKmNumber(item.total_perjalanan_km) || 0;
-                    const bbmVal = parseKmNumber(item.total_bbm_liter) || 0;
+                    
+                    const parseRibuanSafe = (val) => {
+                        if (val === null || val === undefined) return 0;
+                        let str = String(val).trim();
+                        
+                        if (/^\d{1,3}(\.\d{3})+$/.test(str)) {
+                            return parseFloat(str.replace(/\./g, '')) || 0;
+                        }
+                        if (/^\d{1,3}(\.\d{3})+,\d+$/.test(str)) {
+                            return parseFloat(str.replace(/\./g, '').replace(',', '.')) || 0;
+                        }
+                        
+                        let num = parseFloat(str.replace(',', '.')) || 0;
+                        if (num > 0 && num < 50 && /^\d+\.\d{3}$/.test(str)) {
+                            num = Math.round(num * 1000);
+                        }
+                        return num;
+                    };
+
+                    const kmVal = parseRibuanSafe(item.total_perjalanan_km);
+                    const bbmVal = parseRibuanSafe(item.total_bbm_liter);
                     const kmlVal = parseFloat(item.km_per_liter) || (bbmVal > 0 ? kmVal / bbmVal : 0);
 
                     allowedNopolList.forEach(targetNopol => {
@@ -673,55 +712,59 @@
         return mapHasil;
     }
 
-    /* MENGAMBIL DATA TERSIMPAN DARI TABEL 'km_perjalanan_unit' BERDASARKAN ID PENGIRIMAN & PERIODE */
+    /* MENGAMBIL DATA TERSIMPAN DARI TABEL 'km_perjalanan_unit' (PRIORITAS DATA BERISI / TERBARU) */
     async function fetchKmPerjalananSaved(periodeStr, listIds = []) {
-    const mapSaved = {};
-    try {
-        let query = _supabase
-            .from('km_perjalanan_unit')
-            .select('*')
-            .order('updated_at', { ascending: false });
+        const mapSaved = {};
+        try {
+            let query = _supabase
+                .from('km_perjalanan_unit')
+                .select('*')
+                .order('updated_at', { ascending: false });
 
-        if (Array.isArray(listIds) && listIds.length > 0) {
-            query = query.in('id_pengiriman', listIds);
-        } else if (periodeStr) {
-            query = query.eq('periode_bulan', periodeStr);
-        }
-
-        const { data, error } = await query;
-        if (error) throw error;
-
-        (data || []).forEach(item => {
-            if (item.id_pengiriman === null || item.id_pengiriman === undefined) return;
-            if (item.periode_bulan && periodeStr && String(item.periode_bulan).trim() !== periodeStr) {
-                return;
+            if (Array.isArray(listIds) && listIds.length > 0) {
+                query = query.in('id_pengiriman', listIds);
             }
 
-            const keyStr = String(item.id_pengiriman);
-            const adaAngka = [item.km_awal, item.km_pengisian, item.km_bongkar, item.km_akhir]
-                .some(v => parseKmNumber(v) !== null && parseKmNumber(v) > 0);
+            const { data, error } = await query;
+            if (error) throw error;
 
-            // Jika belum ada yang tersimpan, simpan dulu;
-            // jika yang tersimpan sebelumnya hanya 0/kosong dan item ini ada angkanya, pakai item ini
-            if (!mapSaved[keyStr]) {
-                mapSaved[keyStr] = item;
-            } else if (adaAngka) {
-                const prevAdaAngka = [
-                    mapSaved[keyStr].km_awal,
-                    mapSaved[keyStr].km_pengisian,
-                    mapSaved[keyStr].km_bongkar,
-                    mapSaved[keyStr].km_akhir
-                ].some(v => parseKmNumber(v) !== null && parseKmNumber(v) > 0);
-                if (!prevAdaAngka) {
-                    mapSaved[keyStr] = item;
+            (data || []).forEach(item => {
+                if (item.id_pengiriman === null || item.id_pengiriman === undefined || item.id_pengiriman === '') return;
+
+                const itemPeriode = item.periode_bulan ? String(item.periode_bulan).trim() : '';
+                const itemTglIso = ekstrakTanggalIso(item.tanggal);
+                const matchesPeriode = !periodeStr
+                    || !itemPeriode
+                    || itemPeriode === periodeStr
+                    || itemTglIso.startsWith(periodeStr);
+
+                if (!matchesPeriode) return;
+
+                const adaAngka = [item.km_awal, item.km_pengisian, item.km_bongkar, item.km_akhir]
+                    .some(v => parseKmNumber(v) > 0);
+
+                const keys = normalizeKmKeys(item.id_pengiriman);
+                const existing = keys.map(k => mapSaved[k]).find(Boolean);
+
+                if (!existing) {
+                    keys.forEach(k => { mapSaved[k] = item; });
+                } else if (adaAngka) {
+                    const prevAdaAngka = [
+                        existing.km_awal,
+                        existing.km_pengisian,
+                        existing.km_bongkar,
+                        existing.km_akhir
+                    ].some(v => parseKmNumber(v) > 0);
+                    if (!prevAdaAngka) {
+                        keys.forEach(k => { mapSaved[k] = item; });
+                    }
                 }
-            }
-        });
-    } catch (err) {
-        console.error("Gagal mengambil data km_perjalanan_unit:", err);
+            });
+        } catch (err) {
+            console.error("Gagal mengambil data km_perjalanan_unit:", err);
+        }
+        return mapSaved;
     }
-    return mapSaved;
-}
 
     async function fetchDeliveryData() {
         const tbody = document.getElementById('tabel-body');
@@ -759,7 +802,7 @@
                 mapKmPerLiterUnit[np] = 0;
             });
 
-            // 1. MASTER OAT
+            // 1. MENGAMBIL MASTER OAT SESUAI BULAN BERJALAN DARI SUPABASE
             try {
                 let queryMaster = supabaseBaru.from('master_oat').select('*');
                 let { data: master_oat, error: errMaster } = await queryMaster.order('id', { ascending: true });
@@ -779,7 +822,7 @@
                 console.error("Gagal memuat master_oat:", e);
             }
 
-            // 2. DATA RESUME PERJALANAN UNIT
+            // 2. MENGAMBIL DATA DARI TABEL resume_perjalanan_unit DENGAN FILTER PERIODE BULAN (YYYY-MM)
             const dataPengisian = await fetchPengisianHarianDariSupabase(periodeStr);
             allowedNopolList.forEach(np => {
                 const info = dataPengisian[np];
@@ -788,7 +831,7 @@
                 mapKmPerLiterUnit[np] = info ? parseFloat(info.kmPerLiter) || 0 : 0;
             });
 
-            // 3. FETCH DATA PENGIRIMAN
+            // 3. FETCH DATA PENGIRIMAN (DARI _supabase)
             let { data: raw_pengiriman, error } = await _supabase
                 .from('data_pengiriman')
                 .select('id, tanggal, supplier, delivery_to, no_sj, lokasi, nopol, jumlah_masuk, sopir')
@@ -803,7 +846,13 @@
                 return allowedNopolList.some(target => cleanNopol(target) === npClean);
             });
 
-            const listPengirimanIds = data_pengiriman.map(d => d.id).filter(id => id !== null && id !== undefined);
+            // 4. MENGAMBIL DATA TERSIMPAN DARI TABEL km_perjalanan_unit
+            const listPengirimanIds = [...new Set(
+                data_pengiriman
+                    .map(d => d.id)
+                    .filter(id => id !== null && id !== undefined && id !== '')
+                    .flatMap(id => /^\d+$/.test(String(id).trim()) ? [id, Number(String(id).trim()), String(id).trim()] : [id])
+            )];
             mapKmPerjalananSaved = await fetchKmPerjalananSaved(periodeStr, listPengirimanIds);
 
             tbody.innerHTML = "";
@@ -823,7 +872,7 @@
             let { data: bbmLosisSaved } = await _supabase.from('bbm_losis').select('*');
             const mapBbmLosis = {};
             if (bbmLosisSaved) {
-                bbmLosisSaved.forEach(item => { mapBbmLosis[String(item.id_pengiriman)] = item; });
+                bbmLosisSaved.forEach(item => { mapBbmLosis[item.id_pengiriman] = item; });
             }
 
             data_pengiriman.forEach((row, index) => {
@@ -839,7 +888,7 @@
                 
                 const isDuaOrang = /[\/,]|(&)|( dan )/i.test(rawSopir);
                 const uniqueKey = `${index}_${dbId}`;
-                const saved = mapBbmLosis[String(dbId)] || {}; 
+                const saved = mapBbmLosis[dbId] || {}; 
 
                 let isHariMinggu = false;
                 if (row.tanggal) {
@@ -1225,6 +1274,7 @@
         tbody.appendChild(trTotal);
     }
 
+    /* RENDER TABEL RITASE UNIT DETAIL BERDASARKAN SELEKSI DROPDOWN NOPOL */
     function renderTabelRitaseUnit() {
         const selectNopolEl = document.getElementById('ritase-select-nopol');
         if (!selectNopolEl) return;
@@ -1325,6 +1375,7 @@
         tfoot.appendChild(trFoot);
     }
 
+    /* RENDER PANEL PORSI HITUNGAN & BRUTO UNIT (3 KARTU SESUAI FOTO) */
     function renderTabelPorsiUnit(rekapNopol) {
         const container = document.getElementById('porsi-unit-grid');
         if (!container) return;
@@ -1505,7 +1556,7 @@
         return match ? match[0] : String(tglStr).slice(0, 10);
     }
 
-    /* RENDER TABEL KM PERJALANAN UNIT */
+    /* RENDER TABEL KM PERJALANAN UNIT KHUSUS (KH 8734 GH, KH 8068 GR, L 9761 UJ) */
     function renderTabelKmPerjalanan() {
         const tbody = document.getElementById('km-perjalanan-body');
         const tfoot = document.getElementById('km-perjalanan-foot');
@@ -1532,45 +1583,42 @@
             return;
         }
 
+        // Lacak KM Akhir terakhir per NOPOL untuk diteruskan ke KM Awal baris tanggal berikutnya
         const lastKmAkhirPerNopol = {};
 
         rowsFiltered.forEach(baris => {
             const dbId = baris.dbId;
             const npKey = cleanNopol(baris.nopol);
-            const savedKm = mapKmPerjalananSaved[String(dbId)] || mapKmPerjalananSaved[dbId] || {};
-
-            const savedAwal = parseKmNumber(savedKm.km_awal);
-            const savedPengisian = parseKmNumber(savedKm.km_pengisian);
-            const savedBongkar = parseKmNumber(savedKm.km_bongkar);
-            const savedAkhir = parseKmNumber(savedKm.km_akhir);
+            const savedKm = getSavedKmRecord(dbId);
 
             let kmAwalVal = '';
             let isAutoAwal = false;
 
-            if (savedAwal !== null) {
-                kmAwalVal = savedAwal;
-            } else if (lastKmAkhirPerNopol[npKey] !== undefined && lastKmAkhirPerNopol[npKey] !== null) {
-                kmAwalVal = lastKmAkhirPerNopol[npKey];
+            if (savedKm.km_awal !== undefined && savedKm.km_awal !== null && savedKm.km_awal !== '') {
+                kmAwalVal = parseKmNumber(savedKm.km_awal);
+            } else if (lastKmAkhirPerNopol[npKey] !== undefined && lastKmAkhirPerNopol[npKey] !== '') {
+                kmAwalVal = parseKmNumber(lastKmAkhirPerNopol[npKey]);
                 isAutoAwal = true;
             }
 
-            const kmPengisianVal = savedPengisian !== null ? savedPengisian : '';
-            const kmBongkarVal = savedBongkar !== null ? savedBongkar : '';
-            const kmAkhirVal = savedAkhir !== null ? savedAkhir : '';
+            const kmPengisianVal = (savedKm.km_pengisian !== undefined && savedKm.km_pengisian !== null && savedKm.km_pengisian !== '') ? parseKmNumber(savedKm.km_pengisian) : '';
+            const kmBongkarVal = (savedKm.km_bongkar !== undefined && savedKm.km_bongkar !== null && savedKm.km_bongkar !== '') ? parseKmNumber(savedKm.km_bongkar) : '';
+            const kmAkhirVal = (savedKm.km_akhir !== undefined && savedKm.km_akhir !== null && savedKm.km_akhir !== '') ? parseKmNumber(savedKm.km_akhir) : '';
 
-            if (savedAkhir !== null) {
-                lastKmAkhirPerNopol[npKey] = savedAkhir;
+            // Simpan KM Akhir baris ini sebagai kandidat KM Awal untuk tanggal berikutnya dengan nopol sama
+            if (kmAkhirVal !== '' && !isNaN(kmAkhirVal)) {
+                lastKmAkhirPerNopol[npKey] = kmAkhirVal;
             }
 
-            const hasAwal = kmAwalVal !== '' && !Number.isNaN(Number(kmAwalVal));
-            const hasPengisian = kmPengisianVal !== '' && !Number.isNaN(Number(kmPengisianVal));
-            const hasBongkar = kmBongkarVal !== '' && !Number.isNaN(Number(kmBongkarVal));
-            const hasAkhir = kmAkhirVal !== '' && !Number.isNaN(Number(kmAkhirVal));
+            const hasAwal = kmAwalVal !== '' && !isNaN(kmAwalVal);
+            const hasPengisian = kmPengisianVal !== '' && !isNaN(kmPengisianVal);
+            const hasBongkar = kmBongkarVal !== '' && !isNaN(kmBongkarVal);
+            const hasAkhir = kmAkhirVal !== '' && !isNaN(kmAkhirVal);
 
-            const awalNum = hasAwal ? Number(kmAwalVal) : 0;
-            const pengisianNum = hasPengisian ? Number(kmPengisianVal) : 0;
-            const bongkarNum = hasBongkar ? Number(kmBongkarVal) : 0;
-            const akhirNum = hasAkhir ? Number(kmAkhirVal) : 0;
+            const awalNum = hasAwal ? parseFloat(kmAwalVal) : 0;
+            const pengisianNum = hasPengisian ? parseFloat(kmPengisianVal) : 0;
+            const bongkarNum = hasBongkar ? parseFloat(kmBongkarVal) : 0;
+            const akhirNum = hasAkhir ? parseFloat(kmAkhirVal) : 0;
 
             const jarakPengisian = (hasAwal && hasPengisian) ? (pengisianNum - awalNum) : 0;
             const jarakBongkar = (hasPengisian && hasBongkar) ? (bongkarNum - pengisianNum) : 0;
@@ -1578,45 +1626,44 @@
 
             const tr = document.createElement('tr');
             tr.className = "hover:bg-slate-50 transition-colors text-[9px]";
-            tr.dataset.dbId = String(dbId);
+            tr.dataset.dbId = dbId;
             tr.dataset.nopol = baris.nopol;
             tr.dataset.nopolClean = npKey;
             tr.dataset.tanggal = baris.tanggal || '';
             tr.dataset.tujuan = baris.tujuan || '';
             tr.dataset.lokasi = baris.lokasi || '';
-            tr.dataset.jumlahMasuk = baris.qty ?? '';
 
             tr.innerHTML = `
                 <td class="px-1.5 py-0.5 text-center border-r border-slate-200 font-mono text-[9.5px]">${formatDate(baris.tanggal)}</td>
                 <td class="px-1.5 py-0.5 text-center border-r border-slate-200 font-mono font-bold text-slate-800 text-[9.5px]">${baris.nopol}</td>
                 <td class="px-1.5 py-0.5 border-r border-slate-200 font-semibold text-slate-900 truncate" title="${baris.tujuan || ''}">${baris.tujuan || '-'}</td>
                 <td class="px-1.5 py-0.5 border-r border-slate-200 font-medium text-slate-700 truncate" title="${baris.lokasi || ''}">${baris.lokasi || '-'}</td>
-                <td class="px-0.5 py-0.5 border-r border-slate-200 bg-sky-50/40 km-input-cell">
+                <td class="px-0.5 py-0.5 border-r border-slate-200 bg-sky-50/40">
                     <input type="number" step="1" id="km-awal-${dbId}" value="${kmAwalVal}" placeholder="0"
-                        data-manual-edited="${savedAwal !== null ? 'true' : 'false'}"
-                        oninput="onManualEditKmAwal('${dbId}')"
+                        data-manual-edited="${savedKm.km_awal !== undefined && savedKm.km_awal !== null ? 'true' : 'false'}"
+                        oninput="onManualEditKmAwal(${dbId})"
                         class="w-full px-1 text-right font-mono font-bold text-slate-900 bg-white border border-slate-200 rounded h-5 text-[10px] focus:outline-none focus:border-blue-500"
                         title="${isAutoAwal ? 'Otomatis dari KM Akhir sebelumnya (bisa diedit)' : 'KM Awal (Pull)'}">
                 </td>
-                <td class="px-0.5 py-0.5 border-r border-slate-200 bg-slate-50/40 km-input-cell">
+                <td class="px-0.5 py-0.5 border-r border-slate-200 bg-slate-50/40">
                     <div class="flex items-center gap-1">
                         <input type="number" step="1" id="km-pengisian-${dbId}" value="${kmPengisianVal}" placeholder="0"
-                            oninput="hitungTotalKmBaris('${dbId}')"
-                            class="min-w-0 flex-1 px-1 text-right font-mono font-semibold text-slate-800 bg-white border border-slate-200 rounded h-5 text-[10px] focus:outline-none focus:border-blue-500">
-                        <span class="font-mono font-bold text-red-600 text-[9px] whitespace-nowrap shrink-0" id="km-diff-pengisian-${dbId}" title="KM Pengisian - KM Awal">/ ${formatKmTanpaKoma(jarakPengisian)} km</span>
+                            oninput="hitungTotalKmBaris(${dbId})"
+                            class="w-full px-1 text-right font-mono font-semibold text-slate-800 bg-white border border-slate-200 rounded h-5 text-[10px] focus:outline-none focus:border-blue-500">
+                        <span class="font-mono font-bold text-red-600 text-[9.5px] whitespace-nowrap shrink-0" id="km-diff-pengisian-${dbId}" title="KM Pengisian - KM Awal">/ ${formatKmTanpaKoma(jarakPengisian)} km</span>
                     </div>
                 </td>
-                <td class="px-0.5 py-0.5 border-r border-slate-200 bg-slate-50/40 km-input-cell">
+                <td class="px-0.5 py-0.5 border-r border-slate-200 bg-slate-50/40">
                     <div class="flex items-center gap-1">
                         <input type="number" step="1" id="km-bongkar-${dbId}" value="${kmBongkarVal}" placeholder="0"
-                            oninput="hitungTotalKmBaris('${dbId}')"
-                            class="min-w-0 flex-1 px-1 text-right font-mono font-semibold text-slate-800 bg-white border border-slate-200 rounded h-5 text-[10px] focus:outline-none focus:border-blue-500">
-                        <span class="font-mono font-bold text-red-600 text-[9px] whitespace-nowrap shrink-0" id="km-diff-bongkar-${dbId}" title="KM Bongkar - KM Pengisian">/ ${formatKmTanpaKoma(jarakBongkar)} km</span>
+                            oninput="hitungTotalKmBaris(${dbId})"
+                            class="w-full px-1 text-right font-mono font-semibold text-slate-800 bg-white border border-slate-200 rounded h-5 text-[10px] focus:outline-none focus:border-blue-500">
+                        <span class="font-mono font-bold text-red-600 text-[9.5px] whitespace-nowrap shrink-0" id="km-diff-bongkar-${dbId}" title="KM Bongkar - KM Pengisian">/ ${formatKmTanpaKoma(jarakBongkar)} km</span>
                     </div>
                 </td>
-                <td class="px-0.5 py-0.5 border-r border-slate-200 bg-sky-50/40 km-input-cell">
+                <td class="px-0.5 py-0.5 border-r border-slate-200 bg-sky-50/40">
                     <input type="number" step="1" id="km-akhir-${dbId}" value="${kmAkhirVal}" placeholder="0"
-                        oninput="onInputKmAkhir('${dbId}')"
+                        oninput="onInputKmAkhir(${dbId})"
                         class="w-full px-1 text-right font-mono font-bold text-slate-900 bg-white border border-slate-200 rounded h-5 text-[10px] focus:outline-none focus:border-blue-500">
                 </td>
                 <td class="px-1.5 py-0.5 text-right font-mono font-bold text-red-600 bg-red-50/40 text-[10px]" id="km-total-${dbId}" data-value="${totalPerjalanan}">
@@ -1630,173 +1677,251 @@
     }
 
     function openWaModalKmPerjalanan() {
-        const rows = Array.from(document.querySelectorAll('#km-perjalanan-body tr[data-db-id]'));
-        if (rows.length === 0) {
-            alert("⚠️ Tidak ada data KM perjalanan unit untuk dilaporkan pada rentang tanggal ini.");
-            return;
-        }
-
-        const formatTanggalIndo = (val) => {
-            if (!val) return '-';
-            const d = new Date(val);
-            if (!Number.isNaN(d.getTime())) {
-                const bulan = [
-                    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-                ];
-                return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
-            }
-            return typeof formatDate === 'function' ? formatDate(val) : String(val);
-        };
-
-        const safeFormatKm = (raw) => {
-            const num = parseKmNumber(raw);
-            if (num === null) return '';
-            return typeof formatKmTanpaKoma === 'function' ? formatKmTanpaKoma(num) : String(num);
-        };
-
-        const formatJumlahMasuk = (raw) => {
-            if (raw === undefined || raw === null) return '-';
-            const trimmed = String(raw).trim();
-            if (trimmed === '') return '-';
-            if (/[a-zA-Z]/.test(trimmed)) return trimmed;
-
-            const normalized = trimmed.replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.');
-            const num = Number(normalized);
-            if (Number.isNaN(num)) return trimmed;
-
-            const formattedNum = num.toLocaleString('id-ID', {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 3
-            });
-            return `${formattedNum} L`;
-        };
-
-        const blokPesan = rows.map(tr => {
-            const dbId = tr.dataset.dbId;
-            const tglFormatted = formatTanggalIndo(tr.dataset.tanggal);
-            const nopol = tr.dataset.nopol?.trim() || '-';
-            const dari = 'workshop';
-            const tujuan = tr.dataset.tujuan?.trim() || '-';
-            const jumlah = formatJumlahMasuk(tr.dataset.jumlahMasuk);
-            const catatan = tr.dataset.lokasi?.trim() || '';
-
-            const awalStr = safeFormatKm(document.getElementById(`km-awal-${dbId}`)?.value);
-            const pengisianStr = safeFormatKm(document.getElementById(`km-pengisian-${dbId}`)?.value);
-            const bongkarStr = safeFormatKm(document.getElementById(`km-bongkar-${dbId}`)?.value);
-            const akhirStr = safeFormatKm(document.getElementById(`km-akhir-${dbId}`)?.value);
-
-            const detailLines = [
-                `Dari        = ${dari}`,
-                `Tujuan      = ${tujuan}`,
-                `Jumlah.     = ${jumlah}`
-            ];
-
-            if (awalStr) detailLines.push(`Km Awal     = ${awalStr}`);
-            if (pengisianStr) detailLines.push(`Km petro    = ${pengisianStr}`);
-            if (bongkarStr) detailLines.push(`Km Bongkar  = ${bongkarStr}`);
-            if (akhirStr) detailLines.push(`Km Akhir.   = ${akhirStr}`);
-            if (catatan) detailLines.push(`( ${catatan} )`);
-
-            return [
-                `Tanggal ${tglFormatted}`,
-                nopol,
-                '',
-                ...detailLines
-            ].join('\n');
-        });
-
-        const txt = blokPesan.join('\n\n');
-        let editor = document.getElementById('waTextEditor');
-        let modal = document.getElementById('waModal');
-
-        if (!modal) {
-            modal = document.createElement('div');
-            modal.id = 'waModal';
-            modal.style.cssText = [
-                'display:none',
-                'position:fixed',
-                'inset:0',
-                'z-index:9999',
-                'background:rgba(0,0,0,0.6)',
-                'padding:20px',
-                'overflow:auto'
-            ].join(';');
-
-            const box = document.createElement('div');
-            box.style.cssText = [
-                'max-width:600px',
-                'margin:40px auto',
-                'background:#1e293b',
-                'color:#fff',
-                'padding:16px',
-                'border-radius:10px',
-                'box-shadow:0 10px 30px rgba(0,0,0,0.4)'
-            ].join(';');
-
-            const title = document.createElement('div');
-            title.textContent = 'Preview Pesan WhatsApp KM Perjalanan';
-            title.style.cssText = 'font-weight:bold;margin-bottom:10px;';
-
-            editor = document.createElement('textarea');
-            editor.id = 'waTextEditor';
-            editor.rows = 14;
-            editor.style.cssText = [
-                'width:100%',
-                'box-sizing:border-box',
-                'padding:10px',
-                'border-radius:6px',
-                'border:1px solid #475569',
-                'background:#0f172a',
-                'color:#f8fafc',
-                'font-family:monospace',
-                'font-size:13px'
-            ].join(';');
-
-            const btnRow = document.createElement('div');
-            btnRow.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;margin-top:12px;';
-
-            const btnClose = document.createElement('button');
-            btnClose.type = 'button';
-            btnClose.textContent = 'Tutup';
-            btnClose.style.cssText = 'padding:8px 14px;border-radius:6px;border:none;background:#475569;color:#fff;cursor:pointer;';
-            btnClose.onclick = () => { modal.style.display = 'none'; };
-
-            const btnSend = document.createElement('button');
-            btnSend.type = 'button';
-            btnSend.textContent = 'Kirim ke WhatsApp';
-            btnSend.style.cssText = 'padding:8px 14px;border-radius:6px;border:none;background:#16a34a;color:#fff;font-weight:bold;cursor:pointer;';
-            btnSend.onclick = sendToWhatsApp;
-
-            btnRow.appendChild(btnClose);
-            btnRow.appendChild(btnSend);
-            box.appendChild(title);
-            box.appendChild(editor);
-            box.appendChild(btnRow);
-            modal.appendChild(box);
-            document.body.appendChild(modal);
-        }
-
-        if (!editor) {
-            editor = modal.querySelector('textarea');
-        }
-
-        editor.value = txt;
-        modal.style.display = 'block';
+    const rows = Array.from(document.querySelectorAll('#km-perjalanan-body tr[data-db-id]'));
+    if (rows.length === 0) {
+        alert("⚠️ Tidak ada data KM perjalanan unit untuk dilaporkan pada rentang tanggal ini.");
+        return;
     }
 
-    window.kirimWhatsAppKmPerjalanan = openWaModalKmPerjalanan;
-
-    function sendToWhatsApp() {
-        const teks = document.getElementById('waTextEditor')?.value || '';
-        if (!teks.trim()) {
-            alert("⚠️ Teks laporan masih kosong.");
-            return;
+    const formatTanggalIndo = (val) => {
+        if (!val) return '-';
+        const d = new Date(val);
+        if (!Number.isNaN(d.getTime())) {
+            const bulan = [
+                'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+            ];
+            return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
         }
-        window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(teks), "_blank");
+        return typeof formatDate === 'function' ? formatDate(val) : String(val);
+    };
+
+    const safeFormatKm = (raw) => {
+        if (raw === undefined || raw === null) return '';
+        const trimmed = String(raw).trim();
+        if (trimmed === '') return '';
+        const num = Number(trimmed);
+        if (Number.isNaN(num)) return '';
+        return typeof formatKmTanpaKoma === 'function' ? formatKmTanpaKoma(num) : String(num);
+    };
+
+    const formatJumlahMasuk = (raw) => {
+        if (raw === undefined || raw === null) return '-';
+        const trimmed = String(raw).trim();
+        if (trimmed === '') return '-';
+
+        if (/[a-zA-Z]/.test(trimmed)) return trimmed;
+
+        const normalized = trimmed.replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.');
+        const num = Number(normalized);
+        if (Number.isNaN(num)) return trimmed;
+
+        const formattedNum = num.toLocaleString('id-ID', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 3
+        });
+        return `${formattedNum} L`;
+    };
+
+    const cariDiDataPengiriman = (tr, dbId, nopol, tanggal) => {
+        const sumber =
+            (typeof data_pengiriman !== 'undefined' && data_pengiriman) ||
+            window.data_pengiriman ||
+            null;
+
+        if (!sumber) return null;
+
+        const pengirimanId =
+            tr.dataset.pengirimanId ||
+            tr.dataset.pengiriman_id ||
+            tr.dataset.idPengiriman ||
+            '';
+
+        if (sumber instanceof Map) {
+            return sumber.get(pengirimanId) || sumber.get(dbId) || null;
+        }
+
+        if (Array.isArray(sumber)) {
+            if (pengirimanId) {
+                const byPengirimanId = sumber.find(item =>
+                    String(item?.id ?? item?.pengiriman_id ?? '') === String(pengirimanId)
+                );
+                if (byPengirimanId) return byPengirimanId;
+            }
+
+            const byKmId = sumber.find(item =>
+                String(item?.km_id ?? item?.km_perjalanan_id ?? item?.id ?? '') === String(dbId)
+            );
+            if (byKmId) return byKmId;
+
+            if (nopol && tanggal) {
+                const tglKey = String(tanggal).slice(0, 10);
+                return sumber.find(item => {
+                    const itemNopol = String(item?.nopol ?? item?.no_polisi ?? item?.plat ?? '').trim().toUpperCase();
+                    const itemTgl = String(item?.tanggal ?? item?.tgl_pengiriman ?? item?.created_at ?? '').slice(0, 10);
+                    return itemNopol === nopol.toUpperCase() && itemTgl === tglKey;
+                }) || null;
+            }
+        }
+
+        if (typeof sumber === 'object') {
+            return sumber[pengirimanId] || sumber[dbId] || null;
+        }
+
+        return null;
+    };
+
+    const blokPesan = rows.map(tr => {
+        const dbId = tr.dataset.dbId;
+        const tglFormatted = formatTanggalIndo(tr.dataset.tanggal);
+        const nopol = tr.dataset.nopol?.trim() || '-';
+        const kapasitasUnit = tr.dataset.kapasitas?.trim() || tr.dataset.unitKet?.trim() || '';
+        const unitLine = kapasitasUnit ? `${nopol}  ( ${kapasitasUnit} )` : nopol;
+
+        const recordPengiriman = cariDiDataPengiriman(tr, dbId, nopol, tr.dataset.tanggal);
+
+        const dari = 'workshop';
+        const tujuan =
+            tr.dataset.tujuan?.trim() ||
+            recordPengiriman?.tujuan?.trim() ||
+            recordPengiriman?.nama_customer?.trim() ||
+            '-';
+
+        const rawJumlahMasuk =
+            tr.dataset.jumlahMasuk ??
+            tr.dataset.jumlah_masuk ??
+            recordPengiriman?.jumlah_masuk ??
+            recordPengiriman?.jumlahMasuk ??
+            '';
+        const jumlah = formatJumlahMasuk(rawJumlahMasuk);
+
+        const catatan =
+            tr.dataset.keterangan?.trim() ||
+            tr.dataset.catatan?.trim() ||
+            tr.dataset.lokasi?.trim() ||
+            recordPengiriman?.keterangan?.trim() ||
+            '';
+
+        const awalStr = safeFormatKm(document.getElementById(`km-awal-${dbId}`)?.value);
+        const pengisianStr = safeFormatKm(document.getElementById(`km-pengisian-${dbId}`)?.value);
+        const bongkarStr = safeFormatKm(document.getElementById(`km-bongkar-${dbId}`)?.value);
+        const akhirStr = safeFormatKm(document.getElementById(`km-akhir-${dbId}`)?.value);
+
+        const detailLines = [
+            `Dari        = ${dari}`,
+            `Tujuan      = ${tujuan}`,
+            `Jumlah.     = ${jumlah}`
+        ];
+
+        if (awalStr) detailLines.push(`Km Awal     = ${awalStr}`);
+        if (pengisianStr) detailLines.push(`Km petro    = ${pengisianStr}`);
+        if (bongkarStr) detailLines.push(`Km Bongkar  = ${bongkarStr}`);
+        if (akhirStr) detailLines.push(`Km Akhir.   = ${akhirStr}`);
+        if (catatan) detailLines.push(`( ${catatan} )`);
+
+        return [
+            `Tanggal ${tglFormatted}`,
+            unitLine,
+            '',
+            ...detailLines
+        ].join('\n');
+    });
+
+    const txt = blokPesan.join('\n\n');
+    let editor = document.getElementById('waTextEditor');
+    let modal = document.getElementById('waModal');
+
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'waModal';
+        modal.style.cssText = [
+            'display:none',
+            'position:fixed',
+            'inset:0',
+            'z-index:9999',
+            'background:rgba(0,0,0,0.6)',
+            'padding:20px',
+            'overflow:auto'
+        ].join(';');
+
+        const box = document.createElement('div');
+        box.style.cssText = [
+            'max-width:600px',
+            'margin:40px auto',
+            'background:#1e293b',
+            'color:#fff',
+            'padding:16px',
+            'border-radius:10px',
+            'box-shadow:0 10px 30px rgba(0,0,0,0.4)'
+        ].join(';');
+
+        const title = document.createElement('div');
+        title.textContent = 'Preview Pesan WhatsApp KM Perjalanan';
+        title.style.cssText = 'font-weight:bold;margin-bottom:10px;';
+
+        editor = document.createElement('textarea');
+        editor.id = 'waTextEditor';
+        editor.rows = 14;
+        editor.style.cssText = [
+            'width:100%',
+            'box-sizing:border-box',
+            'padding:10px',
+            'border-radius:6px',
+            'border:1px solid #475569',
+            'background:#0f172a',
+            'color:#f8fafc',
+            'font-family:monospace',
+            'font-size:13px'
+        ].join(';');
+
+        const btnRow = document.createElement('div');
+        btnRow.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;margin-top:12px;';
+
+        const btnClose = document.createElement('button');
+        btnClose.type = 'button';
+        btnClose.textContent = 'Tutup';
+        btnClose.style.cssText = 'padding:8px 14px;border-radius:6px;border:none;background:#475569;color:#fff;cursor:pointer;';
+        btnClose.onclick = () => { modal.style.display = 'none'; };
+
+        const btnSend = document.createElement('button');
+        btnSend.type = 'button';
+        btnSend.textContent = 'Kirim ke WhatsApp';
+        btnSend.style.cssText = 'padding:8px 14px;border-radius:6px;border:none;background:#16a34a;color:#fff;font-weight:bold;cursor:pointer;';
+        btnSend.onclick = sendToWhatsApp;
+
+        btnRow.appendChild(btnClose);
+        btnRow.appendChild(btnSend);
+        box.appendChild(title);
+        box.appendChild(editor);
+        box.appendChild(btnRow);
+        modal.appendChild(box);
+        document.body.appendChild(modal);
+    }
+
+    if (!editor) {
+        editor = modal.querySelector('textarea');
+    }
+
+    editor.value = txt;
+    modal.style.display = 'block';
+}
+
+window.kirimWhatsAppKmPerjalanan = openWaModalKmPerjalanan;
+
+function sendToWhatsApp() {
+    const teks = document.getElementById('waTextEditor')?.value || '';
+    if (!teks.trim()) {
+        alert("⚠️ Teks laporan masih kosong.");
+        return;
+    }
+    window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(teks), "_blank");
+    if (typeof closeWaModal === 'function') {
+        closeWaModal();
+    } else {
         const modal = document.getElementById('waModal');
         if (modal) modal.style.display = 'none';
     }
+}
         
     function onManualEditKmAwal(dbId) {
         const awalEl = document.getElementById(`km-awal-${dbId}`);
@@ -1849,14 +1974,19 @@
         const totalEl = document.getElementById(`km-total-${dbId}`);
         if (!awalEl || !akhirEl || !totalEl) return;
 
-        const awalNum = parseKmNumber(awalEl.value);
-        const pengisianNum = parseKmNumber(pengisianEl?.value);
-        const bongkarNum = parseKmNumber(bongkarEl?.value);
-        const akhirNum = parseKmNumber(akhirEl.value);
+        const hasAwal = awalEl.value !== '';
+        const hasPengisian = pengisianEl && pengisianEl.value !== '';
+        const hasBongkar = bongkarEl && bongkarEl.value !== '';
+        const hasAkhir = akhirEl.value !== '';
 
-        const jarakPengisian = (awalNum !== null && pengisianNum !== null) ? (pengisianNum - awalNum) : 0;
-        const jarakBongkar = (pengisianNum !== null && bongkarNum !== null) ? (bongkarNum - pengisianNum) : 0;
-        const total = (awalNum !== null && akhirNum !== null) ? (akhirNum - awalNum) : 0;
+        const awalVal = parseFloat(awalEl.value) || 0;
+        const pengisianVal = hasPengisian ? (parseFloat(pengisianEl.value) || 0) : 0;
+        const bongkarVal = hasBongkar ? (parseFloat(bongkarEl.value) || 0) : 0;
+        const akhirVal = parseFloat(akhirEl.value) || 0;
+
+        const jarakPengisian = (hasAwal && hasPengisian) ? (pengisianVal - awalVal) : 0;
+        const jarakBongkar = (hasPengisian && hasBongkar) ? (bongkarVal - pengisianVal) : 0;
+        const total = (hasAwal && hasAkhir) ? (akhirVal - awalVal) : 0;
 
         if (diffPengisianEl) {
             diffPengisianEl.innerText = `/ ${formatKmTanpaKoma(jarakPengisian)} km`;
@@ -1913,45 +2043,47 @@
     }
 
     function kumpulkanPayloadKmPerjalanan() {
-    const rows = document.querySelectorAll('#km-perjalanan-body tr[data-db-id]');
-    const payloadUpsert = [];
+        const rows = document.querySelectorAll('#km-perjalanan-body tr[data-db-id]');
+        const payloadUpsert = [];
 
-    rows.forEach(tr => {
-        const rawId = tr.dataset.dbId;
-        const dbId = /^\d+$/.test(rawId) ? Number(rawId) : rawId;
-        const nopol = tr.dataset.nopol || null;
-        const tanggal = tr.dataset.tanggal || null;
-        const tujuan = tr.dataset.tujuan || null;
+        rows.forEach(tr => {
+            const rawId = tr.dataset.dbId;
+            const dbId = /^\d+$/.test(rawId) ? Number(rawId) : rawId;
+            const nopol = tr.dataset.nopol || null;
+            const tanggal = tr.dataset.tanggal || null;
+            const tujuan = tr.dataset.tujuan || null;
+            const savedExisting = getSavedKmRecord(rawId);
 
-        const kmAwal = parseKmNumber(document.getElementById(`km-awal-${rawId}`)?.value);
-        const kmPengisian = parseKmNumber(document.getElementById(`km-pengisian-${rawId}`)?.value);
-        const kmBongkar = parseKmNumber(document.getElementById(`km-bongkar-${rawId}`)?.value);
-        const kmAkhir = parseKmNumber(document.getElementById(`km-akhir-${rawId}`)?.value);
+            const kmAwal = parseKmNumber(document.getElementById(`km-awal-${rawId}`)?.value);
+            const kmPengisian = parseKmNumber(document.getElementById(`km-pengisian-${rawId}`)?.value);
+            const kmBongkar = parseKmNumber(document.getElementById(`km-bongkar-${rawId}`)?.value);
+            const kmAkhir = parseKmNumber(document.getElementById(`km-akhir-${rawId}`)?.value);
 
-        // Lewati baris yang seluruh input KM-nya kosong
-        if (kmAwal === null && kmPengisian === null && kmBongkar === null && kmAkhir === null) {
-            return;
-        }
+            const totalPerjalanan = (kmAwal !== 0 && kmAkhir !== 0) ? (kmAkhir - kmAwal) : 0;
 
-        const totalPerjalanan = (kmAwal !== null && kmAkhir !== null) ? (kmAkhir - kmAwal) : 0;
+            const recordPayload = {
+                id_pengiriman: dbId,
+                periode_bulan: currentPeriodeStr,
+                tanggal: tanggal,
+                nopol: nopol,
+                tujuan: tujuan,
+                km_awal: kmAwal,
+                km_pengisian: kmPengisian,
+                km_bongkar: kmBongkar,
+                km_akhir: kmAkhir,
+                total_perjalanan: totalPerjalanan,
+                updated_at: new Date().toISOString()
+            };
 
-        payloadUpsert.push({
-            id_pengiriman: dbId,
-            periode_bulan: currentPeriodeStr,
-            tanggal: tanggal,
-            nopol: nopol,
-            tujuan: tujuan,
-            km_awal: kmAwal,
-            km_pengisian: kmPengisian,
-            km_bongkar: kmBongkar,
-            km_akhir: kmAkhir,
-            total_perjalanan: totalPerjalanan,
-            updated_at: new Date().toISOString()
+            if (savedExisting && savedExisting.id !== undefined && savedExisting.id !== null) {
+                recordPayload.id = savedExisting.id;
+            }
+
+            payloadUpsert.push(recordPayload);
         });
-    });
 
-    return payloadUpsert;
-}
+        return payloadUpsert;
+    }
 
     function exportToExcel() {
         const table = document.getElementById("tabel-utama");
@@ -2025,13 +2157,25 @@
                 if (errB) throw errB;
             }
 
+            // Simpan juga data KM Perjalanan Unit ke tabel km_perjalanan_unit (kosong dianggap 0)
             const payloadKmUpsert = kumpulkanPayloadKmPerjalanan();
             if (payloadKmUpsert.length > 0) {
-                const { error: errKm } = await _supabase
+                let { error: errKm } = await _supabase
                     .from('km_perjalanan_unit')
-                    .upsert(payloadKmUpsert, { onConflict: 'id_pengiriman' });
+                    .upsert(payloadKmUpsert, { onConflict: 'id_pengiriman,periode_bulan' });
 
-                if (errKm) throw errKm;
+                if (errKm) {
+                    const fallbackRes = await _supabase
+                        .from('km_perjalanan_unit')
+                        .upsert(payloadKmUpsert, { onConflict: 'id_pengiriman' });
+                    if (fallbackRes.error) {
+                        const withoutIdPayload = payloadKmUpsert.map(({ id, ...rest }) => rest);
+                        const retryRes = await _supabase
+                            .from('km_perjalanan_unit')
+                            .upsert(withoutIdPayload, { onConflict: 'id_pengiriman' });
+                        if (retryRes.error) throw retryRes.error;
+                    }
+                }
             }
 
             const inputMasterBbm = document.getElementById('master-harga-bbm').value || 0;
